@@ -1,0 +1,31 @@
+{
+  "oxc.enable": true,
+  "eslint.enable": false,
+  "prettier.enable": false,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.oxc": "explicit"
+  },
+  "js/ts.experimental.useTsgo": true,
+  "cSpell.words": [
+    "bumpp",
+    "changelogithub",
+    "codecov",
+    "esbuild",
+    "lcov",
+    "oxfmt",
+    "oxlint",
+    "pnpm",
+    "tsdown",
+    "TSES",
+    "tsgo",
+    "unconfigured",
+    "unrs",
+    "vite",
+    "vitepress",
+    "vitest",
+    "vueuse"
+  ],
+  "cSpell.allowCompoundWords": true
+}

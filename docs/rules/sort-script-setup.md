@@ -1,0 +1,199 @@
+# sort-script-setup
+
+Enforce configurable grouping and ordering of top-level statements in Vue 3 `<script setup>` blocks.
+
+The rule supports JavaScript and TypeScript through `vue-eslint-parser`. It leaves ordinary `<script>` blocks, imports, function bodies, and nested expressions unchanged. TypeScript requires a configured TypeScript parser.
+
+## Usage
+
+```js
+import tsParser from '@typescript-eslint/parser'
+import vueParser from 'vue-eslint-parser'
+import vuePerfectionist from 'eslint-plugin-vue-perfectionist'
+
+export default [
+  {
+    files: ['**/*.vue'],
+    languageOptions: {
+      parser: vueParser,
+      parserOptions: {
+        parser: tsParser,
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
+    },
+    plugins: {
+      'vue-perfectionist': vuePerfectionist,
+    },
+    rules: {
+      'vue-perfectionist/sort-script-setup': [
+        'error',
+        {
+          type: 'unsorted',
+          newlinesBetween: 1,
+          newlinesInside: 'ignore',
+        },
+      ],
+    },
+  },
+]
+```
+
+For JavaScript-only SFCs, omit `parserOptions.parser`. If your existing Vue configuration already supplies the parsers, keep that configuration and add the plugin and rule.
+
+`configs.recommended`, `configs['recommended-natural']`, and `configs['recommended-alphabetical']` register the plugin and enable the rule for `**/*.vue`. They do not install or configure a parser, and do not disable other plugins' rules. Apply them after your Vue parser configuration.
+
+## Options
+
+| Option               | Default                | Behavior                                                                           |
+| -------------------- | ---------------------- | ---------------------------------------------------------------------------------- |
+| `type`               | `'unsorted'`           | `alphabetical`, `natural`, `line-length`, `custom`, or `unsorted`                  |
+| `order`              | `'asc'`                | Ascending or descending order within groups                                        |
+| `fallbackSort`       | `{ type: 'unsorted' }` | Secondary comparator; also accepts `type: 'subgroup-order'`                        |
+| `alphabet`           | `''`                   | Character order for custom sorting                                                 |
+| `ignoreCase`         | `true`                 | Normalize case before comparing names                                              |
+| `specialCharacters`  | `'keep'`               | `keep`, `trim` leading special characters, or `remove` special characters          |
+| `locales`            | `'en-US'`              | Locale string or nonempty array of locale strings                                  |
+| `groups`             | See below              | Complete group order, replacing the defaults                                       |
+| `customGroups`       | `[]`                   | Ordered list of custom matching conditions                                         |
+| `partitionByComment` | `false`                | Partition by comments or regular expression patterns                               |
+| `partitionByNewLine` | `false`                | Treat existing empty lines as sorting boundaries                                   |
+| `newlinesBetween`    | `'ignore'`             | Exact nonnegative number of empty lines between groups, or `ignore`                |
+| `newlinesInside`     | `'ignore'`             | Exact nonnegative number of empty lines inside groups, or `ignore`                 |
+| `vueImportSources`   | `['vue']`              | Exact module names providing Vue runtime APIs                                      |
+| `vueGlobals`         | `[]`                   | Explicitly recognize unbound, auto-imported Vue runtime API names                  |
+| `fix`                | `'safe'`               | `safe` enables conservative fixes; `none` disables all fixes, including whitespace |
+
+`unsorted` preserves order within groups while still enforcing group order and configured whitespace. It also disables the fallback comparator. `order` never reverses groups or initialization dependencies.
+
+Names come from local bindings, including the first binding of a destructuring declaration. Unbound call statements use their callee name. `line-length` measures the complete statement's source length, excluding a trailing semicolon and attached external comments; it does not measure the longest physical line.
+
+`newlinesInside: 'newlinesBetween'` is accepted for compatibility: it resolves to `ignore` when global `newlinesBetween` is `ignore`, otherwise `0`. Prefer an explicit value in new configurations. Numeric whitespace options cannot be combined with `partitionByNewLine: true`, including numeric options inherited from settings or groups.
+
+`usage`, `tsconfig`, `commentAbove`, `useConfigurationIf`, and other upstream-only rule options are not supported. This is a compatible subset of Perfectionist's sorting vocabulary, not a wrapper around its rules.
+
+## Groups
+
+The default groups are:
+
+```js
+;[
+  ['interface', 'type'],
+  'define-options',
+  'define-props',
+  'define-emits',
+  'define-slots',
+  'define-model',
+  'constant',
+  'inject',
+  'composable',
+  'template-ref',
+  ['ref', 'reactive'],
+  'computed',
+  'variable',
+  ['enum', 'class'],
+  'function',
+  'watch',
+  'lifecycle-hook',
+  'provide',
+  'define-expose',
+]
+```
+
+Nested arrays form one group: `['ref', 'reactive']` does not require refs to precede reactive objects. To require that order, use separate entries. An empty `groups` array disables ordering and whitespace diagnostics.
+
+`withDefaults(defineProps(...))` belongs to `define-props`. `ref` includes `shallowRef`, `customRef`, `toRef`, and `toRefs`. `reactive` includes shallow and readonly variants. `watch` includes the watch-effect variants, even when the stop handle is assigned to a variable. `template-ref` recognizes `useTemplateRef`, without guessing from `ref(null)` or binding names.
+
+`constant` means a single `const` binding initialized with a primitive literal or interpolation-free template. Objects, arrays, property reads, and calls do not qualify. `function` includes ordinary declarations and function-valued variables, but only ordinary declarations are eligible for movement fixes.
+
+`composable` recognizes statically imported calls whose exported name matches `^use[A-Z0-9]`, after dedicated Vue API classification. `lifecycle-hook` uses an explicit list of Vue lifecycle registration functions; it does not match every `onXxx` name.
+
+Applicable modifiers include `declare`, `async`, `destructured`, `const`, `let`, and `var`, followed by the selector: for example `async-function`, `const-ref`, or `destructured-define-props`. More-specific configured groups win over plain selectors. Ambient and merging declarations remain fixed regardless of their classification.
+
+Candidates that do not match a configured group stay fixed and partition the surrounding statements. Add `unknown` to place these candidates explicitly. Unknown groups preserve their internal order unless their group object explicitly overrides `type`. Unsupported statements such as assignments, control flow, and multi-declarator declarations remain fixed even with `unknown` configured.
+
+Group objects can override sorting and spacing:
+
+```js
+{
+  groups: [
+    'constant',
+    { newlinesBetween: 1 },
+    { group: 'function', type: 'natural', newlinesInside: 1 },
+  ],
+}
+```
+
+## Custom groups
+
+```js
+{
+  groups: ['router', 'stores', ['ref', 'reactive'], 'computed', 'function'],
+  customGroups: [
+    {
+      groupName: 'router',
+      callNamePattern: '^use(Route|Router)$',
+      importSourcePattern: '^vue-router$',
+    },
+    {
+      groupName: 'stores',
+      callNamePattern: '^use[A-Z].*Store$',
+      importSourcePattern: '^(@/stores/|~/stores/)',
+    },
+  ],
+}
+```
+
+Each custom group must be referenced in `groups`. This example replaces the default group list; omitted categories become fixed boundaries unless an `unknown` group is included.
+
+Filters are `selector`, `modifiers`, `elementNamePattern`, `callNamePattern`, and `importSourcePattern`. Filters in one condition are ANDed, and all listed modifiers must be present. An `anyOf` array ORs multiple condition objects; it cannot coexist with top-level filters. Custom groups take precedence over built-in groups, with the first matching custom definition winning.
+
+Patterns accept a string, `{ pattern, flags }`, or an array of either. Arrays mean OR. Patterns are not implicitly anchored and do not inherit `ignoreCase`. Invalid expressions are configuration errors. Destructured declarations match `elementNamePattern` if any local binding matches.
+
+`callNamePattern` refers to the direct initializer or call statement, not calls nested in a function body. Named import aliases are normalized to exported names; default imports use their local binding name. `importSourcePattern` refers to the static source of that direct call, not arbitrary imports elsewhere in the statement. Unresolved auto-imports and type-only imports have no inferred runtime source.
+
+For a standalone custom group, its sorting overrides win over its `groups` object overrides. Inside a nested group array, individual custom-group overrides do not apply; the entire group uses one comparator. This avoids contradictory comparisons between members of the same group.
+
+## Shared settings
+
+Supported common sorting and partition options are inherited with this precedence:
+
+```text
+rule options
+  > settings['vue-perfectionist']
+  > supported settings.perfectionist fields
+  > defaults
+```
+
+`groups`, `customGroups`, `vueImportSources`, `vueGlobals`, and `fix` belong only in the rule options. Arrays and `fallbackSort` replace values from lower configuration layers. Group overrides merge fallback fields; an unspecified fallback order inherits the group's order.
+
+```js
+{
+  settings: {
+    perfectionist: { type: 'natural', ignoreCase: true },
+    'vue-perfectionist': { type: 'unsorted' },
+  },
+}
+```
+
+Unsupported upstream settings fields such as `tsconfig` are ignored. Unsupported values of recognized fields are rejected unless overridden. Unknown fields in the plugin's own settings are errors.
+
+## Partitions and automatic fixes
+
+Imports, assignments, control flow, multi-declarator statements, top-level await, ambient declarations, and merging declarations are boundaries. No statement moves across them. A function's internal await does not itself partition surrounding declarations.
+
+Comment partitions accept a boolean, regex patterns, or `{ line, block }` with separate boolean/pattern settings. Only comments between top-level statements act as partitions. Markers stay in place. Clearly attached documentation and trailing comments move with their declaration. Ambiguous comments and ESLint/TypeScript control directives prevent movement.
+
+Initialization dependencies take precedence over style. For example, `const snapshot = count.value` will not be required to precede the declaration of `count`, even when its group appears first. Deferred function captures are distinguished from immediate reads, including directly invoked local functions and IIFEs. The rule does not perform whole-program effect analysis or repair pre-existing initialization errors.
+
+Movement fixes are limited to contiguous, proven-safe fragments of independent type/interface declarations, primitive constant declarations, and ordinary function declarations. Runtime calls, compiler macros, destructuring, property reads, class/enum initialization, and other uncertain moves produce an `unsafeReorder` diagnostic without a fix or suggestion. In particular, recognizing `ref`, `watchEffect`, a lifecycle hook, or a composable never grants permission to move it automatically.
+
+Safe fixes preserve original statement text, attached comments, and line endings. Potential automatic-semicolon-insertion hazards suppress movement fixes. Whitespace fixes do not rewrite statement interiors or script tag padding.
+
+## Other rules
+
+Use `perfectionist/sort-imports` for imports. When this rule controls top-level declarations and macros, disable `perfectionist/sort-modules` and `vue/define-macros-order` for the same `.vue` files. Keep Vue correctness rules, including checks for lifecycle registration, watchers, and expose after await.
+
+Align whitespace choices with formatting and padding rules to avoid competing fixes. The default whitespace settings are `ignore`.
+
+See the [design specification](../design/sort-script-setup.md) for the full classification table and validation contract.
