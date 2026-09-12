@@ -65,7 +65,9 @@ parsers, add the plugin and rule to that configuration.
 
 ## Presets
 
-Each preset registers the plugin and enables its rule for `**/*.vue`:
+Each preset registers the plugin and enables `sort-script-setup` for `**/*.vue`.
+The optional [`prefer-ref-pattern`](../rules/prefer-ref-pattern.md) naming rule
+must be enabled explicitly and is not included in these presets:
 
 | Preset                     | Sorting within groups                               |
 | -------------------------- | --------------------------------------------------- |

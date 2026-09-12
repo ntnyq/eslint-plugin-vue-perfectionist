@@ -12,7 +12,9 @@ export type {
   CustomGroup,
   GroupEntry,
   PluginConfigs,
+  PreferRefPatternOptions,
   PresetName,
+  RefPatternTarget,
   SortScriptSetupOptions,
   VuePerfectionistPlugin,
 } from './types/index.ts'

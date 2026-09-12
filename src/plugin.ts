@@ -1,4 +1,5 @@
 import { meta } from './meta.ts'
+import { preferRefPattern } from './rules/prefer-ref-pattern.ts'
 import { sortScriptSetup } from './rules/sort-script-setup.ts'
 import type { ESLint, Linter } from 'eslint'
 
@@ -12,6 +13,7 @@ export const plugin: ESLint.Plugin & {
   // typescript-eslint still exposes deprecated context methods in its types.
   // Our rules use only the shared sourceCode/report API, exercised with ESLint 10.
   rules: {
+    'prefer-ref-pattern': preferRefPattern,
     'sort-script-setup': sortScriptSetup,
   } as unknown as NonNullable<ESLint.Plugin['rules']>,
   configs: pluginConfigs,
