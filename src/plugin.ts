@@ -1,5 +1,5 @@
-import { meta } from './meta'
-import { sortScriptSetup } from './rules/sort-script-setup'
+import { meta } from './meta.ts'
+import { sortScriptSetup } from './rules/sort-script-setup.ts'
 import type { ESLint, Linter } from 'eslint'
 
 const pluginConfigs: Record<string, Linter.Config> = {}

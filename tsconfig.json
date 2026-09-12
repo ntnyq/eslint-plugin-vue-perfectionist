@@ -5,8 +5,20 @@
     "lib": ["DOM", "ES2023"],
     "module": "ESNext",
     "types": ["node"],
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
     "esModuleInterop": true,
     "skipLibCheck": true
   },
+  "include": [
+    "./src/**/*.ts",
+    "./scripts/**/*.ts",
+    "./tests/**/*.ts",
+    "./docs/vite.config.ts",
+    "./docs/**/*.d.ts",
+    "./docs/.vitepress/**/*.ts",
+    "./docs/.vitepress/**/*.vue",
+    "./*.config.ts"
+  ],
   "exclude": ["**/node_modules", "**/dist"]
 }

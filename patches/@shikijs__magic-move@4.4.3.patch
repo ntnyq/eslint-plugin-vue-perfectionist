@@ -1,0 +1,47 @@
+diff --git a/dist/renderer.mjs b/dist/renderer.mjs
+index 15179708ec4209b222f96f8f4e47e91499d628f6..221643e3fb4f503800af022651338cd0e91ee7e1 100644
+--- a/dist/renderer.mjs
++++ b/dist/renderer.mjs
+@@ -80,12 +80,12 @@ class MagicMoveRenderer {
+     this.applyNodeStyle(this.container, step);
+   }
+   registerTransitionEnd(el, cb) {
+-    return () => {
++    return animationsByElement => {
+       let resolved = false;
+       let resolve = () => {};
+       const promise = Promise.race([
+       // wait for the finish of all animation and transitions on this element then invoke the callback
+-      Promise.allSettled(el.getAnimations().map(animation => animation.finished)).then(() => cb()),
++      Promise.allSettled((animationsByElement.get(el) || []).map(animation => animation.finished)).then(() => cb()),
+       // race it with another promise so it's still resolvable separately
+       new Promise(_resolve => {
+         resolve = () => {
+@@ -238,8 +238,9 @@ class MagicMoveRenderer {
+     anchorRect = this.anchor.getBoundingClientRect();
+     // Set the position of the move elements to the old position
+     // Set the transition duration to 0ms to make it immediate
++    const newRects = new Map(move.map(el => [el, el.getBoundingClientRect()]));
+     move.forEach((el, idx) => {
+-      const newRect = el.getBoundingClientRect();
++      const newRect = newRects.get(el);
+       const newPos = {
+         x: newRect.x - anchorRect.x,
+         y: newRect.y - anchorRect.y
+@@ -298,7 +299,15 @@ class MagicMoveRenderer {
+     postReflow.forEach(cb => cb());
+     // we need to call the functions that return the promises after the reflow
+     // to to allow getAnimations to have the correct transitions
+-    const actualPromises = promises.map(promise => promise());
++    // Query animations once: per-token getAnimations() repeatedly flushes styles.
++    const animationsByElement = new Map();
++    for (const animation of this.container.getAnimations({ subtree: true })) {
++      const target = animation.effect?.target;
++      const animations = animationsByElement.get(target) || [];
++      animations.push(animation);
++      animationsByElement.set(target, animations);
++    }
++    const actualPromises = promises.map(promise => promise(animationsByElement));
+     this.isFirstRender = false;
+     this.previousPromises = actualPromises;
+     return Promise.all(actualPromises).then();

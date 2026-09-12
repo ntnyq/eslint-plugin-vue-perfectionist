@@ -5,7 +5,7 @@ import {
   OPTIONS_SCHEMA,
   SELECTORS,
   VUE_APIS,
-} from '../constants'
+} from '../constants/index.ts'
 import type { JSONSchema } from '@typescript-eslint/utils'
 import type {
   Group,
@@ -18,7 +18,7 @@ import type {
   RuleContext,
   Selector,
   Statement,
-} from '../types'
+} from '../types/index.ts'
 
 function invalid(message: string): never {
   throw new Error(`sort-script-setup: ${message}`)

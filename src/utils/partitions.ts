@@ -1,5 +1,5 @@
-import { classifyStatement } from './classify'
-import { assignGroup, matchesPattern } from './options'
+import { classifyStatement } from './classify.ts'
+import { assignGroup, matchesPattern } from './options.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type {
   CommentPartition,
@@ -7,7 +7,7 @@ import type {
   ResolvedOptions,
   SourceCode,
   Statement,
-} from '../types'
+} from '../types/index.ts'
 
 function isPartitionComment(
   comment: TSESTree.Comment,

@@ -1,2 +1,2 @@
-export * from './schema'
-export * from './sort-script-setup'
+export * from './schema.ts'
+export * from './sort-script-setup.ts'

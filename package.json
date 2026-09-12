@@ -2,7 +2,7 @@
   "name": "eslint-plugin-vue-perfectionist",
   "type": "module",
   "version": "0.0.0",
-  "packageManager": "pnpm@12.3.4",
+  "packageManager": "pnpm@12.4.1",
   "description": "ESLint rules for consistent, readable, and maintainable Vue 3 code.",
   "keywords": [
     "composition-api",
@@ -65,6 +65,7 @@
     "vue-eslint-parser": "^10.0.0"
   },
   "dependencies": {
+    "@ntnyq/utils": "^0.22.0",
     "@typescript-eslint/utils": "^8.70.0",
     "natural-orderby": "^5.0.0"
   },

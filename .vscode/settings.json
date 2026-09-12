@@ -1,22 +1,41 @@
 {
   "oxc.enable": true,
-  "eslint.enable": false,
+  "eslint.enable": true,
   "prettier.enable": false,
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "oxc.oxc-vscode",
   "editor.codeActionsOnSave": {
-    "source.fixAll.oxc": "explicit"
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "never",
+    "source.sortImports": "never"
   },
+  "eslint.validate": [
+    "vue",
+    "toml",
+    "yaml",
+    "json",
+    "jsonc",
+    "json5",
+    "markdown",
+    "javascript",
+    "typescript",
+    "javascriptreact",
+    "typescriptreact"
+  ],
   "js/ts.experimental.useTsgo": true,
   "cSpell.words": [
     "bumpp",
     "changelogithub",
     "codecov",
     "esbuild",
+    "iconify",
     "lcov",
     "oxfmt",
     "oxlint",
     "pnpm",
+    "Rects",
+    "shiki",
+    "shikijs",
     "tsdown",
     "TSES",
     "tsgo",

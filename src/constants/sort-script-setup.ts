@@ -1,4 +1,4 @@
-import type { Modifier, ResolvedOptions, Selector } from '../types'
+import type { Modifier, ResolvedOptions, Selector } from '../types/index.ts'
 
 /**
  * Ordered modifier precedence used when multiple configured groups match.

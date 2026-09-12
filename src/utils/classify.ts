@@ -1,13 +1,18 @@
-import { MACROS, VUE_APIS } from '../constants'
+import { MACROS, VUE_APIS } from '../constants/index.ts'
 import {
   containsTopLevelAwait,
   getBindingNames,
   getCallIdentity,
   isPrimitiveConstant,
   unwrapExpression,
-} from './ast'
+} from './ast.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
-import type { ResolvedOptions, Selector, SourceCode, Statement } from '../types'
+import type {
+  ResolvedOptions,
+  Selector,
+  SourceCode,
+  Statement,
+} from '../types/index.ts'
 
 function classifyCall(
   call: TSESTree.CallExpression,

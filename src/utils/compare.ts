@@ -6,7 +6,7 @@ import type {
   SortOrder,
   SortType,
   Statement,
-} from '../types'
+} from '../types/index.ts'
 
 function formatName(name: string, options: ResolvedOptions): string {
   let formatted = options.ignoreCase ? name.toLowerCase() : name

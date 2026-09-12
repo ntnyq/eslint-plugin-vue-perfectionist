@@ -1,4 +1,4 @@
-import { MODIFIERS, SELECTORS } from './sort-script-setup'
+import { MODIFIERS, SELECTORS } from './sort-script-setup.ts'
 import type { JSONSchema } from '@typescript-eslint/utils'
 
 const SORT_TYPES = [

@@ -1,8 +1,91 @@
-# sort-script-setup
+---
+pageClass: rule-details
+sidebarDepth: 0
+title: vue-perfectionist/sort-script-setup
+description: Enforce configurable grouping and ordering of top-level statements in Vue 3 script setup blocks.
+---
 
-Enforce configurable grouping and ordering of top-level statements in Vue 3 `<script setup>` blocks.
+# vue-perfectionist/sort-script-setup
+
+> Enforce configurable grouping and ordering of top-level statements in Vue 3 `<script setup>` blocks.
+
+- :wrench: ESLint's `--fix` option can automatically fix some problems reported by this rule. Moves that may change execution behavior are reported without a fix.
+
+## Why this rule?
+
+Vue setup blocks mix compiler macros, state, computed values, functions, and
+effects. A consistent group order makes these blocks easier to scan. This
+rule combines Vue-aware classification with configurable sorting preferences
+and conservative automatic fixes.
+
+By default, the rule enforces group order while preserving the existing order
+within each group. Initialization dependencies take precedence over both.
+
+## Interactive Demo
+
+Choose a sorting mode to animate the rule's safe fixes. Compare grouping,
+sorting, and runtime safety, then use **Reset** to restore the original source.
+
+<script setup>
+import SortScriptSetupDemo from '../.vitepress/components/demos/sort-script-setup/index.vue'
+</script>
+
+<SortScriptSetupDemo />
+
+## :book: Rule Details
 
 The rule supports JavaScript and TypeScript through `vue-eslint-parser`. It leaves ordinary `<script>` blocks, imports, function bodies, and nested expressions unchanged. TypeScript requires a configured TypeScript parser.
+
+The following examples use the default options. Types come before constants,
+and constants come before functions:
+
+::: correct
+
+```vue
+<script setup lang="ts">
+interface Props {
+  title: string
+}
+const z = 2
+const a = 1
+function run() {}
+</script>
+```
+
+:::
+
+::: incorrect
+
+```vue
+<script setup lang="ts">
+function run() {}
+const z = 2
+const a = 1
+interface Props {
+  title: string
+}
+</script>
+```
+
+:::
+
+The incorrect example can be safely fixed to the correct example. The
+constants retain their relative order because the default `type` is
+`unsorted`. With `type: 'natural'`, `a` would come before `z`.
+
+Recognized Vue APIs can also produce diagnostics without a movement fix:
+
+```vue eslint-check
+<script setup>
+import { computed, ref } from 'vue'
+
+const doubled = computed(() => 2)
+const count = ref(0)
+</script>
+```
+
+The default groups place `ref` before `computed`, but these runtime calls are
+not automatically moved. See [Partitions and automatic fixes](#partitions-and-automatic-fixes).
 
 ## Usage
 
@@ -43,7 +126,7 @@ For JavaScript-only SFCs, omit `parserOptions.parser`. If your existing Vue conf
 
 `configs.recommended`, `configs['recommended-natural']`, and `configs['recommended-alphabetical']` register the plugin and enable the rule for `**/*.vue`. They do not install or configure a parser, and do not disable other plugins' rules. Apply them after your Vue parser configuration.
 
-## Options
+## :wrench: Options
 
 | Option               | Default                | Behavior                                                                           |
 | -------------------- | ---------------------- | ---------------------------------------------------------------------------------- |
@@ -201,3 +284,8 @@ Use `perfectionist/sort-imports` for imports. When this rule controls top-level 
 Align whitespace choices with formatting and padding rules to avoid competing fixes. The default whitespace settings are `ignore`.
 
 See the [design specification](../design/sort-script-setup.md) for the full classification table and validation contract.
+
+## :mag: Implementation
+
+- [Rule source](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/src/rules/sort-script-setup.ts)
+- [Test source](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/tests/rules/sort-script-setup.test.ts)

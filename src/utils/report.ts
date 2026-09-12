@@ -1,6 +1,11 @@
-import { getNewlines } from './compare'
+import { getNewlines } from './compare.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
-import type { Group, ResolvedOptions, RuleContext, Statement } from '../types'
+import type {
+  Group,
+  ResolvedOptions,
+  RuleContext,
+  Statement,
+} from '../types/index.ts'
 
 function createReplacement(
   original: Statement[],

@@ -4,9 +4,9 @@ import {
   getChildren,
   isFunction,
   unwrapExpression,
-} from './ast'
+} from './ast.ts'
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
-import type { ResolvedOptions, SourceCode, Statement } from '../types'
+import type { ResolvedOptions, SourceCode, Statement } from '../types/index.ts'
 
 function getFunctionBody(node: TSESTree.Node): TSESTree.Node | undefined {
   if (isFunction(node)) {

@@ -1,6 +1,6 @@
-import { plugin } from './plugin'
+import { plugin } from './plugin.ts'
 import type { Linter } from 'eslint'
-import type { PluginConfigs, SortType } from './types'
+import type { PluginConfigs, SortType } from './types/index.ts'
 
 function createConfig(name: string, type?: SortType): Linter.Config {
   return {

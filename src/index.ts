@@ -1,6 +1,6 @@
-import { configs } from './configs'
-import { plugin as basePlugin } from './plugin'
-import type { VuePerfectionistPlugin } from './types'
+import { configs } from './configs.ts'
+import { plugin as basePlugin } from './plugin.ts'
+import type { VuePerfectionistPlugin } from './types/index.ts'
 
 export const plugin: VuePerfectionistPlugin = Object.assign(basePlugin, {
   configs,
@@ -15,6 +15,6 @@ export type {
   PresetName,
   SortScriptSetupOptions,
   VuePerfectionistPlugin,
-} from './types'
+} from './types/index.ts'
 
 export default plugin

@@ -1,7 +1,7 @@
 import { ASTUtils } from '@typescript-eslint/utils'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type { AST } from 'vue-eslint-parser'
-import type { CallIdentity, SourceCode } from '../types'
+import type { CallIdentity, SourceCode } from '../types/index.ts'
 
 /**
  * This boundary checks the documented vue-eslint-parser service, whose return

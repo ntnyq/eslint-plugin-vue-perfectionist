@@ -1,3 +1,3 @@
-export * from './plugins'
-export type * from './ast'
-export type * from './rules/sort-script-setup'
+export * from './plugins.ts'
+export type * from './ast.ts'
+export type * from './rules/sort-script-setup.ts'

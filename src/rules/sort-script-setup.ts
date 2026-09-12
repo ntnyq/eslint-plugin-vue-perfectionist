@@ -1,4 +1,4 @@
-import { OPTIONS_SCHEMA } from '../constants'
+import { OPTIONS_SCHEMA } from '../constants/index.ts'
 import {
   buildDependencies,
   collectPartitions,
@@ -9,20 +9,22 @@ import {
   resolveGroups,
   resolveOptions,
   sortByDependencies,
-} from '../utils'
+} from '../utils/index.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
-import type { MessageId, RuleOptions } from '../types'
+import type { MessageId, RuleOptions } from '../types/index.ts'
 
 export const sortScriptSetup = createRule<RuleOptions, MessageId>({
   name: 'sort-script-setup',
   meta: {
     type: 'suggestion',
     docs: {
+      recommended: true,
       description:
-        'Enforce consistent ordering of Vue 3 script setup statements.',
+        'enforce consistent ordering of Vue 3 script setup statements.',
     },
     fixable: 'code',
     schema: [OPTIONS_SCHEMA],
+    defaultOptions: [{}],
     messages: {
       unexpectedGroupOrder:
         'Expected "{{name}}" ({{group}}) to come before "{{before}}".',
