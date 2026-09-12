@@ -1,7 +1,7 @@
 {
   "name": "eslint-plugin-vue-perfectionist",
   "type": "module",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "packageManager": "pnpm@12.4.1",
   "description": "ESLint rules for consistent, readable, and maintainable Vue 3 code.",
   "keywords": [
