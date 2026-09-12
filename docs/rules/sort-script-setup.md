@@ -68,6 +68,8 @@ For JavaScript-only SFCs, omit `parserOptions.parser`. If your existing Vue conf
 
 Names come from local bindings, including the first binding of a destructuring declaration. Unbound call statements use their callee name. `line-length` measures the complete statement's source length, excluding a trailing semicolon and attached external comments; it does not measure the longest physical line.
 
+Natural sorting negotiates locale arrays in preference order. With `ignoreCase: false`, names that differ only in case use locale-sensitive ordering to break natural-sort ties, before `fallbackSort`; numeric ordering remains unchanged. Custom alphabets compare Unicode code points, including characters outside the Basic Multilingual Plane. Unlisted characters have equal priority, with name length measured in code points.
+
 `newlinesInside: 'newlinesBetween'` is accepted for compatibility: it resolves to `ignore` when global `newlinesBetween` is `ignore`, otherwise `0`. Prefer an explicit value in new configurations. Numeric whitespace options cannot be combined with `partitionByNewLine: true`, including numeric options inherited from settings or groups.
 
 `usage`, `tsconfig`, `commentAbove`, `useConfigurationIf`, and other upstream-only rule options are not supported. This is a compatible subset of Perfectionist's sorting vocabulary, not a wrapper around its rules.
@@ -185,6 +187,8 @@ Imports, assignments, control flow, multi-declarator statements, top-level await
 Comment partitions accept a boolean, regex patterns, or `{ line, block }` with separate boolean/pattern settings. Only comments between top-level statements act as partitions. Markers stay in place. Clearly attached documentation and trailing comments move with their declaration. Ambiguous comments and ESLint/TypeScript control directives prevent movement.
 
 Initialization dependencies take precedence over style. For example, `const snapshot = count.value` will not be required to precede the declaration of `count`, even when its group appears first. Deferred function captures are distinguished from immediate reads, including directly invoked local functions and IIFEs. The rule does not perform whole-program effect analysis or repair pre-existing initialization errors.
+
+For recognized Vue calls, dependency analysis follows inline and locally declared callbacks executed during registration: `watch` source getters (including inline source arrays), immediate `watch` callbacks, `watchEffect`, `watchSyncEffect`, and `customRef` factories. Ordinary `watch` callbacks, `watchPostEffect`, and `watchEffect` with `flush: 'post'` remain deferred. When options cannot be resolved statically, callbacks that may run immediately conservatively retain their dependencies. Calls nested in immediately invoked local functions use their own Vue import identity; unrelated functions with the same name are not treated as Vue APIs.
 
 Movement fixes are limited to contiguous, proven-safe fragments of independent type/interface declarations, primitive constant declarations, and ordinary function declarations. Runtime calls, compiler macros, destructuring, property reads, class/enum initialization, and other uncertain moves produce an `unsafeReorder` diagnostic without a fix or suggestion. In particular, recognizing `ref`, `watchEffect`, a lifecycle hook, or a composable never grants permission to move it automatically.
 

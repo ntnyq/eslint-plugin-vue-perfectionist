@@ -1,23 +1,51 @@
-import { getChildren, isFunction, unwrapExpression } from './ast'
+import { ASTUtils } from '@typescript-eslint/utils'
+import {
+  getCallIdentity,
+  getChildren,
+  isFunction,
+  unwrapExpression,
+} from './ast'
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
-import type { SourceCode, Statement } from '../types'
+import type { ResolvedOptions, SourceCode, Statement } from '../types'
 
 function getFunctionBody(node: TSESTree.Node): TSESTree.Node | undefined {
   if (isFunction(node)) {
     return node
   }
-  if (node.type === 'VariableDeclaration') {
-    const init = node.declarations[0]?.init
-    if (init) {
-      return getFunctionBody(unwrapExpression(init))
-    }
+  if (node.type === 'VariableDeclarator' && node.init) {
+    return getFunctionBody(unwrapExpression(node.init))
   }
   return undefined
+}
+
+/**
+ * Missing options are known defaults; unresolved options may enable immediate
+ * execution, so callers must conservatively keep their callback dependencies.
+ */
+function getCallOptions(
+  node: TSESTree.Node | undefined,
+  sourceCode: SourceCode,
+): object | undefined {
+  if (!node) {
+    return {}
+  }
+  const result = ASTUtils.getStaticValue(
+    unwrapExpression(node),
+    sourceCode.getScope(node),
+  )
+  if (!result) {
+    return undefined
+  }
+  if (result.value === undefined || result.value === null) {
+    return {}
+  }
+  return typeof result.value === 'object' ? result.value : undefined
 }
 
 export function buildDependencies(
   statements: Statement[],
   sourceCode: SourceCode,
+  options: ResolvedOptions,
 ): Map<Statement, Set<Statement>> {
   const references = new Map<TSESTree.Node, TSESLint.Scope.Reference>()
   const declarations = new Map<TSESLint.Scope.Variable, Statement>()
@@ -48,7 +76,27 @@ export function buildDependencies(
       continue
     }
     const visitedFunctions = new Set<TSESTree.Node>()
-    const visit = (node: TSESTree.Node, executeFunction = false): void => {
+    const visitFunction = (node: TSESTree.Node | undefined): void => {
+      if (!node) {
+        return
+      }
+      const expression = unwrapExpression(node)
+      if (isFunction(expression)) {
+        visit(expression, true)
+        return
+      }
+      const variable = references.get(expression)?.resolved
+      for (const definition of variable?.defs ?? []) {
+        if (!['FunctionName', 'Variable'].includes(definition.type)) {
+          continue
+        }
+        const fn = getFunctionBody(definition.node)
+        if (fn) {
+          visit(fn, true)
+        }
+      }
+    }
+    function visit(node: TSESTree.Node, executeFunction = false): void {
       if (isFunction(node) && !executeFunction) {
         return
       }
@@ -74,29 +122,42 @@ export function buildDependencies(
         }
       }
       if (node.type === 'CallExpression') {
-        const callee = unwrapExpression(node.callee)
-        if (isFunction(callee)) {
-          visit(callee, true)
-        } else {
-          const variable = references.get(callee)?.resolved
-          const declaration = variable ? declarations.get(variable) : undefined
-          const fn = declaration ? getFunctionBody(declaration.node) : undefined
-          if (fn) {
-            visit(fn, true)
-          }
-        }
-        // watchEffect and customRef factories may execute immediately.
-        if (
-          (statement.selector === 'watch' &&
-            ['watchEffect', 'watchSyncEffect'].includes(
-              statement.callName ?? '',
-            )) ||
-          statement.callName === 'customRef'
-        ) {
-          for (const argument of node.arguments) {
-            if (isFunction(argument)) {
-              visit(argument, true)
+        visitFunction(node.callee)
+        const identity = getCallIdentity(node, sourceCode)
+        const isVueCall =
+          identity &&
+          ((identity.source &&
+            options.vueImportSources.includes(identity.source)) ||
+            (identity.isUnbound && options.vueGlobals.includes(identity.name)))
+        if (isVueCall) {
+          const first = node.arguments[0]
+          if (identity.name === 'watch') {
+            const source = first ? unwrapExpression(first) : undefined
+            if (source?.type === 'ArrayExpression') {
+              source.elements.forEach(element =>
+                visitFunction(element ?? undefined),
+              )
+            } else {
+              visitFunction(source)
             }
+            const callOptions = getCallOptions(node.arguments[2], sourceCode)
+            if (
+              !callOptions ||
+              ('immediate' in callOptions && callOptions.immediate)
+            ) {
+              visitFunction(node.arguments[1])
+            }
+          } else if (identity.name === 'watchEffect') {
+            const callOptions = getCallOptions(node.arguments[1], sourceCode)
+            if (
+              !callOptions ||
+              !('flush' in callOptions) ||
+              callOptions.flush !== 'post'
+            ) {
+              visitFunction(first)
+            }
+          } else if (['watchSyncEffect', 'customRef'].includes(identity.name)) {
+            visitFunction(first)
           }
         }
       }

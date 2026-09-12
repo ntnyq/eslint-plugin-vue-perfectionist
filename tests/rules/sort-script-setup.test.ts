@@ -246,6 +246,72 @@ describe('classification and grouping', () => {
 
 describe('sorting options', () => {
   it.each([
+    { type: 'natural' },
+    { type: 'line-length', fallbackSort: { type: 'natural' } },
+    { groups: [{ group: 'constant', type: 'natural' }] },
+  ])('negotiates multiple locales for Unicode names: %j', options => {
+    expect(
+      fix('const ä = 1\nconst z = 2', {
+        ...options,
+        locales: ['zz-ZZ', 'sv-SE', 'en-US'],
+      }).output,
+    ).toBe(setup('const z = 2\nconst ä = 1'))
+  })
+
+  it.each([
+    { type: 'natural' },
+    { type: 'line-length', fallbackSort: { type: 'natural' } },
+    { groups: [{ group: 'constant', type: 'natural' }] },
+  ])('honors case sensitivity in natural comparisons: %j', options => {
+    const body = 'const Item2 = 0\nconst item2 = 0'
+    expect(fix(body, { ...options, ignoreCase: false }).output).toBe(
+      setup('const item2 = 0\nconst Item2 = 0'),
+    )
+    expect(lint(body, { ...options, ignoreCase: true })).toEqual([])
+    expect(
+      fix('const item2 = 0\nconst Item2 = 0', {
+        ...options,
+        ignoreCase: false,
+        order: 'desc',
+      }).output,
+    ).toBe(setup(body))
+  })
+
+  it('keeps numeric precedence when natural sorting is case sensitive', () => {
+    expect(
+      fix('const item10 = 0\nconst Item2 = 0', {
+        type: 'natural',
+        ignoreCase: false,
+      }).output,
+    ).toBe(setup('const Item2 = 0\nconst item10 = 0'))
+  })
+
+  it('compares custom alphabets and name lengths by Unicode code point', () => {
+    expect(
+      fix('const 𠮷 = 0\nconst 𠮶 = 0', {
+        type: 'custom',
+        alphabet: '𠮶𠮷',
+      }).output,
+    ).toBe(setup('const 𠮶 = 0\nconst 𠮷 = 0'))
+    expect(
+      fix('const a = 0\nconst 𠮷 = 0', {
+        type: 'custom',
+        alphabet: '𠮷a',
+      }).output,
+    ).toBe(setup('const 𠮷 = 0\nconst a = 0'))
+    expect(
+      lint('const 𠮷 = 0\nconst a = 0', { type: 'custom', alphabet: 'x' }),
+    ).toEqual([])
+    expect(
+      fix('const 𠮶 = 0\nconst 𠮷 = 0', {
+        type: 'custom',
+        alphabet: '𠮶𠮷',
+        order: 'desc',
+      }).output,
+    ).toBe(setup('const 𠮷 = 0\nconst 𠮶 = 0'))
+  })
+
+  it.each([
     ['natural', 'const item2 = 0\nconst item10 = 0'],
     ['alphabetical', 'const item10 = 0\nconst item2 = 0'],
   ])('supports %s sorting', (type, output) => {
@@ -535,6 +601,111 @@ describe('partitions, comments and whitespace', () => {
 })
 
 describe('dependencies and safe fixes', () => {
+  it.each([
+    'watch(() => z.value, () => {})',
+    'watch([() => z.value], () => {})',
+    'watch(read, () => {})',
+    'watch([read], () => {})',
+    'watch(() => 0, read, { immediate: true })',
+    'watch(() => 0, read, options)',
+    'watchEffect(read)',
+    'watchSyncEffect(read)',
+    'watchEffect((read as () => number))',
+  ])('preserves state read by synchronous Vue callbacks: %s', call => {
+    const body = [
+      'import { ref, watch, watchEffect, watchSyncEffect } from "vue"',
+      'function read() { return z.value }',
+      'const z = ref(0)',
+      `const stop = ${call}`,
+    ].join('\n')
+    const result = fix(body, { groups: ['function', 'watch', 'ref'] })
+    expect(result.messages).toEqual([])
+    expect(result.output).toBe(setup(body))
+  })
+
+  it.each([
+    'watch(() => 0, read)',
+    'watch(() => 0, read, { immediate: false })',
+    'watchEffect(read, { flush: "post" })',
+    'watchEffect(read, { flush: "post" } as const)',
+    'watchPostEffect(read)',
+    'watchEffect(() => { onCleanup(read) })',
+  ])(
+    'keeps deferred Vue callbacks free of immediate dependencies: %s',
+    call => {
+      const body = [
+        'import { ref, watch, watchEffect, watchPostEffect } from "vue"',
+        'function read() { return z.value }',
+        `const stop = ${call}`,
+        'const z = ref(0)',
+      ].join('\n')
+      expect(lint(body, { groups: ['function', 'watch', 'ref'] })).toEqual([])
+    },
+  )
+
+  it('resolves function-valued variables used as watch callbacks', () => {
+    expect(
+      lint(
+        'import { ref, watchEffect } from "vue"\nconst read = () => z.value\nconst z = ref(0)\nconst stop = watchEffect(read)',
+        { groups: ['function', 'watch', 'ref'] },
+      ),
+    ).toEqual([])
+  })
+
+  it('preserves synchronous callback dependencies in JavaScript setup', () => {
+    const code =
+      '<script setup>\nimport { ref, watch } from "vue"\nconst z = ref(0)\nwatch(() => z.value, () => {})\n</script>'
+    const configuration: Linter.Config = {
+      ...config({ groups: ['watch', 'ref'] }),
+      languageOptions: { parser: vueParser },
+    }
+    const result = linter.verifyAndFix(code, configuration, 'Test.vue')
+    expect(result.messages).toEqual([])
+    expect(result.output).toBe(code)
+  })
+
+  it('tracks Vue callbacks nested in immediately called local functions', () => {
+    expect(
+      lint(
+        'import { ref, watchEffect } from "vue"\nfunction start() { return watchEffect(() => z.value) }\nconst z = ref(0)\nconst stop = start()',
+        { groups: ['function', 'variable', 'ref'] },
+      ),
+    ).toEqual([])
+  })
+
+  it('resolves imported aliases and explicit globals for synchronous callbacks', () => {
+    expect(
+      lint(
+        'import { ref, watch as observe } from "vue"\nconst z = ref(0)\nconst stop = observe(() => z.value, () => {})',
+        { groups: ['watch', 'ref'] },
+      ),
+    ).toEqual([])
+    expect(
+      lint('const z = ref(0)\nconst stop = watchEffect(() => z.value)', {
+        groups: ['watch', 'ref'],
+        vueGlobals: ['ref', 'watchEffect'],
+      }),
+    ).toEqual([])
+  })
+
+  it('tracks a named customRef factory without executing returned accessors', () => {
+    expect(
+      lint(
+        'import { customRef } from "vue"\nfunction factory() { record(z); return { get: () => later, set() {} } }\nconst z = {}\nconst value = customRef(factory)\nconst later = {}',
+        { groups: ['function', 'ref', 'variable'] },
+      ),
+    ).toEqual([])
+  })
+
+  it('does not infer Vue callback execution from a foreign customRef name', () => {
+    expect(
+      lint(
+        'import { customRef } from "./helpers"\nconst a = customRef(() => z)\nconst z = {}',
+        { type: 'natural' },
+      ),
+    ).toEqual([])
+  })
+
   it('prioritizes initialization dependencies over group order', () => {
     expect(
       lint(

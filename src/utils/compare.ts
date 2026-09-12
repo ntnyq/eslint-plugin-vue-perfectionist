@@ -32,7 +32,9 @@ function createComparator(
   const direction = order === 'asc' ? 1 : -1
   const natural =
     type === 'natural'
-      ? createNaturalCompare({ locale: options.locales.toString() })
+      ? createNaturalCompare({
+          locale: new Intl.Collator(options.locales).resolvedOptions().locale,
+        })
       : undefined
   const alphabet = new Map(
     [...options.alphabet].map((character, index) => [character, index]),
@@ -53,16 +55,29 @@ function createComparator(
       return a.localeCompare(b, options.locales) * direction
     }
     if (natural) {
-      return natural(a, b) * direction
+      // natural-orderby folds case internally. Resolve case-only ties after
+      // its numeric comparison, before applying the configured fallback.
+      const result = natural(a, b)
+      const caseOrder =
+        !result && !options.ignoreCase && a.toLowerCase() === b.toLowerCase()
+          ? a.localeCompare(b, options.locales)
+          : 0
+      return (result || caseOrder) * direction
     }
-    for (let index = 0; index < Math.min(a.length, b.length); index++) {
-      const first = alphabet.get(a.charAt(index)) ?? Infinity
-      const second = alphabet.get(b.charAt(index)) ?? Infinity
+    const leftCharacters = [...a]
+    const rightCharacters = [...b]
+    for (const [index, character] of leftCharacters.entries()) {
+      const other = rightCharacters[index]
+      if (other === undefined) {
+        break
+      }
+      const first = alphabet.get(character) ?? Infinity
+      const second = alphabet.get(other) ?? Infinity
       if (first !== second) {
         return (first > second ? 1 : -1) * direction
       }
     }
-    return (a.length - b.length) * direction
+    return (leftCharacters.length - rightCharacters.length) * direction
   }
 }
 

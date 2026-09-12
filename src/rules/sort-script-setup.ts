@@ -58,7 +58,11 @@ export const sortScriptSetup = createRule<RuleOptions, MessageId>({
         options,
         groups,
       )) {
-        const dependencies = buildDependencies(partition, context.sourceCode)
+        const dependencies = buildDependencies(
+          partition,
+          context.sourceCode,
+          options,
+        )
         reportPartition(
           partition,
           sortByDependencies(partition, dependencies, compare),
