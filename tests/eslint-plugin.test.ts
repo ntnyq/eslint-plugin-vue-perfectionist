@@ -8,6 +8,10 @@ describe('plugin contract', () => {
     expect(plugin.meta.name).toBe('eslint-plugin-vue-perfectionist')
     expect(plugin.configs.recommended).toBe(configs.recommended)
     expect(configs.recommended.plugins?.['vue-perfectionist']).toBe(plugin)
+    expect(plugin.rules?.['callback-style']).toBeDefined()
+    for (const preset of Object.values(configs)) {
+      expect(preset.rules?.['vue-perfectionist/callback-style']).toBeUndefined()
+    }
     expect(plugin.rules).toHaveProperty('prefer-ref-pattern')
     for (const config of Object.values(configs)) {
       expect(config.rules).not.toHaveProperty(

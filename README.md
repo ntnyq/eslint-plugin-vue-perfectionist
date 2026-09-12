@@ -54,6 +54,7 @@ see the [setup guide](https://vue-perfectionist.vercel.app/guide/) for more conf
 
 | Rule                                                                                | Description                                               |
 | ----------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| [callback-style](https://vue-perfectionist.vercel.app/rules/callback-style)         | Enforce callback styles for Vue APIs.                     |
 | [prefer-ref-pattern](https://vue-perfectionist.vercel.app/rules/prefer-ref-pattern) | Enforce naming patterns for template refs.                |
 | [sort-script-setup](https://vue-perfectionist.vercel.app/rules/sort-script-setup)   | Group and order top-level statements in `<script setup>`. |
 

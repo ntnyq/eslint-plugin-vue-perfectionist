@@ -8,7 +8,10 @@ export const plugin: VuePerfectionistPlugin = Object.assign(basePlugin, {
 
 export { configs }
 export type {
+  CallbackGroup,
+  CallbackStyleOptions,
   CommonSortOptions,
+  CustomCallback,
   CustomGroup,
   GroupEntry,
   PluginConfigs,
