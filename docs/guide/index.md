@@ -66,8 +66,10 @@ parsers, add the plugin and rule to that configuration.
 ## Presets
 
 Each preset registers the plugin and enables `sort-script-setup` for `**/*.vue`.
-The optional [`prefer-ref-pattern`](../rules/prefer-ref-pattern.md) naming rule
-must be enabled explicitly and is not included in these presets:
+The optional [`callback-style`](../rules/callback-style.md),
+[`define-macros-newline`](../rules/define-macros-newline.md), and
+[`prefer-ref-pattern`](../rules/prefer-ref-pattern.md) rules must be enabled
+explicitly and are not included in these presets:
 
 | Preset                     | Sorting within groups                               |
 | -------------------------- | --------------------------------------------------- |

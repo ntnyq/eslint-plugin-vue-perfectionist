@@ -47,6 +47,10 @@ export function getThemeConfig(): DefaultTheme.Config {
         text: 'Rules',
         items: [
           { link: '/rules/callback-style', text: 'callback-style' },
+          {
+            link: '/rules/define-macros-newline',
+            text: 'define-macros-newline',
+          },
           { link: '/rules/prefer-ref-pattern', text: 'prefer-ref-pattern' },
           { link: '/rules/sort-script-setup', text: 'sort-script-setup' },
         ],

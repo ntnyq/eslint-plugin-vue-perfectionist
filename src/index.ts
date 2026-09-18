@@ -13,6 +13,8 @@ export type {
   CommonSortOptions,
   CustomCallback,
   CustomGroup,
+  DefineMacrosNewlineMacro,
+  DefineMacrosNewlineOptions,
   GroupEntry,
   PluginConfigs,
   PreferRefPatternOptions,
