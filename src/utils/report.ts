@@ -26,6 +26,7 @@ function createReplacement(
   if (
     gaps.some(
       gap =>
+        // cSpell: disable-next-line
         !/^[\t\v\f\r \u{A0}\u{1680}\u{2000}-\u{200A}\u{2028}\u{2029}\u{202F}\u{205F}\u{3000}\u{FEFF}]*\n\s*$/u.test(
           gap,
         ),
@@ -44,7 +45,10 @@ function createReplacement(
         (gaps[index] ?? ''),
     )
     .join('')
-  return { range: [first.start, last.end], text }
+  return {
+    range: [first.start, last.end],
+    text,
+  }
 }
 
 export function reportPartition(

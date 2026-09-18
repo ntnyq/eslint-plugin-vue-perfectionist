@@ -1,6 +1,6 @@
-import packageJson from '../../package.json' with { type: 'json' }
+import pkg from '../../package.json' with { type: 'json' }
 
-const { description, name, version } = packageJson
+const { description, name, version } = pkg
 
 /**
  * Shared documentation site metadata.

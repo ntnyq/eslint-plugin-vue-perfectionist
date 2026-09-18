@@ -16,7 +16,7 @@ export function getThemeConfig(): DefaultTheme.Config {
       { link: '/', text: 'Home' },
       { link: '/guide/', text: 'Guide', activeMatch: '^/guide/' },
       {
-        link: '/rules/sort-script-setup',
+        link: '/rules/',
         text: 'Rules',
         activeMatch: '^/rules/',
       },
@@ -45,7 +45,9 @@ export function getThemeConfig(): DefaultTheme.Config {
       },
       {
         text: 'Rules',
+        link: '/rules/',
         items: [
+          { link: '/rules/', text: 'Overview' },
           { link: '/rules/callback-style', text: 'callback-style' },
           {
             link: '/rules/define-macros-newline',

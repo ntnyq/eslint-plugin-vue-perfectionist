@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This package provides ESLint rules for Vue 3, currently focused on ordering top-level statements in `<script setup>`.
+This package provides ESLint rules for consistent, readable, and maintainable Vue 3 code, covering callback styles, macro declaration layout, template ref naming, and statement ordering. Each rule defines its own scope: rules may target Vue SFC templates, script blocks, or standalone JavaScript and TypeScript files.
 
 - `src/index.ts` and `src/plugin.ts` expose the plugin and its rules. The plugin does not provide built-in configurations; users compose their own.
 - `src/rules/` contains rule implementations; `src/utils/`, `src/constants/`, and `src/types/` hold shared logic, schemas, and types.
@@ -33,7 +33,7 @@ Use kebab-case filenames such as `sort-script-setup.ts`, camelCase functions and
 
 Add tests in `tests/rules/<rule-name>.test.ts` using Vitest and ESLint's `Linter`. Cover valid input, diagnostics, option combinations, fixed output, and fix idempotence. Include JavaScript and TypeScript SFC cases where relevant. No numeric coverage threshold is configured.
 
-Preserve execution dependencies: unsafe runtime reordering must report without autofixing. Add regression cases for any changes to this safety boundary.
+Preserve program behavior in automatic fixes. For sorting rules, unsafe runtime reordering must report without autofixing; other rules must respect their own documented fix boundaries. Add regression cases for any changes to these safety boundaries.
 
 ## Commit & Pull Request Guidelines
 

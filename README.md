@@ -7,9 +7,14 @@
 
 ESLint rules for consistent, readable, and maintainable Vue 3 code.
 
-Vue 3 only. This project is in early development; the API may change before the first stable release.
+Configure callback styles, macro declaration layout, template ref naming, and
+statement ordering. Depending on the rule, checks apply to Vue SFC templates,
+script blocks, or standalone JavaScript and TypeScript files.
 
-[Documentation](https://vue-perfectionist.vercel.app) · [Getting Started](https://vue-perfectionist.vercel.app/guide/)
+> [!WARNING]
+> This project is under active development. The API is unstable and may introduce breaking changes before the first stable release.
+
+[Documentation](https://vue-perfectionist.vercel.app) · [Getting Started](https://vue-perfectionist.vercel.app/guide/) · [Rules](https://vue-perfectionist.vercel.app/rules/)
 
 ## Setup
 
@@ -44,6 +49,9 @@ export default [
       'vue-perfectionist': vuePerfectionist,
     },
     rules: {
+      'vue-perfectionist/callback-style': 'error',
+      'vue-perfectionist/define-macros-newline': 'error',
+      'vue-perfectionist/prefer-ref-pattern': 'error',
       'vue-perfectionist/sort-script-setup': 'error',
     },
   },

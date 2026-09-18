@@ -47,6 +47,9 @@ export default defineConfig({
                 'vue-perfectionist': pluginVuePerfectionist,
               },
               rules: {
+                'vue-perfectionist/callback-style': 'error',
+                'vue-perfectionist/define-macros-newline': 'error',
+                'vue-perfectionist/prefer-ref-pattern': 'error',
                 'vue-perfectionist/sort-script-setup': 'error',
               },
             },

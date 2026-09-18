@@ -153,7 +153,7 @@ Names come from local bindings, including the first binding of a destructuring d
 
 Natural sorting negotiates locale arrays in preference order. With `ignoreCase: false`, names that differ only in case use locale-sensitive ordering to break natural-sort ties, before `fallbackSort`; numeric ordering remains unchanged. Custom alphabets compare Unicode code points, including characters outside the Basic Multilingual Plane. Unlisted characters have equal priority, with name length measured in code points.
 
-`newlinesInside: 'newlinesBetween'` is accepted for compatibility: it resolves to `ignore` when global `newlinesBetween` is `ignore`, otherwise `0`. Prefer an explicit value in new configurations. Numeric whitespace options cannot be combined with `partitionByNewLine: true`, including numeric options inherited from settings or groups.
+`newlinesInside: 'newlinesBetween'` is accepted for compatibility: it resolves to `ignore` when global `newlinesBetween` is `ignore`, otherwise `0`. Prefer an explicit value in new configurations. Numeric whitespace options cannot be combined with `partitionByNewLine: true`, including numeric group overrides.
 
 `usage`, `tsconfig`, `commentAbove`, `useConfigurationIf`, and other upstream-only rule options are not supported. This is a compatible subset of Perfectionist's sorting vocabulary, not a wrapper around its rules.
 
@@ -239,29 +239,15 @@ Patterns accept a string, `{ pattern, flags }`, or an array of either. Arrays me
 
 For a standalone custom group, its sorting overrides win over its `groups` object overrides. Inside a nested group array, individual custom-group overrides do not apply; the entire group uses one comparator. This avoids contradictory comparisons between members of the same group.
 
-## Shared settings
+## Configuration
 
-Supported common sorting and partition options are inherited with this precedence:
+Configure all preferences directly in the rule options. Explicit options override
+the rule defaults; shared ESLint settings are not supported.
+`settings.perfectionist` and `settings['vue-perfectionist']` are ignored,
+including invalid or unknown values within those namespaces.
 
-```text
-rule options
-  > settings['vue-perfectionist']
-  > supported settings.perfectionist fields
-  > defaults
-```
-
-`groups`, `customGroups`, `vueImportSources`, `vueGlobals`, and `fix` belong only in the rule options. Arrays and `fallbackSort` replace values from lower configuration layers. Group overrides merge fallback fields; an unspecified fallback order inherits the group's order.
-
-```js
-{
-  settings: {
-    perfectionist: { type: 'natural', ignoreCase: true },
-    'vue-perfectionist': { type: 'unsorted' },
-  },
-}
-```
-
-Unsupported upstream settings fields such as `tsconfig` are ignored. Unsupported values of recognized fields are rejected unless overridden. Unknown fields in the plugin's own settings are errors.
+Arrays and `fallbackSort` replace their default values. Group overrides merge
+fallback fields; an unspecified fallback order inherits the group's order.
 
 ## Partitions and automatic fixes
 

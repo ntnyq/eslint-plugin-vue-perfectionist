@@ -116,7 +116,7 @@ const groupNames: JSONSchema.JSONSchema4 = {
 }
 
 /**
- * Shared schema is also applied to settings after precedence resolution.
+ * Common sorting and partitioning options for the rule schema.
  */
 export const COMMON_PROPERTIES: Record<string, JSONSchema.JSONSchema4> = {
   ...overrides,

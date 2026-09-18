@@ -28,9 +28,12 @@ describe('plugin contract', () => {
       settings: {},
     },
     {
-      name: 'shared settings',
-      rule: 'error',
-      settings: { perfectionist: { type: 'natural' } },
+      name: 'explicit rule options with ignored settings',
+      rule: ['error', { type: 'natural' }],
+      settings: {
+        perfectionist: { order: 'desc' },
+        'vue-perfectionist': { order: 'desc' },
+      },
     },
   ])('applies $name with user-composed configuration', ({ rule, settings }) => {
     const linter = new Linter()

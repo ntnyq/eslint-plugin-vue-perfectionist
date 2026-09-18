@@ -83,7 +83,7 @@ export type CustomGroup = GroupOverrides & { groupName: string } & (
   )
 
 /**
- * Sorting preferences shared by the rule and plugin settings.
+ * Common sorting and partitioning preferences for rule options.
  */
 export interface CommonSortOptions {
   alphabet?: string

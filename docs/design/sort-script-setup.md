@@ -237,7 +237,7 @@ For a standalone custom group, higher-priority values are:
 
 1. Explicit overrides on its `customGroups` definition.
 2. Corresponding overrides on its `groups` object.
-3. Resolved rule options and shared settings.
+3. Resolved rule options.
 
 Inside a merged array, individual custom-group overrides do not apply. The
 whole group needs one consistent comparator and spacing policy. Use
@@ -436,28 +436,20 @@ TypeScript directives such as `@ts-expect-error` and `@ts-ignore`, and other
 tool directives, also remain fixed with their affected statements. Clearly
 attached JSDoc may move.
 
-## 10. Shared Settings and Presets
+## 10. Rule Configuration
 
-Supported common preferences use the following precedence:
+Rule preferences use the following precedence:
 
 ```text
 rule options
-  > settings['vue-perfectionist']
-  > supported settings.perfectionist fields
   > rule defaults
 ```
 
-Only `CommonSortOptions` fields are shared. `groups`, `customGroups`,
-`vueGlobals`, `vueImportSources`, and `fix` belong in rule options. Installing
-the upstream plugin is not required to use shared settings.
+Configure all preferences directly in rule options. Shared ESLint settings are
+not supported: `settings.perfectionist` and `settings['vue-perfectionist']`
+are neither read nor validated.
 
-Project only supported fields from `settings.perfectionist`; ignore unrelated
-upstream fields such as `tsconfig`. Reject unsupported values of selected
-fields unless a higher layer replaces them. The plugin's own namespace
-rejects unknown fields. Fully overridden values do not participate in final
-semantic validation.
-
-Configuration layers use shallow field replacement, including whole arrays
+Rule options replace defaults by field, including whole arrays
 and `fallbackSort` objects, following the upstream
 [completion baseline](https://github.com/azat-io/eslint-plugin-perfectionist/blob/c0b3b8eb20b0eedd8229ffa456f8a10c85bf83fc/utils/complete.ts).
 Group-level fallback overrides inherit individual fields; a missing fallback
@@ -465,10 +457,6 @@ order uses the group's order.
 
 ```js
 {
-  settings: {
-    perfectionist: { type: 'natural', order: 'asc', ignoreCase: true },
-    'vue-perfectionist': { type: 'unsorted' },
-  },
   rules: {
     'vue-perfectionist/sort-script-setup': ['error', {
       newlinesBetween: 1,
@@ -490,12 +478,11 @@ order uses the group's order.
 ```
 
 This preserves order within ordinary groups and naturally sorts functions.
-Omitting the plugin-specific `type` allows upstream shared `natural` to
-override the rule's default `unsorted`.
+Omitting `type` uses the rule's default `unsorted`.
 
 The plugin provides rules only, with no built-in configurations. Users register
-the plugin, configure the parser, and enable their chosen rules. Explicit
-comparison types such as `natural` or `alphabetical` override shared settings.
+the plugin, configure the parser, and enable their chosen rules. Set `type`
+to `natural` or `alphabetical` in rule options to sort names within groups.
 
 ## 11. Dependencies and Fix Contract
 
@@ -625,8 +612,7 @@ Beyond basic schema validation, reject:
 - Duplicate, incompatible, or selector-inapplicable modifiers.
 - Empty regex arrays, unconditional `anyOf` branches, invalid expressions,
   flags or locales, and unknown Vue global names.
-- Unknown object fields, except unrelated upstream settings projected out
-  according to section 10.
+- Unknown fields in rule options.
 
 `groups: []` disables ordering and spacing diagnostics without restoring
 defaults. `customGroups: []` clears custom matching.
@@ -690,7 +676,7 @@ combination has a dedicated test. Executable cases live in
 | Call sources   | Import aliases, namespaces, foreign names, globals, dynamic callees                                               |
 | Custom groups  | First match, AND/OR, static sources, unreferenced groups, name conflicts                                          |
 | Comparators    | Five types, fallback, subgroup order, descending order, stable ties, Unicode                                      |
-| Settings       | Upstream/plugin/rule/group/custom priority and array replacement                                                  |
+| Options        | Rule/group/custom priority, array replacement, ignored ESLint settings                                            |
 | Whitespace     | Inside/between, absent groups, partition conflicts, comments, CRLF                                                |
 | Dependencies   | Initialization order, cross-group reads, immediate calls, captures, callbacks, cycles, overloads                  |
 | Side effects   | Immediate effects, unknown watch options, composables, inject factories                                           |
@@ -701,7 +687,7 @@ combination has a dedicated test. Executable cases live in
 
 Implementation proceeds from option resolution and classification to grouping
 and diagnostics, then dependency protection and conservative fixing, followed
-by shared settings, plugin integration, and documentation. Any expansion of movement
+by plugin integration and documentation. Any expansion of movement
 safety requires semantic regressions before broadening the allowed forms.
 
 ## Implementation

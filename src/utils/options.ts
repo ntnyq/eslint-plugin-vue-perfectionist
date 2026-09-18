@@ -1,5 +1,4 @@
 import {
-  COMMON_PROPERTIES,
   DEFAULT_OPTIONS,
   MODIFIERS,
   OPTIONS_SCHEMA,
@@ -29,8 +28,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /**
- * Validate the subset of JSON Schema used by our own options, including settings
- * which ESLint does not pass through meta.schema.
+ * Validate the subset of JSON Schema used by the resolved rule options.
  */
 function matchesSchema(
   value: unknown,
@@ -263,28 +261,7 @@ function validateCondition(condition: MatchCondition) {
 }
 
 export function resolveOptions(context: RuleContext): ResolvedOptions {
-  const { perfectionist: upstream } = context.settings
-  const own = context.settings['vue-perfectionist']
-  if (own !== undefined && !isRecord(own)) {
-    invalid('settings["vue-perfectionist"] must be an object.')
-  }
-  const shared: Record<string, unknown> = {}
-  if (isRecord(upstream)) {
-    for (const key of Object.keys(COMMON_PROPERTIES)) {
-      if (key in upstream) {
-        shared[key] = upstream[key]
-      }
-    }
-  }
-  if (isRecord(own)) {
-    for (const [key, value] of Object.entries(own)) {
-      if (!(key in COMMON_PROPERTIES)) {
-        invalid(`Unknown shared option: ${key}`)
-      }
-      shared[key] = value
-    }
-  }
-  const options = { ...DEFAULT_OPTIONS, ...shared, ...context.options[0] }
+  const options = { ...DEFAULT_OPTIONS, ...context.options[0] }
   for (const [key, value] of Object.entries(options)) {
     const properties: Record<string, JSONSchema.JSONSchema4> =
       OPTIONS_SCHEMA.properties

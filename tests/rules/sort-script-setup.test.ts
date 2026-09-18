@@ -162,19 +162,19 @@ await run<SortScriptSetupOptions, MessageId>({
       },
     },
     {
-      description: 'applies upstream, plugin, and rule preferences in order',
+      description: 'ignores sorting preferences in both settings namespaces',
       code: setup('const z = 0\nconst a = 1'),
       settings: {
         perfectionist: {
           type: 'natural',
         },
         'vue-perfectionist': {
-          type: 'unsorted',
+          type: 'natural',
         },
       },
     },
     {
-      description: 'applies upstream, plugin, and rule preferences in order',
+      description: 'uses explicit rule options regardless of settings',
       code: setup('const z = 0\nconst a = 1'),
       options: {
         type: 'unsorted',
@@ -614,7 +614,7 @@ await run<SortScriptSetupOptions, MessageId>({
       },
     },
     {
-      description: 'validates shared fields after precedence resolution',
+      description: 'ignores invalid settings when rule options are provided',
       code: setup('const a = 1'),
       options: {
         type: 'unsorted',
@@ -1311,15 +1311,10 @@ await run<SortScriptSetupOptions, MessageId>({
       output: setup('function z() {}\nfunction a() {}'),
     },
     {
-      description: 'applies upstream, plugin, and rule preferences in order',
+      description: 'sorts using explicit rule options',
       code: setup('const z = 0\nconst a = 1'),
-      settings: {
-        perfectionist: {
-          type: 'natural',
-          tsconfig: {
-            rootDir: '.',
-          },
-        },
+      options: {
+        type: 'natural',
       },
       errors: [
         {
@@ -1333,7 +1328,8 @@ await run<SortScriptSetupOptions, MessageId>({
       output: setup('const a = 1\nconst z = 0'),
     },
     {
-      description: 'replaces fallbackSort between configuration layers',
+      description:
+        'inherits rule order for fallback sorting and ignores settings',
       code: setup('const aa = 0\nconst zz = 0'),
       options: {
         type: 'line-length',
@@ -1983,17 +1979,27 @@ describe('option validation', () => {
   })
 
   it.each([
+    { perfectionist: { type: 'natural' } },
+    { 'vue-perfectionist': { type: 'natural' } },
     { perfectionist: { type: 'usage' } },
+    { 'vue-perfectionist': { type: 'usage' } },
+    { 'vue-perfectionist': null },
+    { 'vue-perfectionist': [] },
+    { 'vue-perfectionist': 'natural' },
+    {
+      perfectionist: { newlinesBetween: 1, partitionByNewLine: true },
+      'vue-perfectionist': { partitionByComment: '[' },
+    },
     {
       'vue-perfectionist': {
         // cSpell: disable-next-line
         tyep: 'natural',
       },
     },
-  ])('rejects invalid shared settings: %j', async settings => {
+  ])('ignores ESLint settings: %j', async settings => {
     await expect(
-      tester.valid({ code: setup('const a = 1'), settings }),
-    ).rejects.toThrow()
+      tester.valid({ code: setup('const z = 0\nconst a = 1'), settings }),
+    ).resolves.toMatchObject({ result: { fixed: false, messages: [] } })
   })
 
   it('rejects numeric newline overrides in partitioned custom groups', async () => {

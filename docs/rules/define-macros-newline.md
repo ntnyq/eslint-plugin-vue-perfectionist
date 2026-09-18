@@ -1,6 +1,15 @@
-# define-macros-newline
+---
+pageClass: rule-details
+sidebarDepth: 0
+title: vue-perfectionist/define-macros-newline
+description: Require line breaks inside braces and between top-level members of inline Vue compiler macro declarations.
+---
 
-Require line breaks inside braces and between top-level members of inline Vue compiler macro declarations.
+# vue-perfectionist/define-macros-newline
+
+> Require line breaks inside braces and between top-level members of inline Vue compiler macro declarations.
+
+- :wrench: ESLint's `--fix` option can automatically fix problems reported by this rule.
 
 This is an autofixable `layout` rule for `.vue` files with `<script setup>`. Enable it explicitly in your ESLint configuration.
 
@@ -22,6 +31,8 @@ export default [
   },
 ]
 ```
+
+## :book: Rule Details
 
 Even declarations with a single member must use multiple lines:
 
@@ -64,7 +75,7 @@ defineProps<{
 }>()
 ```
 
-## Options
+## :wrench: Options
 
 ```js
 {
@@ -143,3 +154,8 @@ The rule does not follow variable or type declarations, recursively expand neste
 The `expectedNewlines` diagnostic is reported once per affected declaration. Its fix changes only whitespace, retaining member order, comments, commas, semicolons, and existing line breaks. CRLF files retain CRLF in inserted line breaks. Comments immediately inside either brace are also separated from that brace by a line break.
 
 Indentation, semicolons, trailing commas, and blank-line counts remain the formatter's responsibility. Run your formatter after ESLint fixes to finish indentation. With Oxfmt's `objectWrap: 'preserve'`, fixed declarations retain their multiline layout. Avoid formatter settings or other rules that collapse these declarations back onto one line.
+
+## :mag: Implementation
+
+- [Rule source](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/src/rules/define-macros-newline.ts)
+- [Test source](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/tests/rules/define-macros-newline.test.ts)

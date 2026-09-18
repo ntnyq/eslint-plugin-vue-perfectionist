@@ -39,7 +39,7 @@ Templates require `vue-eslint-parser`. Script checks also work in JavaScript
 and TypeScript files with their usual ESLint parser when the rule is enabled
 for those files. TypeScript requires a TypeScript parser.
 
-## Rule Details
+## :book: Rule Details
 
 The following examples use the default pattern, `.+Ref$`:
 
@@ -103,7 +103,7 @@ h('section', { ref: panel }) // Reported
 h('section', { ref: 'panel' }) // Reported
 ```
 
-## Options
+## :wrench: Options
 
 | Option    | Default                                    | Description                                                         |
 | --------- | ------------------------------------------ | ------------------------------------------------------------------- |
@@ -171,3 +171,8 @@ Targets replace the default list. They must be unique and use the names above.
 
 - [Original template-ref-pattern proposal](https://github.com/vuejs/eslint-plugin-vue/issues/2139)
 - [Vue template refs](https://vuejs.org/guide/essentials/template-refs.html)
+
+## :mag: Implementation
+
+- [Rule source](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/src/rules/prefer-ref-pattern.ts)
+- [Test source](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/tests/rules/prefer-ref-pattern.test.ts)

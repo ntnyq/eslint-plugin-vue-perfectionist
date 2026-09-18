@@ -1,6 +1,15 @@
-# callback-style
+---
+pageClass: rule-details
+sidebarDepth: 0
+title: vue-perfectionist/callback-style
+description: Require callbacks to be declared inline at known Vue API argument positions, with configurable function and body styles.
+---
 
-Require callbacks to be declared inline at known Vue API argument positions, with configurable function and body styles.
+# vue-perfectionist/callback-style
+
+> Require callbacks to be declared inline at known Vue API argument positions, with configurable function and body styles.
+
+- :wrench: ESLint's `--fix` option can automatically fix some problems reported by this rule. Only arrow expression bodies can be automatically converted to block bodies.
 
 The rule checks JavaScript and TypeScript files and both ordinary and setup scripts in Vue SFCs, including calls inside composables and other functions. Template expressions are outside its scope. Enable it explicitly in your ESLint configuration.
 
@@ -22,6 +31,8 @@ export default [
   },
 ]
 ```
+
+## :book: Rule Details
 
 With the defaults:
 
@@ -51,7 +62,7 @@ watchEffect(onCleanup => {
 
 The callback may contain any number of statements. It does not have to wrap an existing function.
 
-## Options
+## :wrench: Options
 
 ```js
 {
@@ -179,3 +190,8 @@ onMounted(() => {
 The returned expression is parenthesized to preserve sequence expressions and prevent automatic semicolon insertion around comments and line breaks. Existing parentheses, comments, async modifiers, parameters, and TypeScript annotations are retained. Your formatter can format the resulting block.
 
 Keeping `return` preserves promises and values such as `false`. If a callback intentionally discards its return value, write that block manually. When combining this rule with `arrow-body-style`, configure that rule to allow block bodies.
+
+## :mag: Implementation
+
+- [Rule source](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/src/rules/callback-style.ts)
+- [Test source](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/tests/rules/callback-style.test.ts)
