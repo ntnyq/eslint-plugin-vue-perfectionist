@@ -76,7 +76,7 @@ export function buildDependencies(
       continue
     }
     const visitedFunctions = new Set<TSESTree.Node>()
-    const visitFunction = (node: TSESTree.Node | undefined): void => {
+    const visitFunction = (node: TSESTree.Node | undefined) => {
       if (!node) {
         return
       }
@@ -96,7 +96,7 @@ export function buildDependencies(
         }
       }
     }
-    function visit(node: TSESTree.Node, executeFunction = false): void {
+    function visit(node: TSESTree.Node, executeFunction = false) {
       if (isFunction(node) && !executeFunction) {
         return
       }

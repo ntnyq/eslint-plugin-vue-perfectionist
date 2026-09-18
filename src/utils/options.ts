@@ -93,7 +93,7 @@ function matchesSchema(
   }
 }
 
-function validatePatterns(value: unknown): void {
+function validatePatterns(value: unknown) {
   if (Array.isArray(value)) {
     value.forEach(validatePatterns)
     return
@@ -112,7 +112,7 @@ function validatePatterns(value: unknown): void {
   }
 }
 
-function validateCommentPatterns(value: unknown): void {
+function validateCommentPatterns(value: unknown) {
   if (typeof value === 'boolean') {
     return
   }
@@ -243,7 +243,7 @@ export function getGroupNames(entry: GroupEntry): string[] {
   return []
 }
 
-function validateCondition(condition: MatchCondition): void {
+function validateCondition(condition: MatchCondition) {
   if (Object.keys(condition).length === 0) {
     invalid('Custom group conditions must not be empty.')
   }

@@ -53,7 +53,7 @@ export function reportPartition(
   context: RuleContext,
   options: ResolvedOptions,
   groups: Group[],
-): void {
+) {
   const positions = new Map(
     original.map((statement, index) => [statement, index]),
   )
