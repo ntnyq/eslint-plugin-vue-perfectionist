@@ -4,7 +4,7 @@
 
 This package provides ESLint rules for Vue 3, currently focused on ordering top-level statements in `<script setup>`.
 
-- `src/index.ts`, `src/plugin.ts`, and `src/configs.ts` expose the plugin and flat configuration presets.
+- `src/index.ts` and `src/plugin.ts` expose the plugin and its rules. The plugin does not provide built-in configurations; users compose their own.
 - `src/rules/` contains rule implementations; `src/utils/`, `src/constants/`, and `src/types/` hold shared logic, schemas, and types.
 - `tests/rules/` contains rule and plugin contract tests.
 - `docs/rules/` documents public options; `docs/design/` records design decisions. VitePress configuration lives in `docs/.vitepress/`.

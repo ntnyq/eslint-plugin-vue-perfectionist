@@ -1,17 +1,9 @@
-import type { ESLint, Linter } from 'eslint'
-
-export type PresetName =
-  | 'recommended-alphabetical'
-  | 'recommended-natural'
-  | 'recommended'
-
-export type PluginConfigs = Record<PresetName, Linter.Config>
+import type { ESLint } from 'eslint'
 
 /**
  * Public plugin contract keeps ESLint's host types portable in declarations.
  */
-export interface VuePerfectionistPlugin extends ESLint.Plugin {
-  configs: PluginConfigs
+export interface VuePerfectionistPlugin extends Omit<ESLint.Plugin, 'configs'> {
   meta: {
     name: string
     version: string

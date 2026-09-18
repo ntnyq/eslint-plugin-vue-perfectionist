@@ -1,12 +1,6 @@
-import { configs } from './configs.ts'
-import { plugin as basePlugin } from './plugin.ts'
-import type { VuePerfectionistPlugin } from './types/index.ts'
+import { plugin } from './plugin.ts'
 
-export const plugin: VuePerfectionistPlugin = Object.assign(basePlugin, {
-  configs,
-})
-
-export { configs }
+export { plugin }
 export type {
   CallbackGroup,
   CallbackStyleOptions,
@@ -16,9 +10,7 @@ export type {
   DefineMacrosNewlineMacro,
   DefineMacrosNewlineOptions,
   GroupEntry,
-  PluginConfigs,
   PreferRefPatternOptions,
-  PresetName,
   RefPatternTarget,
   SortScriptSetupOptions,
   VuePerfectionistPlugin,

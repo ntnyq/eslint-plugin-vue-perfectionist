@@ -43,10 +43,10 @@ features:
     link: /rules/sort-script-setup#custom-groups
     linkText: Customize your groups
   - icon: 📦
-    title: Flat Config Presets
-    details: Add a recommended, natural, or alphabetical preset to your Vue parser configuration. Supports JavaScript and TypeScript single-file components.
-    link: /guide/#presets
-    linkText: Choose a preset
+    title: Compose Your Rules
+    details: Register the plugin and choose the rules and options for your project. Supports JavaScript and TypeScript single-file components.
+    link: /guide/#choosing-rules
+    linkText: Choose your rules
   - icon: ✨
     title: See It in Action
     details: Compare sorting modes in the interactive demo, watch safe fixes reorder declarations, and explore when automatic changes are limited.
@@ -74,10 +74,10 @@ yarn add -D eslint eslint-plugin-vue-perfectionist vue-eslint-parser
 
 :::
 
-Already have ESLint configured for Vue? Add
-`vuePerfectionist.configs.recommended` to your flat config to enable statement
-grouping while preserving the order within each group by default.
+Already have ESLint configured for Vue? Register `vuePerfectionist` under
+`plugins` and enable `vue-perfectionist/sort-script-setup` in `rules` to group
+statements while preserving the order within each group by default.
 
 Follow the [setup guide](/guide/#basic-usage) for a complete configuration,
-including TypeScript support, or [choose a preset](/guide/#presets) to sort
-declarations by name.
+including TypeScript support, or [choose your rules](/guide/#choosing-rules)
+and sorting options.

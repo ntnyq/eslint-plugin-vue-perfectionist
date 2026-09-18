@@ -26,7 +26,7 @@ conservative automatic fixes:
 - The initial API supports a documented subset of upstream options and rejects
   unsupported rule options.
 
-The rule and presets require an ESLint configuration with a Vue parser.
+The rule requires an ESLint configuration with a Vue parser.
 
 ## 2. Perfectionist Compatibility Baseline
 
@@ -493,11 +493,9 @@ This preserves order within ordinary groups and naturally sorts functions.
 Omitting the plugin-specific `type` allows upstream shared `natural` to
 override the rule's default `unsorted`.
 
-`recommended` enables the rule without explicit options.
-`recommended-natural` and `recommended-alphabetical` explicitly set their
-comparison type and therefore override shared settings for that field. There
-is no `recommended-custom` because no alphabet is suitable for every project.
-Presets register the plugin for `**/*.vue`; parser setup remains with the user.
+The plugin provides rules only, with no built-in configurations. Users register
+the plugin, configure the parser, and enable their chosen rules. Explicit
+comparison types such as `natural` or `alphabetical` override shared settings.
 
 ## 11. Dependencies and Fix Contract
 
@@ -684,26 +682,26 @@ This matrix records acceptance requirements rather than claiming that every
 combination has a dedicated test. Executable cases live in
 [the rule tests](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/tests/rules/sort-script-setup.test.ts).
 
-| Area           | Required behavior                                                                                |
-| -------------- | ------------------------------------------------------------------------------------------------ |
-| Scope          | JS/TS setup, ordinary script skip, dual-script isolation, missing SFC services                   |
-| Groups         | Defaults, partial/empty lists, merged arrays, explicit/omitted unknown                           |
-| Macros         | Standalone/bound calls, withDefaults, props destructuring, multiple models, shadowing            |
-| Call sources   | Import aliases, namespaces, foreign names, globals, dynamic callees                              |
-| Custom groups  | First match, AND/OR, static sources, unreferenced groups, name conflicts                         |
-| Comparators    | Five types, fallback, subgroup order, descending order, stable ties, Unicode                     |
-| Settings       | Upstream/plugin/rule/group/custom priority and array replacement                                 |
-| Whitespace     | Inside/between, absent groups, partition conflicts, comments, CRLF                               |
-| Dependencies   | Initialization order, cross-group reads, immediate calls, captures, callbacks, cycles, overloads |
-| Side effects   | Immediate effects, unknown watch options, composables, inject factories                          |
-| Fix boundaries | Await, assignments, control flow, multiple declarators, disable/directive comments               |
-| Safe cases     | Independent types/interfaces, primitive constants, ordinary functions, spacing                   |
-| Stability      | Idempotent fixes, unchanged unsafe input, nonoverlapping fix ranges                              |
-| Integration    | Parser and presets, import sorting coexistence, disabled overlapping rules, formatter stability  |
+| Area           | Required behavior                                                                                                 |
+| -------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Scope          | JS/TS setup, ordinary script skip, dual-script isolation, missing SFC services                                    |
+| Groups         | Defaults, partial/empty lists, merged arrays, explicit/omitted unknown                                            |
+| Macros         | Standalone/bound calls, withDefaults, props destructuring, multiple models, shadowing                             |
+| Call sources   | Import aliases, namespaces, foreign names, globals, dynamic callees                                               |
+| Custom groups  | First match, AND/OR, static sources, unreferenced groups, name conflicts                                          |
+| Comparators    | Five types, fallback, subgroup order, descending order, stable ties, Unicode                                      |
+| Settings       | Upstream/plugin/rule/group/custom priority and array replacement                                                  |
+| Whitespace     | Inside/between, absent groups, partition conflicts, comments, CRLF                                                |
+| Dependencies   | Initialization order, cross-group reads, immediate calls, captures, callbacks, cycles, overloads                  |
+| Side effects   | Immediate effects, unknown watch options, composables, inject factories                                           |
+| Fix boundaries | Await, assignments, control flow, multiple declarators, disable/directive comments                                |
+| Safe cases     | Independent types/interfaces, primitive constants, ordinary functions, spacing                                    |
+| Stability      | Idempotent fixes, unchanged unsafe input, nonoverlapping fix ranges                                               |
+| Integration    | Parser and manual rule configuration, import sorting coexistence, disabled overlapping rules, formatter stability |
 
 Implementation proceeds from option resolution and classification to grouping
 and diagnostics, then dependency protection and conservative fixing, followed
-by shared settings, presets, and documentation. Any expansion of movement
+by shared settings, plugin integration, and documentation. Any expansion of movement
 safety requires semantic regressions before broadening the allowed forms.
 
 ## Implementation

@@ -17,7 +17,7 @@ The rule reports without automatic fixes or suggestions. A regular expression
 cannot determine a unique replacement name, and renaming a ref may affect
 script bindings, templates, and `$refs` access.
 
-This naming preference is **not enabled by any recommended preset**.
+Enable this naming preference explicitly in your ESLint configuration.
 
 ## Usage
 

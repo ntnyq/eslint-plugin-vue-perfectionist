@@ -63,46 +63,28 @@ For JavaScript-only SFCs, omit the TypeScript parser import and
 `parserOptions.parser`. If an existing Vue configuration already supplies the
 parsers, add the plugin and rule to that configuration.
 
-## Presets
+## Choosing Rules
 
-Each preset registers the plugin and enables `sort-script-setup` for `**/*.vue`.
-The optional [`callback-style`](../rules/callback-style.md),
+The plugin provides rules only and does not include built-in configurations.
+Enable and combine rules explicitly in your own configuration. Alongside
+[`sort-script-setup`](../rules/sort-script-setup.md), you can enable
+[`callback-style`](../rules/callback-style.md),
 [`define-macros-newline`](../rules/define-macros-newline.md), and
-[`prefer-ref-pattern`](../rules/prefer-ref-pattern.md) rules must be enabled
-explicitly and are not included in these presets:
+[`prefer-ref-pattern`](../rules/prefer-ref-pattern.md).
 
-| Preset                     | Sorting within groups                               |
-| -------------------------- | --------------------------------------------------- |
-| `recommended`              | Preserves the existing order by default             |
-| `recommended-natural`      | Natural name order, such as `item2` before `item10` |
-| `recommended-alphabetical` | Alphabetical name order                             |
+To sort names naturally, configure `sort-script-setup` with an explicit option:
 
-Presets require an existing Vue parser configuration. For example, replace the
-manual plugin registration and rule settings above with a preset:
-
-```js [eslint.config.mjs]
-import tsParser from '@typescript-eslint/parser'
-import { defineConfig } from 'eslint/config'
-import vuePerfectionist from 'eslint-plugin-vue-perfectionist'
-import vueParser from 'vue-eslint-parser'
-
-export default defineConfig([
-  {
-    files: ['**/*.vue'],
-    languageOptions: {
-      parser: vueParser,
-      parserOptions: { parser: tsParser },
-    },
+```js
+{
+  rules: {
+    'vue-perfectionist/sort-script-setup': ['error', { type: 'natural' }],
   },
-  vuePerfectionist.configs.recommended,
-])
+}
 ```
 
-The `recommended` preset inherits supported preferences from
-`settings.perfectionist` and `settings['vue-perfectionist']`. A shared
-`type: 'natural'` therefore overrides its default `unsorted` behavior. The
-natural and alphabetical presets set `type` explicitly, taking precedence over
-shared settings.
+Without explicit sorting options, the rule inherits supported preferences from
+`settings.perfectionist` and `settings['vue-perfectionist']`, falling back to
+`unsorted`. Explicit rule options take precedence over shared settings.
 
 ## Automatic Fixes
 
@@ -124,6 +106,6 @@ configuration enables `perfectionist/sort-modules` or
 this plugin controls declaration and macro order. Keep Vue correctness rules
 such as checks for watchers and lifecycle registration after `await`.
 
-Presets do not disable other plugins' rules. Align any whitespace settings
+Align any whitespace settings
 with your formatter and padding rules; this plugin ignores blank-line counts
 by default.

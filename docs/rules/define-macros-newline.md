@@ -2,7 +2,7 @@
 
 Require line breaks inside braces and between top-level members of inline Vue compiler macro declarations.
 
-This is an autofixable `layout` rule for `.vue` files with `<script setup>`. It is opt-in and is not enabled by any recommended preset.
+This is an autofixable `layout` rule for `.vue` files with `<script setup>`. Enable it explicitly in your ESLint configuration.
 
 ## Usage
 

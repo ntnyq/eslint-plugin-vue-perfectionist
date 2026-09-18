@@ -1,5 +1,5 @@
-import packageJson from '../package.json' with { type: 'json' }
+import pkg from '../package.json' with { type: 'json' }
 
-const { name, version } = packageJson
+const { name, version } = pkg
 
 export const meta = { name, version }

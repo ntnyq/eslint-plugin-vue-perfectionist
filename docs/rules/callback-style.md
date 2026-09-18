@@ -2,7 +2,7 @@
 
 Require callbacks to be declared inline at known Vue API argument positions, with configurable function and body styles.
 
-The rule checks JavaScript and TypeScript files and both ordinary and setup scripts in Vue SFCs, including calls inside composables and other functions. Template expressions are outside its scope. It is opt-in and is not enabled by the recommended presets.
+The rule checks JavaScript and TypeScript files and both ordinary and setup scripts in Vue SFCs, including calls inside composables and other functions. Template expressions are outside its scope. Enable it explicitly in your ESLint configuration.
 
 ## Usage
 

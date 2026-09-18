@@ -25,7 +25,8 @@ For TypeScript SFCs, also install the TypeScript parser:
 pnpm add -D @typescript-eslint/parser typescript
 ```
 
-Add the recommended preset to `eslint.config.mjs`:
+Register the plugin and enable the rules you want in `eslint.config.mjs`.
+The plugin provides rules only, with no built-in configurations:
 
 ```js
 import tsParser from '@typescript-eslint/parser'
@@ -39,16 +40,20 @@ export default [
       parser: vueParser,
       parserOptions: { parser: tsParser },
     },
+    plugins: {
+      'vue-perfectionist': vuePerfectionist,
+    },
+    rules: {
+      'vue-perfectionist/sort-script-setup': 'error',
+    },
   },
-  vuePerfectionist.configs.recommended,
 ]
 ```
 
 For JavaScript-only SFCs, omit the TypeScript parser import and `parserOptions.parser`.
-If your Vue configuration already supplies the parsers, just add the preset.
+If your Vue configuration already supplies the parsers, add the plugin and your chosen rules.
 
-The recommended preset enables `sort-script-setup`. Enable other rules explicitly;
-see the [setup guide](https://vue-perfectionist.vercel.app/guide/) for more configuration options.
+See the [setup guide](https://vue-perfectionist.vercel.app/guide/) for more configuration options.
 
 ## Rules
 

@@ -124,7 +124,7 @@ export default [
 
 For JavaScript-only SFCs, omit `parserOptions.parser`. If your existing Vue configuration already supplies the parsers, keep that configuration and add the plugin and rule.
 
-`configs.recommended`, `configs['recommended-natural']`, and `configs['recommended-alphabetical']` register the plugin and enable the rule for `**/*.vue`. They do not install or configure a parser, and do not disable other plugins' rules. Apply them after your Vue parser configuration.
+The plugin provides no built-in configurations. Register it and enable this rule explicitly in your own configuration.
 
 ## :wrench: Options
 
