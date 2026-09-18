@@ -113,6 +113,19 @@ await run<PreferRefPatternOptions, PreferRefPatternMessageId>({
       description: 'does not infer Options API exposure from a module variable',
       code: '<script>import { ref } from "vue"; const panel = ref(null); export default {}</script><template><div :ref="panel" /></template>',
     },
+    ...[
+      'const panel = el => {}',
+      'let panel = ref(null); panel = el => {}',
+      'let panel = ref(null); function replace() { panel = el => {} }',
+    ].map(script => ({
+      description: `respects setup shadowing and reassignment: ${script}`,
+      code: `<script lang="ts">import { h, ref } from "vue"; const panel = ref(null)</script>${sfc(`${script}; h("div", { ref: panel })`, '<div :ref="panel" />')}`,
+    })),
+    {
+      description:
+        'does not expose an ordinary script ref through an unrelated setup block',
+      code: `<script lang="ts">import { ref } from "vue"; const panel = ref(null)</script>${sfc('const other = 1', '<div :ref="panel" />')}`,
+    },
     {
       description:
         'skips reassigned variables and destructured ref initializers',
@@ -149,6 +162,38 @@ await run<PreferRefPatternOptions, PreferRefPatternMessageId>({
     },
   ],
   invalid: [
+    ...['', ' lang="ts"'].flatMap(language =>
+      [false, true].map(setupFirst => {
+        const ordinary = `<script${language}>let panel = 1; panel = 2</script>`
+        const setup = `<script setup${language}>import { ref, h } from "vue"; const panel = ref(null); h("div", { ref: panel })</script>`
+        return {
+          description: `resolves same-name setup refs (${language || 'JavaScript'}, setup first: ${setupFirst})`,
+          code: `${setupFirst ? setup + ordinary : ordinary + setup}<template><div :ref="panel" /></template>`,
+          languageOptions: language
+            ? vueLanguageOptions
+            : { parserOptions: { parser: null } },
+          errors: [
+            'unexpectedRefPattern' as const,
+            'unexpectedRefPattern' as const,
+          ],
+          output: null,
+        }
+      }),
+    ),
+    {
+      description: 'keeps ordinary script refs available to setup render calls',
+      code: `<script lang="ts">import { h, ref } from "vue"; const panel = ref(null)</script>${sfc('h("div", { ref: panel })')}`,
+      errors: ['unexpectedRefPattern'],
+      output: null,
+    },
+    ...['0', '[1]', '1n', '[-1]', '["ref" as const]'].map(key => ({
+      description: `checks render refs with a static trailing key: ${key}`,
+      code: sfc(
+        `import { h } from "vue"; h("div", { ref: "bad", ${key}: "bad" })`,
+      ),
+      errors: ['unexpectedRefPattern' as const],
+      output: null,
+    })),
     {
       description:
         'resolves setup refs after the template and outside a shadowing loop',

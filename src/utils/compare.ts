@@ -1,3 +1,4 @@
+import { isNumber } from '@ntnyq/utils'
 import { compare as createNaturalCompare } from 'natural-orderby'
 import type {
   Group,
@@ -124,7 +125,7 @@ export function getNewlines(
     .slice(left.group + 1, right.group + 1)
     .map(group => group.before)
   const positive = values.filter(
-    (value): value is number => typeof value === 'number' && value > 0,
+    (value): value is number => isNumber(value) && value > 0,
   )
   if (positive.length) {
     return Math.max(...positive)

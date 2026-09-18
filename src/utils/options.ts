@@ -1,3 +1,4 @@
+import { isArray, isBoolean, isNumber, isString } from '@ntnyq/utils'
 import {
   DEFAULT_OPTIONS,
   MODIFIERS,
@@ -24,7 +25,7 @@ function invalid(message: string): never {
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === 'object' && !Array.isArray(value)
+  return value !== null && typeof value === 'object' && !isArray(value)
 }
 
 /**
@@ -45,19 +46,17 @@ function matchesSchema(
   }
   switch (schema.type) {
     case 'string':
-      return (
-        typeof value === 'string' && value.length >= (schema.minLength ?? 0)
-      )
+      return isString(value) && value.length >= (schema.minLength ?? 0)
     case 'boolean':
-      return typeof value === 'boolean'
+      return isBoolean(value)
     case 'integer':
       return (
-        typeof value === 'number' &&
+        isNumber(value) &&
         Number.isSafeInteger(value) &&
         value >= (schema.minimum ?? 0)
       )
     case 'array': {
-      if (!Array.isArray(value) || value.length < (schema.minItems ?? 0)) {
+      if (!isArray(value) || value.length < (schema.minItems ?? 0)) {
         return false
       }
       if (schema.uniqueItems && new Set(value).size !== value.length) {
@@ -66,7 +65,7 @@ function matchesSchema(
       const items = schema.items
       return (
         !items ||
-        Array.isArray(items) ||
+        isArray(items) ||
         value.every(entry => matchesSchema(entry, items))
       )
     }
@@ -75,7 +74,7 @@ function matchesSchema(
         return false
       }
       if (
-        Array.isArray(schema.required) &&
+        isArray(schema.required) &&
         schema.required.some(key => !(key in value))
       ) {
         return false
@@ -92,7 +91,7 @@ function matchesSchema(
 }
 
 function validatePatterns(value: unknown) {
-  if (Array.isArray(value)) {
+  if (isArray(value)) {
     value.forEach(validatePatterns)
     return
   }
@@ -111,7 +110,7 @@ function validatePatterns(value: unknown) {
 }
 
 function validateCommentPatterns(value: unknown) {
-  if (typeof value === 'boolean') {
+  if (isBoolean(value)) {
     return
   }
   if (isRecord(value) && !('pattern' in value)) {
@@ -122,9 +121,9 @@ function validateCommentPatterns(value: unknown) {
 }
 
 export function compilePatterns(pattern: RegexOption): RegExp[] {
-  return (Array.isArray(pattern) ? pattern : [pattern]).map(entry => {
+  return (isArray(pattern) ? pattern : [pattern]).map(entry => {
     try {
-      return typeof entry === 'string'
+      return isString(entry)
         ? new RegExp(entry)
         : new RegExp(entry.pattern, entry.flags)
     } catch {
@@ -229,14 +228,14 @@ function normalizeGroupName(name: string): string {
 }
 
 export function getGroupNames(entry: GroupEntry): string[] {
-  if (typeof entry === 'string') {
+  if (isString(entry)) {
     return [entry]
   }
-  if (Array.isArray(entry)) {
+  if (isArray(entry)) {
     return entry
   }
   if ('group' in entry) {
-    return typeof entry.group === 'string' ? [entry.group] : entry.group
+    return isString(entry.group) ? [entry.group] : entry.group
   }
   return []
 }
@@ -349,7 +348,7 @@ export function resolveOptions(context: RuleContext): ResolvedOptions {
   for (const candidate of [
     options,
     ...options.groups.filter(
-      entry => typeof entry === 'object' && !Array.isArray(entry),
+      entry => typeof entry === 'object' && !isArray(entry),
     ),
     ...options.customGroups,
   ]) {
@@ -384,7 +383,7 @@ export function resolveGroups(options: ResolvedOptions): Group[] {
     if (!names.length) {
       if (
         typeof entry === 'object' &&
-        !Array.isArray(entry) &&
+        !isArray(entry) &&
         'newlinesBetween' in entry
       ) {
         before = entry.newlinesBetween
@@ -392,7 +391,7 @@ export function resolveGroups(options: ResolvedOptions): Group[] {
       continue
     }
     const overrides: GroupOverrides =
-      typeof entry === 'object' && !Array.isArray(entry) && 'group' in entry
+      typeof entry === 'object' && !isArray(entry) && 'group' in entry
         ? entry
         : {}
     const custom =

@@ -1,3 +1,4 @@
+import { isNil } from '@ntnyq/utils'
 import { ASTUtils } from '@typescript-eslint/utils'
 import {
   getCallIdentity,
@@ -36,7 +37,7 @@ function getCallOptions(
   if (!result) {
     return undefined
   }
-  if (result.value === undefined || result.value === null) {
+  if (isNil(result.value)) {
     return {}
   }
   return typeof result.value === 'object' ? result.value : undefined

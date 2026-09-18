@@ -153,7 +153,9 @@ Targets replace the default list. They must be unique and use the names above.
   `useTemplateRef()` initializer from Vue and is not reassigned. TypeScript
   assertions, non-null assertions, and `satisfies` wrappers are supported.
 - Template identifiers are resolved only against `<script setup>` declarations.
-  `v-for` and slot bindings take precedence. Options API `setup()` return-value
+  Same-name declarations and assignments in an ordinary `<script>` block do
+  not affect setup ref recognition. `v-for` and slot bindings take precedence.
+  Options API `setup()` return-value
   mappings, destructuring, aliases of ref variables, and custom composable
   return values are not inferred. Static template strings are still checked
   with ordinary `<script>` or no script block.
@@ -162,7 +164,8 @@ Targets replace the default list. They must be unique and use the names above.
   holding string keys are not evaluated. `.prop` and `.attr` bindings are skipped
   because they target ordinary properties or attributes instead of template refs.
 - Render checks inspect inline props objects, including shorthand `ref` and
-  static computed property names. Later properties override earlier ones;
+  static computed property names. Numeric property names do not hide an earlier
+  `ref` property. Later properties override earlier ones;
   a later spread or unknown computed key makes an earlier ref uncertain and
   it is skipped. Props variables, `mergeProps()`, JSX, and other render APIs
   are outside this rule's scope.

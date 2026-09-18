@@ -1,3 +1,4 @@
+import { isString } from '@ntnyq/utils'
 import { ASTUtils } from '@typescript-eslint/utils'
 import { unwrapExpression } from './ast.ts'
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
@@ -27,7 +28,7 @@ export function getRefString(
   node: AST.Node | TSESTree.Node,
 ): string | undefined {
   const expression = unwrapRefExpression(node)
-  if (expression.type === 'Literal' && typeof expression.value === 'string') {
+  if (expression.type === 'Literal' && isString(expression.value)) {
     return expression.value
   }
   if (expression.type === 'TemplateLiteral' && !expression.expressions.length) {
@@ -88,17 +89,30 @@ export function getVueRefApi(
 export function isVueRefVariable(
   variable: TSESLint.Scope.Variable | null | undefined,
   sourceCode: SourceCode,
+  declarationRange?: TSESTree.Range,
 ): boolean {
+  // vue-eslint-parser merges same-name bindings from both script blocks.
+  // Only declarations and writes in the selected block belong to a setup ref.
+  const isInRange = (node: TSESTree.Node) =>
+    !declarationRange ||
+    (node.range[0] >= declarationRange[0] &&
+      node.range[1] <= declarationRange[1])
+  const definitions = variable?.defs.filter(definition =>
+    isInRange(definition.node),
+  )
   if (
     !variable ||
-    variable.defs.length !== 1 ||
+    definitions?.length !== 1 ||
     variable.references.some(
-      reference => reference.isWrite() && !reference.init,
+      reference =>
+        reference.isWrite() &&
+        !reference.init &&
+        isInRange(reference.identifier),
     )
   ) {
     return false
   }
-  const definition = variable.defs[0]
+  const definition = definitions[0]
   if (
     definition?.type !== 'Variable' ||
     definition.node.id.type !== 'Identifier' ||

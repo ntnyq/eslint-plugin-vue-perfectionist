@@ -1,3 +1,9 @@
+import {
+  isArray,
+  isFunction as isCallable,
+  isNumber,
+  isString,
+} from '@ntnyq/utils'
 import { ASTUtils } from '@typescript-eslint/utils'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type { AST } from 'vue-eslint-parser'
@@ -14,7 +20,7 @@ function hasVueServices(
     services !== null &&
     typeof services === 'object' &&
     'getDocumentFragment' in services &&
-    typeof services.getDocumentFragment === 'function'
+    isCallable(services.getDocumentFragment)
   )
 }
 
@@ -65,9 +71,9 @@ function isNode(value: unknown): value is TSESTree.Node {
     value !== null &&
     typeof value === 'object' &&
     'type' in value &&
-    typeof value.type === 'string' &&
+    isString(value.type) &&
     'range' in value &&
-    Array.isArray(value.range)
+    isArray(value.range)
   )
 }
 
@@ -78,7 +84,7 @@ export function getChildren(
   const children: TSESTree.Node[] = []
   for (const key of sourceCode.visitorKeys[node.type] ?? []) {
     const value: unknown = Reflect.get(node, key)
-    if (Array.isArray(value)) {
+    if (isArray(value)) {
       children.push(...value.filter(isNode))
     } else if (isNode(value)) {
       children.push(value)
@@ -140,7 +146,7 @@ export function isPrimitiveConstant(node: TSESTree.Node): boolean {
     expression.type === 'UnaryExpression' &&
     ['+', '-'].includes(expression.operator) &&
     expression.argument.type === 'Literal' &&
-    typeof expression.argument.value === 'number'
+    isNumber(expression.argument.value)
   )
 }
 

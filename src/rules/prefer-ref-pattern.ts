@@ -1,3 +1,4 @@
+import { isFunction } from '@ntnyq/utils'
 import { ASTUtils } from '@typescript-eslint/utils'
 import { getSetupRange, unwrapExpression } from '../utils/ast.ts'
 import { createRule } from '../utils/create-rule.ts'
@@ -29,7 +30,7 @@ function hasTemplateVisitor(services: unknown): services is {
     services !== null &&
     typeof services === 'object' &&
     'defineTemplateBodyVisitor' in services &&
-    typeof services.defineTemplateBodyVisitor === 'function'
+    isFunction(services.defineTemplateBodyVisitor)
   )
 }
 
@@ -97,14 +98,29 @@ export const preferRefPattern = createRule<
       const name = getRefString(expression)
       if (name !== undefined) {
         checkName(name, expression)
-      } else if (
-        expression.type === 'Identifier' &&
-        isVueRefVariable(
-          ASTUtils.findVariable(sourceCode.getScope(expression), expression),
-          sourceCode,
+      } else if (expression.type === 'Identifier') {
+        const variable = ASTUtils.findVariable(
+          sourceCode.getScope(expression),
+          expression,
         )
-      ) {
-        checkName(expression.name, expression)
+        const isSetupBinding =
+          setupRange &&
+          expression.range[0] >= setupRange[0] &&
+          expression.range[1] <= setupRange[1] &&
+          variable?.defs.some(
+            definition =>
+              definition.node.range[0] >= setupRange[0] &&
+              definition.node.range[1] <= setupRange[1],
+          )
+        if (
+          isVueRefVariable(
+            variable,
+            sourceCode,
+            isSetupBinding ? setupRange : undefined,
+          )
+        ) {
+          checkName(expression.name, expression)
+        }
       }
     }
 
@@ -135,9 +151,7 @@ export const preferRefPattern = createRule<
           return
         }
         const key =
-          !property.computed && property.key.type === 'Identifier'
-            ? property.key.name
-            : getRefString(property.key)
+          ASTUtils.getPropertyName(property) ?? getRefString(property.key)
         if (key === undefined) {
           return
         }
@@ -185,13 +199,7 @@ export const preferRefPattern = createRule<
         scope => scope.type === 'module',
       )
       const variable = moduleScope?.set.get(expression.name)
-      const definition = variable?.defs[0]
-      if (
-        definition &&
-        definition.node.range[0] >= setupRange[0] &&
-        definition.node.range[1] <= setupRange[1] &&
-        isVueRefVariable(variable, sourceCode)
-      ) {
+      if (isVueRefVariable(variable, sourceCode, setupRange)) {
         checkName(expression.name, expression)
       }
     }

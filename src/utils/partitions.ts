@@ -1,3 +1,4 @@
+import { isArray, isBoolean } from '@ntnyq/utils'
 import { classifyStatement } from './classify.ts'
 import { assignGroup, matchesPattern } from './options.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
@@ -13,12 +14,12 @@ function isPartitionComment(
   comment: TSESTree.Comment,
   option: CommentPartition,
 ): boolean {
-  if (typeof option === 'boolean') {
+  if (isBoolean(option)) {
     return option
   }
   if (
     typeof option === 'object' &&
-    !Array.isArray(option) &&
+    !isArray(option) &&
     !('pattern' in option)
   ) {
     const selected = comment.type === 'Line' ? option.line : option.block
