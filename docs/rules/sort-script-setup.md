@@ -75,7 +75,9 @@ constants retain their relative order because the default `type` is
 
 Recognized Vue APIs can also produce diagnostics without a movement fix:
 
-```vue eslint-check
+::: incorrect
+
+```vue
 <script setup>
 import { computed, ref } from 'vue'
 
@@ -83,6 +85,8 @@ const doubled = computed(() => 2)
 const count = ref(0)
 </script>
 ```
+
+:::
 
 The default groups place `ref` before `computed`, but these runtime calls are
 not automatically moved. See [Partitions and automatic fixes](#partitions-and-automatic-fixes).

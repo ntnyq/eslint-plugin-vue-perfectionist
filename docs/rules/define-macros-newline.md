@@ -36,14 +36,9 @@ export default [
 
 Even declarations with a single member must use multiple lines:
 
-```ts
-// Invalid
-defineProps<{ name: string }>()
-defineEmits<{ change: [value: string] }>()
-defineSlots<{ default(props: { name: string }): unknown }>()
-defineExpose({ open, close })
+::: correct
 
-// Valid
+```ts
 defineProps<{
   name: string
 }>()
@@ -59,21 +54,42 @@ defineExpose({
 })
 ```
 
+:::
+
+::: incorrect
+
+```ts
+defineProps<{ name: string }>()
+defineEmits<{ change: [value: string] }>()
+defineSlots<{ default(props: { name: string }): unknown }>()
+defineExpose({ open, close })
+```
+
+:::
+
 Each member must start on a later line than the previous member ends. Members themselves may span multiple lines. Adding line breaks around the braces alone is insufficient:
 
-<!-- prettier-ignore -->
-```ts
-// Invalid
-defineProps<{
-  name: string; age: number
-}>()
+::: correct
 
-// Valid
+```ts
 defineProps<{
   name: string
   age: number
 }>()
 ```
+
+:::
+
+::: incorrect
+
+<!-- prettier-ignore -->
+```ts
+defineProps<{
+  name: string; age: number
+}>()
+```
+
+:::
 
 ## :wrench: Options
 
@@ -111,6 +127,8 @@ Ordinary `<script>` blocks, template expressions, and standalone JavaScript or T
 
 Only direct, nonempty type literals and object arguments are checked:
 
+::: correct
+
 ```ts
 // The props type is checked; the defaults object is not.
 withDefaults(
@@ -146,6 +164,8 @@ defineProps<Props & { name: string }>()
 defineProps<Partial<{ name: string }>>()
 defineExpose({ open } satisfies Exposed)
 ```
+
+:::
 
 The rule does not follow variable or type declarations, recursively expand nested members, or validate macro signatures. `defineModel` is not supported because its type and option arguments have different roles.
 

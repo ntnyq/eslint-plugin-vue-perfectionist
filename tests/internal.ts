@@ -22,7 +22,16 @@ export async function run<TOptions, TMessageId extends string = string>(
   options: RuleTesterInitOptions & TestCasesOptions<TOptions, TMessageId>,
 ) {
   return runRuleTests<TOptions, TMessageId>({
-    languageOptions: vueLanguageOptions,
+    configs: [
+      {
+        files: ['**/*.{ts,tsx}'],
+        languageOptions: { parser: tsParser },
+      },
+      {
+        files: ['**/*.vue'],
+        languageOptions: vueLanguageOptions,
+      },
+    ],
     defaultFilenames: {
       js: 'Test.vue',
     },

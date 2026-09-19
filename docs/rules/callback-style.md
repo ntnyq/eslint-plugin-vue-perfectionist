@@ -36,19 +36,11 @@ export default [
 
 With the defaults:
 
+::: correct
+
 ```ts
 import { onMounted, watch, watchEffect } from 'vue'
 
-// Invalid: callback references and expression bodies.
-onMounted(fetchData)
-watch(userId, handleUserChange)
-watchEffect(updateTitle)
-onMounted(() => fetchData())
-onMounted(function () {
-  fetchData()
-})
-
-// Valid: inline arrow callbacks with block bodies.
 onMounted(() => {
   fetchData()
 })
@@ -59,6 +51,24 @@ watchEffect(onCleanup => {
   updateTitle(onCleanup)
 })
 ```
+
+:::
+
+::: incorrect
+
+```ts
+import { onMounted, watch, watchEffect } from 'vue'
+
+onMounted(fetchData)
+watch(userId, handleUserChange)
+watchEffect(updateTitle)
+onMounted(() => fetchData())
+onMounted(function () {
+  fetchData()
+})
+```
+
+:::
 
 The callback may contain any number of statements. It does not have to wrap an existing function.
 
@@ -106,6 +116,8 @@ Indices are zero-based.
 
 Only the second argument of `watch` is checked. Sources such as getter functions, refs, reactive objects, and arrays are left alone:
 
+::: correct
+
 ```ts
 import { watch } from 'vue'
 
@@ -117,17 +129,23 @@ watch(
 )
 ```
 
+:::
+
 ### Import identity and auto-imports
 
 Named import aliases and namespace imports match the original export name:
+
+::: incorrect
 
 ```ts
 import { onMounted as mounted } from 'vue'
 import * as Vue from 'vue'
 
-mounted(handler) // Reported.
-Vue.onMounted(handler) // Reported.
+mounted(handler)
+Vue.onMounted(handler)
 ```
+
+:::
 
 Imports from other modules, local functions, and shadowed bindings do not match built-ins. Type-only imports do not match. Default imports are not treated as named Vue APIs.
 
@@ -177,15 +195,23 @@ Missing arguments are skipped. An argument at or after a spread is skipped becau
 
 For example, the automatic fix preserves the return value:
 
-```ts
-// Before
-onMounted(() => fetchData())
+::: incorrect
 
-// After
+```ts
+onMounted(() => fetchData())
+```
+
+:::
+
+::: correct
+
+```ts
 onMounted(() => {
   return fetchData()
 })
 ```
+
+:::
 
 The returned expression is parenthesized to preserve sequence expressions and prevent automatic semicolon insertion around comments and line breaks. Existing parentheses, comments, async modifiers, parameters, and TypeScript annotations are retained. Your formatter can format the resulting block.
 

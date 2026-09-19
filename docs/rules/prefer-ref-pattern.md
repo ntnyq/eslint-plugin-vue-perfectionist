@@ -91,17 +91,31 @@ and `ref="table"` produce a diagnostic.
 
 Render functions use the same convention:
 
+::: correct
+
 ```js
 import { h, shallowRef } from 'vue'
 
 const tableRef = shallowRef(null)
+
+h('table', { ref: tableRef })
+h('table', { ref: 'tableRef' })
+```
+
+:::
+
+::: incorrect
+
+```js
+import { h, shallowRef } from 'vue'
+
 const panel = shallowRef(null)
 
-h('table', { ref: tableRef }) // Valid
-h('table', { ref: 'tableRef' }) // Valid
-h('section', { ref: panel }) // Reported
-h('section', { ref: 'panel' }) // Reported
+h('section', { ref: panel })
+h('section', { ref: 'panel' })
 ```
+
+:::
 
 ## :wrench: Options
 
