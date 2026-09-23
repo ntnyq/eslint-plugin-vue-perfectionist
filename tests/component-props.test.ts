@@ -43,7 +43,11 @@ function resolveRuntimeProps(
 }
 
 describe('component prop contracts with Vue compilation and runtime', () => {
-  it.each(['require-component-props', 'component-prop-types'])(
+  it.each([
+    'require-component-props',
+    'component-prop-types',
+    'component-prop-values',
+  ])(
     'keeps %s documentation examples consistent with rendered diagnostics',
     name => {
       const markdown = readFileSync(
@@ -65,6 +69,18 @@ describe('component prop contracts with Vue compilation and runtime', () => {
             languageOptions: vueLanguageOptions,
             plugins: { 'vue-perfectionist': plugin },
             rules: {
+              'vue-perfectionist/component-prop-values': [
+                'error',
+                {
+                  targets: [
+                    {
+                      components: ['AppStepCounter'],
+                      props: { count: { multipleOf: 10 } },
+                    },
+                  ],
+                  unknownValues: 'report',
+                },
+              ],
               'vue-perfectionist/require-component-props': [
                 'error',
                 { targets: [{ components: ['AppCounter'], props: ['count'] }] },

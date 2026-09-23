@@ -8,6 +8,10 @@ export type ComponentPropNode = AST.Node | TSESTree.Node
 export interface PropValueVariant {
   type: ComponentPropType
   /**
+   * Concrete scalar retained by the value-constraint analyzer when available.
+   */
+  value?: string | number | boolean | null
+  /**
    * Retained for Boolean casting and statically known dynamic names.
    */
   stringValue?: string

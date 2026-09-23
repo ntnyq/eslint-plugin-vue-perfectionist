@@ -86,7 +86,9 @@ independent options; enabling one rule does not require enabling another.
 
 `require-component-props` requires configured props at component usage sites.
 `component-prop-types` checks the types of supplied values that can be inferred
-from template expressions. Both need explicit `targets`; they perform no checks
+from template expressions. [`component-prop-values`](../rules/component-prop-values.md)
+checks configured value constraints such as numeric multiples, ranges, enums, and
+string lengths or patterns. These rules need explicit `targets`; they perform no checks
 by default and can be enabled independently.
 
 Browse the [rules overview](/rules/) for all available rules and their descriptions.
@@ -123,7 +125,8 @@ Run ESLint with `--fix` to apply supported fixes. Fix behavior depends on the ru
 - [`consistent-template-ref-name`](../rules/consistent-template-ref-name.md)
   reports mismatched variable names and keys without fixes or suggestions because
   renaming can affect script references and template associations.
-- [`component-prop-types`](../rules/component-prop-types.md) and
+- [`component-prop-types`](../rules/component-prop-types.md),
+  [`component-prop-values`](../rules/component-prop-values.md), and
   [`require-component-props`](../rules/require-component-props.md) report component
   contract violations without fixes or suggestions, preserving passed values.
 - [`define-macros-newline`](../rules/define-macros-newline.md#automatic-fixes-and-formatting)

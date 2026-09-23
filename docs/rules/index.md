@@ -8,6 +8,7 @@ See the [setup guide](/guide/#basic-usage) for configuration instructions.
 | ----------------------------------------------------------------- | --------------------------------------------------------- |
 | [callback-style](./callback-style.md)                             | Enforce callback styles for Vue APIs.                     |
 | [component-prop-types](./component-prop-types.md)                 | Enforce configured component prop value types.            |
+| [component-prop-values](./component-prop-values.md)               | Enforce configured component prop value constraints.      |
 | [consistent-template-ref-name](./consistent-template-ref-name.md) | Require template ref variable names to match their keys.  |
 | [define-macros-newline](./define-macros-newline.md)               | Require multiline inline Vue macro declarations.          |
 | [prefer-ref-pattern](./prefer-ref-pattern.md)                     | Enforce naming patterns for template refs.                |

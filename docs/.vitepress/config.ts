@@ -48,6 +48,18 @@ export default defineConfig({
               },
               rules: {
                 'vue-perfectionist/callback-style': 'error',
+                'vue-perfectionist/component-prop-values': [
+                  'error',
+                  {
+                    targets: [
+                      {
+                        components: ['AppStepCounter'],
+                        props: { count: { multipleOf: 10 } },
+                      },
+                    ],
+                    unknownValues: 'report',
+                  },
+                ],
                 'vue-perfectionist/component-prop-types': [
                   'error',
                   {

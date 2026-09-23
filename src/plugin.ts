@@ -1,6 +1,7 @@
 import { meta } from './meta.ts'
 import { callbackStyle } from './rules/callback-style.ts'
 import { componentPropTypes } from './rules/component-prop-types.ts'
+import { componentPropValues } from './rules/component-prop-values.ts'
 import { consistentTemplateRefName } from './rules/consistent-template-ref-name.ts'
 import { defineMacrosNewline } from './rules/define-macros-newline.ts'
 import { preferRefPattern } from './rules/prefer-ref-pattern.ts'
@@ -16,6 +17,7 @@ export const plugin: VuePerfectionistPlugin = {
   rules: {
     'callback-style': callbackStyle,
     'component-prop-types': componentPropTypes,
+    'component-prop-values': componentPropValues,
     'consistent-template-ref-name': consistentTemplateRefName,
     'define-macros-newline': defineMacrosNewline,
     'prefer-ref-pattern': preferRefPattern,

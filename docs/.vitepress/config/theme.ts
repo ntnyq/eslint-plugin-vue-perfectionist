@@ -51,6 +51,10 @@ export function getThemeConfig(): DefaultTheme.Config {
           { link: '/rules/callback-style', text: 'callback-style' },
           { link: '/rules/component-prop-types', text: 'component-prop-types' },
           {
+            link: '/rules/component-prop-values',
+            text: 'component-prop-values',
+          },
+          {
             link: '/rules/consistent-template-ref-name',
             text: 'consistent-template-ref-name',
           },

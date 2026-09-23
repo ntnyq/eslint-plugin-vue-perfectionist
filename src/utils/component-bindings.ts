@@ -101,6 +101,7 @@ export function analyzeComponentBindings(
   element: AST.VElement,
   propNames: Iterable<string>,
   sourceCode: SourceCode,
+  inferValue: typeof inferPropValue = inferPropValue,
 ): Map<string, ComponentPropBinding> {
   const bindings = new Map<string, ComponentPropBinding>()
   for (const name of propNames) {
@@ -139,7 +140,7 @@ export function analyzeComponentBindings(
     node: ComponentPropNode,
     container: AST.VExpressionContainer,
   ): PropValue {
-    return inferPropValue(node, identifier => {
+    return inferValue(node, identifier => {
       const reference = container.references.find(
         item => item.id === identifier,
       )

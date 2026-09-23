@@ -12,6 +12,7 @@ describe('plugin contract', () => {
     expect(Object.keys(plugin.rules ?? {})).toEqual([
       'callback-style',
       'component-prop-types',
+      'component-prop-values',
       'consistent-template-ref-name',
       'define-macros-newline',
       'prefer-ref-pattern',
