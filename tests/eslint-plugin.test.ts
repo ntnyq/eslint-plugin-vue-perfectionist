@@ -11,10 +11,53 @@ describe('plugin contract', () => {
     expect(plugin).not.toHaveProperty('configs')
     expect(Object.keys(plugin.rules ?? {})).toEqual([
       'callback-style',
+      'consistent-template-ref-name',
       'define-macros-newline',
       'prefer-ref-pattern',
       'sort-script-setup',
     ])
+  })
+
+  it.each([
+    {
+      description: 'only checks consistency when enabled alone',
+      code: 'const input = useTemplateRef("input")',
+      pattern: false,
+      messageIds: [],
+    },
+    {
+      description: 'keeps the pattern rule independent',
+      code: 'const inputRef = useTemplateRef("fieldRef")',
+      pattern: true,
+      messageIds: ['inconsistentTemplateRefName'],
+    },
+    {
+      description: 'reports both conventions when both fail',
+      code: 'const inputRef = useTemplateRef("field")',
+      pattern: true,
+      messageIds: ['inconsistentTemplateRefName', 'unexpectedRefPattern'],
+    },
+  ])('$description', ({ code, pattern, messageIds }) => {
+    const linter = new Linter()
+    const configuration: Linter.Config = {
+      files: ['**/*.vue'],
+      languageOptions: vueLanguageOptions,
+      plugins: { 'vue-perfectionist': plugin },
+      rules: {
+        'vue-perfectionist/consistent-template-ref-name': 'error',
+        'vue-perfectionist/prefer-ref-pattern': pattern ? 'error' : 'off',
+      },
+    }
+    const source = `<script setup>import { useTemplateRef } from 'vue'; ${code}</script>`
+    const result = linter.verifyAndFix(source, configuration, 'Test.vue')
+    expect(result.messages.map(message => message.messageId)).toEqual(
+      messageIds,
+    )
+    expect(result.fixed).toBe(false)
+    expect(result.output).toBe(source)
+    expect(
+      linter.verifyAndFix(result.output, configuration, 'Test.vue'),
+    ).toEqual(result)
   })
 
   it.each<{

@@ -50,6 +50,7 @@ export default [
     },
     rules: {
       'vue-perfectionist/callback-style': 'error',
+      'vue-perfectionist/consistent-template-ref-name': 'error',
       'vue-perfectionist/define-macros-newline': 'error',
       'vue-perfectionist/prefer-ref-pattern': 'error',
       'vue-perfectionist/sort-script-setup': 'error',
@@ -65,12 +66,13 @@ See the [setup guide](https://vue-perfectionist.vercel.app/guide/) for more conf
 
 ## Rules
 
-| Rule                                                                                      | Description                                               |
-| ----------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| [callback-style](https://vue-perfectionist.vercel.app/rules/callback-style)               | Enforce callback styles for Vue APIs.                     |
-| [define-macros-newline](https://vue-perfectionist.vercel.app/rules/define-macros-newline) | Require multiline inline Vue macro declarations.          |
-| [prefer-ref-pattern](https://vue-perfectionist.vercel.app/rules/prefer-ref-pattern)       | Enforce naming patterns for template refs.                |
-| [sort-script-setup](https://vue-perfectionist.vercel.app/rules/sort-script-setup)         | Group and order top-level statements in `<script setup>`. |
+| Rule                                                                                                    | Description                                               |
+| ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| [callback-style](https://vue-perfectionist.vercel.app/rules/callback-style)                             | Enforce callback styles for Vue APIs.                     |
+| [consistent-template-ref-name](https://vue-perfectionist.vercel.app/rules/consistent-template-ref-name) | Require template ref variable names to match their keys.  |
+| [define-macros-newline](https://vue-perfectionist.vercel.app/rules/define-macros-newline)               | Require multiline inline Vue macro declarations.          |
+| [prefer-ref-pattern](https://vue-perfectionist.vercel.app/rules/prefer-ref-pattern)                     | Enforce naming patterns for template refs.                |
+| [sort-script-setup](https://vue-perfectionist.vercel.app/rules/sort-script-setup)                       | Group and order top-level statements in `<script setup>`. |
 
 ## Credits
 

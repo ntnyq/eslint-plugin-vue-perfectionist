@@ -60,6 +60,7 @@ export default defineConfig([
     },
     rules: {
       'vue-perfectionist/callback-style': 'error',
+      'vue-perfectionist/consistent-template-ref-name': 'error',
       'vue-perfectionist/define-macros-newline': 'error',
       'vue-perfectionist/prefer-ref-pattern': 'error',
       'vue-perfectionist/sort-script-setup': 'error',
@@ -72,10 +73,10 @@ For JavaScript-only SFCs, omit the TypeScript parser import and
 `parserOptions.parser`. If an existing Vue configuration already supplies the
 parsers, add the plugin and your chosen rules to that configuration.
 
-To check standalone JavaScript and TypeScript files, enable `callback-style`
-and the script targets of `prefer-ref-pattern` in configurations matching those
-files, using their usual ESLint parsers. The example above matches `.vue` files
-only.
+To check standalone JavaScript and TypeScript files, enable `callback-style`,
+`consistent-template-ref-name`, and the script targets of `prefer-ref-pattern`
+in configurations matching those files, using their usual ESLint parsers.
+The example above matches `.vue` files only.
 
 ## Choosing Rules
 
@@ -84,6 +85,11 @@ Enable and combine rules explicitly in your own configuration. Each rule has
 independent options; enabling one rule does not require enabling another.
 
 Browse the [rules overview](/rules/) for all available rules and their descriptions.
+
+Use [`consistent-template-ref-name`](../rules/consistent-template-ref-name.md)
+to require `useTemplateRef()` variables and keys to match. Combine it with
+[`prefer-ref-pattern`](../rules/prefer-ref-pattern.md) when names must also
+follow a naming pattern. Neither rule requires the other.
 
 ### Configuring Statement Ordering
 
@@ -109,6 +115,9 @@ Run ESLint with `--fix` to apply supported fixes. Fix behavior depends on the ru
 - [`callback-style`](../rules/callback-style.md#diagnostics-and-fixes) can convert
   arrow expression bodies to block bodies while preserving their return values.
   Callback references and ordinary function expressions are reported without fixes.
+- [`consistent-template-ref-name`](../rules/consistent-template-ref-name.md)
+  reports mismatched variable names and keys without fixes or suggestions because
+  renaming can affect script references and template associations.
 - [`define-macros-newline`](../rules/define-macros-newline.md#automatic-fixes-and-formatting)
   inserts line breaks while preserving member order. Run your formatter afterward
   to finish indentation.

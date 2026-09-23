@@ -65,8 +65,11 @@ const count = ref(0)
 
 `element` is allowed: the `useTemplateRef` target checks its key, and does not
 require the variable name to equal that key. `count` is ordinary state, so its
-name is not checked. If `element` is explicitly used in `:ref="element"` or
-`h('div', { ref: element })`, its name is checked at that usage site.
+name is not checked. Enable
+[`consistent-template-ref-name`](./consistent-template-ref-name.md) separately
+to require the variable name and key to match. If `element` is explicitly used
+in `:ref="element"` or `h('div', { ref: element })`, its name is checked at that
+usage site.
 
 ::: incorrect
 

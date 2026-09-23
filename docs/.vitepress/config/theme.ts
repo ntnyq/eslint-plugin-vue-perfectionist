@@ -50,6 +50,10 @@ export function getThemeConfig(): DefaultTheme.Config {
           { link: '/rules/', text: 'Overview' },
           { link: '/rules/callback-style', text: 'callback-style' },
           {
+            link: '/rules/consistent-template-ref-name',
+            text: 'consistent-template-ref-name',
+          },
+          {
             link: '/rules/define-macros-newline',
             text: 'define-macros-newline',
           },
