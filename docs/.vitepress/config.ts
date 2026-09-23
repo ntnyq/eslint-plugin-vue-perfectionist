@@ -10,6 +10,50 @@ import pluginVuePerfectionist from '../../src/index.ts'
 import { head } from './config/head.ts'
 import { getThemeConfig } from './config/theme.ts'
 import { appDescription, appTitle } from './meta.ts'
+import type { Linter } from 'eslint'
+
+const exampleRules = {
+  'vue-perfectionist/callback-style': 'error',
+  'vue-perfectionist/component-prop-values': [
+    'error',
+    {
+      targets: [
+        {
+          components: ['AppStepCounter'],
+          props: { count: { multipleOf: 10 } },
+        },
+      ],
+      unknownValues: 'report',
+    },
+  ],
+  'vue-perfectionist/component-prop-types': [
+    'error',
+    {
+      targets: [
+        {
+          components: ['AppStepper'],
+          props: { count: 'number' },
+        },
+        {
+          components: ['AppButton'],
+          props: {
+            disabled: { type: 'boolean', booleanCasting: true },
+          },
+        },
+      ],
+    },
+  ],
+  'vue-perfectionist/consistent-template-ref-name': 'error',
+  'vue-perfectionist/define-macros-newline': 'error',
+  'vue-perfectionist/prefer-ref-pattern': 'error',
+  'vue-perfectionist/require-component-props': [
+    'error',
+    {
+      targets: [{ components: ['AppCounter'], props: ['count'] }],
+    },
+  ],
+  'vue-perfectionist/sort-script-setup': 'error',
+} satisfies Record<string, Linter.RuleEntry>
 
 export default defineConfig({
   cleanUrls: true,
@@ -27,74 +71,40 @@ export default defineConfig({
       transformerTwoslash({
         explicitTrigger: /\btwoslash\b/,
       }),
-      transformerTwoslash({
-        errorRendering: 'hover',
-        explicitTrigger: /\beslint-check\b/,
-        langs: ['vue'],
-        twoslasher: createTwoslasher({
-          eslintConfig: [
-            {
-              files: ['**/*.vue'],
-              languageOptions: {
-                parser: parserVue,
-                parserOptions: {
+      ...Object.entries(exampleRules).map(([ruleName, ruleConfig]) =>
+        transformerTwoslash({
+          errorRendering: 'hover',
+          explicitTrigger: new RegExp(`\\beslint-check=${ruleName}(?=\\s|$)`),
+          langs: ['vue', 'js', 'ts'],
+          twoslasher: createTwoslasher({
+            eslintConfig: [
+              {
+                files: ['**/*.{vue,js,ts}'],
+                languageOptions: {
                   parser: parserTypeScript,
                   ecmaVersion: 'latest',
                   sourceType: 'module',
                 },
+                plugins: {
+                  'vue-perfectionist': pluginVuePerfectionist,
+                },
+                rules: { [ruleName]: ruleConfig },
               },
-              plugins: {
-                'vue-perfectionist': pluginVuePerfectionist,
+              {
+                files: ['**/*.vue'],
+                languageOptions: {
+                  parser: parserVue,
+                  parserOptions: { parser: parserTypeScript },
+                },
               },
-              rules: {
-                'vue-perfectionist/callback-style': 'error',
-                'vue-perfectionist/component-prop-values': [
-                  'error',
-                  {
-                    targets: [
-                      {
-                        components: ['AppStepCounter'],
-                        props: { count: { multipleOf: 10 } },
-                      },
-                    ],
-                    unknownValues: 'report',
-                  },
-                ],
-                'vue-perfectionist/component-prop-types': [
-                  'error',
-                  {
-                    targets: [
-                      {
-                        components: ['AppStepper'],
-                        props: { count: 'number' },
-                      },
-                      {
-                        components: ['AppButton'],
-                        props: {
-                          disabled: { type: 'boolean', booleanCasting: true },
-                        },
-                      },
-                    ],
-                  },
-                ],
-                'vue-perfectionist/define-macros-newline': 'error',
-                'vue-perfectionist/prefer-ref-pattern': 'error',
-                'vue-perfectionist/require-component-props': [
-                  'error',
-                  {
-                    targets: [{ components: ['AppCounter'], props: ['count'] }],
-                  },
-                ],
-                'vue-perfectionist/sort-script-setup': 'error',
-              },
+            ],
+            eslintCodePreprocess(code) {
+              // Remove presentational newline markers before parsing the SFC.
+              return code.replace(/⏎(?=\r?\n)/gu, '').replace(/⏎$/gu, '\n')
             },
-          ],
-          eslintCodePreprocess(code) {
-            // Remove presentational newline markers before parsing the SFC.
-            return code.replace(/⏎(?=\r?\n)/gu, '').replace(/⏎$/gu, '\n')
-          },
+          }),
         }),
-      }),
+      ),
     ],
     config(md) {
       md.use(groupIconMdPlugin)
@@ -104,17 +114,27 @@ export default defineConfig({
       for (const type of ['correct', 'incorrect']) {
         // VitePress and the container plugin resolve different markdown-it types.
         MarkdownItContainer(md as unknown as MarkdownIt, type, {
-          render(tokens, index) {
+          render(
+            tokens,
+            index,
+            _options,
+            env: { frontmatter?: { title?: string } },
+          ) {
             if (tokens[index]?.nesting !== 1) {
               return '</CustomWrapper>\n'
             }
 
+            // Each page checks only its own rule, so unrelated rules cannot
+            // turn a correct example into an error.
+            const ruleName = env.frontmatter?.title
             const next = tokens[index + 1]
             if (
+              ruleName &&
+              Object.hasOwn(exampleRules, ruleName) &&
               next?.type === 'fence' &&
               !/\beslint-check\b/u.test(next.info)
             ) {
-              next.info = `${next.info} eslint-check`
+              next.info = `${next.info} eslint-check=${ruleName}`
             }
 
             return `<CustomWrapper type="${type}">`

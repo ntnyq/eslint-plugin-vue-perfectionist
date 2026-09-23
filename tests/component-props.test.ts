@@ -43,20 +43,22 @@ function resolveRuntimeProps(
 }
 
 describe('component prop contracts with Vue compilation and runtime', () => {
-  it.each([
-    'require-component-props',
-    'component-prop-types',
-    'component-prop-values',
-  ])(
-    'keeps %s documentation examples consistent with rendered diagnostics',
-    name => {
+  it.each(
+    [
+      'require-component-props',
+      'component-prop-types',
+      'component-prop-values',
+    ].flatMap(name => ['LF', 'CRLF'].map(lineEnding => ({ name, lineEnding }))),
+  )(
+    'keeps $name documentation examples consistent with rendered diagnostics ($lineEnding)',
+    ({ name, lineEnding }) => {
       const markdown = readFileSync(
         new URL(`../docs/rules/${name}.md`, import.meta.url),
         'utf8',
-      )
+      ).replace(/\r?\n/gu, () => (lineEnding === 'LF' ? '\n' : '\r\n'))
       const examples = [
         ...markdown.matchAll(
-          /::: (correct|incorrect)\s+```vue\n([\s\S]*?)\n```\s+:::/gu,
+          /::: (correct|incorrect)\s+```vue\r?\n([\s\S]*?)\r?\n```\s+:::/gu,
         ),
       ]
       expect(examples.length).toBeGreaterThan(0)

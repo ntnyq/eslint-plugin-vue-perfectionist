@@ -2,7 +2,7 @@
   "name": "eslint-plugin-vue-perfectionist",
   "type": "module",
   "version": "0.2.0",
-  "packageManager": "pnpm@12.4.2",
+  "packageManager": "pnpm@12.5.1",
   "description": "ESLint rules for consistent, readable, and maintainable Vue 3 code.",
   "keywords": [
     "composition-api",
@@ -65,15 +65,15 @@
     "vue-eslint-parser": "^10.0.0"
   },
   "dependencies": {
-    "@ntnyq/utils": "^0.22.0",
-    "@typescript-eslint/utils": "^8.70.0",
+    "@ntnyq/utils": "^0.23.0",
+    "@typescript-eslint/utils": "^8.70.1",
     "natural-orderby": "^5.0.0"
   },
   "devDependencies": {
-    "@ntnyq/eslint-config": "^7.0.0-beta.20",
+    "@ntnyq/eslint-config": "^7.0.0-beta.21",
     "@ntnyq/tsconfig": "^3.1.0",
     "@types/node": "^26.6.2",
-    "@typescript-eslint/parser": "^8.70.0",
+    "@typescript-eslint/parser": "^8.70.1",
     "bumpp": "^12.3.0",
     "eslint": "^10.11.0",
     "eslint-plugin-eslint-plugin": "^7.6.2",
@@ -82,7 +82,7 @@
     "husky": "^9.1.7",
     "nano-staged": "^1.0.2",
     "npm-run-all2": "^9.0.3",
-    "oxfmt": "^0.68.0",
+    "oxfmt": "^0.70.0",
     "tsdown": "^0.23.0",
     "typescript": "^6.0.3",
     "vitest": "^5.0.1",
