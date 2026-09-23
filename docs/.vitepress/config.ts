@@ -67,6 +67,12 @@ export default defineConfig({
                 ],
                 'vue-perfectionist/define-macros-newline': 'error',
                 'vue-perfectionist/prefer-ref-pattern': 'error',
+                'vue-perfectionist/require-component-props': [
+                  'error',
+                  {
+                    targets: [{ components: ['AppCounter'], props: ['count'] }],
+                  },
+                ],
                 'vue-perfectionist/sort-script-setup': 'error',
               },
             },

@@ -43,7 +43,7 @@ function resolveRuntimeProps(
 }
 
 describe('component prop contracts with Vue compilation and runtime', () => {
-  it.each(['component-prop-types'])(
+  it.each(['require-component-props', 'component-prop-types'])(
     'keeps %s documentation examples consistent with rendered diagnostics',
     name => {
       const markdown = readFileSync(
@@ -65,6 +65,10 @@ describe('component prop contracts with Vue compilation and runtime', () => {
             languageOptions: vueLanguageOptions,
             plugins: { 'vue-perfectionist': plugin },
             rules: {
+              'vue-perfectionist/require-component-props': [
+                'error',
+                { targets: [{ components: ['AppCounter'], props: ['count'] }] },
+              ],
               'vue-perfectionist/component-prop-types': [
                 'error',
                 {
@@ -120,5 +124,51 @@ describe('component prop contracts with Vue compilation and runtime', () => {
     expect(
       resolveRuntimeProps('<AppCounter is-ready="is-ready" />').isReady,
     ).toBe(true)
+  })
+
+  it('combines both rules under the public namespace without fixes', () => {
+    const linter = new Linter()
+    const config: Linter.Config = {
+      files: ['**/*.vue'],
+      languageOptions: vueLanguageOptions,
+      plugins: { 'vue-perfectionist': plugin },
+      rules: {
+        'vue-perfectionist/require-component-props': [
+          'error',
+          {
+            targets: [
+              { components: ['AppCounter'], props: ['count', 'label'] },
+            ],
+          },
+        ],
+        'vue-perfectionist/component-prop-types': [
+          'error',
+          {
+            targets: [
+              {
+                components: ['AppCounter'],
+                props: { count: 'number', label: 'string' },
+              },
+            ],
+          },
+        ],
+      },
+    }
+    const code = '<template><AppCounter count="20" /></template>'
+    const result = linter.verifyAndFix(code, config, 'Test.vue')
+    expect(
+      result.messages.map(message => [message.ruleId, message.messageId]),
+    ).toEqual([
+      ['vue-perfectionist/require-component-props', 'missingProp'],
+      ['vue-perfectionist/component-prop-types', 'invalidPropType'],
+    ])
+    expect(result.fixed).toBe(false)
+    expect(result.output).toBe(code)
+    expect(
+      result.messages.every(message => !message.fix && !message.suggestions),
+    ).toBe(true)
+    expect(linter.verifyAndFix(result.output, config, 'Test.vue')).toEqual(
+      result,
+    )
   })
 })

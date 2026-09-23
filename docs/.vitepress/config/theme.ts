@@ -59,6 +59,10 @@ export function getThemeConfig(): DefaultTheme.Config {
             text: 'define-macros-newline',
           },
           { link: '/rules/prefer-ref-pattern', text: 'prefer-ref-pattern' },
+          {
+            link: '/rules/require-component-props',
+            text: 'require-component-props',
+          },
           { link: '/rules/sort-script-setup', text: 'sort-script-setup' },
         ],
       },

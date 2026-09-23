@@ -84,9 +84,10 @@ The plugin provides rules only and does not include built-in configurations.
 Enable and combine rules explicitly in your own configuration. Each rule has
 independent options; enabling one rule does not require enabling another.
 
+`require-component-props` requires configured props at component usage sites.
 `component-prop-types` checks the types of supplied values that can be inferred
-from template expressions. It needs explicit `targets` and performs no checks
-by default.
+from template expressions. Both need explicit `targets`; they perform no checks
+by default and can be enabled independently.
 
 Browse the [rules overview](/rules/) for all available rules and their descriptions.
 
@@ -122,7 +123,8 @@ Run ESLint with `--fix` to apply supported fixes. Fix behavior depends on the ru
 - [`consistent-template-ref-name`](../rules/consistent-template-ref-name.md)
   reports mismatched variable names and keys without fixes or suggestions because
   renaming can affect script references and template associations.
-- [`component-prop-types`](../rules/component-prop-types.md) reports component
+- [`component-prop-types`](../rules/component-prop-types.md) and
+  [`require-component-props`](../rules/require-component-props.md) report component
   contract violations without fixes or suggestions, preserving passed values.
 - [`define-macros-newline`](../rules/define-macros-newline.md#automatic-fixes-and-formatting)
   inserts line breaks while preserving member order. Run your formatter afterward

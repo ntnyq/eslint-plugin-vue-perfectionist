@@ -17,6 +17,8 @@ export type {
   GroupEntry,
   PreferRefPatternOptions,
   RefPatternTarget,
+  RequireComponentPropsOptions,
+  RequireComponentPropsTarget,
   SortScriptSetupOptions,
   VuePerfectionistPlugin,
 } from './types/index.ts'

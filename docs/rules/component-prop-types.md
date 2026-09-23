@@ -66,7 +66,7 @@ These examples configure `count: 'number'` on `AppStepper`. Static attribute val
 
 :::
 
-Missing props are not type errors. Unknown expressions are ignored by default, which means no type conclusion was reached, not that the value passed validation.
+Missing props are not type errors. Use [require-component-props](./require-component-props.md) to require presence. Unknown expressions are ignored by default, which means no type conclusion was reached, not that the value passed validation.
 
 ### Effective values and binding order
 
@@ -192,11 +192,11 @@ Without `booleanCasting`, bare attributes are empty strings. The order in `type:
 
 Type: `'ignore' | 'report'`. Default: `'ignore'`.
 
-`report` emits `unverifiablePropType` for a definitely supplied prop whose type cannot be established. Presence that is itself unknown, such as a sole `v-bind="extra"`, is not checked. Known bad branches still produce diagnostics even if another branch is unknown and this option is `ignore`.
+`report` emits `unverifiablePropType` for a definitely supplied prop whose type cannot be established. Presence that is itself unknown, such as a sole `v-bind="extra"`, is left to `require-component-props`. Known bad branches still produce diagnostics even if another branch is unknown and this option is `ignore`.
 
 ## Scope
 
-Component names match PascalCase and kebab-case; prop names match camelCase and kebab-case. Native tags and `v-pre` subtrees are skipped. Static dynamic components and named bindings are supported. Reserved attributes cannot be configured as props. This rule checks SFC templates, not script declarations or render functions.
+Component matching, prop normalization, native-tag exclusions, `v-pre`, static dynamic components, directive support, and reserved prop restrictions are shared with [require-component-props](./require-component-props.md#scope). This rule checks SFC templates, not script declarations or render functions.
 
 | Expression shape                                   | Inferred category                                                   |
 | -------------------------------------------------- | ------------------------------------------------------------------- |

@@ -73,6 +73,7 @@ See the [setup guide](https://vue-perfectionist.vercel.app/guide/) for more conf
 | [consistent-template-ref-name](https://vue-perfectionist.vercel.app/rules/consistent-template-ref-name) | Require template ref variable names to match their keys.  |
 | [define-macros-newline](https://vue-perfectionist.vercel.app/rules/define-macros-newline)               | Require multiline inline Vue macro declarations.          |
 | [prefer-ref-pattern](https://vue-perfectionist.vercel.app/rules/prefer-ref-pattern)                     | Enforce naming patterns for template refs.                |
+| [require-component-props](https://vue-perfectionist.vercel.app/rules/require-component-props)           | Require configured props at component usage sites.        |
 | [sort-script-setup](https://vue-perfectionist.vercel.app/rules/sort-script-setup)                       | Group and order top-level statements in `<script setup>`. |
 
 ## Credits

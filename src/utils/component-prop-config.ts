@@ -1,6 +1,7 @@
 import type {
   ComponentPropType,
   ComponentPropTypesTarget,
+  RequireComponentPropsTarget,
 } from '../types/index.ts'
 
 export interface CompiledPropConstraint {
@@ -41,6 +42,26 @@ export function validatePropName(name: string): string {
     throw new Error(`Unsupported component prop contract: "${name}".`)
   }
   return normalized
+}
+
+export function compileRequiredProps(
+  targets: RequireComponentPropsTarget[],
+): Map<string, Map<string, string>> {
+  const result = new Map<string, Map<string, string>>()
+  for (const target of targets) {
+    for (const component of target.components) {
+      const key = hyphenateName(component)
+      const props = result.get(key) ?? new Map<string, string>()
+      for (const name of target.props) {
+        const normalized = validatePropName(name)
+        if (!props.has(normalized)) {
+          props.set(normalized, name)
+        }
+      }
+      result.set(key, props)
+    }
+  }
+  return result
 }
 
 export function compilePropTypes(
