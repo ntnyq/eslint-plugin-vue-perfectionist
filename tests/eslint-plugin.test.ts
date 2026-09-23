@@ -11,6 +11,7 @@ describe('plugin contract', () => {
     expect(plugin).not.toHaveProperty('configs')
     expect(Object.keys(plugin.rules ?? {})).toEqual([
       'callback-style',
+      'component-prop-types',
       'consistent-template-ref-name',
       'define-macros-newline',
       'prefer-ref-pattern',

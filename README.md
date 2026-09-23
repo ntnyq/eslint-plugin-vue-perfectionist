@@ -7,8 +7,8 @@
 
 ESLint rules for consistent, readable, and maintainable Vue 3 code.
 
-Configure callback styles, macro declaration layout, template ref naming, and
-statement ordering. Depending on the rule, checks apply to Vue SFC templates,
+Configure callback styles, macro declaration layout, template ref naming, component prop
+contracts, and statement ordering. Depending on the rule, checks apply to Vue SFC templates,
 script blocks, or standalone JavaScript and TypeScript files.
 
 > [!WARNING]
@@ -69,6 +69,7 @@ See the [setup guide](https://vue-perfectionist.vercel.app/guide/) for more conf
 | Rule                                                                                                    | Description                                               |
 | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
 | [callback-style](https://vue-perfectionist.vercel.app/rules/callback-style)                             | Enforce callback styles for Vue APIs.                     |
+| [component-prop-types](https://vue-perfectionist.vercel.app/rules/component-prop-types)                 | Enforce configured component prop value types.            |
 | [consistent-template-ref-name](https://vue-perfectionist.vercel.app/rules/consistent-template-ref-name) | Require template ref variable names to match their keys.  |
 | [define-macros-newline](https://vue-perfectionist.vercel.app/rules/define-macros-newline)               | Require multiline inline Vue macro declarations.          |
 | [prefer-ref-pattern](https://vue-perfectionist.vercel.app/rules/prefer-ref-pattern)                     | Enforce naming patterns for template refs.                |

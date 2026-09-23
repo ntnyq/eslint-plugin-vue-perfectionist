@@ -48,6 +48,23 @@ export default defineConfig({
               },
               rules: {
                 'vue-perfectionist/callback-style': 'error',
+                'vue-perfectionist/component-prop-types': [
+                  'error',
+                  {
+                    targets: [
+                      {
+                        components: ['AppStepper'],
+                        props: { count: 'number' },
+                      },
+                      {
+                        components: ['AppButton'],
+                        props: {
+                          disabled: { type: 'boolean', booleanCasting: true },
+                        },
+                      },
+                    ],
+                  },
+                ],
                 'vue-perfectionist/define-macros-newline': 'error',
                 'vue-perfectionist/prefer-ref-pattern': 'error',
                 'vue-perfectionist/sort-script-setup': 'error',

@@ -2,7 +2,7 @@
 
 `eslint-plugin-vue-perfectionist` provides configurable ESLint rules for
 consistent, readable, and maintainable Vue 3 code. Rules cover callback styles,
-macro declaration layout, template ref naming, and statement ordering.
+macro declaration layout, template ref naming, component prop contracts, and statement ordering.
 
 Each rule has its own scope. Some check `<script setup>`, while others also
 check templates, ordinary script blocks, or standalone JavaScript and TypeScript
@@ -84,6 +84,10 @@ The plugin provides rules only and does not include built-in configurations.
 Enable and combine rules explicitly in your own configuration. Each rule has
 independent options; enabling one rule does not require enabling another.
 
+`component-prop-types` checks the types of supplied values that can be inferred
+from template expressions. It needs explicit `targets` and performs no checks
+by default.
+
 Browse the [rules overview](/rules/) for all available rules and their descriptions.
 
 Use [`consistent-template-ref-name`](../rules/consistent-template-ref-name.md)
@@ -118,6 +122,8 @@ Run ESLint with `--fix` to apply supported fixes. Fix behavior depends on the ru
 - [`consistent-template-ref-name`](../rules/consistent-template-ref-name.md)
   reports mismatched variable names and keys without fixes or suggestions because
   renaming can affect script references and template associations.
+- [`component-prop-types`](../rules/component-prop-types.md) reports component
+  contract violations without fixes or suggestions, preserving passed values.
 - [`define-macros-newline`](../rules/define-macros-newline.md#automatic-fixes-and-formatting)
   inserts line breaks while preserving member order. Run your formatter afterward
   to finish indentation.

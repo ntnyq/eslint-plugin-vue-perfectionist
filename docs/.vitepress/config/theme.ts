@@ -49,6 +49,7 @@ export function getThemeConfig(): DefaultTheme.Config {
         items: [
           { link: '/rules/', text: 'Overview' },
           { link: '/rules/callback-style', text: 'callback-style' },
+          { link: '/rules/component-prop-types', text: 'component-prop-types' },
           {
             link: '/rules/consistent-template-ref-name',
             text: 'consistent-template-ref-name',
