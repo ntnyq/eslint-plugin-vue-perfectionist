@@ -54,6 +54,29 @@ await run<CallbackStyleOptions, CallbackStyleMessageId>({
     }
   },
   valid: [
+    ...[false, true].map(autoImport => ({
+      description: `explicit empty globals override autoImport: ${autoImport}`,
+      code: 'onMounted(handler)',
+      settings: { 'vue-perfectionist': { autoImport } },
+      options: { vueGlobals: [] },
+    })),
+    ...[
+      'function onMounted() {}; onMounted(handler)',
+      'function run(onMounted) { onMounted(handler) }',
+      'import { onMounted } from "other"; onMounted(handler)',
+      'import type { onMounted } from "vue"; onMounted(handler)',
+    ].map(code => ({
+      description: `preserves callback identity with auto-imports: ${code}`,
+      code,
+      settings: { 'vue-perfectionist': { autoImport: true } },
+    })),
+    {
+      description:
+        'keeps auto-import recognition opt-in even for ESLint globals',
+      code: 'onMounted(handler)',
+      languageOptions: { globals: { onMounted: 'readonly' } },
+      settings: { 'vue-perfectionist': { autoImport: false } },
+    },
     ...[
       'onMounted(() => { fetchData(); updateTitle() })',
       'onMounted(async () => { await fetchData() })',
@@ -148,6 +171,40 @@ await run<CallbackStyleOptions, CallbackStyleMessageId>({
     },
   ],
   invalid: [
+    ...[false, true].map(withGlobals => ({
+      description: `checks auto-imported callbacks, globals: ${withGlobals}`,
+      code: 'onMounted(handler); watch(source, handler)',
+      settings: { 'vue-perfectionist': { autoImport: true } },
+      languageOptions: withGlobals
+        ? {
+            globals: {
+              onMounted: 'readonly' as const,
+              watch: 'readonly' as const,
+            },
+          }
+        : {},
+      errors: [
+        'expectedInlineCallback' as const,
+        'expectedInlineCallback' as const,
+      ],
+      output: null,
+    })),
+    {
+      description:
+        'fixes auto-imported callback bodies using existing boundaries',
+      code: 'onMounted(() => update())',
+      settings: { 'vue-perfectionist': { autoImport: true } },
+      errors: ['expectedBlockBody'],
+      output: 'onMounted(() => { return (update()) })',
+    },
+    {
+      description: 'explicit globals remain enabled with autoImport disabled',
+      code: 'onMounted(handler)',
+      settings: { 'vue-perfectionist': { autoImport: false } },
+      options: { vueGlobals: ['onMounted'] },
+      errors: ['expectedInlineCallback'],
+      output: null,
+    },
     ...[
       'onBeforeMount',
       'onMounted',

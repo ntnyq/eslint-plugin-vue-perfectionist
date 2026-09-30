@@ -24,6 +24,29 @@ await run<SortScriptSetupOptions, MessageId>({
   },
   valid: [
     {
+      description: 'keeps auto-import recognition opt-in',
+      code: setup('const z = computed(() => 1)\nconst a = ref(0)'),
+      settings: { 'vue-perfectionist': { autoImport: false } },
+    },
+    {
+      description: 'explicit empty globals override shared auto-imports',
+      code: setup('const z = computed(() => 1)\nconst a = ref(0)'),
+      options: { vueGlobals: [] },
+      settings: { 'vue-perfectionist': { autoImport: true } },
+    },
+    {
+      description: 'does not override local bindings with auto-imports',
+      code: setup('const z = 1\nconst ref = () => 0\nconst a = ref()'),
+      options: { groups: ['constant', 'function', 'variable', 'ref'] },
+      settings: { 'vue-perfectionist': { autoImport: true } },
+    },
+    {
+      description: 'preserves eager callback dependencies with auto-imports',
+      code: setup('const state = ref(0)\nwatchEffect(() => state.value)'),
+      options: { groups: ['watch', 'ref'] },
+      settings: { 'vue-perfectionist': { autoImport: true } },
+    },
+    {
       description: 'preserves intra-group order by default',
       code: setup('const z = 1\nconst a = 2'),
     },
@@ -645,6 +668,26 @@ await run<SortScriptSetupOptions, MessageId>({
     },
   ],
   invalid: [
+    ...[false, true].map(withGlobals => ({
+      description: `classifies auto-imports without unsafe fixes, globals: ${withGlobals}`,
+      code: setup('const z = computed(() => 1)\nconst a = ref(0)'),
+      settings: { 'vue-perfectionist': { autoImport: true } },
+      languageOptions: withGlobals
+        ? {
+            globals: {
+              computed: 'readonly' as const,
+              ref: 'readonly' as const,
+            },
+          }
+        : {},
+      errors: [
+        {
+          messageId: 'unsafeReorder' as const,
+          data: { name: 'a', before: 'z', group: 'ref / reactive' },
+        },
+      ],
+      output: null,
+    })),
     {
       description: 'enforces grouping with unsorted',
       code: setup('function run() {}\ninterface Props {}'),

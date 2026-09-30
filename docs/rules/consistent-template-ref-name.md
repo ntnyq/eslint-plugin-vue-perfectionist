@@ -96,8 +96,11 @@ This rule has no options.
   arguments, destructuring, assignments after declaration, and calls nested in
   other expressions or custom wrappers. Optional chains are skipped.
 - Skips local functions, shadowed bindings, default imports, type-only imports,
-  imports from other modules, aliases assigned to variables, and unimported
-  auto-import globals.
+  imports from other modules, and aliases assigned to variables.
+- Unimported `useTemplateRef()` is recognized only when
+  `settings['vue-perfectionist'].autoImport` is `true`; see the
+  [auto-import setup](../guide/index.md#auto-imported-vue-apis). The setting
+  defaults to `false` and does not override local bindings.
 - Does not inspect template attributes, ordinary `ref()` / `shallowRef()` state,
   or relationships between a key and a template element.
 

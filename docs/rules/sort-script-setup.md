@@ -245,10 +245,14 @@ For a standalone custom group, its sorting overrides win over its `groups` objec
 
 ## Configuration
 
-Configure all preferences directly in the rule options. Explicit options override
-the rule defaults; shared ESLint settings are not supported.
-`settings.perfectionist` and `settings['vue-perfectionist']` are ignored,
-including invalid or unknown values within those namespaces.
+Configure sorting preferences directly in the rule options. Explicit options
+override the rule defaults; sorting preferences in shared settings are ignored.
+
+For auto-imported Vue APIs, enable `settings['vue-perfectionist'].autoImport: true`
+(see the [shared setup](../guide/index.md#auto-imported-vue-apis)). It recognizes
+unbound names from this rule's built-in Vue API table, including ESLint globals,
+without overriding local bindings or changing fix safety. An explicit `vueGlobals`
+list replaces this selection; `vueGlobals: []` disables it for this rule.
 
 Arrays and `fallbackSort` replace their default values. Group overrides merge
 fallback fields; an unspecified fallback order inherits the group's order.

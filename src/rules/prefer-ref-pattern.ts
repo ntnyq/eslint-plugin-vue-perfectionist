@@ -8,6 +8,7 @@ import {
   isVueRefVariable,
   unwrapRefExpression,
 } from '../utils/ref-pattern.ts'
+import { resolveVueGlobals } from '../utils/vue-globals.ts'
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
 import type { AST } from 'vue-eslint-parser'
 import type {
@@ -81,6 +82,12 @@ export const preferRefPattern = createRule<
       options.targets ?? ['template', 'useTemplateRef', 'render'],
     )
     const sourceCode = context.sourceCode
+    const vueGlobals = resolveVueGlobals(context.settings, [
+      'ref',
+      'shallowRef',
+      'useTemplateRef',
+      'h',
+    ])
     const setupRange = getSetupRange(sourceCode)
 
     function checkName(name: string, node: AST.Node | TSESTree.Node) {
@@ -117,6 +124,7 @@ export const preferRefPattern = createRule<
             variable,
             sourceCode,
             isSetupBinding ? setupRange : undefined,
+            vueGlobals,
           )
         ) {
           checkName(expression.name, expression)
@@ -125,7 +133,7 @@ export const preferRefPattern = createRule<
     }
 
     function checkCall(node: TSESTree.CallExpression) {
-      const api = getVueRefApi(node, sourceCode)
+      const api = getVueRefApi(node, sourceCode, vueGlobals)
       if (api === 'useTemplateRef' && targets.has('useTemplateRef')) {
         const argument = node.arguments[0]
         const name = argument && getRefString(argument)
@@ -199,7 +207,7 @@ export const preferRefPattern = createRule<
         scope => scope.type === 'module',
       )
       const variable = moduleScope?.set.get(expression.name)
-      if (isVueRefVariable(variable, sourceCode, setupRange)) {
+      if (isVueRefVariable(variable, sourceCode, setupRange, vueGlobals)) {
         checkName(expression.name, expression)
       }
     }

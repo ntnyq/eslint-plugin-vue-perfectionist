@@ -2,6 +2,7 @@ import { ASTUtils } from '@typescript-eslint/utils'
 import { CALLBACK_APIS } from '../constants/callback-style.ts'
 import { getCallIdentity, unwrapExpression } from '../utils/ast.ts'
 import { createRule } from '../utils/create-rule.ts'
+import { resolveVueGlobals } from '../utils/vue-globals.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type {
   CallbackStyleMessageId,
@@ -101,7 +102,13 @@ export const callbackStyle = createRule<
     const functionStyle = options.functionStyle ?? 'arrow'
     const bodyStyle = options.bodyStyle ?? 'block'
     const vueSources = new Set(options.vueImportSources ?? ['vue'])
-    const vueGlobals = new Set(options.vueGlobals)
+    const vueGlobals = new Set(
+      resolveVueGlobals(
+        context.settings,
+        Object.values(CALLBACK_APIS).flatMap(group => Object.keys(group)),
+        options.vueGlobals,
+      ),
+    )
     const excluded = new Set(options.exclude)
     const builtins = new Map(
       (options.groups ?? ['lifecycle', 'watch']).flatMap(group =>

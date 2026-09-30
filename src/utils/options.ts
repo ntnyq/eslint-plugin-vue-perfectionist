@@ -6,6 +6,7 @@ import {
   SELECTORS,
   VUE_APIS,
 } from '../constants/index.ts'
+import { resolveVueGlobals } from './vue-globals.ts'
 import type { JSONSchema } from '@typescript-eslint/utils'
 import type {
   Group,
@@ -261,6 +262,11 @@ function validateCondition(condition: MatchCondition) {
 
 export function resolveOptions(context: RuleContext): ResolvedOptions {
   const options = { ...DEFAULT_OPTIONS, ...context.options[0] }
+  options.vueGlobals = resolveVueGlobals(
+    context.settings,
+    VUE_APIS.keys(),
+    context.options[0]?.vueGlobals,
+  )
   for (const [key, value] of Object.entries(options)) {
     const properties: Record<string, JSONSchema.JSONSchema4> =
       OPTIONS_SCHEMA.properties

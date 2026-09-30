@@ -445,9 +445,11 @@ rule options
   > rule defaults
 ```
 
-Configure all preferences directly in rule options. Shared ESLint settings are
-not supported: `settings.perfectionist` and `settings['vue-perfectionist']`
-are neither read nor validated.
+Configure sorting preferences directly in rule options; shared sorting settings
+are ignored. `settings['vue-perfectionist'].autoImport` is a separate boolean
+opt-in for recognizing unbound built-in Vue API names. Explicit `vueGlobals`
+override it, including an empty list. Classification and dependency analysis
+use the same resolved globals; enabling recognition does not imply purity.
 
 Rule options replace defaults by field, including whole arrays
 and `fallbackSort` objects, following the upstream

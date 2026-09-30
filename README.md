@@ -64,6 +64,25 @@ If your Vue configuration already supplies the parsers, add the plugin and your 
 
 See the [setup guide](https://vue-perfectionist.vercel.app/guide/) for more configuration options.
 
+## Vue Auto-imports
+
+For `unplugin-auto-import` with Vue APIs, add this shared setting to your ESLint
+configuration:
+
+```js
+{
+  settings: {
+    'vue-perfectionist': { autoImport: true },
+  },
+}
+```
+
+It defaults to `false` and enables same-name Vue API recognition across the
+sorting, callback, and ref rules. Local bindings still take precedence.
+Explicit rule-level `vueGlobals` override it, including an empty list.
+See the [auto-import guide](https://vue-perfectionist.vercel.app/guide/#auto-imported-vue-apis)
+for scope, limitations, and ESLint globals.
+
 ## Rules
 
 | Rule                                                                                                    | Description                                               |

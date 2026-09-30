@@ -28,6 +28,7 @@ export type {
   RequireComponentPropsTarget,
   SortScriptSetupOptions,
   VuePerfectionistPlugin,
+  VuePerfectionistSettings,
 } from './types/index.ts'
 
 export default plugin

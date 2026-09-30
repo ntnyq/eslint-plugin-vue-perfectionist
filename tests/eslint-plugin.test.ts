@@ -4,6 +4,50 @@ import plugin, * as pluginExports from '../src'
 import { vueLanguageOptions } from './internal'
 
 describe('plugin contract', () => {
+  it.each(['', ' lang="ts"'])(
+    'shares auto-import settings across rules with an aliased plugin: %s',
+    language => {
+      const linter = new Linter()
+      const source = `<script setup${language}>
+const panel = useTemplateRef('field')
+const z = computed(() => 1)
+const a = ref(0)
+onMounted(handler)
+</script>`
+      const configuration: Linter.Config = {
+        files: ['**/*.vue'],
+        languageOptions: vueLanguageOptions,
+        plugins: { vp: plugin },
+        settings: { 'vue-perfectionist': { autoImport: true } },
+        rules: {
+          'vp/callback-style': 'error',
+          'vp/consistent-template-ref-name': 'error',
+          'vp/prefer-ref-pattern': 'error',
+          'vp/sort-script-setup': ['error', { groups: ['ref', 'computed'] }],
+        },
+      }
+      const result = linter.verifyAndFix(source, configuration, 'Test.vue')
+      expect(result.messages.map(message => message.messageId)).toEqual([
+        'inconsistentTemplateRefName',
+        'unexpectedRefPattern',
+        'unsafeReorder',
+        'expectedInlineCallback',
+      ])
+      expect(result.fixed).toBe(false)
+      expect(result.output).toBe(source)
+      expect(
+        linter.verify(
+          source,
+          {
+            ...configuration,
+            settings: { 'vue-perfectionist': { autoImport: false } },
+          },
+          'Test.vue',
+        ),
+      ).toEqual([])
+    },
+  )
+
   it('exports rules without built-in configs', () => {
     expect(plugin.meta.name).toBe('eslint-plugin-vue-perfectionist')
     expect(pluginExports.plugin).toBe(plugin)

@@ -149,7 +149,12 @@ Vue.onMounted(handler)
 
 Imports from other modules, local functions, and shadowed bindings do not match built-ins. Type-only imports do not match. Default imports are not treated as named Vue APIs.
 
-For auto-imports, configure `vueGlobals: ['onMounted', 'watch', 'watchEffect']`. These names match only when there is no local binding. For re-export modules, configure `vueImportSources: ['vue', '#imports']`.
+For auto-imports, enable `settings['vue-perfectionist'].autoImport: true`
+(see the [shared setup](../guide/index.md#auto-imported-vue-apis)), or configure
+`vueGlobals: ['onMounted', 'watch', 'watchEffect']` for this rule alone. An explicit
+`vueGlobals` list overrides the shared setting; `[]` disables global recognition.
+These names match only when there is no local binding, including names declared
+in ESLint globals. For re-export modules, configure `vueImportSources: ['vue', '#imports']`.
 
 There is no prefix guessing or cross-file analysis. Computed member access, optional calls, and optional member access are skipped.
 

@@ -1,6 +1,7 @@
 import { unwrapExpression } from '../utils/ast.ts'
 import { createRule } from '../utils/create-rule.ts'
 import { getRefString, getVueRefApi } from '../utils/ref-pattern.ts'
+import { resolveVueGlobals } from '../utils/vue-globals.ts'
 import type { ConsistentTemplateRefNameMessageId } from '../types/index.ts'
 
 export const consistentTemplateRefName = createRule<
@@ -22,6 +23,7 @@ export const consistentTemplateRefName = createRule<
   },
   defaultOptions: [],
   create(context) {
+    const vueGlobals = resolveVueGlobals(context.settings, ['useTemplateRef'])
     return {
       VariableDeclarator(node) {
         if (node.id.type !== 'Identifier' || !node.init) {
@@ -30,7 +32,8 @@ export const consistentTemplateRefName = createRule<
         const initializer = unwrapExpression(node.init)
         if (
           initializer.type !== 'CallExpression' ||
-          getVueRefApi(initializer, context.sourceCode) !== 'useTemplateRef'
+          getVueRefApi(initializer, context.sourceCode, vueGlobals) !==
+            'useTemplateRef'
         ) {
           return
         }

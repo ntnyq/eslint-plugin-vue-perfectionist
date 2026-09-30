@@ -30,6 +30,39 @@ await run<PreferRefPatternOptions, PreferRefPatternMessageId>({
   },
   valid: [
     {
+      description: 'skips auto-imported APIs when disabled',
+      code: sfc(
+        'const panel = ref(null); useTemplateRef("bad"); h("div", { ref: "bad" })',
+        '<div :ref="panel" />',
+      ),
+      settings: { 'vue-perfectionist': { autoImport: false } },
+    },
+    ...[
+      'function ref() {}; const panel = ref(null)',
+      'import { ref } from "other"; const panel = ref(null)',
+      'import type { ref } from "vue"; const panel = ref(null)',
+      'let panel = ref(null); panel = () => {}',
+    ].map(script => ({
+      description: `preserves ref identity with auto-imports: ${script}`,
+      code: sfc(script, '<div :ref="panel" />'),
+      settings: { 'vue-perfectionist': { autoImport: true } },
+    })),
+    {
+      description: 'respects template-local shadowing with auto-imports',
+      code: sfc(
+        'const panel = ref(null)',
+        '<div v-for="panel in panels" :ref="panel" />',
+      ),
+      settings: { 'vue-perfectionist': { autoImport: true } },
+    },
+    {
+      description: 'respects shadowed render and template-ref APIs',
+      code: sfc(
+        'function render(h, useTemplateRef) { h("div", { ref: "bad" }); useTemplateRef("bad") }',
+      ),
+      settings: { 'vue-perfectionist': { autoImport: true } },
+    },
+    {
       description:
         'ignores ref bindings forced to ordinary DOM properties or attributes',
       code: '<template><div :ref.prop="\'bad\'" /><Widget :ref.attr="\'bad\'" /></template>',
@@ -162,6 +195,31 @@ await run<PreferRefPatternOptions, PreferRefPatternMessageId>({
     },
   ],
   invalid: [
+    ...['ref', 'shallowRef', 'useTemplateRef'].flatMap(api =>
+      [false, true].map(withGlobals => ({
+        description: `recognizes auto-imported ${api} in template bindings, globals: ${withGlobals}`,
+        code: sfc(`const panel = ${api}(null)`, '<div :ref="panel" />'),
+        settings: { 'vue-perfectionist': { autoImport: true } },
+        languageOptions: withGlobals
+          ? { globals: { [api]: 'readonly' as const } }
+          : {},
+        errors: ['unexpectedRefPattern' as const],
+        output: null,
+      })),
+    ),
+    {
+      description: 'checks auto-imported template-ref keys and render refs',
+      code: sfc(
+        'const panel = ref(null); useTemplateRef("bad"); h("div", { ref: panel }); h("div", { ref: "bad" })',
+      ),
+      settings: { 'vue-perfectionist': { autoImport: true } },
+      errors: [
+        'unexpectedRefPattern',
+        'unexpectedRefPattern',
+        'unexpectedRefPattern',
+      ],
+      output: null,
+    },
     ...['', ' lang="ts"'].flatMap(language =>
       [false, true].map(setupFirst => {
         const ordinary = `<script${language}>let panel = 1; panel = 2</script>`

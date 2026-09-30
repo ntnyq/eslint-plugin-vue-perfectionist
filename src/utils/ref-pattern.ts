@@ -38,18 +38,23 @@ export function getRefString(
 }
 
 /**
- * Only explicit Vue runtime imports establish an API's identity.
+ * Recognize Vue runtime imports and explicitly enabled auto-import globals.
  */
 export function getVueRefApi(
   call: TSESTree.CallExpression,
   sourceCode: SourceCode,
+  vueGlobals: readonly string[] = [],
 ): string | undefined {
   const callee = unwrapExpression(call.callee)
   if (callee.type === 'Identifier') {
-    const definition = ASTUtils.findVariable(
+    const variable = ASTUtils.findVariable(
       sourceCode.getScope(call),
       callee.name,
-    )?.defs[0]
+    )
+    const definition = variable?.defs[0]
+    if (!variable?.defs.length && vueGlobals.includes(callee.name)) {
+      return callee.name
+    }
     if (
       definition?.type === 'ImportBinding' &&
       definition.parent.type === 'ImportDeclaration' &&
@@ -90,6 +95,7 @@ export function isVueRefVariable(
   variable: TSESLint.Scope.Variable | null | undefined,
   sourceCode: SourceCode,
   declarationRange?: TSESTree.Range,
+  vueGlobals: readonly string[] = [],
 ): boolean {
   // vue-eslint-parser merges same-name bindings from both script blocks.
   // Only declarations and writes in the selected block belong to a setup ref.
@@ -124,7 +130,7 @@ export function isVueRefVariable(
   if (initializer.type !== 'CallExpression') {
     return false
   }
-  const api = getVueRefApi(initializer, sourceCode)
+  const api = getVueRefApi(initializer, sourceCode, vueGlobals)
   return (
     api !== undefined && ['ref', 'shallowRef', 'useTemplateRef'].includes(api)
   )
