@@ -62,6 +62,7 @@ onMounted(handler)
       'define-macros-type-style',
       'prefer-ref-pattern',
       'require-component-props',
+      'require-macro-type-name',
       'sort-script-setup',
     ])
   })

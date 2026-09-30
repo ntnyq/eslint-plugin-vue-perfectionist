@@ -134,6 +134,10 @@ by default and can be enabled independently.
 Use [`define-macros-type-style`](../rules/define-macros-type-style.md) to require
 inline, local, or imported type arguments for `defineProps`, `defineEmits`, and
 `defineSlots`. It defaults to local declarations and reports without fixes.
+Combine it with [`require-macro-type-name`](../rules/require-macro-type-name.md)
+to require the call-site names `Props`, `Emits`, and `Slots`. Both rules can be
+configured independently and provide no fixes or suggestions. Disable a macro
+in the naming rule when its style is required to be inline.
 
 Browse the [rules overview](/rules/) for all available rules and their descriptions.
 

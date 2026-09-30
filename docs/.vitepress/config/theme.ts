@@ -71,6 +71,10 @@ export function getThemeConfig(): DefaultTheme.Config {
             link: '/rules/require-component-props',
             text: 'require-component-props',
           },
+          {
+            link: '/rules/require-macro-type-name',
+            text: 'require-macro-type-name',
+          },
           { link: '/rules/sort-script-setup', text: 'sort-script-setup' },
         ],
       },

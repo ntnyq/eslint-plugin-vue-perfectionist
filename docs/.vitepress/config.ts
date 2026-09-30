@@ -53,6 +53,7 @@ const exampleRules = {
       targets: [{ components: ['AppCounter'], props: ['count'] }],
     },
   ],
+  'vue-perfectionist/require-macro-type-name': 'error',
   'vue-perfectionist/sort-script-setup': 'error',
 } satisfies Record<string, Linter.RuleEntry>
 

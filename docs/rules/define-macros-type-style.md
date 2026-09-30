@@ -148,6 +148,11 @@ This rule needs no TypeScript project or type checker. It enforces a declaration
 convention and does not establish that Vue can compile the type. It neither
 requires a macro to exist nor requires a missing generic argument.
 
+Combine this rule with [`require-macro-type-name`](./require-macro-type-name.md)
+to require specific call-site names. With both defaults, contracts must be local
+and named `Props`, `Emits`, and `Slots`. Disable the corresponding naming check
+when requiring inline types, since those policies conflict.
+
 ## Automatic fixes and formatting
 
 There are no automatic fixes or suggestions. Extracting or moving a type requires

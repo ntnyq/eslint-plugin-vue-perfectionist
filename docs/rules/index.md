@@ -14,4 +14,5 @@ See the [setup guide](/guide/#basic-usage) for configuration instructions.
 | [define-macros-type-style](./define-macros-type-style.md)         | Enforce declaration styles for Vue macro types.           |
 | [prefer-ref-pattern](./prefer-ref-pattern.md)                     | Enforce naming patterns for template refs.                |
 | [require-component-props](./require-component-props.md)           | Require configured props at component usage sites.        |
+| [require-macro-type-name](./require-macro-type-name.md)           | Require exact call-site names for Vue macro types.        |
 | [sort-script-setup](./sort-script-setup.md)                       | Group and order top-level statements in `<script setup>`. |

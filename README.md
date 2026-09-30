@@ -95,6 +95,7 @@ for scope, limitations, and ESLint globals.
 | [define-macros-type-style](https://vue-perfectionist.vercel.app/rules/define-macros-type-style)         | Enforce declaration styles for Vue macro types.           |
 | [prefer-ref-pattern](https://vue-perfectionist.vercel.app/rules/prefer-ref-pattern)                     | Enforce naming patterns for template refs.                |
 | [require-component-props](https://vue-perfectionist.vercel.app/rules/require-component-props)           | Require configured props at component usage sites.        |
+| [require-macro-type-name](https://vue-perfectionist.vercel.app/rules/require-macro-type-name)           | Require exact call-site names for Vue macro types.        |
 | [sort-script-setup](https://vue-perfectionist.vercel.app/rules/sort-script-setup)                       | Group and order top-level statements in `<script setup>`. |
 
 ## Credits

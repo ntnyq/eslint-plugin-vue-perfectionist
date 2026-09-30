@@ -26,6 +26,8 @@ export type {
   RefPatternTarget,
   RequireComponentPropsOptions,
   RequireComponentPropsTarget,
+  RequireMacroTypeNameMacro,
+  RequireMacroTypeNameOptions,
   SortScriptSetupOptions,
   VuePerfectionistPlugin,
   VuePerfectionistSettings,

@@ -7,6 +7,7 @@ import { defineMacrosNewline } from './rules/define-macros-newline.ts'
 import { defineMacrosTypeStyle } from './rules/define-macros-type-style.ts'
 import { preferRefPattern } from './rules/prefer-ref-pattern.ts'
 import { requireComponentProps } from './rules/require-component-props.ts'
+import { requireMacroTypeName } from './rules/require-macro-type-name.ts'
 import { sortScriptSetup } from './rules/sort-script-setup.ts'
 import type { ESLint } from 'eslint'
 import type { VuePerfectionistPlugin } from './types/index.ts'
@@ -24,6 +25,7 @@ export const plugin: VuePerfectionistPlugin = {
     'define-macros-type-style': defineMacrosTypeStyle,
     'prefer-ref-pattern': preferRefPattern,
     'require-component-props': requireComponentProps,
+    'require-macro-type-name': requireMacroTypeName,
     'sort-script-setup': sortScriptSetup,
   } as unknown as NonNullable<ESLint.Plugin['rules']>,
 }
