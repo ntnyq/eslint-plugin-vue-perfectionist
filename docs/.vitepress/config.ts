@@ -45,6 +45,7 @@ const exampleRules = {
   ],
   'vue-perfectionist/consistent-template-ref-name': 'error',
   'vue-perfectionist/define-macros-newline': 'error',
+  'vue-perfectionist/define-macros-type-style': 'error',
   'vue-perfectionist/prefer-ref-pattern': 'error',
   'vue-perfectionist/require-component-props': [
     'error',

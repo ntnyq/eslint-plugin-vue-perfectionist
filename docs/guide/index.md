@@ -91,6 +91,10 @@ checks configured value constraints such as numeric multiples, ranges, enums, an
 string lengths or patterns. These rules need explicit `targets`; they perform no checks
 by default and can be enabled independently.
 
+Use [`define-macros-type-style`](../rules/define-macros-type-style.md) to require
+inline, local, or imported type arguments for `defineProps`, `defineEmits`, and
+`defineSlots`. It defaults to local declarations and reports without fixes.
+
 Browse the [rules overview](/rules/) for all available rules and their descriptions.
 
 Use [`consistent-template-ref-name`](../rules/consistent-template-ref-name.md)

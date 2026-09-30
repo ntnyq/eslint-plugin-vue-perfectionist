@@ -15,6 +15,7 @@ describe('plugin contract', () => {
       'component-prop-values',
       'consistent-template-ref-name',
       'define-macros-newline',
+      'define-macros-type-style',
       'prefer-ref-pattern',
       'require-component-props',
       'sort-script-setup',

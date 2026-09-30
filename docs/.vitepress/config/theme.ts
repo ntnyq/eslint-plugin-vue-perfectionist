@@ -62,6 +62,10 @@ export function getThemeConfig(): DefaultTheme.Config {
             link: '/rules/define-macros-newline',
             text: 'define-macros-newline',
           },
+          {
+            link: '/rules/define-macros-type-style',
+            text: 'define-macros-type-style',
+          },
           { link: '/rules/prefer-ref-pattern', text: 'prefer-ref-pattern' },
           {
             link: '/rules/require-component-props',
