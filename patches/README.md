@@ -1,6 +1,6 @@
 # Documentation dependency compatibility
 
-## `@shikijs/magic-move@4.4.3`
+## `@shikijs/magic-move@4.5.0`
 
 The complete groups demo exposed a synchronous animation setup cost of about
 2.5 seconds per sorting change. The renderer interleaved geometry reads with
@@ -13,6 +13,11 @@ animations once for the container subtree. It groups those animations by target 
 each token still waits for its own animations and retains interruption cleanup.
 Keep this patch until an upstream renderer batches both operations.
 
+The 4.5.0 renderer is unchanged from 4.4.3, so the patch applies unchanged.
+The docs dependency is pinned to the patched version and excluded from Taze
+updates. When upgrading it manually, inspect the upstream renderer, migrate or
+remove the patch, update `patchedDependencies`, and run `pnpm install` together.
+
 Verify in a real browser with the **All default groups** example: switch sorting
 modes repeatedly, reset during an animation, switch examples, and check that code
 and diagnostics match the selected mode. Compare main-thread task time and layout
@@ -21,9 +26,14 @@ cannot reproduce the browser's style and animation flush costs.
 
 ## FloatingVue override
 
-`@shikijs/vitepress-twoslash@4.4.3` patches
+`@shikijs/vitepress-twoslash@4.5.0` patches
 `VMenu.components.Popper.extends.methods`. FloatingVue 5.4.0 changed that internal
 component structure, causing `Failed to patch FloatingVue` on page initialization.
 The scoped pnpm override keeps Twoslash on FloatingVue 5.2.2, which matches the
 structure its client expects. Remove the override when Twoslash supports the new
 structure. Verify both a clean console and working hover tooltips when upgrading.
+
+The override selector is excluded in `.tazerc.json`: Taze 21.1.0 treats nested
+selectors from `pnpm-workspace.yaml` as package names, causing an invalid package
+name error. Keep this compatibility pin out of automatic updates until the
+upstream integration supports newer FloatingVue versions.

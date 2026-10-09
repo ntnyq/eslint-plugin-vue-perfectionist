@@ -6,6 +6,7 @@ import { consistentTemplateRefName } from './rules/consistent-template-ref-name.
 import { defineMacrosNewline } from './rules/define-macros-newline.ts'
 import { defineMacrosTypeStyle } from './rules/define-macros-type-style.ts'
 import { preferRefPattern } from './rules/prefer-ref-pattern.ts'
+import { preferSimpleEventHandler } from './rules/prefer-simple-event-handler.ts'
 import { requireComponentProps } from './rules/require-component-props.ts'
 import { requireMacroTypeName } from './rules/require-macro-type-name.ts'
 import { sortScriptSetup } from './rules/sort-script-setup.ts'
@@ -24,6 +25,7 @@ export const plugin: VuePerfectionistPlugin = {
     'define-macros-newline': defineMacrosNewline,
     'define-macros-type-style': defineMacrosTypeStyle,
     'prefer-ref-pattern': preferRefPattern,
+    'prefer-simple-event-handler': preferSimpleEventHandler,
     'require-component-props': requireComponentProps,
     'require-macro-type-name': requireMacroTypeName,
     'sort-script-setup': sortScriptSetup,

@@ -68,6 +68,10 @@ export function getThemeConfig(): DefaultTheme.Config {
           },
           { link: '/rules/prefer-ref-pattern', text: 'prefer-ref-pattern' },
           {
+            link: '/rules/prefer-simple-event-handler',
+            text: 'prefer-simple-event-handler',
+          },
+          {
             link: '/rules/require-component-props',
             text: 'require-component-props',
           },

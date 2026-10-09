@@ -23,6 +23,7 @@ export type {
   DefineMacrosTypeStyleOptions,
   GroupEntry,
   PreferRefPatternOptions,
+  PreferSimpleEventHandlerOptions,
   RefPatternTarget,
   RequireComponentPropsOptions,
   RequireComponentPropsTarget,

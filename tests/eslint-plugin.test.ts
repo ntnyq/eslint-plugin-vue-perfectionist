@@ -61,6 +61,7 @@ onMounted(handler)
       'define-macros-newline',
       'define-macros-type-style',
       'prefer-ref-pattern',
+      'prefer-simple-event-handler',
       'require-component-props',
       'require-macro-type-name',
       'sort-script-setup',

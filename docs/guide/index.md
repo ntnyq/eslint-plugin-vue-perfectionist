@@ -146,6 +146,13 @@ to require `useTemplateRef()` variables and keys to match. Combine it with
 [`prefer-ref-pattern`](../rules/prefer-ref-pattern.md) when names must also
 follow a naming pattern. Neither rule requires the other.
 
+Use [`prefer-simple-event-handler`](../rules/prefer-simple-event-handler.md)
+to keep named template event handlers simple. It checks `@event` and `v-on:event`
+values recursively, including inline functions, but skips object-form `v-on`,
+dynamic event names, and script implementations. Options allow inline functions,
+ternary expressions, and logical expressions independently. Complex handlers
+are reported without fixes or suggestions.
+
 ### Configuring Statement Ordering
 
 To sort names naturally, configure `sort-script-setup` with an explicit option:

@@ -2,10 +2,10 @@ packages:
   - docs
 
 overrides:
-  # Twoslash 4.4.3 patches VMenu internals that changed in FloatingVue 5.4.
+  # Twoslash 4.5.0 patches VMenu internals that changed in FloatingVue 5.4.
   '@shikijs/vitepress-twoslash>floating-vue': 5.2.2
 patchedDependencies:
-  '@shikijs/magic-move@4.4.3': patches/@shikijs__magic-move@4.4.3.patch
+  '@shikijs/magic-move@4.5.0': patches/@shikijs__magic-move@4.5.0.patch
 
 allowBuilds:
   unrs-resolver: true
