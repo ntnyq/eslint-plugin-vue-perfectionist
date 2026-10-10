@@ -16,6 +16,10 @@ export interface CustomCallback {
    * Exact module specifier used by the import.
    */
   source: string
+  /**
+   * Recognize the unbound export name. Defaults to the shared autoImport setting.
+   */
+  autoImport?: boolean
 }
 
 export interface CallbackStyleOptions {
@@ -24,7 +28,7 @@ export interface CallbackStyleOptions {
    */
   bodyStyle?: 'any' | 'block'
   /**
-   * Additional exact import matches, independent of built-in groups.
+   * Additional callback targets, independent of built-in groups.
    */
   customCallbacks?: CustomCallback[]
   /**

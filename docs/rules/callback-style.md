@@ -94,7 +94,7 @@ The callback may contain any number of statements. It does not have to wrap an e
 | `functionStyle`    | `'arrow'`                | `'arrow'` requires arrow functions; `'any'` also accepts inline function expressions.   |
 | `bodyStyle`        | `'block'`                | `'block'` requires braces for arrow callback bodies; `'any'` permits expression bodies. |
 | `exclude`          | `[]`                     | Built-in APIs to skip, using original export names.                                     |
-| `customCallbacks`  | `[]`                     | Additional exact import matches and callback argument indices.                          |
+| `customCallbacks`  | `[]`                     | Additional callback targets with per-entry auto-import support.                         |
 | `vueGlobals`       | `[]`                     | Explicit unbound Vue API names supplied by auto-import tooling.                         |
 | `vueImportSources` | `['vue']`                | Exact module specifiers exposing Vue APIs. Replaces the default list.                   |
 
@@ -152,7 +152,8 @@ Imports from other modules, local functions, and shadowed bindings do not match 
 For auto-imports, enable `settings['vue-perfectionist'].autoImport: true`
 (see the [shared setup](../guide/index.md#auto-imported-vue-apis)), or configure
 `vueGlobals: ['onMounted', 'watch', 'watchEffect']` for this rule alone. An explicit
-`vueGlobals` list overrides the shared setting; `[]` disables global recognition.
+`vueGlobals` list overrides the shared setting for built-in Vue APIs; `[]` disables
+their global recognition. Custom callbacks use their own `autoImport` option.
 These names match only when there is no local binding, including names declared
 in ESLint globals. For re-export modules, configure `vueImportSources: ['vue', '#imports']`.
 
@@ -184,7 +185,66 @@ There is no prefix guessing or cross-file analysis. Computed member access, opti
 
 `source` and `name` are exact, nonempty strings. `name` is the original export name; use `'default'` to match a default import regardless of its local name. Aliases and namespace calls are supported. Each `callbackIndices` list must contain at least one unique, nonnegative integer.
 
-Custom entries apply independently of `groups` and `exclude`. Matching indices are combined, and each argument is reported at most once. Custom entries do not match unbound globals.
+Custom entries apply independently of `groups`, `exclude`, and `vueGlobals`. Matching indices are combined, and each argument is reported at most once.
+
+Each entry accepts an optional `autoImport` boolean. When omitted, it inherits
+`settings['vue-perfectionist'].autoImport`, which defaults to `false`. Set it to
+`true` or `false` to override the shared setting for that entry. Explicit imports
+continue to match regardless of this option.
+
+For example, configure these VueUse callbacks to inherit the shared setting:
+
+```js
+{
+  settings: {
+    'vue-perfectionist': { autoImport: true },
+  },
+  rules: {
+    'vue-perfectionist/callback-style': ['error', {
+      customCallbacks: [
+        { source: '@vueuse/core', name: 'useResizeObserver', callbackIndices: [1] },
+        { source: '@vueuse/core', name: 'tryOnMounted', callbackIndices: [0] },
+        { source: '@vueuse/core', name: 'tryOnUnmounted', callbackIndices: [0] },
+      ],
+    }],
+  },
+}
+```
+
+With this configuration:
+
+::: incorrect
+
+```ts
+useResizeObserver(containerRef, resize)
+tryOnMounted(mount)
+tryOnUnmounted(unmount)
+```
+
+:::
+
+::: correct
+
+```ts
+useResizeObserver(containerRef, () => {
+  resize()
+})
+tryOnMounted(() => {
+  mount()
+})
+tryOnUnmounted(() => {
+  unmount()
+})
+```
+
+:::
+
+Auto-import matching uses the configured `name` only when it has no local
+binding, including names declared in ESLint globals. Local declarations,
+parameters, imports from other sources, and type-only imports are skipped.
+The setting declares that the unbound name belongs to the configured source;
+the rule does not inspect auto-import manifests. Aliases and namespace objects
+are not inferred, and `name: 'default'` still requires an explicit import.
 
 ## Diagnostics and fixes
 

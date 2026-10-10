@@ -72,6 +72,10 @@ export const callbackStyle = createRule<
             items: {
               type: 'object',
               properties: {
+                autoImport: {
+                  description: 'Override the shared autoImport setting.',
+                  type: 'boolean',
+                },
                 source: { type: 'string', minLength: 1 },
                 name: { type: 'string', minLength: 1 },
                 callbackIndices: {
@@ -110,6 +114,19 @@ export const callbackStyle = createRule<
       ),
     )
     const excluded = new Set(options.exclude)
+    const customCallbacks = (options.customCallbacks ?? []).map(custom => ({
+      ...custom,
+      autoImport:
+        resolveVueGlobals(
+          context.settings,
+          [custom.name],
+          custom.autoImport === undefined
+            ? undefined
+            : custom.autoImport
+              ? [custom.name]
+              : [],
+        ).length > 0,
+    }))
     const builtins = new Map(
       (options.groups ?? ['lifecycle', 'watch']).flatMap(group =>
         Object.entries(CALLBACK_APIS[group]).filter(
@@ -191,8 +208,12 @@ export const callbackStyle = createRule<
             indices.add(index)
           }
         }
-        for (const custom of options.customCallbacks ?? []) {
-          if (custom.source === identity.source && custom.name === name) {
+        for (const custom of customCallbacks) {
+          if (
+            custom.name === name &&
+            (custom.source === identity.source ||
+              (identity.isUnbound && custom.autoImport))
+          ) {
             for (const index of custom.callbackIndices) {
               indices.add(index)
             }

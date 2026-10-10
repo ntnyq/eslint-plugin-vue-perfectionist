@@ -96,6 +96,7 @@ When using `unplugin-auto-import` with Vue APIs, enable the shared opt-in in
 `autoImport` is a boolean and defaults to `false`. It enables recognition of
 unbound, same-name Vue APIs already supported by `sort-script-setup`,
 `callback-style`, `consistent-template-ref-name`, and `prefer-ref-pattern`.
+`callback-style` also recognizes configured `customCallbacks` names.
 `prefer-function-result-pattern` recognizes all configured target names under this
 setting, including `ref`, `shallowRef`, `computed`, and VueUse's `useToggle` by default.
 It also recognizes names declared in ESLint's `languageOptions.globals`.
@@ -103,8 +104,10 @@ Local declarations, parameters, imports from other modules, and type-only
 imports still take precedence and are not treated as auto-imports.
 
 For `sort-script-setup` and `callback-style`, an explicit `vueGlobals` option
-replaces the shared selection, including `vueGlobals: []` to disable it for
-one rule. Callback `groups` and `exclude` continue to control which APIs are checked.
+replaces the shared selection of built-in Vue APIs, including `vueGlobals: []`
+to disable it for one rule. Callback `groups` and `exclude` continue to control
+which built-in APIs are checked. Each `callback-style.customCallbacks` entry's
+`autoImport` boolean overrides the shared setting independently of `vueGlobals`.
 For `prefer-function-result-pattern`, each target's `autoImport` boolean overrides
 the shared setting for that group of functions.
 Macros and component prop rules do not require this setting. Literal template
@@ -113,8 +116,9 @@ refs are also checked independently of API imports.
 This setting declares that the unbound names come from their supported libraries; it does not read
 Vite configuration, generated declarations, or auto-import manifests. Custom
 auto-import aliases and APIs from other libraries are not inferred. Use explicit
-imports for those cases, or configure `prefer-function-result-pattern` targets
-with `autoImport: true`. Sorting still preserves its existing fix safety boundaries.
+imports for aliases, or configure `callback-style.customCallbacks` or
+`prefer-function-result-pattern` targets for additional APIs with auto-import
+recognition enabled. Sorting still preserves its existing fix safety boundaries.
 The settings namespace remains `vue-perfectionist` even if the plugin is
 registered under another name.
 

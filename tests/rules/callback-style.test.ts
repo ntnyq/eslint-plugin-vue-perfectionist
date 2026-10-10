@@ -40,6 +40,14 @@ const customOptions: CallbackStyleOptions = {
   ],
 }
 
+const vueUseCallbacks = [
+  { source: '@vueuse/core', name: 'useResizeObserver', callbackIndices: [1] },
+  { source: '@vueuse/core', name: 'tryOnMounted', callbackIndices: [0] },
+  { source: '@vueuse/core', name: 'tryOnUnmounted', callbackIndices: [0] },
+]
+const vueUseCalls =
+  'useResizeObserver(containerRef, resize); tryOnMounted(mount); tryOnUnmounted(unmount)'
+
 await run<CallbackStyleOptions, CallbackStyleMessageId>({
   name: 'callback-style',
   rule: callbackStyle,
@@ -54,6 +62,42 @@ await run<CallbackStyleOptions, CallbackStyleMessageId>({
     }
   },
   valid: [
+    ...[
+      [undefined, undefined],
+      [false, undefined],
+      [undefined, false],
+      [false, false],
+      [true, false],
+    ].map(([shared, autoImport]) => ({
+      description: `disables custom auto-imports with shared ${shared} and entry ${autoImport}`,
+      code: vueUseCalls,
+      settings: { 'vue-perfectionist': { autoImport: shared } },
+      options: {
+        customCallbacks: vueUseCallbacks.map(custom => ({
+          ...custom,
+          ...(autoImport === undefined ? {} : { autoImport }),
+        })),
+      },
+    })),
+    ...[
+      'const tryOnMounted = register; tryOnMounted(handler)',
+      'function tryOnMounted() {}; tryOnMounted(handler)',
+      'function run(tryOnMounted) { tryOnMounted(handler) }',
+      'tryOnMounted(handler); const tryOnMounted = register',
+      "import { tryOnMounted } from 'other'; tryOnMounted(handler)",
+      "import type { tryOnMounted } from '@vueuse/core'; tryOnMounted(handler)",
+      "import { type tryOnMounted } from '@vueuse/core'; tryOnMounted(handler)",
+      'VueUse.tryOnMounted(handler)',
+      'tryOnMounted?.(handler)',
+      'mounted(handler)',
+      'useResizeObserver(...args, handler)',
+      'tryOnMounted(() => {}); useResizeObserver(target, () => {})',
+    ].map(code => ({
+      description: `preserves custom auto-import identity and boundaries: ${code}`,
+      code,
+      settings: { 'vue-perfectionist': { autoImport: true } },
+      options: { customCallbacks: vueUseCallbacks },
+    })),
     ...[false, true].map(autoImport => ({
       description: `explicit empty globals override autoImport: ${autoImport}`,
       code: 'onMounted(handler)',
@@ -171,6 +215,113 @@ await run<CallbackStyleOptions, CallbackStyleMessageId>({
     },
   ],
   invalid: [
+    ...[
+      [true, undefined],
+      [undefined, true],
+      [false, true],
+      [true, true],
+    ].map(([shared, autoImport]) => ({
+      description: `enables custom auto-imports with shared ${shared} and entry ${autoImport}`,
+      code: vueUseCalls,
+      settings: { 'vue-perfectionist': { autoImport: shared } },
+      options: {
+        groups: [],
+        vueGlobals: [],
+        customCallbacks: vueUseCallbacks.map(custom => ({
+          ...custom,
+          ...(autoImport === undefined ? {} : { autoImport }),
+        })),
+      },
+      errors: [
+        {
+          messageId: 'expectedInlineCallback' as const,
+          data: { name: 'useResizeObserver' },
+        },
+        {
+          messageId: 'expectedInlineCallback' as const,
+          data: { name: 'tryOnMounted' },
+        },
+        {
+          messageId: 'expectedInlineCallback' as const,
+          data: { name: 'tryOnUnmounted' },
+        },
+      ],
+      output: null,
+    })),
+    {
+      description: 'resolves autoImport independently for each custom callback',
+      code: vueUseCalls,
+      settings: { 'vue-perfectionist': { autoImport: true } },
+      options: {
+        customCallbacks: vueUseCallbacks.map(custom =>
+          custom.name === 'tryOnMounted'
+            ? { ...custom, autoImport: false }
+            : custom,
+        ),
+      },
+      errors: [
+        {
+          messageId: 'expectedInlineCallback',
+          data: { name: 'useResizeObserver' },
+        },
+        {
+          messageId: 'expectedInlineCallback',
+          data: { name: 'tryOnUnmounted' },
+        },
+      ],
+      output: null,
+    },
+    {
+      description:
+        'recognizes custom ESLint globals and checks indices before spreads',
+      code: 'useResizeObserver(target, handler, ...options)',
+      languageOptions: { globals: { useResizeObserver: 'readonly' } },
+      settings: { 'vue-perfectionist': { autoImport: true } },
+      options: { customCallbacks: vueUseCallbacks },
+      errors: ['expectedInlineCallback'],
+      output: null,
+    },
+    ...['', ' lang="ts"'].map(language => ({
+      description: `fixes custom auto-import callback bodies in SFC scripts${language}`,
+      filename: 'Test.vue',
+      code: `<script setup${language}>useResizeObserver(target, () => resize())</script>`,
+      settings: { 'vue-perfectionist': { autoImport: true } },
+      options: { customCallbacks: vueUseCallbacks },
+      errors: ['expectedBlockBody' as const],
+      output: `<script setup${language}>useResizeObserver(target, () => { return (resize()) })</script>`,
+    })),
+    {
+      description:
+        'explicit custom imports still match when autoImport is disabled',
+      code: "import { tryOnMounted as mounted } from '@vueuse/core'; import * as VueUse from '@vueuse/core'; import custom from './default'; mounted(handler); VueUse.tryOnUnmounted(handler); custom(handler)",
+      settings: { 'vue-perfectionist': { autoImport: true } },
+      options: {
+        customCallbacks: [
+          ...vueUseCallbacks,
+          ...(customOptions.customCallbacks ?? []),
+        ].map(custom => ({ ...custom, autoImport: false })),
+      },
+      errors: [
+        'expectedInlineCallback',
+        'expectedInlineCallback',
+        'expectedInlineCallback',
+      ],
+      output: null,
+    },
+    {
+      description:
+        'combines built-in and duplicate custom auto-import callback positions',
+      code: 'watch(source, handler)',
+      settings: { 'vue-perfectionist': { autoImport: true } },
+      options: {
+        customCallbacks: [
+          { source: 'vue', name: 'watch', callbackIndices: [1] },
+          { source: 'vue', name: 'watch', callbackIndices: [1] },
+        ],
+      },
+      errors: ['expectedInlineCallback'],
+      output: null,
+    },
     ...[false, true].map(withGlobals => ({
       description: `checks auto-imported callbacks, globals: ${withGlobals}`,
       code: 'onMounted(handler); watch(source, handler)',
@@ -479,6 +630,17 @@ describe('callback-style configuration', () => {
     ['vueGlobals', [1]],
     ['vueImportSources', 'vue'],
     ['exclude', [false]],
+    ...['true', 1, null, []].map<[string, unknown]>(autoImport => [
+      'customCallbacks',
+      [
+        {
+          source: '@vueuse/core',
+          name: 'tryOnMounted',
+          callbackIndices: [0],
+          autoImport,
+        },
+      ],
+    ]),
     [
       'customCallbacks',
       [{ source: 'vue', name: 'watch', callbackIndices: [-1] }],
