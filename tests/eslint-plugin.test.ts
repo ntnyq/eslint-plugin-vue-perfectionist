@@ -4,6 +4,44 @@ import plugin, * as pluginExports from '../src'
 import { vueLanguageOptions } from './internal'
 
 describe('plugin contract', () => {
+  it.each([false, true])(
+    'recognizes boolean state auto-imports with an aliased plugin: %s',
+    autoImport => {
+      const linter = new Linter()
+      const source = `<script setup lang="ts">
+const loading = ref(false)
+const ready = shallowRef<boolean>()
+const [open, toggle] = useToggle()
+function local(ref: Function) { const state = ref(false) }
+</script>`
+      const result = linter.verifyAndFix(
+        source,
+        {
+          files: ['**/*.vue'],
+          languageOptions: {
+            ...vueLanguageOptions,
+            globals: {
+              ref: 'readonly',
+              shallowRef: 'readonly',
+              useToggle: 'readonly',
+            },
+          },
+          plugins: { vp: plugin },
+          settings: { 'vue-perfectionist': { autoImport } },
+          rules: { 'vp/prefer-function-result-pattern': 'error' },
+        },
+        'Test.vue',
+      )
+      expect(result.messages.map(message => message.messageId)).toEqual(
+        autoImport
+          ? Array.from({ length: 3 }, () => 'unexpectedFunctionResultPattern')
+          : [],
+      )
+      expect(result.fixed).toBe(false)
+      expect(result.output).toBe(source)
+    },
+  )
+
   it.each(['', ' lang="ts"'])(
     'shares auto-import settings across rules with an aliased plugin: %s',
     language => {
@@ -60,6 +98,7 @@ onMounted(handler)
       'consistent-template-ref-name',
       'define-macros-newline',
       'define-macros-type-style',
+      'prefer-function-result-pattern',
       'prefer-ref-pattern',
       'prefer-simple-event-handler',
       'require-component-props',

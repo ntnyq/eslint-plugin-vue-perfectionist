@@ -66,6 +66,10 @@ export function getThemeConfig(): DefaultTheme.Config {
             link: '/rules/define-macros-type-style',
             text: 'define-macros-type-style',
           },
+          {
+            link: '/rules/prefer-function-result-pattern',
+            text: 'prefer-function-result-pattern',
+          },
           { link: '/rules/prefer-ref-pattern', text: 'prefer-ref-pattern' },
           {
             link: '/rules/prefer-simple-event-handler',

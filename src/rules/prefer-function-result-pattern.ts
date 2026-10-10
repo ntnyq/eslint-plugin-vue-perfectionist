@@ -1,0 +1,214 @@
+import { ASTUtils } from '@typescript-eslint/utils'
+import { getCallIdentity, unwrapExpression } from '../utils/ast.ts'
+import { createRule } from '../utils/create-rule.ts'
+import { resolveVueGlobals } from '../utils/vue-globals.ts'
+import type { TSESTree } from '@typescript-eslint/utils'
+import type {
+  PreferFunctionResultPatternMessageId,
+  PreferFunctionResultPatternOptions,
+  PreferFunctionResultPatternTarget,
+} from '../types/index.ts'
+
+const DEFAULT_TARGETS: PreferFunctionResultPatternTarget[] = [
+  {
+    source: 'vue',
+    names: ['ref', 'shallowRef'],
+    pattern: '^(is|has|should|can)[A-Z]',
+    booleanOnly: true,
+  },
+  {
+    source: '@vueuse/core',
+    names: ['useToggle'],
+    pattern: '^(is|has|should|can)[A-Z]',
+    returnIndex: 0,
+    booleanOnly: true,
+  },
+]
+
+function isBooleanType(node: TSESTree.TypeNode): boolean {
+  return (
+    node.type === 'TSBooleanKeyword' ||
+    (node.type === 'TSLiteralType' &&
+      node.literal.type === 'Literal' &&
+      typeof node.literal.value === 'boolean') ||
+    (node.type === 'TSUnionType' && node.types.every(isBooleanType))
+  )
+}
+
+function hasBooleanValue(call: TSESTree.CallExpression): boolean {
+  const typeArgument = call.typeArguments?.params[0]
+  if (typeArgument) {
+    return isBooleanType(typeArgument)
+  }
+  const argument = call.arguments[0]
+  const value = argument && unwrapExpression(argument)
+  return value?.type === 'Literal' && typeof value.value === 'boolean'
+}
+
+function isBooleanCall(
+  call: TSESTree.CallExpression,
+  source: string,
+  name: string,
+): boolean {
+  // useToggle(ref) returns a function; custom values/options are not boolean state.
+  if (source === '@vueuse/core' && name === 'useToggle') {
+    return (
+      !call.typeArguments &&
+      (call.arguments.length === 0 ||
+        (call.arguments.length === 1 && hasBooleanValue(call)))
+    )
+  }
+  return hasBooleanValue(call)
+}
+
+export const preferFunctionResultPattern = createRule<
+  [PreferFunctionResultPatternOptions],
+  PreferFunctionResultPatternMessageId
+>({
+  name: 'prefer-function-result-pattern',
+  meta: {
+    type: 'suggestion',
+    docs: {
+      recommended: false,
+      description: 'enforce naming patterns for function result bindings.',
+    },
+    schema: [
+      {
+        type: 'object',
+        properties: {
+          targets: {
+            description:
+              'Function groups; replaces defaults. Later matches take precedence.',
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                source: {
+                  description: 'Exact import module specifier.',
+                  type: 'string',
+                  minLength: 1,
+                },
+                names: {
+                  description: 'Original export names, or default.',
+                  type: 'array',
+                  items: { type: 'string', minLength: 1 },
+                  minItems: 1,
+                  uniqueItems: true,
+                },
+                pattern: {
+                  description: 'JavaScript regular expression source.',
+                  type: 'string',
+                  format: 'regex',
+                },
+                returnIndex: {
+                  description: 'Zero-based array destructuring position.',
+                  type: 'integer',
+                  minimum: 0,
+                },
+                booleanOnly: {
+                  description: 'Filter calls using static boolean evidence.',
+                  type: 'boolean',
+                },
+                autoImport: {
+                  description: 'Override the shared autoImport setting.',
+                  type: 'boolean',
+                },
+              },
+              required: ['source', 'names', 'pattern'],
+              additionalProperties: false,
+            },
+          },
+        },
+        additionalProperties: false,
+      },
+    ],
+    defaultOptions: [{}],
+    messages: {
+      unexpectedFunctionResultPattern:
+        'Expected function result name "{{name}}" to match pattern "{{pattern}}".',
+    },
+  },
+  defaultOptions: [{}],
+  create(context, [options]) {
+    const sourceCode = context.sourceCode
+    const targets = (options.targets ?? DEFAULT_TARGETS).map(target => ({
+      ...target,
+      matcher: new RegExp(target.pattern),
+      globals: new Set(
+        resolveVueGlobals(
+          context.settings,
+          target.names,
+          target.autoImport === undefined
+            ? undefined
+            : target.autoImport
+              ? target.names
+              : [],
+        ),
+      ),
+    }))
+
+    return {
+      VariableDeclarator(node) {
+        if (!node.init) {
+          return
+        }
+        const call = unwrapExpression(node.init)
+        if (call.type !== 'CallExpression') {
+          return
+        }
+        const identity = getCallIdentity(call, sourceCode)
+        if (!identity) {
+          return
+        }
+        const callee = unwrapExpression(call.callee)
+        const definition =
+          callee.type === 'Identifier'
+            ? ASTUtils.findVariable(sourceCode.getScope(callee), callee)
+                ?.defs[0]
+            : undefined
+        const name =
+          definition?.type === 'ImportBinding' &&
+          definition.node.type === 'ImportDefaultSpecifier'
+            ? 'default'
+            : identity.name
+
+        const selected = new Map<number | undefined, (typeof targets)[number]>()
+        for (const target of targets) {
+          if (
+            target.names.includes(name) &&
+            (identity.source === target.source || identity.isUnbound)
+          ) {
+            selected.set(target.returnIndex, target)
+          }
+        }
+        for (const target of selected.values()) {
+          // Select before filtering so an override cannot fall back to an earlier target.
+          if (
+            (identity.isUnbound && !target.globals.has(name)) ||
+            (target.booleanOnly && !isBooleanCall(call, target.source, name))
+          ) {
+            continue
+          }
+          const result =
+            target.returnIndex === undefined
+              ? node.id
+              : node.id.type === 'ArrayPattern'
+                ? node.id.elements[target.returnIndex]
+                : undefined
+          const binding =
+            result?.type === 'AssignmentPattern' ? result.left : result
+          if (
+            binding?.type === 'Identifier' &&
+            !target.matcher.test(binding.name)
+          ) {
+            context.report({
+              node: binding,
+              messageId: 'unexpectedFunctionResultPattern',
+              data: { name: binding.name, pattern: target.pattern },
+            })
+          }
+        }
+      },
+    }
+  },
+})

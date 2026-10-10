@@ -22,6 +22,8 @@ export type {
   DefineMacrosTypeStyleMacro,
   DefineMacrosTypeStyleOptions,
   GroupEntry,
+  PreferFunctionResultPatternOptions,
+  PreferFunctionResultPatternTarget,
   PreferRefPatternOptions,
   PreferSimpleEventHandlerOptions,
   RefPatternTarget,

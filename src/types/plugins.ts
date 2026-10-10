@@ -5,8 +5,8 @@ import type { ESLint } from 'eslint'
  */
 export interface VuePerfectionistSettings {
   /**
-   * Recognize unbound Vue API names supplied by auto-import tooling.
-   * Defaults to false; explicit rule-level vueGlobals take precedence.
+   * Recognize supported unbound API names supplied by auto-import tooling.
+   * Defaults to false; rule-level vueGlobals and target autoImport take precedence.
    */
   autoImport?: boolean
 }

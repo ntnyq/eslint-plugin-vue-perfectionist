@@ -74,7 +74,7 @@ For JavaScript-only SFCs, omit the TypeScript parser import and
 parsers, add the plugin and your chosen rules to that configuration.
 
 To check standalone JavaScript and TypeScript files, enable `callback-style`,
-`consistent-template-ref-name`, and the script targets of `prefer-ref-pattern`
+`consistent-template-ref-name`, `prefer-function-result-pattern`, and the script targets of `prefer-ref-pattern`
 in configurations matching those files, using their usual ESLint parsers.
 The example above matches `.vue` files only.
 
@@ -96,6 +96,8 @@ When using `unplugin-auto-import` with Vue APIs, enable the shared opt-in in
 `autoImport` is a boolean and defaults to `false`. It enables recognition of
 unbound, same-name Vue APIs already supported by `sort-script-setup`,
 `callback-style`, `consistent-template-ref-name`, and `prefer-ref-pattern`.
+`prefer-function-result-pattern` recognizes all configured target names under this
+setting, including `ref`, `shallowRef`, and VueUse's `useToggle` by default.
 It also recognizes names declared in ESLint's `languageOptions.globals`.
 Local declarations, parameters, imports from other modules, and type-only
 imports still take precedence and are not treated as auto-imports.
@@ -103,13 +105,16 @@ imports still take precedence and are not treated as auto-imports.
 For `sort-script-setup` and `callback-style`, an explicit `vueGlobals` option
 replaces the shared selection, including `vueGlobals: []` to disable it for
 one rule. Callback `groups` and `exclude` continue to control which APIs are checked.
+For `prefer-function-result-pattern`, each target's `autoImport` boolean overrides
+the shared setting for that group of functions.
 Macros and component prop rules do not require this setting. Literal template
 refs are also checked independently of API imports.
 
-This setting declares that the unbound names come from Vue; it does not read
+This setting declares that the unbound names come from their supported libraries; it does not read
 Vite configuration, generated declarations, or auto-import manifests. Custom
 auto-import aliases and APIs from other libraries are not inferred. Use explicit
-imports for those cases. Sorting still preserves its existing fix safety boundaries.
+imports for those cases, or configure `prefer-function-result-pattern` targets
+with `autoImport: true`. Sorting still preserves its existing fix safety boundaries.
 The settings namespace remains `vue-perfectionist` even if the plugin is
 registered under another name.
 
@@ -145,6 +150,12 @@ Use [`consistent-template-ref-name`](../rules/consistent-template-ref-name.md)
 to require `useTemplateRef()` variables and keys to match. Combine it with
 [`prefer-ref-pattern`](../rules/prefer-ref-pattern.md) when names must also
 follow a naming pattern. Neither rule requires the other.
+
+Use [`prefer-function-result-pattern`](../rules/prefer-function-result-pattern.md)
+to constrain function result bindings with regular expressions. Its `targets`
+array groups methods by import source, pattern, and optional destructuring
+position. Defaults require `is`, `has`, `should`, or `can` prefixes on boolean
+state from Vue refs and VueUse toggles. It reports without renaming bindings.
 
 Use [`prefer-simple-event-handler`](../rules/prefer-simple-event-handler.md)
 to keep named template event handlers simple. It checks `@event` and `v-on:event`

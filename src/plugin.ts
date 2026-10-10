@@ -5,6 +5,7 @@ import { componentPropValues } from './rules/component-prop-values.ts'
 import { consistentTemplateRefName } from './rules/consistent-template-ref-name.ts'
 import { defineMacrosNewline } from './rules/define-macros-newline.ts'
 import { defineMacrosTypeStyle } from './rules/define-macros-type-style.ts'
+import { preferFunctionResultPattern } from './rules/prefer-function-result-pattern.ts'
 import { preferRefPattern } from './rules/prefer-ref-pattern.ts'
 import { preferSimpleEventHandler } from './rules/prefer-simple-event-handler.ts'
 import { requireComponentProps } from './rules/require-component-props.ts'
@@ -24,6 +25,7 @@ export const plugin: VuePerfectionistPlugin = {
     'consistent-template-ref-name': consistentTemplateRefName,
     'define-macros-newline': defineMacrosNewline,
     'define-macros-type-style': defineMacrosTypeStyle,
+    'prefer-function-result-pattern': preferFunctionResultPattern,
     'prefer-ref-pattern': preferRefPattern,
     'prefer-simple-event-handler': preferSimpleEventHandler,
     'require-component-props': requireComponentProps,
