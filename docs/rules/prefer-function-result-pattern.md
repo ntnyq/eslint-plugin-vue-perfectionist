@@ -145,9 +145,9 @@ This configuration gives Vue methods a shared pattern and overrides only `ref`:
 }
 ```
 
-::: correct
-
 With the configuration above:
+
+::: correct
 
 ```ts
 import { ref, shallowRef } from 'vue'
@@ -159,8 +159,6 @@ const isOpen = shallowRef(false)
 :::
 
 ::: incorrect
-
-With the configuration above:
 
 ```ts
 import { ref, shallowRef } from 'vue'
@@ -193,9 +191,9 @@ unless `booleanOnly: true` is configured:
 }
 ```
 
-::: correct
-
 With the configuration above:
+
+::: correct
 
 ```ts
 import { useDark, useOnline } from '@vueuse/core'
@@ -211,8 +209,6 @@ const isReady = makeFlag()
 :::
 
 ::: incorrect
-
-With the configuration above:
 
 ```ts
 import { useDark, useOnline } from '@vueuse/core'

@@ -18,3 +18,7 @@ lib-cov
 # pnpm
 .pnpm-debug.log*
 .pnpm-store
+
+# playwright
+.playwright-cli/
+output/
