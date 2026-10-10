@@ -12,7 +12,7 @@ import type {
 const DEFAULT_TARGETS: PreferFunctionResultPatternTarget[] = [
   {
     source: 'vue',
-    names: ['ref', 'shallowRef'],
+    names: ['ref', 'shallowRef', 'computed'],
     pattern: '^(is|has|should|can)[A-Z]',
     booleanOnly: true,
   },
@@ -45,11 +45,111 @@ function hasBooleanValue(call: TSESTree.CallExpression): boolean {
   return value?.type === 'Literal' && typeof value.value === 'boolean'
 }
 
+function isBooleanExpression(node: TSESTree.Node): boolean {
+  const expression = unwrapExpression(node)
+  switch (expression.type) {
+    case 'Literal':
+      return typeof expression.value === 'boolean'
+    case 'UnaryExpression':
+      return expression.operator === '!'
+    case 'BinaryExpression':
+      return [
+        '==',
+        '!=',
+        '===',
+        '!==',
+        '<',
+        '<=',
+        '>',
+        '>=',
+        'in',
+        'instanceof',
+      ].includes(expression.operator)
+    case 'LogicalExpression':
+      return (
+        isBooleanExpression(expression.left) &&
+        isBooleanExpression(expression.right)
+      )
+    case 'ConditionalExpression':
+      return (
+        isBooleanExpression(expression.consequent) &&
+        isBooleanExpression(expression.alternate)
+      )
+    default:
+      return false
+  }
+}
+
+function isBooleanGetter(node: TSESTree.Node): boolean {
+  const getter = unwrapExpression(node)
+  if (
+    (getter.type !== 'ArrowFunctionExpression' &&
+      getter.type !== 'FunctionExpression') ||
+    getter.async ||
+    getter.generator
+  ) {
+    return false
+  }
+  if (getter.returnType) {
+    return isBooleanType(getter.returnType.typeAnnotation)
+  }
+  if (getter.body.type !== 'BlockStatement') {
+    return isBooleanExpression(getter.body)
+  }
+  // A single return cannot fall through or hide a return in a nested function.
+  const statement = getter.body.body[0]
+  return (
+    getter.body.body.length === 1 &&
+    statement?.type === 'ReturnStatement' &&
+    statement.argument !== null &&
+    isBooleanExpression(statement.argument)
+  )
+}
+
+function isBooleanComputed(call: TSESTree.CallExpression): boolean {
+  const typeArgument = call.typeArguments?.params[0]
+  if (typeArgument) {
+    return isBooleanType(typeArgument)
+  }
+  const argument = call.arguments[0]
+  if (!argument) {
+    return false
+  }
+  const value = unwrapExpression(argument)
+  if (value.type !== 'ObjectExpression') {
+    return isBooleanGetter(value)
+  }
+  // Spreads or dynamic keys can replace the getter, so do not infer their value.
+  if (
+    value.properties.some(
+      property => property.type !== 'Property' || property.computed,
+    )
+  ) {
+    return false
+  }
+  const getters = value.properties.filter(
+    property =>
+      property.type === 'Property' &&
+      ((property.key.type === 'Identifier' && property.key.name === 'get') ||
+        (property.key.type === 'Literal' && property.key.value === 'get')),
+  )
+  const getter = getters[0]
+  return (
+    getters.length === 1 &&
+    getter?.type === 'Property' &&
+    getter.kind === 'init' &&
+    isBooleanGetter(getter.value)
+  )
+}
+
 function isBooleanCall(
   call: TSESTree.CallExpression,
   source: string,
   name: string,
 ): boolean {
+  if (source === 'vue' && name === 'computed') {
+    return isBooleanComputed(call)
+  }
   // useToggle(ref) returns a function; custom values/options are not boolean state.
   if (source === '@vueuse/core' && name === 'useToggle') {
     return (

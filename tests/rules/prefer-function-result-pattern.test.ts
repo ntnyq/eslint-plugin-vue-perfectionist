@@ -37,6 +37,10 @@ function withToggle(code: string): string {
   return `import { useToggle } from '@vueuse/core'\n${code}`
 }
 
+function withComputed(code: string): string {
+  return `import { computed } from 'vue'\n${code}`
+}
+
 const errors: PreferFunctionResultPatternMessageId[] = [
   'unexpectedFunctionResultPattern',
 ]
@@ -59,6 +63,83 @@ await run<
     }
   },
   valid: [
+    ...['isReady', 'hasPermission', 'shouldRender', 'canEdit'].map(name => ({
+      code: withComputed(`const ${name} = computed(() => count.value > 0)`),
+    })),
+    ...[
+      '() => count.value',
+      '() => flag.value',
+      '() => checkPermission()',
+      '() => 1',
+      '() => "yes"',
+      '() => value + 1',
+      '() => ~value',
+      '() => value && true',
+      '() => value || false',
+      '() => value ?? false',
+      '() => condition ? true : undefined',
+      '() => condition ? true : "yes"',
+      '() => {}',
+      '() => { return }',
+      '() => { if (condition) return true }',
+      '() => { const fn = () => true; return fn() }',
+      '() => { try { return true } finally { return 0 } }',
+      'async () => true',
+      'async function () { return true }',
+      'function* () { return true }',
+      '(): boolean | undefined => true',
+      '(): unknown => true',
+      '(): Flag => true',
+      'getter',
+      'true',
+      '',
+      '{ get: () => flag.value, set(value) {} }',
+      '{ get: async () => true, set(value) {} }',
+      '{ get: () => true, ...options }',
+      '{ ...options, get: () => true }',
+      '{ [key]: () => true, get: () => true }',
+      '{ get: () => true, get: () => 0 }',
+      '{ get get() { return () => true } }',
+      '{ get, set(value) {} }',
+      '{ set(value) {} }',
+    ].map(argument => ({
+      description: `skips computed without definite boolean evidence: ${argument}`,
+      code: withComputed(`const ready = computed(${argument})`),
+    })),
+    ...['boolean | undefined', 'boolean | string', 'unknown', 'Flag'].map(
+      type => ({
+        description: 'computed type arguments take precedence over its getter',
+        code: withComputed(`const ready = computed<${type}>(() => true)`),
+      }),
+    ),
+    ...[
+      "import { computed } from './other'; const ready = computed(() => true)",
+      "import { computed } from 'vue'; function f(computed) { const ready = computed(() => true) }",
+      "import type { computed } from 'vue'; const ready = computed<boolean>(() => true)",
+      "import { computed } from 'vue'; const ready = computed?.(() => true)",
+    ].map(code => ({ code, settings: autoImport })),
+    {
+      code: 'const ready = computed(() => true)',
+    },
+    {
+      description: 'explicit targets replace the default computed target',
+      code: withComputed('const ready = computed(() => true)'),
+      options: { targets: [vueTarget] },
+    },
+    {
+      description: 'custom computed exports keep generic boolean filtering',
+      code: "import { computed } from './state'; const ready = computed(() => true)",
+      options: {
+        targets: [
+          {
+            source: './state',
+            names: ['computed'],
+            pattern,
+            booleanOnly: true,
+          },
+        ],
+      },
+    },
     {
       description:
         'accepts grouped custom methods and selected default bindings',
@@ -258,6 +339,102 @@ const isReady = makeFlag()`,
     },
   ],
   invalid: [
+    ...[
+      '() => true',
+      '() => false',
+      '() => !value',
+      '() => !!value',
+      '() => (false as const)',
+      '() => (false satisfies boolean)',
+      '() => !a && !b',
+      '() => !a || !b',
+      '() => true ?? false',
+      '() => condition ? true : !value',
+      '() => { return count.value > 0 }',
+      'function () { return false }',
+      '(): boolean => flag.value',
+      '(): true | false => checkPermission()',
+      'function (): boolean { return flag.value }',
+      '{ get: () => true, set(value) {} }',
+      '{ get() { return !value }, set(value) {} }',
+      '{ get(): boolean { return flag.value }, set(value) {} }',
+      '{ "get": () => true, set(value) {} }',
+      '((() => true) as () => boolean)',
+    ].map(argument => ({
+      description: `checks computed boolean getter: ${argument}`,
+      code: withComputed(`const ready = computed(${argument})`),
+      errors,
+      output: null,
+    })),
+    ...['==', '!=', '===', '!==', '<', '<=', '>', '>=', 'in', 'instanceof'].map(
+      operator => ({
+        code: withComputed(
+          `const ready = computed(() => left ${operator} right)`,
+        ),
+        errors,
+        output: null,
+      }),
+    ),
+    ...['boolean', 'true', 'false', 'true | false'].map(type => ({
+      code: withComputed(`const ready = computed<${type}>(() => flag.value)`),
+      errors,
+      output: null,
+    })),
+    ...[
+      "import { computed as derive } from 'vue'; const ready = derive(() => true)",
+      "import * as Vue from 'vue'; const ready = Vue.computed(() => true)",
+    ].map(code => ({ code, errors, output: null })),
+    {
+      code: 'const ready = computed(() => true)',
+      settings: autoImport,
+      errors,
+      output: null,
+    },
+    {
+      description: 'computed targets can disable boolean filtering',
+      code: withComputed('const count = computed(() => 1)'),
+      options: { targets: [{ source: 'vue', names: ['computed'], pattern }] },
+      errors,
+      output: null,
+    },
+    {
+      description: 'computed targets support custom patterns',
+      code: withComputed('const isReady = computed(() => true)'),
+      options: {
+        targets: [
+          {
+            source: 'vue',
+            names: ['computed'],
+            pattern: '^has[A-Z]',
+            booleanOnly: true,
+          },
+        ],
+      },
+      errors: [
+        {
+          messageId: 'unexpectedFunctionResultPattern',
+          data: { name: 'isReady', pattern: '^has[A-Z]' },
+        },
+      ],
+      output: null,
+    },
+    ...['', ' lang="ts"'].flatMap(language =>
+      ['script', 'script setup'].map(tag => ({
+        filename: 'Test.vue',
+        code: `<${tag}${language}>${withComputed('const ready = computed(() => true)')}</script>`,
+        languageOptions: {
+          parserOptions: { parser: language ? tsParser : null },
+        },
+        errors,
+        output: null,
+      })),
+    ),
+    {
+      filename: 'test.js',
+      code: withComputed('const ready = computed(() => true)'),
+      errors,
+      output: null,
+    },
     {
       description:
         'reports grouped custom methods and selected default bindings',

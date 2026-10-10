@@ -39,10 +39,11 @@ By default, boolean state names must match `^(is|has|should|can)[A-Z]`.
 `isOpen` and `hasPermission` pass; `is`, `island`, `is_open`, and `IsOpen` do not.
 The default pattern does not constrain the rest of the identifier.
 
-| Source         | Exports             | Checked binding                                                           |
-| -------------- | ------------------- | ------------------------------------------------------------------------- |
-| `vue`          | `ref`, `shallowRef` | Direct variable, for a boolean literal or explicit boolean type argument. |
-| `@vueuse/core` | `useToggle`         | First array element, for no arguments or one boolean literal argument.    |
+| Source         | Exports             | Checked binding                                                                       |
+| -------------- | ------------------- | ------------------------------------------------------------------------------------- |
+| `vue`          | `ref`, `shallowRef` | Direct variable, for a boolean literal or explicit boolean type argument.             |
+| `vue`          | `computed`          | Direct variable, for an explicit boolean type argument or a supported boolean getter. |
+| `@vueuse/core` | `useToggle`         | First array element, for no arguments or one boolean literal argument.                |
 
 ::: correct
 
@@ -95,7 +96,7 @@ Omitting `targets` uses these defaults:
   targets: [
     {
       source: 'vue',
-      names: ['ref', 'shallowRef'],
+      names: ['ref', 'shallowRef', 'computed'],
       pattern: '^(is|has|should|can)[A-Z]',
       booleanOnly: true,
     },
@@ -232,7 +233,7 @@ patterns, and nested patterns are skipped. A default value such as
 
 ### Boolean filtering
 
-`booleanOnly: true` uses syntax, not TypeScript type services or return type
+`booleanOnly: true` uses syntax, not TypeScript type services or general type
 inference. For Vue `ref` / `shallowRef` and custom methods:
 
 - An explicit first type argument takes precedence. It must be `boolean`,
@@ -250,6 +251,68 @@ The default target checks only array element zero, so a direct function binding
 such as `const toggle = useToggle(isOpen)` is outside its scope.
 Setting `booleanOnly: false` removes this filter, including for `useToggle`.
 A custom export named `useToggle` from another source uses the generic filter.
+
+#### Boolean computed values
+
+Vue `computed` is included in the default targets. With `booleanOnly: true`,
+its first type argument takes precedence and must be a boolean type as
+described above. Otherwise, the rule checks an inline getter:
+
+- An explicit getter return type must be `boolean`, a boolean literal type,
+  or a union containing only boolean types. It takes precedence over the body.
+- Without a return annotation, an expression body or a block containing only
+  one `return` statement must return a syntactically boolean expression:
+  `true` / `false`, negation (`!`), equality or relational comparisons,
+  `in`, `instanceof`, or a conditional/logical expression whose two result
+  operands are both recognized as boolean.
+- Writable computed options support `get: () => ...` and `get() { ... }`.
+  Objects with spreads, dynamic keys, or duplicate `get` properties are skipped.
+- Async and generator getters are skipped unless an explicit boolean type
+  argument is provided.
+
+::: correct
+
+```ts
+import { computed } from 'vue'
+
+const isReady = computed(() => count.value > 0)
+const hasPermission = computed<boolean>(() => flag.value)
+const canEdit = computed((): boolean => checkPermission())
+const shouldRender = computed({
+  get: () => !hidden.value,
+  set(value) {
+    hidden.value = !value
+  },
+})
+```
+
+:::
+
+::: incorrect
+
+```ts
+import { computed } from 'vue'
+
+const ready = computed(() => count.value > 0)
+const permission = computed<boolean>(() => flag.value)
+const editable = computed((): boolean => checkPermission())
+const visible = computed({
+  get: () => !hidden.value,
+  set(value) {
+    hidden.value = !value
+  },
+})
+```
+
+:::
+
+Unannotated getters returning identifiers, member access such as `flag.value`,
+or function calls are skipped, even when TypeScript could infer a boolean.
+Blocks with multiple statements or control flow are also skipped without a
+return annotation. Add `computed<boolean>(...)` or a `(): boolean` getter
+annotation to make the intended type explicit. Mixed types such as
+`boolean | undefined` are skipped. A custom export named `computed` from
+another source keeps the generic filter rather than inspecting its getter.
 
 ### Auto-imports
 

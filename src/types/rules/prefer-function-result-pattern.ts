@@ -17,6 +17,8 @@ export interface PreferFunctionResultPatternTarget {
   autoImport?: boolean
   /**
    * Check only calls with a boolean first type argument or literal first argument.
+   * Vue computed also recognizes inline getters with an explicit boolean return
+   * type or a syntactically boolean result.
    * VueUse useToggle instead requires no arguments or one boolean literal and no
    * type arguments. Defaults to false.
    */
@@ -29,7 +31,7 @@ export interface PreferFunctionResultPatternTarget {
 
 export interface PreferFunctionResultPatternOptions {
   /**
-   * Replaces the default Vue ref/shallowRef and VueUse useToggle targets.
+   * Replaces the default Vue ref/shallowRef/computed and VueUse useToggle targets.
    * An empty array disables checks. Later targets override earlier ones for
    * the same method and binding position, before boolean filtering.
    */

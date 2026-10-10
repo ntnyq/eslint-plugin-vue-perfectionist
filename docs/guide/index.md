@@ -97,7 +97,7 @@ When using `unplugin-auto-import` with Vue APIs, enable the shared opt-in in
 unbound, same-name Vue APIs already supported by `sort-script-setup`,
 `callback-style`, `consistent-template-ref-name`, and `prefer-ref-pattern`.
 `prefer-function-result-pattern` recognizes all configured target names under this
-setting, including `ref`, `shallowRef`, and VueUse's `useToggle` by default.
+setting, including `ref`, `shallowRef`, `computed`, and VueUse's `useToggle` by default.
 It also recognizes names declared in ESLint's `languageOptions.globals`.
 Local declarations, parameters, imports from other modules, and type-only
 imports still take precedence and are not treated as auto-imports.
@@ -155,7 +155,8 @@ Use [`prefer-function-result-pattern`](../rules/prefer-function-result-pattern.m
 to constrain function result bindings with regular expressions. Its `targets`
 array groups methods by import source, pattern, and optional destructuring
 position. Defaults require `is`, `has`, `should`, or `can` prefixes on boolean
-state from Vue refs and VueUse toggles. It reports without renaming bindings.
+state from Vue refs, supported computed getters, and VueUse toggles. It reports
+without renaming bindings.
 
 Use [`prefer-simple-event-handler`](../rules/prefer-simple-event-handler.md)
 to keep named template event handlers simple. It checks `@event` and `v-on:event`
