@@ -1,8 +1,7 @@
-import { ASTUtils } from '@typescript-eslint/utils'
-import { CALLBACK_APIS } from '../constants/callback-style.ts'
-import { getCallIdentity, unwrapExpression } from '../utils/ast.ts'
+import { CALLBACK_TARGET_SCHEMA } from '../constants/callback.ts'
+import { unwrapExpression } from '../utils/ast.ts'
+import { createCallbackVisitor } from '../utils/callback.ts'
 import { createRule } from '../utils/create-rule.ts'
-import { resolveVueGlobals } from '../utils/vue-globals.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type {
   CallbackStyleMessageId,
@@ -26,15 +25,7 @@ export const callbackStyle = createRule<
       {
         type: 'object',
         properties: {
-          groups: {
-            description: 'Built-in API groups to check.',
-            type: 'array',
-            items: {
-              type: 'string',
-              enum: ['lifecycle', 'watch', 'cleanup', 'scheduler'],
-            },
-            uniqueItems: true,
-          },
+          ...CALLBACK_TARGET_SCHEMA,
           functionStyle: {
             description:
               'Whether to require arrow functions or accept any inline function.',
@@ -45,49 +36,6 @@ export const callbackStyle = createRule<
             description: 'Whether to require block bodies for arrow callbacks.',
             type: 'string',
             enum: ['block', 'any'],
-          },
-          exclude: {
-            description: 'Original built-in API export names to exclude.',
-            type: 'array',
-            items: { type: 'string' },
-            uniqueItems: true,
-          },
-          vueGlobals: {
-            description:
-              'Unbound API names supplied by Vue auto-import tooling.',
-            type: 'array',
-            items: { type: 'string' },
-            uniqueItems: true,
-          },
-          vueImportSources: {
-            description: 'Exact module specifiers exposing Vue APIs.',
-            type: 'array',
-            items: { type: 'string' },
-            uniqueItems: true,
-          },
-          customCallbacks: {
-            description:
-              'Additional callback positions matched by exact module and export names.',
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                autoImport: {
-                  description: 'Override the shared autoImport setting.',
-                  type: 'boolean',
-                },
-                source: { type: 'string', minLength: 1 },
-                name: { type: 'string', minLength: 1 },
-                callbackIndices: {
-                  type: 'array',
-                  items: { type: 'integer', minimum: 0 },
-                  minItems: 1,
-                  uniqueItems: true,
-                },
-              },
-              required: ['source', 'name', 'callbackIndices'],
-              additionalProperties: false,
-            },
           },
         },
         additionalProperties: false,
@@ -105,35 +53,6 @@ export const callbackStyle = createRule<
     const sourceCode = context.sourceCode
     const functionStyle = options.functionStyle ?? 'arrow'
     const bodyStyle = options.bodyStyle ?? 'block'
-    const vueSources = new Set(options.vueImportSources ?? ['vue'])
-    const vueGlobals = new Set(
-      resolveVueGlobals(
-        context.settings,
-        Object.values(CALLBACK_APIS).flatMap(group => Object.keys(group)),
-        options.vueGlobals,
-      ),
-    )
-    const excluded = new Set(options.exclude)
-    const customCallbacks = (options.customCallbacks ?? []).map(custom => ({
-      ...custom,
-      autoImport:
-        resolveVueGlobals(
-          context.settings,
-          [custom.name],
-          custom.autoImport === undefined
-            ? undefined
-            : custom.autoImport
-              ? [custom.name]
-              : [],
-        ).length > 0,
-    }))
-    const builtins = new Map(
-      (options.groups ?? ['lifecycle', 'watch']).flatMap(group =>
-        Object.entries(CALLBACK_APIS[group]).filter(
-          ([name]) => !excluded.has(name),
-        ),
-      ),
-    )
 
     function checkCallback(argument: TSESTree.Node, name: string) {
       const callback = unwrapExpression(argument)
@@ -179,56 +98,11 @@ export const callbackStyle = createRule<
       })
     }
 
-    return {
-      CallExpression(node) {
-        const identity = getCallIdentity(node, sourceCode)
-        if (!identity) {
-          return
-        }
-        // The shared sorting resolver names default imports by their local name.
-        // Callback matching instead uses their actual export name, "default".
-        const callee = unwrapExpression(node.callee)
-        const definition =
-          callee.type === 'Identifier'
-            ? ASTUtils.findVariable(sourceCode.getScope(callee), callee)
-                ?.defs[0]
-            : undefined
-        const name =
-          definition?.type === 'ImportBinding' &&
-          definition.node.type === 'ImportDefaultSpecifier'
-            ? 'default'
-            : identity.name
-        const indices = new Set<number>()
-        if (
-          (identity.source !== undefined && vueSources.has(identity.source)) ||
-          (identity.isUnbound && vueGlobals.has(name))
-        ) {
-          const index = builtins.get(name)
-          if (index !== undefined) {
-            indices.add(index)
-          }
-        }
-        for (const custom of customCallbacks) {
-          if (
-            custom.name === name &&
-            (custom.source === identity.source ||
-              (identity.isUnbound && custom.autoImport))
-          ) {
-            for (const index of custom.callbackIndices) {
-              indices.add(index)
-            }
-          }
-        }
-        const spreadIndex = node.arguments.findIndex(
-          argument => argument.type === 'SpreadElement',
-        )
-        for (const index of indices) {
-          const argument = node.arguments[index]
-          if (argument && (spreadIndex === -1 || index < spreadIndex)) {
-            checkCallback(argument, name)
-          }
-        }
-      },
-    }
+    return createCallbackVisitor(
+      sourceCode,
+      context.settings,
+      options,
+      checkCallback,
+    )
   },
 })

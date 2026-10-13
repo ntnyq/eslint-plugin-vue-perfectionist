@@ -67,6 +67,10 @@ export function getThemeConfig(): DefaultTheme.Config {
             text: 'define-macros-type-style',
           },
           {
+            link: '/rules/max-lines-per-callback',
+            text: 'max-lines-per-callback',
+          },
+          {
             link: '/rules/no-complex-v-for-source',
             text: 'no-complex-v-for-source',
           },

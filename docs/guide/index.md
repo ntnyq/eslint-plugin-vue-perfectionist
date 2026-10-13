@@ -74,6 +74,7 @@ For JavaScript-only SFCs, omit the TypeScript parser import and
 parsers, add the plugin and your chosen rules to that configuration.
 
 To check standalone JavaScript and TypeScript files, enable `callback-style`,
+`max-lines-per-callback`,
 `consistent-template-ref-name`, `prefer-function-result-pattern`, and the script targets of `prefer-ref-pattern`
 in configurations matching those files, using their usual ESLint parsers.
 The example above matches `.vue` files only.
@@ -95,19 +96,19 @@ When using `unplugin-auto-import` with Vue APIs, enable the shared opt-in in
 
 `autoImport` is a boolean and defaults to `false`. It enables recognition of
 unbound, same-name Vue APIs already supported by `sort-script-setup`,
-`callback-style`, `consistent-template-ref-name`, and `prefer-ref-pattern`.
-`callback-style` also recognizes configured `customCallbacks` names.
+`callback-style`, `max-lines-per-callback`, `consistent-template-ref-name`, and `prefer-ref-pattern`.
+`callback-style` and `max-lines-per-callback` also recognize configured `customCallbacks` names.
 `prefer-function-result-pattern` recognizes all configured target names under this
 setting, including `ref`, `shallowRef`, `computed`, and VueUse's `useToggle` by default.
 It also recognizes names declared in ESLint's `languageOptions.globals`.
 Local declarations, parameters, imports from other modules, and type-only
 imports still take precedence and are not treated as auto-imports.
 
-For `sort-script-setup` and `callback-style`, an explicit `vueGlobals` option
+For `sort-script-setup`, `callback-style`, and `max-lines-per-callback`, an explicit `vueGlobals` option
 replaces the shared selection of built-in Vue APIs, including `vueGlobals: []`
 to disable it for one rule. Callback `groups` and `exclude` continue to control
-which built-in APIs are checked. Each `callback-style.customCallbacks` entry's
-`autoImport` boolean overrides the shared setting independently of `vueGlobals`.
+which built-in APIs are checked. Each `customCallbacks` entry in either callback rule has an
+`autoImport` boolean that overrides the shared setting independently of `vueGlobals`.
 For `prefer-function-result-pattern`, each target's `autoImport` boolean overrides
 the shared setting for that group of functions.
 Macros and component prop rules do not require this setting. Literal template
@@ -116,7 +117,7 @@ refs are also checked independently of API imports.
 This setting declares that the unbound names come from their supported libraries; it does not read
 Vite configuration, generated declarations, or auto-import manifests. Custom
 auto-import aliases and APIs from other libraries are not inferred. Use explicit
-imports for aliases, or configure `callback-style.customCallbacks` or
+imports for aliases, or configure `customCallbacks` in either callback rule or
 `prefer-function-result-pattern` targets for additional APIs with auto-import
 recognition enabled. Sorting still preserves its existing fix safety boundaries.
 The settings namespace remains `vue-perfectionist` even if the plugin is
@@ -147,6 +148,13 @@ Combine it with [`require-macro-type-name`](../rules/require-macro-type-name.md)
 to require the call-site names `Props`, `Emits`, and `Slots`. Both rules can be
 configured independently and provide no fixes or suggestions. Disable a macro
 in the naming rule when its style is required to be inline.
+
+Use [`max-lines-per-callback`](../rules/max-lines-per-callback.md) to limit inline
+callback length for Vue APIs or configured custom APIs. It defaults to 20 lines
+and can skip blank or comment-only lines. Combine it with
+[`callback-style`](../rules/callback-style.md) to require short inline callbacks:
+extract long internal logic into separate functions and call them from the
+inline callbacks. Length diagnostics offer no fixes or suggestions.
 
 Browse the [rules overview](/rules/) for all available rules and their descriptions.
 

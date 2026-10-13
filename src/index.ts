@@ -22,6 +22,7 @@ export type {
   DefineMacrosTypeStyleMacro,
   DefineMacrosTypeStyleOptions,
   GroupEntry,
+  MaxLinesPerCallbackOptions,
   NoComplexVForSourceOptions,
   PreferFunctionResultPatternOptions,
   PreferFunctionResultPatternTarget,

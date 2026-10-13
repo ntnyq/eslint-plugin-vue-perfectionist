@@ -71,6 +71,9 @@ onMounted(function () {
 :::
 
 The callback may contain any number of statements. It does not have to wrap an existing function.
+Combine this rule with [max-lines-per-callback](./max-lines-per-callback.md) to
+limit its length. Extract long internal logic into a separate function and call
+that function from the inline callback.
 
 ## :wrench: Options
 
