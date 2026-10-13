@@ -155,6 +155,12 @@ to require `useTemplateRef()` variables and keys to match. Combine it with
 [`prefer-ref-pattern`](../rules/prefer-ref-pattern.md) when names must also
 follow a naming pattern. Neither rule requires the other.
 
+Use [`no-complex-v-for-source`](../rules/no-complex-v-for-source.md) to keep
+`v-for` sources simple. References and property access are accepted; calls and
+primitive literals are allowed by default and can be disabled independently.
+Array and object literals, branching, and other complex sources are reported
+without fixes or suggestions.
+
 Use [`prefer-function-result-pattern`](../rules/prefer-function-result-pattern.md)
 to constrain function result bindings with regular expressions. Its `targets`
 array groups methods by import source, pattern, and optional destructuring

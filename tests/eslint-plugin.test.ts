@@ -122,6 +122,7 @@ onMounted(handler)
       'consistent-template-ref-name',
       'define-macros-newline',
       'define-macros-type-style',
+      'no-complex-v-for-source',
       'prefer-function-result-pattern',
       'prefer-ref-pattern',
       'prefer-simple-event-handler',
