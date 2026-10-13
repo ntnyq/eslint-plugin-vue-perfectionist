@@ -11,7 +11,7 @@
     "@shikijs/magic-move": "4.5.0",
     "@vueuse/core": "^15.0.0",
     "shiki": "^4.5.0",
-    "vue": "^3.5.43"
+    "vue": "^3.5.44"
   },
   "devDependencies": {
     "@iconify-json/ri": "^1.2.10",
