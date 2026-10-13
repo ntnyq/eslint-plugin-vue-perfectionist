@@ -67,7 +67,10 @@ await run<RequireComponentPropsOptions, RequireComponentPropsMessageId>({
       '<component :is="current" />',
       '<component is="AppCounter" count />',
       '<component :is="\'AppCounter\'" count />',
-    ].map(content => ({ code: template(content), options })),
+    ].map(content => ({
+      code: template(content),
+      options,
+    })),
     { code: '<script setup>const count = 1</script>', options },
     { code: 'const count = 1', filename: 'test.js', options },
     { code: 'const count: number = 1', filename: 'test.ts', options },
@@ -216,9 +219,14 @@ describe('require-component-props configuration', () => {
       { components: ['AppCounter'], props: ['count', 'count'] },
       { components: ['AppCounter'], props: ['count'], extra: true },
       ...['class', 'style', 'key', 'ref', 'onClick', 'on-click', 'is'].map(
-        prop => ({ components: ['AppCounter'], props: [prop] }),
+        prop => ({
+          components: ['AppCounter'],
+          props: [prop],
+        }),
       ),
-    ].map(target => ({ targets: [target] })),
+    ].map(target => ({
+      targets: [target],
+    })),
   ])('rejects invalid options: %j', async invalidOptions => {
     await expect(
       tester.valid({ code: '<template />', options: invalidOptions }),

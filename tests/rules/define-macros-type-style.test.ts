@@ -93,7 +93,9 @@ await run<DefineMacrosTypeStyleOptions, DefineMacrosTypeStyleMessageId>({
         options: { macros: { defineProps: styles } },
       })),
     ),
-    ...skippedMacroTypes.map(script => ({ code: sfc(script) })),
+    ...skippedMacroTypes.map(script => ({
+      code: sfc(script),
+    })),
     { code: sfc('defineProps<Props>(); type Props = {}') },
     {
       code: sfc(
@@ -261,7 +263,9 @@ it.each([
   { macros: { unknown: 'local' } },
   { macros: null },
   ...[true, null, [], ['local', 'local'], ['local', false], 'external', 1].map(
-    value => ({ macros: { defineProps: value } }),
+    value => ({
+      macros: { defineProps: value },
+    }),
   ),
 ])('rejects invalid options %j', async options => {
   await expect(

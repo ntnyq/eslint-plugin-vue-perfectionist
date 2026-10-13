@@ -48,7 +48,12 @@ describe('component prop contracts with Vue compilation and runtime', () => {
       'require-component-props',
       'component-prop-types',
       'component-prop-values',
-    ].flatMap(name => ['LF', 'CRLF'].map(lineEnding => ({ name, lineEnding }))),
+    ].flatMap(name =>
+      ['LF', 'CRLF'].map(lineEnding => ({
+        name,
+        lineEnding,
+      })),
+    ),
   )(
     'keeps $name documentation examples consistent with rendered diagnostics ($lineEnding)',
     ({ name, lineEnding }) => {

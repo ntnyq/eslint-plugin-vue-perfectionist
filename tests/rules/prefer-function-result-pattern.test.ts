@@ -117,7 +117,10 @@ await run<
       "import { computed } from 'vue'; function f(computed) { const ready = computed(() => true) }",
       "import type { computed } from 'vue'; const ready = computed<boolean>(() => true)",
       "import { computed } from 'vue'; const ready = computed?.(() => true)",
-    ].map(code => ({ code, settings: autoImport })),
+    ].map(code => ({
+      code,
+      settings: autoImport,
+    })),
     {
       code: 'const ready = computed(() => true)',
     },
@@ -254,7 +257,9 @@ const isReady = makeFlag()`,
       'const [state] = useToggle(initial)',
       'const [state] = useToggle(...args)',
       'const [state] = useToggle<boolean, boolean>(false)',
-    ].map(code => ({ code: withToggle(code) })),
+    ].map(code => ({
+      code: withToggle(code),
+    })),
     ...[
       "import { ref } from 'other'; const state = ref(false)",
       "import { useToggle } from 'vue'; const [state] = useToggle()",
@@ -275,7 +280,10 @@ const isReady = makeFlag()`,
       "import { ref } from 'vue'; const other = ref; const state = other(false)",
       "import { ref } from 'vue'; const { value } = ref(false)",
       "import { ref } from 'vue'; let state; state = ref(false)",
-    ].map(code => ({ code, settings: autoImport })),
+    ].map(code => ({
+      code,
+      settings: autoImport,
+    })),
     { code: 'const state = ref(false); const [open] = useToggle()' },
     {
       code: 'const state = ref(false)',
@@ -312,13 +320,19 @@ const isReady = makeFlag()`,
       code: 'const dark = useDark()',
       settings: autoImport,
       options: {
-        targets: targets.map(target => ({ ...target, autoImport: false })),
+        targets: targets.map(target => ({
+          ...target,
+          autoImport: false,
+        })),
       },
     },
     {
       code: 'function f(useDark) { const dark = useDark() }',
       options: {
-        targets: targets.map(target => ({ ...target, autoImport: true })),
+        targets: targets.map(target => ({
+          ...target,
+          autoImport: true,
+        })),
       },
     },
     {
@@ -383,7 +397,11 @@ const isReady = makeFlag()`,
     ...[
       "import { computed as derive } from 'vue'; const ready = derive(() => true)",
       "import * as Vue from 'vue'; const ready = Vue.computed(() => true)",
-    ].map(code => ({ code, errors, output: null })),
+    ].map(code => ({
+      code,
+      errors,
+      output: null,
+    })),
     {
       code: 'const ready = computed(() => true)',
       settings: autoImport,
@@ -617,12 +635,20 @@ const ready = makeFlag()`,
       "import { ref } from 'vue'; const ready = (ref!)(false)",
       "import { useToggle as toggle } from '@vueuse/core'; const [ready] = toggle()",
       "import * as VueUse from '@vueuse/core'; const [ready] = VueUse.useToggle(false)",
-    ].map(code => ({ code, errors, output: null })),
+    ].map(code => ({
+      code,
+      errors,
+      output: null,
+    })),
     ...[
       'const [open, toggle] = useToggle()',
       'const [open = false, toggle] = useToggle(false)',
       'const [open] = useToggle(true)',
-    ].map(code => ({ code: withToggle(code), errors, output: null })),
+    ].map(code => ({
+      code: withToggle(code),
+      errors,
+      output: null,
+    })),
     {
       code: withVue('const isReady = ref(false)'),
       options: { targets: [{ ...vueTarget, pattern: '^was[A-Z]' }] },
@@ -675,7 +701,10 @@ const ready = makeFlag()`,
     {
       code: 'const dark = useDark()',
       options: {
-        targets: targets.map(target => ({ ...target, autoImport: true })),
+        targets: targets.map(target => ({
+          ...target,
+          autoImport: true,
+        })),
       },
       errors,
       output: null,
@@ -763,7 +792,9 @@ describe('prefer-function-result-pattern configuration', () => {
       { booleanOnly: 'yes' },
       { autoImport: 'yes' },
       { extra: true },
-    ].map(override => ({ targets: [{ ...vueTarget, ...override }] })),
+    ].map(override => ({
+      targets: [{ ...vueTarget, ...override }],
+    })),
   ])('rejects invalid options: %j', async options => {
     await expect(tester.valid({ code: '', options })).rejects.toThrow()
   })

@@ -60,7 +60,10 @@ await run<ComponentPropValuesOptions, ComponentPropValuesMessageId>({
       'v-bind="{ count: 20, ...null, ...false, ...1 }"',
       'count="wrong" v-bind="{ count: 20 }"',
       'v-bind="extra"',
-    ].map(attributes => ({ code: counter(attributes), options: strict })),
+    ].map(attributes => ({
+      code: counter(attributes),
+      options: strict,
+    })),
     ...[
       ':count="value"',
       ':count="getCount()"',
@@ -68,14 +71,20 @@ await run<ComponentPropValuesOptions, ComponentPropValuesMessageId>({
       ':count="flag ? 20 : value"',
       ':count="25" v-bind="extra"',
       'v-bind="{ count: 25, ...extra }"',
-    ].map(attributes => ({ code: counter(attributes), options })),
+    ].map(attributes => ({
+      code: counter(attributes),
+      options,
+    })),
     ...[
       '<Other :count="25" />',
       '<appcounter :count="25" />',
       '<AppCounter v-pre :count="25" />',
       '<div v-pre><AppCounter :count="25" /></div>',
       '<component :is="current" :count="25" />',
-    ].map(content => ({ code: template(content), options: strict })),
+    ].map(content => ({
+      code: template(content),
+      options: strict,
+    })),
     { code: 'const count = 25', filename: 'test.js', options },
     { code: 'const count: number = 25', filename: 'test.ts', options },
     { code: '<script setup>const count = 25</script>', options },

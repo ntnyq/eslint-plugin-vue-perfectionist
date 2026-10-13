@@ -59,14 +59,20 @@ await run<ComponentPropTypesOptions, ComponentPropTypesMessageId>({
       ':count="1" :[key]="\'wrong\'"',
       'v-bind="{ ...{ count: 1 } }"',
       'v-bind="{ count: 1, ...null, ...true, ...42 }"',
-    ].map(attributes => ({ code: counter(attributes), options })),
+    ].map(attributes => ({
+      code: counter(attributes),
+      options,
+    })),
     ...[
       '<Other count="wrong" />',
       '<appcounter count="wrong" />',
       '<AppCounter v-pre count="wrong" />',
       '<div v-pre><AppCounter count="wrong" /></div>',
       '<component :is="current" count="wrong" />',
-    ].map(content => ({ code: template(content), options })),
+    ].map(content => ({
+      code: template(content),
+      options,
+    })),
     {
       code: '<script setup lang="ts">const count: number = 1</script>',
       options,

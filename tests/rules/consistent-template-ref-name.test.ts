@@ -61,7 +61,9 @@ await run<never, ConsistentTemplateRefNameMessageId>({
       'const inputRef = useTemplateRef?.("fieldRef")',
       'const alias = useTemplateRef; const inputRef = alias("fieldRef")',
       'function read(useTemplateRef) { const inputRef = useTemplateRef("fieldRef") }',
-    ].map(code => ({ code: `${vueImport} ${code}` })),
+    ].map(code => ({
+      code: `${vueImport} ${code}`,
+    })),
     ...[
       'const inputRef = useTemplateRef("fieldRef")',
       'function useTemplateRef(key) { return key }; const inputRef = useTemplateRef("fieldRef")',
@@ -76,7 +78,9 @@ await run<never, ConsistentTemplateRefNameMessageId>({
       'import * as Vue from "vue"; const inputRef = Vue?.useTemplateRef("fieldRef")',
       'import * as Vue from "vue"; function read(Vue) { const inputRef = Vue.useTemplateRef("fieldRef") }',
       'import { ref, shallowRef } from "vue"; const inputRef = ref("fieldRef"); const panelRef = shallowRef("fieldRef")',
-    ].map(code => ({ code })),
+    ].map(code => ({
+      code,
+    })),
     {
       filename: 'Test.vue',
       code: '<template><input ref="fieldRef" /></template>',

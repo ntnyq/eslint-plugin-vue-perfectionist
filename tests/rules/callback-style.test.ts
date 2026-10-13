@@ -299,7 +299,10 @@ await run<CallbackStyleOptions, CallbackStyleMessageId>({
         customCallbacks: [
           ...vueUseCallbacks,
           ...(customOptions.customCallbacks ?? []),
-        ].map(custom => ({ ...custom, autoImport: false })),
+        ].map(custom => ({
+          ...custom,
+          autoImport: false,
+        })),
       },
       errors: [
         'expectedInlineCallback',

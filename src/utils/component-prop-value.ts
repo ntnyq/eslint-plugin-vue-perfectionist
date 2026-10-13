@@ -24,7 +24,11 @@ export interface PropValue {
 }
 
 export function unknownPropValue(node: ComponentPropNode): PropValue {
-  return { variants: [], unknown: true, node }
+  return {
+    variants: [],
+    unknown: true,
+    node,
+  }
 }
 
 export function stringPropValue(
@@ -108,7 +112,10 @@ export function inferPropValue(
               (node.operator !== '+' && variant.type === 'bigint'),
           )
         ) {
-          return { ...argument, node }
+          return {
+            ...argument,
+            node,
+          }
         }
       }
       break

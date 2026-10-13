@@ -1,4 +1,8 @@
 /**
+ * cSpell: disable
+ */
+
+/**
  * Native HTML, SVG, and MathML names recognized by Vue.
  * Keep exact spelling: capitalized component names can resemble native tags.
  */

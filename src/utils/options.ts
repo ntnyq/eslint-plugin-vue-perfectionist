@@ -160,7 +160,10 @@ export function parsePredefinedGroup(
   if (!areModifiersValid(selector, modifiers)) {
     return undefined
   }
-  return { selector, modifiers }
+  return {
+    selector,
+    modifiers,
+  }
 }
 
 function areModifiersValid(selector: Selector, modifiers: Modifier[]): boolean {

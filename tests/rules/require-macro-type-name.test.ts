@@ -55,7 +55,9 @@ await run<RequireMacroTypeNameOptions, RequireMacroTypeNameMessageId>({
         `import type { External as ${name} } from "types"; ${macro}<${name}>()`,
         `${macro}<${name}<Other>>()`,
         `${macro}<(${name})>()`,
-      ].map(script => ({ code: sfc(script) })),
+      ].map(script => ({
+        code: sfc(script),
+      })),
     ),
     ...customNames.map(name => ({
       code: sfc(`type ${name} = {}; defineProps<${name}>()`),
@@ -64,7 +66,9 @@ await run<RequireMacroTypeNameOptions, RequireMacroTypeNameMessageId>({
     ...checkedMacroTypes.map(script => ({
       code: sfc(script.replace('{}>', 'Props>')),
     })),
-    ...skippedMacroTypes.map(script => ({ code: sfc(script) })),
+    ...skippedMacroTypes.map(script => ({
+      code: sfc(script),
+    })),
     { code: sfc('defineProps<\\u0050rops>()') },
     {
       code: sfc('defineProps<{}>(); defineEmits<{}>(); defineSlots<{}>()'),
@@ -82,7 +86,9 @@ await run<RequireMacroTypeNameOptions, RequireMacroTypeNameMessageId>({
       const script =
         '<script lang="ts">defineProps<Wrong>(); interface Props {}</script>'
       const setup = sfc('defineProps<Props>()')
-      return { code: reverse ? setup + script : script + setup }
+      return {
+        code: reverse ? setup + script : script + setup,
+      }
     }),
     {
       code: '<script setup lang="ts" generic="Props">defineProps<Props>()</script>',
@@ -267,7 +273,9 @@ it.each([
     'void',
     'object',
     'undefined',
-  ].map(value => ({ macros: { defineProps: value } })),
+  ].map(value => ({
+    macros: { defineProps: value },
+  })),
 ])('rejects invalid options %j', async options => {
   await expect(
     tester.valid({ code: sfc('defineProps<Props>()'), options }),

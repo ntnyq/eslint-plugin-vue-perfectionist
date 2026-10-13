@@ -30,6 +30,7 @@
     "esbuild",
     "iconify",
     "lcov",
+    "noembed",
     "oxfmt",
     "oxlint",
     "pnpm",

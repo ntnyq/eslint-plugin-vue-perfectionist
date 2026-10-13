@@ -113,7 +113,11 @@ export function inferStaticPropValue(
         variants.push(numeric(value))
       }
     }
-    return { variants, unknown, node }
+    return {
+      variants,
+      unknown,
+      node,
+    }
   }
   const result = inferPropValue(node, isGlobalUndefined)
   if (node.type === 'Literal' && !('regex' in node)) {
@@ -126,7 +130,10 @@ export function inferStaticPropValue(
     ) {
       return {
         ...result,
-        variants: result.variants.map(variant => ({ ...variant, value })),
+        variants: result.variants.map(variant => ({
+          ...variant,
+          value,
+        })),
       }
     }
   }
