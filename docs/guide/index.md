@@ -169,6 +169,11 @@ dynamic event names, and script implementations. Options allow inline functions,
 ternary expressions, and logical expressions independently. Complex handlers
 are reported without fixes or suggestions.
 
+Use [`prefer-template-literal-in-interpolation`](../rules/prefer-template-literal-in-interpolation.md)
+to combine mixed template text and interpolation. By default it reports only
+fragments with safe automatic fixes based on static expression types. Enable
+`reportUnfixable` to also report fragments that need manual review.
+
 ### Configuring Statement Ordering
 
 To sort names naturally, configure `sort-script-setup` with an explicit option:
@@ -205,6 +210,10 @@ Run ESLint with `--fix` to apply supported fixes. Fix behavior depends on the ru
   to finish indentation.
 - [`prefer-ref-pattern`](../rules/prefer-ref-pattern.md) reports naming mismatches
   without fixes or suggestions because a pattern cannot determine a unique name.
+- [`prefer-template-literal-in-interpolation`](../rules/prefer-template-literal-in-interpolation.md)
+  combines statically safe primitive expressions with adjacent text, preserving
+  nullish display values. Unknown types and whitespace-sensitive fragments are
+  skipped by default.
 - [`sort-script-setup`](../rules/sort-script-setup.md#partitions-and-automatic-fixes)
   limits movement fixes to eligible declarations within safe contiguous fragments.
   Initialization dependencies take precedence over sorting preferences; unsafe

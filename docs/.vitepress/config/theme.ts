@@ -76,6 +76,10 @@ export function getThemeConfig(): DefaultTheme.Config {
             text: 'prefer-simple-event-handler',
           },
           {
+            link: '/rules/prefer-template-literal-in-interpolation',
+            text: 'prefer-template-literal-in-interpolation',
+          },
+          {
             link: '/rules/require-component-props',
             text: 'require-component-props',
           },

@@ -85,20 +85,21 @@ for scope, limitations, and ESLint globals.
 
 ## Rules
 
-| Rule                                                                                                        | Description                                                  |
-| ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| [callback-style](https://vue-perfectionist.vercel.app/rules/callback-style)                                 | Enforce callback styles for Vue APIs.                        |
-| [component-prop-types](https://vue-perfectionist.vercel.app/rules/component-prop-types)                     | Enforce configured component prop value types.               |
-| [component-prop-values](https://vue-perfectionist.vercel.app/rules/component-prop-values)                   | Enforce configured component prop value constraints.         |
-| [consistent-template-ref-name](https://vue-perfectionist.vercel.app/rules/consistent-template-ref-name)     | Require template ref variable names to match their keys.     |
-| [define-macros-newline](https://vue-perfectionist.vercel.app/rules/define-macros-newline)                   | Require multiline inline Vue macro declarations.             |
-| [define-macros-type-style](https://vue-perfectionist.vercel.app/rules/define-macros-type-style)             | Enforce declaration styles for Vue macro types.              |
-| [prefer-function-result-pattern](https://vue-perfectionist.vercel.app/rules/prefer-function-result-pattern) | Enforce naming patterns for function result bindings.        |
-| [prefer-ref-pattern](https://vue-perfectionist.vercel.app/rules/prefer-ref-pattern)                         | Enforce naming patterns for template refs.                   |
-| [prefer-simple-event-handler](https://vue-perfectionist.vercel.app/rules/prefer-simple-event-handler)       | Require simple expressions in named template event handlers. |
-| [require-component-props](https://vue-perfectionist.vercel.app/rules/require-component-props)               | Require configured props at component usage sites.           |
-| [require-macro-type-name](https://vue-perfectionist.vercel.app/rules/require-macro-type-name)               | Require exact call-site names for Vue macro types.           |
-| [sort-script-setup](https://vue-perfectionist.vercel.app/rules/sort-script-setup)                           | Group and order top-level statements in `<script setup>`.    |
+| Rule                                                                                                                            | Description                                                        |
+| ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| [callback-style](https://vue-perfectionist.vercel.app/rules/callback-style)                                                     | Enforce callback styles for Vue APIs.                              |
+| [component-prop-types](https://vue-perfectionist.vercel.app/rules/component-prop-types)                                         | Enforce configured component prop value types.                     |
+| [component-prop-values](https://vue-perfectionist.vercel.app/rules/component-prop-values)                                       | Enforce configured component prop value constraints.               |
+| [consistent-template-ref-name](https://vue-perfectionist.vercel.app/rules/consistent-template-ref-name)                         | Require template ref variable names to match their keys.           |
+| [define-macros-newline](https://vue-perfectionist.vercel.app/rules/define-macros-newline)                                       | Require multiline inline Vue macro declarations.                   |
+| [define-macros-type-style](https://vue-perfectionist.vercel.app/rules/define-macros-type-style)                                 | Enforce declaration styles for Vue macro types.                    |
+| [prefer-function-result-pattern](https://vue-perfectionist.vercel.app/rules/prefer-function-result-pattern)                     | Enforce naming patterns for function result bindings.              |
+| [prefer-ref-pattern](https://vue-perfectionist.vercel.app/rules/prefer-ref-pattern)                                             | Enforce naming patterns for template refs.                         |
+| [prefer-simple-event-handler](https://vue-perfectionist.vercel.app/rules/prefer-simple-event-handler)                           | Require simple expressions in named template event handlers.       |
+| [prefer-template-literal-in-interpolation](https://vue-perfectionist.vercel.app/rules/prefer-template-literal-in-interpolation) | Prefer a single template literal for mixed text and interpolation. |
+| [require-component-props](https://vue-perfectionist.vercel.app/rules/require-component-props)                                   | Require configured props at component usage sites.                 |
+| [require-macro-type-name](https://vue-perfectionist.vercel.app/rules/require-macro-type-name)                                   | Require exact call-site names for Vue macro types.                 |
+| [sort-script-setup](https://vue-perfectionist.vercel.app/rules/sort-script-setup)                                               | Group and order top-level statements in `<script setup>`.          |
 
 ## Credits
 

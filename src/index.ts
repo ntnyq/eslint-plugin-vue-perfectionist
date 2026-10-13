@@ -26,6 +26,7 @@ export type {
   PreferFunctionResultPatternTarget,
   PreferRefPatternOptions,
   PreferSimpleEventHandlerOptions,
+  PreferTemplateLiteralInInterpolationOptions,
   RefPatternTarget,
   RequireComponentPropsOptions,
   RequireComponentPropsTarget,

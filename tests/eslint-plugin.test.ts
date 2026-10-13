@@ -4,6 +4,30 @@ import plugin, * as pluginExports from '../src'
 import { vueLanguageOptions } from './internal'
 
 describe('plugin contract', () => {
+  it('fixes mixed template text through an aliased plugin and stabilizes', () => {
+    const linter = new Linter()
+    const configuration: Linter.Config = {
+      files: ['**/*.vue'],
+      languageOptions: vueLanguageOptions,
+      plugins: { vp: plugin },
+      rules: { 'vp/prefer-template-literal-in-interpolation': 'error' },
+    }
+    const result = linter.verifyAndFix(
+      '<template><span>{{ ok ? 0 : null }}分</span></template>',
+      configuration,
+      'Test.vue',
+    )
+    expect(result.fixed).toBe(true)
+    expect(result.messages).toEqual([])
+    expect(result.output).toBe(
+      // eslint-disable-next-line no-template-curly-in-string
+      "<template><span>{{ `${(ok ? 0 : null) ?? ''}分` }}</span></template>",
+    )
+    expect(
+      linter.verifyAndFix(result.output, configuration, 'Test.vue'),
+    ).toEqual({ ...result, fixed: false })
+  })
+
   it.each([false, true])(
     'recognizes boolean state auto-imports with an aliased plugin: %s',
     autoImport => {
@@ -101,6 +125,7 @@ onMounted(handler)
       'prefer-function-result-pattern',
       'prefer-ref-pattern',
       'prefer-simple-event-handler',
+      'prefer-template-literal-in-interpolation',
       'require-component-props',
       'require-macro-type-name',
       'sort-script-setup',

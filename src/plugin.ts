@@ -8,6 +8,7 @@ import { defineMacrosTypeStyle } from './rules/define-macros-type-style.ts'
 import { preferFunctionResultPattern } from './rules/prefer-function-result-pattern.ts'
 import { preferRefPattern } from './rules/prefer-ref-pattern.ts'
 import { preferSimpleEventHandler } from './rules/prefer-simple-event-handler.ts'
+import { preferTemplateLiteralInInterpolation } from './rules/prefer-template-literal-in-interpolation.ts'
 import { requireComponentProps } from './rules/require-component-props.ts'
 import { requireMacroTypeName } from './rules/require-macro-type-name.ts'
 import { sortScriptSetup } from './rules/sort-script-setup.ts'
@@ -28,6 +29,8 @@ export const plugin: VuePerfectionistPlugin = {
     'prefer-function-result-pattern': preferFunctionResultPattern,
     'prefer-ref-pattern': preferRefPattern,
     'prefer-simple-event-handler': preferSimpleEventHandler,
+    'prefer-template-literal-in-interpolation':
+      preferTemplateLiteralInInterpolation,
     'require-component-props': requireComponentProps,
     'require-macro-type-name': requireMacroTypeName,
     'sort-script-setup': sortScriptSetup,
