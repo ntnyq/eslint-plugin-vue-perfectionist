@@ -1,7 +1,10 @@
-import { unwrapExpression } from '../utils/ast.ts'
+import {
+  getStaticStringValue,
+  unwrapExpression,
+} from '../utils/ast/expressions.ts'
 import { createRule } from '../utils/create-rule.ts'
-import { getRefString, getVueRefApi } from '../utils/ref-pattern.ts'
-import { resolveVueGlobals } from '../utils/vue-globals.ts'
+import { resolveVueGlobals } from '../utils/vue/globals.ts'
+import { getVueRefApi } from '../utils/vue/refs.ts'
 import type { ConsistentTemplateRefNameMessageId } from '../types/index.ts'
 
 export const consistentTemplateRefName = createRule<
@@ -38,7 +41,7 @@ export const consistentTemplateRefName = createRule<
           return
         }
         const argument = initializer.arguments[0]
-        const key = argument && getRefString(argument)
+        const key = argument && getStaticStringValue(argument)
         if (key !== undefined && key !== node.id.name) {
           context.report({
             node: node.id,

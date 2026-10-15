@@ -343,7 +343,7 @@ of automatic transformations. Omit both `meta.fixable` and `meta.hasSuggestions`
 
 ## Implementation checklist
 
-1. Add a focused shared utility in `src/utils/macro-types.ts` for eligible
+1. Add a focused shared utility in `src/utils/vue/macro-types.ts` for eligible
    macro calls and structural type-argument analysis. Reuse `getSetupRange()`
    and `getCallIdentity()` without changing their behavior for existing rules.
 2. Resolve type bindings only for the style rule, using parser scope references

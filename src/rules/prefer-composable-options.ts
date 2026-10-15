@@ -1,9 +1,7 @@
-import { unwrapExpression } from '../utils/ast.ts'
-import {
-  classifyComposableParameter,
-  filterScriptDefinitions,
-} from '../utils/composable-options.ts'
+import { unwrapExpression } from '../utils/ast/expressions.ts'
+import { classifyComposableParameter } from '../utils/composable-options.ts'
 import { createRule } from '../utils/create-rule.ts'
+import { filterScriptDefinitions } from '../utils/vue/script-scope.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type {
   PreferComposableOptionsMessageId,

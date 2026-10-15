@@ -1,50 +1,31 @@
-import { getSetupRange } from './ast.ts'
+import { findScopeReference } from './ast/scope.ts'
+import { filterScriptDefinitions } from './vue/script-scope.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
-import type { SourceCode } from '../types/index.ts'
+import type { SourceCode } from '../types/eslint.ts'
 
 type ParameterKind = 'options' | 'positional' | 'undefined' | 'unknown'
 
 /**
- * Vue's parser can merge top-level bindings from both scripts. Setup bindings
- * shadow ordinary-script bindings only for references inside script setup.
- */
-export function filterScriptDefinitions<
-  Definition extends { node: TSESTree.Node },
->(
-  definitions: Definition[],
-  reference: TSESTree.Node,
-  sourceCode: SourceCode,
-): Definition[] {
-  const setupRange = getSetupRange(sourceCode)
-  if (!setupRange) {
-    return definitions
-  }
-  const isSetup = (node: TSESTree.Node) =>
-    node.range[0] >= setupRange[0] && node.range[1] <= setupRange[1]
-  const setupDefinitions = definitions.filter(definition =>
-    isSetup(definition.node),
-  )
-  if (isSetup(reference) && setupDefinitions.length) {
-    return setupDefinitions
-  }
-  return definitions.filter(definition => !isSetup(definition.node))
-}
-
-/**
  * Resolve only the type namespace, preserving lexical shadowing and SFC scopes.
+ *
+ * @param identifier - The type identifier to resolve.
+ * @param sourceCode - The source code supplying scope and script-block
+ * information.
+ * @returns The visible type definitions, or an empty array when none resolve.
  */
 function getTypeDefinitions(
   identifier: TSESTree.Identifier,
   sourceCode: SourceCode,
 ) {
-  let scope = sourceCode.getScope(identifier)
-  let reference = scope.references.find(item => item.identifier === identifier)
-  while (!reference && scope.upper) {
-    scope = scope.upper
-    reference = scope.references.find(item => item.identifier === identifier)
-  }
+  const reference = findScopeReference(identifier, sourceCode)
   return filterScriptDefinitions(
     reference?.resolved?.defs.filter(
+      /**
+       * Keep definitions that belong to the type namespace.
+       *
+       * @param definition - The resolved scope definition.
+       * @returns Whether the definition introduces a type.
+       */
       definition => definition.isTypeDefinition,
     ) ?? [],
     identifier,
@@ -52,9 +33,21 @@ function getTypeDefinitions(
   )
 }
 
+/**
+ * Classify an object type by its call signatures and named members.
+ *
+ * @param members - The type members to inspect.
+ * @returns Positional for callable types, options for named fields, or unknown.
+ */
 function classifyMembers(members: TSESTree.TypeElement[]): ParameterKind {
   if (
     members.some(
+      /**
+       * Recognize callable or constructable type members.
+       *
+       * @param member - The type member to inspect.
+       * @returns Whether the member is a call or construct signature.
+       */
       member =>
         member.type === 'TSCallSignatureDeclaration' ||
         member.type === 'TSConstructSignatureDeclaration',
@@ -63,6 +56,12 @@ function classifyMembers(members: TSESTree.TypeElement[]): ParameterKind {
     return 'positional'
   }
   return members.some(
+    /**
+     * Recognize a property or method with a statically named key.
+     *
+     * @param member - The type member to inspect.
+     * @returns Whether the member provides a named options field.
+     */
     member =>
       (member.type === 'TSPropertySignature' ||
         member.type === 'TSMethodSignature') &&
@@ -75,6 +74,13 @@ function classifyMembers(members: TSESTree.TypeElement[]): ParameterKind {
 /**
  * Classify outer shapes only; field types do not change the options container.
  * A recursion path prevents cyclic aliases from being mistaken for evidence.
+ *
+ * @param node - The type annotation to classify.
+ * @param sourceCode - The source code used to resolve local type declarations.
+ * @param seen - The declarations already visited on this recursion path;
+ * defaults to an empty set.
+ * @returns The parameter shape, with unknown for unsupported or cyclic
+ * declarations.
  */
 function classifyType(
   node: TSESTree.TypeNode,
@@ -92,7 +98,15 @@ function classifyType(
       return classifyMembers(node.members)
     case 'TSUnionType': {
       const kinds = new Set(
-        node.types.map(type => classifyType(type, sourceCode, path)),
+        node.types.map(
+          /**
+           * Classify a constituent type using the current recursion path.
+           *
+           * @param type - The union or intersection constituent.
+           * @returns The parameter shape of the constituent.
+           */
+          type => classifyType(type, sourceCode, path),
+        ),
       )
       if (kinds.has('positional')) {
         return 'positional'
@@ -103,8 +117,26 @@ function classifyType(
       return kinds.has('options') ? 'options' : 'undefined'
     }
     case 'TSIntersectionType': {
-      const kinds = node.types.map(type => classifyType(type, sourceCode, path))
-      if (kinds.every(kind => kind === 'options')) {
+      const kinds = node.types.map(
+        /**
+         * Classify a constituent type using the current recursion path.
+         *
+         * @param type - The union or intersection constituent.
+         * @returns The parameter shape of the constituent.
+         */
+        type => classifyType(type, sourceCode, path),
+      )
+      if (
+        kinds.every(
+          /**
+           * Check whether a constituent is an options container.
+           *
+           * @param kind - The inferred parameter shape.
+           * @returns Whether the shape is options.
+           */
+          kind => kind === 'options',
+        )
+      ) {
         return 'options'
       }
       return kinds.includes('positional') ? 'positional' : 'unknown'
@@ -161,6 +193,11 @@ function classifyType(
 /**
  * Destructuring establishes named fields. Otherwise prefer an explicit type
  * over a default value, which cannot narrow the declared API by itself.
+ *
+ * @param node - The function parameter to classify.
+ * @param sourceCode - The source code used to resolve referenced types.
+ * @returns The options, positional, undefined, or unknown parameter
+ * classification.
  */
 export function classifyComposableParameter(
   node: TSESTree.Parameter,

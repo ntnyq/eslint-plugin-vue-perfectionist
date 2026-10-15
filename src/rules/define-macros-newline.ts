@@ -1,5 +1,6 @@
-import { getCallIdentity, getSetupRange } from '../utils/ast.ts'
 import { createRule } from '../utils/create-rule.ts'
+import { getCallIdentity } from '../utils/vue/call-identity.ts'
+import { getSetupRange } from '../utils/vue/script-scope.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type {
   DefineMacrosNewlineMessageId,

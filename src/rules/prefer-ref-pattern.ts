@@ -1,39 +1,19 @@
-import { isFunction } from '@ntnyq/utils'
 import { ASTUtils } from '@typescript-eslint/utils'
-import { getSetupRange, unwrapExpression } from '../utils/ast.ts'
-import { createRule } from '../utils/create-rule.ts'
 import {
-  getRefString,
-  getVueRefApi,
-  isVueRefVariable,
-  unwrapRefExpression,
-} from '../utils/ref-pattern.ts'
-import { resolveVueGlobals } from '../utils/vue-globals.ts'
+  getStaticStringValue,
+  unwrapExpression,
+} from '../utils/ast/expressions.ts'
+import { createRule } from '../utils/create-rule.ts'
+import { resolveVueGlobals } from '../utils/vue/globals.ts'
+import { hasTemplateVisitor } from '../utils/vue/parser-services.ts'
+import { getVueRefApi, isVueRefVariable } from '../utils/vue/refs.ts'
+import { getSetupRange } from '../utils/vue/script-scope.ts'
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
 import type { AST } from 'vue-eslint-parser'
 import type {
   PreferRefPatternMessageId,
   PreferRefPatternOptions,
 } from '../types/index.ts'
-
-/**
- * Narrow the documented Vue visitor service at the parser boundary.
- */
-function hasTemplateVisitor(services: unknown): services is {
-  defineTemplateBodyVisitor: (
-    templateVisitor: {
-      VAttribute: (node: AST.VAttribute | AST.VDirective) => void
-    },
-    scriptVisitor: TSESLint.RuleListener,
-  ) => TSESLint.RuleListener
-} {
-  return (
-    services !== null &&
-    typeof services === 'object' &&
-    'defineTemplateBodyVisitor' in services &&
-    isFunction(services.defineTemplateBodyVisitor)
-  )
-}
 
 export const preferRefPattern = createRule<
   [PreferRefPatternOptions],
@@ -102,7 +82,7 @@ export const preferRefPattern = createRule<
 
     function checkRenderRef(node: TSESTree.Node) {
       const expression = unwrapExpression(node)
-      const name = getRefString(expression)
+      const name = getStaticStringValue(expression)
       if (name !== undefined) {
         checkName(name, expression)
       } else if (expression.type === 'Identifier') {
@@ -136,9 +116,9 @@ export const preferRefPattern = createRule<
       const api = getVueRefApi(node, sourceCode, vueGlobals)
       if (api === 'useTemplateRef' && targets.has('useTemplateRef')) {
         const argument = node.arguments[0]
-        const name = argument && getRefString(argument)
+        const name = argument && getStaticStringValue(argument)
         if (name !== undefined && argument) {
-          checkName(name, unwrapRefExpression(argument))
+          checkName(name, unwrapExpression(argument))
         }
       }
       if (
@@ -159,7 +139,8 @@ export const preferRefPattern = createRule<
           return
         }
         const key =
-          ASTUtils.getPropertyName(property) ?? getRefString(property.key)
+          ASTUtils.getPropertyName(property) ??
+          getStaticStringValue(property.key)
         if (key === undefined) {
           return
         }
@@ -190,8 +171,8 @@ export const preferRefPattern = createRule<
       ) {
         return
       }
-      const expression = unwrapRefExpression(node.value.expression)
-      const name = getRefString(expression)
+      const expression = unwrapExpression(node.value.expression)
+      const name = getStaticStringValue(expression)
       if (name !== undefined) {
         checkName(name, expression)
         return

@@ -1,11 +1,11 @@
 import { COMPONENT_NAMES_SCHEMA } from '../constants/component-props.ts'
 import {
   analyzeComponentBindings,
-  hasComponentTemplateVisitor,
   matchComponent,
-} from '../utils/component-bindings.ts'
-import { compileRequiredProps } from '../utils/component-prop-config.ts'
+} from '../utils/component-props/bindings.ts'
+import { compileRequiredProps } from '../utils/component-props/config.ts'
 import { createRule } from '../utils/create-rule.ts'
+import { hasTemplateVisitor } from '../utils/vue/parser-services.ts'
 import type {
   RequireComponentPropsMessageId,
   RequireComponentPropsOptions,
@@ -63,7 +63,7 @@ export const requireComponentProps = createRule<
   create(context, [options]) {
     const targets = compileRequiredProps(options.targets ?? [])
     const services = context.sourceCode.parserServices
-    if (!hasComponentTemplateVisitor(services)) {
+    if (!hasTemplateVisitor(services)) {
       return {}
     }
     return services.defineTemplateBodyVisitor({

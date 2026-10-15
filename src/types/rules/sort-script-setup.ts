@@ -1,4 +1,4 @@
-import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
+import type { TSESLint } from '@typescript-eslint/utils'
 
 export type SortType =
   | 'alphabetical'
@@ -110,36 +110,14 @@ export interface SortScriptSetupOptions extends CommonSortOptions {
   vueImportSources?: string[]
 }
 
-export type RuleOptions = [SortScriptSetupOptions]
-export type MessageId =
+export type SortScriptSetupRuleOptions = [SortScriptSetupOptions]
+export type SortScriptSetupMessageId =
   | 'unexpectedGroupOrder'
   | 'unexpectedNewlinesBetween'
   | 'unexpectedNewlinesInside'
   | 'unexpectedOrder'
   | 'unsafeReorder'
-export type RuleContext = TSESLint.RuleContext<MessageId, RuleOptions>
-export type SourceCode = RuleContext['sourceCode']
-export type ResolvedOptions = Required<SortScriptSetupOptions>
-
-export interface Group {
-  before: Newlines
-  names: string[]
-  options: ResolvedOptions
-}
-
-export interface Statement {
-  end: number
-  group: number
-  index: number
-  modifiers: Modifier[]
-  name: string
-  names: string[]
-  node: TSESTree.ProgramStatement
-  selector: Selector
-  size: number
-  start: number
-  subgroup: number
-  callName?: string
-  importSource?: string | undefined
-  safeKind?: 'constant' | 'function' | 'type' | undefined
-}
+export type SortScriptSetupRuleContext = TSESLint.RuleContext<
+  SortScriptSetupMessageId,
+  SortScriptSetupRuleOptions
+>

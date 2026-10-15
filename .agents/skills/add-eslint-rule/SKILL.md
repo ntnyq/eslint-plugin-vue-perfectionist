@@ -43,8 +43,8 @@ Registration, plugin contract tests, rule tables, and the Rules sidebar currentl
 
 Add or update the following only when needed; do not create empty modules merely to fill out the structure:
 
-- `src/constants/example-rule.ts`: Large or shared API tables, defaults, and similar constants. Use `UPPER_SNAKE_CASE`. Update `src/constants/index.ts` when importing through the barrel; direct imports do not require a re-export.
-- `src/utils/example-rule.ts` or an existing utility file: Reusable AST, parsing, and option handling logic. Update `src/utils/index.ts` when importing through the barrel. The existing `src/constants/schema.ts` serves sorting options; keep unrelated schemas elsewhere.
+- `src/constants/example-rule.ts`: Large or shared API tables, defaults, and similar constants. Use `UPPER_SNAKE_CASE`. Import constants from their explicit module paths; there is no root constants barrel.
+- `src/utils/ast/`, `src/utils/vue/`, or `src/utils/component-props/`: Reuse the narrowest existing owner for shared analysis. Rule-specific sorting internals belong in `src/utils/sort-script-setup/`. Keep standalone helpers in `src/utils/example-rule.ts` when no domain fits; use explicit imports without a root utility barrel. `src/constants/sort-script-setup-schema.ts` serves sorting options; keep unrelated schemas elsewhere.
 - `tests/internal.ts`: Add helpers only when multiple tests need them. Prefer the existing `run`, `vueLanguageOptions`, and `$` helpers.
 - `docs/.vitepress/config.ts`: Enable the new rule in the documentation's `eslintConfig` when its Vue examples need rendered diagnostics. Keep the existing `correct` / `incorrect` container renderer.
 - `docs/design/example-rule.md`: Create this when complex semantics, sorting, or fix strategies need a discussion of tradeoffs, and register it in the Design sidebar.
@@ -106,8 +106,8 @@ export const exampleRule = createRule<
 ## 4. Scope and fix safety
 
 - For setup-only rules, reuse `getSetupRange()`, check the full node range, and handle SFCs containing both ordinary and setup scripts. Skip safely when required parser services are unavailable.
-- For template checks, follow `prefer-ref-pattern` for `defineTemplateBodyVisitor` and service type guards. Ordinary script visitors do not inspect template expressions.
-- Prefer `getCallIdentity()` for API identification and use `unwrapExpression()` where needed. Distinguish named imports, aliases, namespaces, default imports, type-only imports, same-named local variables, and shadowed bindings. Macros and runtime APIs have different identity rules; do not guess from identifier text alone.
+- For template checks, use `hasTemplateVisitor()` from `src/utils/vue/parser-services.ts`; its visitor keeps template node inference and accepts an optional script visitor. Ordinary script visitors do not inspect template expressions.
+- Prefer `getCallIdentity()` from `src/utils/vue/call-identity.ts` for API identification; use `unwrapExpression()` and `getStaticStringValue()` from `src/utils/ast/expressions.ts` where needed. Match export-based targets with `identity.exportedName ?? identity.name`; sorting preserves the classification `name` for default imports. Distinguish named imports, aliases, namespaces, default imports, type-only imports, same-named local variables, and shadowed bindings. Macros and runtime APIs have different identity rules; do not guess from identifier text alone.
 - Add `vueGlobals` / `vueImportSources` only when required. Global names must not override local bindings. Define whether optional calls, computed properties, dynamic expressions, and spread arguments are supported or skipped.
 - Declare `meta.fixable` only when a safe fixer exists: use `'whitespace'` for whitespace-only changes and `'code'` for code changes. Omit it for rules that only report. Declare `hasSuggestions` only when suggestions are actually provided.
 - When semantic preservation cannot be established, report without an automatic fix or an equally unsafe suggestion. Sorting must respect execution dependencies and side-effect boundaries. Do not mechanically convert functions that depend on `this`, `arguments`, or similar semantics, or rename one occurrence while breaking its references.

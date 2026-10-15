@@ -1,19 +1,22 @@
-import { MACROS, VUE_APIS } from '../constants/index.ts'
-import {
-  containsTopLevelAwait,
-  getBindingNames,
-  getCallIdentity,
-  isPrimitiveConstant,
-  unwrapExpression,
-} from './ast.ts'
+import { MACROS, VUE_APIS } from '../../constants/sort-script-setup.ts'
+import { isPrimitiveConstant, unwrapExpression } from '../ast/expressions.ts'
+import { containsTopLevelAwait, getBindingNames } from '../ast/traversal.ts'
+import { getCallIdentity } from '../vue/call-identity.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
-import type {
-  ResolvedOptions,
-  Selector,
-  SourceCode,
-  Statement,
-} from '../types/index.ts'
+import type { SourceCode } from '../../types/eslint.ts'
+import type { Selector } from '../../types/index.ts'
+import type { ResolvedOptions, Statement } from './types.ts'
 
+/**
+ * Classify a call and record its resolved call name and import source.
+ *
+ * @param call - The call expression to classify.
+ * @param statement - The statement metadata to update with the resolved
+ * identity.
+ * @param sourceCode - The source code providing lexical and import information.
+ * @param options - The resolved Vue import and global recognition options.
+ * @returns The recognized macro, Vue API, or composable selector, or undefined.
+ */
 function classifyCall(
   call: TSESTree.CallExpression,
   statement: Statement,
@@ -54,6 +57,16 @@ function classifyCall(
   return undefined
 }
 
+/**
+ * Classify a top-level statement and establish its sorting metadata.
+ *
+ * @param node - The program statement to inspect.
+ * @param sourceCode - The source code providing text, visitor keys, and scopes.
+ * @param options - The resolved rule options.
+ * @param index - The original statement index used for stable ordering.
+ * @returns The statement metadata, or undefined for unsupported statements or
+ * top-level await.
+ */
 export function classifyStatement(
   node: TSESTree.ProgramStatement,
   sourceCode: SourceCode,

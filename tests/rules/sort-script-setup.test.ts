@@ -4,13 +4,16 @@ import { describe, expect, it } from 'vitest'
 import { compileScript, parse } from 'vue/compiler-sfc'
 import { sortScriptSetup } from '../../src/rules/sort-script-setup'
 import { run, vueLanguageOptions } from '../internal'
-import type { MessageId, SortScriptSetupOptions } from '../../src/types'
+import type {
+  SortScriptSetupMessageId,
+  SortScriptSetupOptions,
+} from '../../src/types'
 
 function setup(body: string): string {
   return `<script setup lang="ts">\n${body}\n</script>`
 }
 
-await run<SortScriptSetupOptions, MessageId>({
+await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
   name: 'sort-script-setup',
   rule: sortScriptSetup,
   onResult(testcase, result) {

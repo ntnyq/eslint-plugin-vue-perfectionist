@@ -1,7 +1,7 @@
-import { unwrapRefExpression } from './ref-pattern.ts'
+import { unwrapExpression } from '../ast/expressions.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type { AST } from 'vue-eslint-parser'
-import type { ComponentPropType } from '../types/index.ts'
+import type { ComponentPropType } from '../../types/index.ts'
 
 export type ComponentPropNode = AST.Node | TSESTree.Node
 
@@ -23,6 +23,13 @@ export interface PropValue {
   node: ComponentPropNode
 }
 
+/**
+ * Represent a prop expression whose value cannot be inferred.
+ *
+ * @param node - The node responsible for the unknown value.
+ * @returns An unknown value with no known variants and the original diagnostic
+ * node.
+ */
 export function unknownPropValue(node: ComponentPropNode): PropValue {
   return {
     variants: [],
@@ -31,6 +38,13 @@ export function unknownPropValue(node: ComponentPropNode): PropValue {
   }
 }
 
+/**
+ * Represent a statically known string prop value.
+ *
+ * @param value - The decoded string value.
+ * @param node - The node supplying the string.
+ * @returns A certain string variant retaining its concrete text.
+ */
 export function stringPropValue(
   value: string,
   node: ComponentPropNode,
@@ -44,12 +58,24 @@ export function stringPropValue(
 
 /**
  * Infer only expression structure, never execute code or trust type assertions.
+ *
+ * @param input - The expression to inspect, including TypeScript wrappers.
+ * @param isGlobalUndefined - A predicate confirming that an undefined
+ * identifier is the unshadowed global.
+ * @returns Known structural variants, their remaining uncertainty, and the
+ * unwrapped expression node.
  */
 export function inferPropValue(
   input: ComponentPropNode,
   isGlobalUndefined: (node: ComponentPropNode) => boolean,
 ): PropValue {
-  const node = unwrapRefExpression(input)
+  const node = unwrapExpression(input)
+  /**
+   * Create a certain structural value for the current expression.
+   *
+   * @param type - The runtime type established by the expression shape.
+   * @returns A single known type variant associated with the current node.
+   */
   const known = (type: ComponentPropType): PropValue => ({
     variants: [{ type }],
     unknown: false,
@@ -107,6 +133,13 @@ export function inferPropValue(
         if (
           !argument.unknown &&
           argument.variants.every(
+            /**
+             * Recognize numeric types supported by the current unary operator.
+             *
+             * @param variant - The inferred operand variant.
+             * @returns Whether the operand is numeric or a bigint supported by
+             * the operator.
+             */
             variant =>
               variant.type === 'number' ||
               (node.operator !== '+' && variant.type === 'bigint'),

@@ -1,28 +1,12 @@
-import { isFunction } from '@ntnyq/utils'
+import { unwrapExpression } from '../utils/ast/expressions.ts'
 import { createRule } from '../utils/create-rule.ts'
-import { unwrapRefExpression } from '../utils/ref-pattern.ts'
-import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
+import { hasTemplateVisitor } from '../utils/vue/parser-services.ts'
+import type { TSESTree } from '@typescript-eslint/utils'
 import type { AST } from 'vue-eslint-parser'
 import type {
   NoComplexVForSourceMessageId,
   NoComplexVForSourceOptions,
 } from '../types/index.ts'
-
-/**
- * Narrow the Vue parser service without requiring it for standalone scripts.
- */
-function hasTemplateVisitor(services: unknown): services is {
-  defineTemplateBodyVisitor: (templateVisitor: {
-    VForExpression: (node: AST.VForExpression) => void
-  }) => TSESLint.RuleListener
-} {
-  return (
-    services !== null &&
-    typeof services === 'object' &&
-    'defineTemplateBodyVisitor' in services &&
-    isFunction(services.defineTemplateBodyVisitor)
-  )
-}
 
 export const noComplexVForSource = createRule<
   [NoComplexVForSourceOptions],
@@ -70,7 +54,7 @@ export const noComplexVForSource = createRule<
       node: AST.Node | TSESTree.Node,
       isSource = false,
     ): boolean {
-      const expression = unwrapRefExpression(node)
+      const expression = unwrapExpression(node)
       const canUseLiteral = !isSource || options.allowLiteral !== false
       switch (expression.type) {
         case 'Identifier':
@@ -94,7 +78,7 @@ export const noComplexVForSource = createRule<
         case 'TemplateLiteral':
           return canUseLiteral && expression.expressions.length === 0
         case 'UnaryExpression': {
-          const argument = unwrapRefExpression(expression.argument)
+          const argument = unwrapExpression(expression.argument)
           return (
             canUseLiteral &&
             ['+', '-'].includes(expression.operator) &&

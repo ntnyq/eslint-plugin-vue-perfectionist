@@ -2,16 +2,16 @@ import { PROP_VALUE_CONSTRAINT_SCHEMA } from '../constants/component-prop-values
 import { COMPONENT_NAMES_SCHEMA } from '../constants/component-props.ts'
 import {
   analyzeComponentBindings,
-  hasComponentTemplateVisitor,
   matchComponent,
-} from '../utils/component-bindings.ts'
-import { inferStaticPropValue } from '../utils/component-static-value.ts'
+} from '../utils/component-props/bindings.ts'
 import {
   compilePropValues,
   describePropVariant,
   getValueFailures,
-} from '../utils/component-value-constraints.ts'
+} from '../utils/component-props/constraints.ts'
+import { inferStaticPropValue } from '../utils/component-props/static-value.ts'
 import { createRule } from '../utils/create-rule.ts'
+import { hasTemplateVisitor } from '../utils/vue/parser-services.ts'
 import type {
   ComponentPropValuesMessageId,
   ComponentPropValuesOptions,
@@ -75,7 +75,7 @@ export const componentPropValues = createRule<
   create(context, [options]) {
     const targets = compilePropValues(options.targets ?? [])
     const services = context.sourceCode.parserServices
-    if (!hasComponentTemplateVisitor(services)) {
+    if (!hasTemplateVisitor(services)) {
       return {}
     }
     return services.defineTemplateBodyVisitor({

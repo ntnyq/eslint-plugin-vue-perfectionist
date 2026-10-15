@@ -1,9 +1,20 @@
-import { getCallIdentity, getSetupRange, unwrapExpression } from './ast.ts'
+import { unwrapExpression } from '../ast/expressions.ts'
+import { getCallIdentity } from './call-identity.ts'
+import { getSetupRange } from './script-scope.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
-import type { DefineMacrosTypeStyleMacro, SourceCode } from '../types/index.ts'
+import type { SourceCode } from '../../types/eslint.ts'
+import type { DefineMacrosTypeStyleMacro } from '../../types/index.ts'
 
 /**
  * Visits only compiler macro positions supported by the macro type rules.
+ *
+ * @param sourceCode - The source code providing the script setup range and
+ * lexical scopes.
+ * @param filename - The filename used to restrict analysis to Vue SFCs.
+ * @param check - The handler invoked with the macro name and its sole type
+ * argument.
+ * @returns A program visitor, or an empty visitor outside a Vue script setup
+ * block.
  */
 export function createMacroTypeVisitor(
   sourceCode: SourceCode,
@@ -17,6 +28,14 @@ export function createMacroTypeVisitor(
 
   const [setupStart, setupEnd] = setupRange
 
+  /**
+   * Inspect a top-level expression for an unshadowed type-only compiler macro.
+   *
+   * @param expression - The expression to inspect, including TypeScript
+   * wrappers.
+   * @param allowDefaults - Whether one withDefaults wrapper may be unwrapped;
+   * defaults to true.
+   */
   function inspect(expression: TSESTree.Node, allowDefaults = true) {
     const call = unwrapExpression(expression)
     if (
@@ -57,6 +76,12 @@ export function createMacroTypeVisitor(
   }
 
   return {
+    /**
+     * Inspect top-level expressions and variable initializers for supported
+     * macros.
+     *
+     * @param program - The merged SFC program.
+     */
     Program(program: TSESTree.Program) {
       for (const statement of program.body) {
         if (statement.type === 'ExpressionStatement') {

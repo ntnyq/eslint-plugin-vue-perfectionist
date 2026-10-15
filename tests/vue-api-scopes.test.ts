@@ -145,3 +145,64 @@ it.each([false, true])(
     ])
   },
 )
+
+it.each(['', ' lang="ts"'])(
+  'preserves distinct default import matching across composed rules (%s)',
+  language => {
+    const source = `<script setup${language}>
+import useSubscription from 'events'
+const marker = 1
+const result = useSubscription(handler)
+</script>`
+    const linter = new Linter()
+    const composedConfig: Linter.Config = {
+      ...config,
+      languageOptions: language
+        ? vueLanguageOptions
+        : { ...vueLanguageOptions, parserOptions: { parser: null } },
+      rules: {
+        'vp/sort-script-setup': [
+          'error',
+          { groups: ['composable', 'constant'] },
+        ],
+        'vp/callback-style': [
+          'error',
+          {
+            customCallbacks: [
+              { source: 'events', name: 'default', callbackIndices: [0] },
+            ],
+          },
+        ],
+        'vp/prefer-function-result-pattern': [
+          'error',
+          {
+            targets: [
+              {
+                source: 'events',
+                names: ['default'],
+                pattern: '^subscription',
+              },
+            ],
+          },
+        ],
+      },
+    }
+    const result = linter.verifyAndFix(source, composedConfig, 'Test.vue')
+    expect(
+      result.messages.map(message => [message.ruleId, message.messageId]),
+    ).toEqual([
+      ['vp/sort-script-setup', 'unsafeReorder'],
+      ['vp/prefer-function-result-pattern', 'unexpectedFunctionResultPattern'],
+      ['vp/callback-style', 'expectedInlineCallback'],
+    ])
+    expect(result.fixed).toBe(false)
+    expect(result.output).toBe(source)
+    for (const message of result.messages) {
+      expect(message.fix).toBeUndefined()
+      expect(message.suggestions).toBeUndefined()
+    }
+    expect(
+      linter.verifyAndFix(result.output, composedConfig, 'Test.vue'),
+    ).toEqual(result)
+  },
+)

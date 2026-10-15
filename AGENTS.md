@@ -5,7 +5,9 @@
 This package provides ESLint rules for consistent, readable, and maintainable Vue 3 code, covering callback styles, macro declaration layout, template ref naming, and statement ordering. Each rule defines its own scope: rules may target Vue SFC templates, script blocks, or standalone JavaScript and TypeScript files.
 
 - `src/index.ts` and `src/plugin.ts` expose the plugin and its rules. The plugin does not provide built-in configurations; users compose their own.
-- `src/rules/` contains rule implementations; `src/utils/`, `src/constants/`, and `src/types/` hold shared logic, schemas, and types.
+- `src/rules/` contains flat rule entry files. `src/utils/ast/` holds parser-independent AST helpers, `src/utils/vue/` holds Vue parser and scope integration, and `src/utils/component-props/` holds component prop analysis.
+- `src/utils/sort-script-setup/` owns sorting internals, including its internal models, group matching, option resolution, and validation. Public rule options stay in `src/types/rules/`; shared ESLint source types live in `src/types/eslint.ts`.
+- Use explicit utility imports rather than a root barrel. Keep single-purpose helpers such as `composable-options.ts` and `template-interpolation.ts` at `src/utils/` until a real multi-file domain emerges. See `docs/design/source-structure.md` for ownership and behavior boundaries.
 - `tests/rules/` contains rule and plugin contract tests.
 - `docs/rules/` documents public options; `docs/design/` records design decisions. VitePress configuration lives in `docs/.vitepress/`.
 - `dist/` is generated build output; do not edit it directly.

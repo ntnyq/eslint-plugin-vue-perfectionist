@@ -105,6 +105,7 @@ export function getThemeConfig(): DefaultTheme.Config {
       {
         text: 'Design',
         items: [
+          { link: '/design/source-structure', text: 'Source Structure' },
           { link: '/design/define-macros-types', text: 'Macro Type Rules' },
           { link: '/design/sort-script-setup', text: 'sort-script-setup' },
         ],

@@ -1,29 +1,10 @@
-import { isFunction } from '@ntnyq/utils'
 import { createRule } from '../utils/create-rule.ts'
-import type { TSESLint } from '@typescript-eslint/utils'
+import { hasTemplateVisitor } from '../utils/vue/parser-services.ts'
 import type { AST } from 'vue-eslint-parser'
 import type {
   PreferSimpleEventHandlerMessageId,
   PreferSimpleEventHandlerOptions,
 } from '../types/index.ts'
-
-/**
- * Narrow the Vue parser service without requiring it for standalone scripts.
- */
-function hasTemplateVisitor(services: unknown): services is {
-  defineTemplateBodyVisitor: (templateVisitor: {
-    VAttribute: (node: AST.VAttribute | AST.VDirective) => void
-    'VAttribute:exit': () => void
-    '*': (node: AST.Node) => void
-  }) => TSESLint.RuleListener
-} {
-  return (
-    services !== null &&
-    typeof services === 'object' &&
-    'defineTemplateBodyVisitor' in services &&
-    isFunction(services.defineTemplateBodyVisitor)
-  )
-}
 
 export const preferSimpleEventHandler = createRule<
   [PreferSimpleEventHandlerOptions],

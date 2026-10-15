@@ -4,14 +4,12 @@ import {
 } from '../constants/component-props.ts'
 import {
   analyzeComponentBindings,
-  hasComponentTemplateVisitor,
   matchComponent,
-} from '../utils/component-bindings.ts'
-import {
-  compilePropTypes,
-  hyphenateName,
-} from '../utils/component-prop-config.ts'
+} from '../utils/component-props/bindings.ts'
+import { compilePropTypes } from '../utils/component-props/config.ts'
+import { analyzePropTypes } from '../utils/component-props/type-analysis.ts'
 import { createRule } from '../utils/create-rule.ts'
+import { hasTemplateVisitor } from '../utils/vue/parser-services.ts'
 import type {
   ComponentPropTypesMessageId,
   ComponentPropTypesOptions,
@@ -91,7 +89,7 @@ export const componentPropTypes = createRule<
   create(context, [options]) {
     const targets = compilePropTypes(options.targets ?? [])
     const services = context.sourceCode.parserServices
-    if (!hasComponentTemplateVisitor(services)) {
+    if (!hasTemplateVisitor(services)) {
       return {}
     }
     return services.defineTemplateBodyVisitor({
@@ -111,26 +109,10 @@ export const componentPropTypes = createRule<
           if (!constraint || binding.presence !== 'present') {
             continue
           }
-          const actual = [
-            ...new Set(
-              binding.value.variants.flatMap(variant => {
-                if (!constraint.booleanCasting || variant.type !== 'string') {
-                  return [variant.type]
-                }
-                if (variant.stringValue === undefined) {
-                  return ['string', 'boolean'] as const
-                }
-                return [
-                  variant.stringValue === '' ||
-                  variant.stringValue === hyphenateName(name)
-                    ? ('boolean' as const)
-                    : ('string' as const),
-                ]
-              }),
-            ),
-          ].sort()
-          const invalid = actual.filter(
-            type => !constraint.types.includes(type),
+          const { actual, invalid } = analyzePropTypes(
+            binding.value,
+            name,
+            constraint,
           )
           let messageId: ComponentPropTypesMessageId
           if (invalid.length) {

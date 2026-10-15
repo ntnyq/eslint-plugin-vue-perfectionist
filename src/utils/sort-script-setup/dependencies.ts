@@ -1,14 +1,19 @@
 import { isNil } from '@ntnyq/utils'
 import { ASTUtils } from '@typescript-eslint/utils'
-import {
-  getCallIdentity,
-  getChildren,
-  isFunction,
-  unwrapExpression,
-} from './ast.ts'
+import { isFunction, unwrapExpression } from '../ast/expressions.ts'
+import { getChildren } from '../ast/traversal.ts'
+import { getCallIdentity } from '../vue/call-identity.ts'
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
-import type { ResolvedOptions, SourceCode, Statement } from '../types/index.ts'
+import type { SourceCode } from '../../types/eslint.ts'
+import type { ResolvedOptions, Statement } from './types.ts'
 
+/**
+ * Find a function node directly or through a variable initializer.
+ *
+ * @param node - The function or variable declarator to inspect.
+ * @returns The function node, or undefined when the node does not initialize a
+ * function.
+ */
 function getFunctionBody(node: TSESTree.Node): TSESTree.Node | undefined {
   if (isFunction(node)) {
     return node
@@ -22,6 +27,12 @@ function getFunctionBody(node: TSESTree.Node): TSESTree.Node | undefined {
 /**
  * Missing options are known defaults; unresolved options may enable immediate
  * execution, so callers must conservatively keep their callback dependencies.
+ *
+ * @param node - The options argument, or undefined when omitted.
+ * @param sourceCode - The source code providing scope information for static
+ * evaluation.
+ * @returns The static options object, an empty object for absent or nullish
+ * options, or undefined when unresolved.
  */
 function getCallOptions(
   node: TSESTree.Node | undefined,
@@ -43,6 +54,17 @@ function getCallOptions(
   return typeof result.value === 'object' ? result.value : undefined
 }
 
+/**
+ * Build runtime dependencies, following functions and callbacks executed
+ * immediately.
+ *
+ * @param statements - The sortable statements to analyze.
+ * @param sourceCode - The source code providing references, scopes, and visitor
+ * keys.
+ * @param options - The Vue import and global recognition options.
+ * @returns Each statement mapped to the declarations it requires before
+ * execution.
+ */
 export function buildDependencies(
   statements: Statement[],
   sourceCode: SourceCode,
@@ -56,9 +78,24 @@ export function buildDependencies(
     }
     for (const variable of scope.variables) {
       const statement = statements.find(
+        /**
+         * Locate the statement that owns a scope variable declaration.
+         *
+         * @param candidate - The statement candidate.
+         * @returns Whether it declares the variable name and contains a
+         * corresponding definition.
+         */
         candidate =>
           candidate.names.includes(variable.name) &&
           variable.defs.some(
+            /**
+             * Check whether a variable definition lies inside the candidate
+             * statement.
+             *
+             * @param definition - The variable definition to inspect.
+             * @returns Whether its declaration name is contained in the
+             * statement range.
+             */
             definition =>
               definition.name.range[0] >= candidate.node.range[0] &&
               definition.name.range[1] <= candidate.node.range[1],
@@ -77,6 +114,13 @@ export function buildDependencies(
       continue
     }
     const visitedFunctions = new Set<TSESTree.Node>()
+    /**
+     * Visit a called function directly or through its resolved local
+     * definitions.
+     *
+     * @param node - The callee or callback expression, or undefined when
+     * absent.
+     */
     const visitFunction = (node: TSESTree.Node | undefined) => {
       if (!node) {
         return
@@ -97,6 +141,14 @@ export function buildDependencies(
         }
       }
     }
+    /**
+     * Collect immediate runtime reads while avoiding deferred and recursive
+     * functions.
+     *
+     * @param node - The AST node to visit.
+     * @param executeFunction - Whether this function node executes immediately;
+     * defaults to false.
+     */
     function visit(node: TSESTree.Node, executeFunction = false) {
       if (isFunction(node) && !executeFunction) {
         return
@@ -135,8 +187,14 @@ export function buildDependencies(
           if (identity.name === 'watch') {
             const source = first ? unwrapExpression(first) : undefined
             if (source?.type === 'ArrayExpression') {
-              source.elements.forEach(element =>
-                visitFunction(element ?? undefined),
+              source.elements.forEach(
+                /**
+                 * Visit a watch source array element as an immediately evaluated
+                 * getter.
+                 *
+                 * @param element - The source element, or null for an array hole.
+                 */
+                element => visitFunction(element ?? undefined),
               )
             } else {
               visitFunction(source)
@@ -174,6 +232,12 @@ export function buildDependencies(
 /**
  * Stable topological selection prefers style order only among ready statements.
  * A cyclic remainder is kept verbatim instead of forcing an invalid move.
+ *
+ * @param statements - The statements in original order.
+ * @param dependencies - The prerequisite statements required by each statement.
+ * @param compare - The style comparator used to choose among ready statements.
+ * @returns The dependency-respecting order, preserving original order for a
+ * cyclic remainder.
  */
 export function sortByDependencies(
   statements: Statement[],
@@ -184,17 +248,41 @@ export function sortByDependencies(
   const sorted: Statement[] = []
   while (pending.size) {
     const ready = [...pending]
-      .filter(statement =>
-        [...(dependencies.get(statement) ?? [])].every(
-          dependency => !pending.has(dependency),
-        ),
+      .filter(
+        /**
+         * Select a statement whose prerequisites have already left the pending
+         * set.
+         *
+         * @param statement - The pending statement to inspect.
+         * @returns Whether every dependency is already satisfied.
+         */
+        statement =>
+          [...(dependencies.get(statement) ?? [])].every(
+            /**
+             * Check whether a prerequisite is no longer pending.
+             *
+             * @param dependency - The prerequisite statement.
+             * @returns Whether the prerequisite is outside the remaining pending
+             * set.
+             */
+            dependency => !pending.has(dependency),
+          ),
       )
       .sort(compare)
     const next = ready[0]
     if (!next) {
       return [
         ...sorted,
-        ...statements.filter(statement => pending.has(statement)),
+        ...statements.filter(
+          /**
+           * Retain statements still pending when a dependency cycle prevents
+           * progress.
+           *
+           * @param statement - The statement in original order.
+           * @returns Whether the statement remains unsorted.
+           */
+          statement => pending.has(statement),
+        ),
       ]
     }
     sorted.push(next)

@@ -1,10 +1,7 @@
-import {
-  getCallIdentity,
-  getScriptVariableDefinitions,
-  unwrapExpression,
-} from '../utils/ast.ts'
+import { unwrapExpression } from '../utils/ast/expressions.ts'
 import { createRule } from '../utils/create-rule.ts'
-import { resolveVueGlobals } from '../utils/vue-globals.ts'
+import { getCallIdentity } from '../utils/vue/call-identity.ts'
+import { resolveVueGlobals } from '../utils/vue/globals.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type {
   PreferFunctionResultPatternMessageId,
@@ -263,17 +260,7 @@ export const preferFunctionResultPattern = createRule<
         if (!identity) {
           return
         }
-        const callee = unwrapExpression(call.callee)
-        const definition =
-          callee.type === 'Identifier'
-            ? getScriptVariableDefinitions(callee, sourceCode)[0]
-            : undefined
-        const name =
-          definition?.type === 'ImportBinding' &&
-          definition.node.type === 'ImportDefaultSpecifier'
-            ? 'default'
-            : identity.name
-
+        const name = identity.exportedName ?? identity.name
         const selected = new Map<number | undefined, (typeof targets)[number]>()
         for (const target of targets) {
           if (

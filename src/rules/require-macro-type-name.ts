@@ -1,5 +1,5 @@
 import { createRule } from '../utils/create-rule.ts'
-import { createMacroTypeVisitor } from '../utils/macro-types.ts'
+import { createMacroTypeVisitor } from '../utils/vue/macro-types.ts'
 import type { JSONSchema4 } from '@typescript-eslint/utils/json-schema'
 import type {
   RequireMacroTypeNameMessageId,

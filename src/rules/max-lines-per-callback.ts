@@ -1,7 +1,7 @@
 import { CALLBACK_TARGET_SCHEMA } from '../constants/callback.ts'
-import { unwrapExpression } from '../utils/ast.ts'
-import { createCallbackVisitor } from '../utils/callback.ts'
+import { unwrapExpression } from '../utils/ast/expressions.ts'
 import { createRule } from '../utils/create-rule.ts'
+import { createCallbackVisitor } from '../utils/vue/callback.ts'
 import type {
   MaxLinesPerCallbackMessageId,
   MaxLinesPerCallbackOptions,

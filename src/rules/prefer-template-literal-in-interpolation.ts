@@ -1,10 +1,10 @@
-import { hasComponentTemplateVisitor } from '../utils/component-bindings.ts'
 import { createRule } from '../utils/create-rule.ts'
 import {
   createInterpolationReplacement,
   getTextFragments,
   isInterpolationContext,
 } from '../utils/template-interpolation.ts'
+import { hasTemplateVisitor } from '../utils/vue/parser-services.ts'
 import type {
   PreferTemplateLiteralInInterpolationMessageId,
   PreferTemplateLiteralInInterpolationOptions,
@@ -46,7 +46,7 @@ export const preferTemplateLiteralInInterpolation = createRule<
     const sourceCode = context.sourceCode
     const services = sourceCode.parserServices
 
-    if (!hasComponentTemplateVisitor(services)) {
+    if (!hasTemplateVisitor(services)) {
       return {}
     }
 
