@@ -1,6 +1,5 @@
 import { isString } from '@ntnyq/utils'
-import { ASTUtils } from '@typescript-eslint/utils'
-import { unwrapExpression } from './ast.ts'
+import { getScriptVariableDefinitions, unwrapExpression } from './ast.ts'
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
 import type { AST } from 'vue-eslint-parser'
 import type { SourceCode } from '../types/index.ts'
@@ -47,12 +46,9 @@ export function getVueRefApi(
 ): string | undefined {
   const callee = unwrapExpression(call.callee)
   if (callee.type === 'Identifier') {
-    const variable = ASTUtils.findVariable(
-      sourceCode.getScope(call),
-      callee.name,
-    )
-    const definition = variable?.defs[0]
-    if (!variable?.defs.length && vueGlobals.includes(callee.name)) {
+    const definitions = getScriptVariableDefinitions(callee, sourceCode)
+    const definition = definitions[0]
+    if (!definitions.length && vueGlobals.includes(callee.name)) {
       return callee.name
     }
     if (
@@ -72,10 +68,10 @@ export function getVueRefApi(
     callee.type === 'MemberExpression' &&
     callee.object.type === 'Identifier'
   ) {
-    const definition = ASTUtils.findVariable(
-      sourceCode.getScope(call),
-      callee.object.name,
-    )?.defs[0]
+    const definition = getScriptVariableDefinitions(
+      callee.object,
+      sourceCode,
+    )[0]
     if (
       definition?.type === 'ImportBinding' &&
       definition.parent.type === 'ImportDeclaration' &&

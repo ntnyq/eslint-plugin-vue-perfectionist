@@ -1,5 +1,8 @@
-import { ASTUtils } from '@typescript-eslint/utils'
-import { getCallIdentity, unwrapExpression } from '../utils/ast.ts'
+import {
+  getCallIdentity,
+  getScriptVariableDefinitions,
+  unwrapExpression,
+} from '../utils/ast.ts'
 import { createRule } from '../utils/create-rule.ts'
 import { resolveVueGlobals } from '../utils/vue-globals.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
@@ -263,8 +266,7 @@ export const preferFunctionResultPattern = createRule<
         const callee = unwrapExpression(call.callee)
         const definition =
           callee.type === 'Identifier'
-            ? ASTUtils.findVariable(sourceCode.getScope(callee), callee)
-                ?.defs[0]
+            ? getScriptVariableDefinitions(callee, sourceCode)[0]
             : undefined
         const name =
           definition?.type === 'ImportBinding' &&

@@ -5,7 +5,7 @@ import {
   isString,
 } from '@ntnyq/utils'
 import { ASTUtils } from '@typescript-eslint/utils'
-import type { TSESTree } from '@typescript-eslint/utils'
+import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
 import type { AST } from 'vue-eslint-parser'
 import type { CallIdentity, SourceCode } from '../types/index.ts'
 
@@ -150,6 +150,48 @@ export function isPrimitiveConstant(node: TSESTree.Node): boolean {
   )
 }
 
+/**
+ * Recover runtime scope from the Vue parser's merged top-level definitions.
+ * Setup locals shadow module bindings; imports from either script are hoisted.
+ */
+export function getScriptVariableDefinitions(
+  identifier: TSESTree.Identifier,
+  sourceCode: SourceCode,
+): TSESLint.Scope.Definition[] {
+  const variable = ASTUtils.findVariable(
+    sourceCode.getScope(identifier),
+    identifier,
+  )
+  const definitions = variable?.defs ?? []
+  const setupRange = getSetupRange(sourceCode)
+  if (!setupRange) {
+    return definitions
+  }
+  const isSetup = (node: TSESTree.Node) =>
+    node.range[0] >= setupRange[0] && node.range[1] <= setupRange[1]
+  const runtimeDefinitions = definitions.filter(
+    definition => definition.isVariableDefinition !== false,
+  )
+  // Keep type-only bindings when there is no value binding, so they do not
+  // accidentally opt into auto-import recognition.
+  const candidates = runtimeDefinitions.length
+    ? runtimeDefinitions
+    : definitions
+  if (isSetup(identifier)) {
+    const local = candidates.filter(
+      definition =>
+        definition.type !== 'ImportBinding' && isSetup(definition.node),
+    )
+    if (local.length) {
+      return local
+    }
+  }
+  return candidates.filter(
+    definition =>
+      definition.type === 'ImportBinding' || !isSetup(definition.node),
+  )
+}
+
 export function getCallIdentity(
   call: TSESTree.CallExpression,
   sourceCode: SourceCode,
@@ -159,8 +201,8 @@ export function getCallIdentity(
   }
   const callee = unwrapExpression(call.callee)
   if (callee.type === 'Identifier') {
-    const variable = ASTUtils.findVariable(sourceCode.getScope(callee), callee)
-    const definition = variable?.defs[0]
+    const definitions = getScriptVariableDefinitions(callee, sourceCode)
+    const definition = definitions[0]
     if (
       definition?.type === 'ImportBinding' &&
       definition.parent.type === 'ImportDeclaration' &&
@@ -191,7 +233,7 @@ export function getCallIdentity(
     }
     return {
       name: callee.name,
-      isUnbound: !variable || variable.defs.length === 0,
+      isUnbound: definitions.length === 0,
     }
   }
   if (
@@ -201,11 +243,10 @@ export function getCallIdentity(
     callee.object.type === 'Identifier' &&
     callee.property.type === 'Identifier'
   ) {
-    const variable = ASTUtils.findVariable(
-      sourceCode.getScope(callee.object),
+    const definition = getScriptVariableDefinitions(
       callee.object,
-    )
-    const definition = variable?.defs[0]
+      sourceCode,
+    )[0]
     if (
       definition?.type === 'ImportBinding' &&
       definition.parent.type === 'ImportDeclaration' &&

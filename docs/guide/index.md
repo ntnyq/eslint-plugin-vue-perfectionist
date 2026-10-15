@@ -36,7 +36,8 @@ The plugin supports ESLint `^9.10.0 || ^10.0.0` and `vue-eslint-parser`
 
 Use an `eslint.config.mjs` flat configuration file. The following configuration
 supports both JavaScript and TypeScript Vue SFCs and shows how to combine the
-available rules. Keep the rules that match your project's conventions:
+available rules. This example uses ESLint 9.22.0 or later. Keep the rules that
+match your project's conventions:
 
 ```js [eslint.config.mjs]
 import tsParser from '@typescript-eslint/parser'
@@ -68,6 +69,46 @@ export default defineConfig([
   },
 ])
 ```
+
+<details>
+<summary>Using ESLint 9.10.0 through 9.21.x</summary>
+
+The `defineConfig` helper from `eslint/config` was introduced in
+[ESLint 9.22.0](https://eslint.org/blog/2025/03/eslint-v9.22.0-released/).
+For earlier supported versions, omit that import and export the configuration
+array directly:
+
+```js [eslint.config.mjs]
+import tsParser from '@typescript-eslint/parser'
+import vuePerfectionist from 'eslint-plugin-vue-perfectionist'
+import vueParser from 'vue-eslint-parser'
+
+export default [
+  {
+    files: ['**/*.vue'],
+    languageOptions: {
+      parser: vueParser,
+      parserOptions: {
+        parser: tsParser,
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
+    },
+    plugins: {
+      'vue-perfectionist': vuePerfectionist,
+    },
+    rules: {
+      'vue-perfectionist/callback-style': 'error',
+      'vue-perfectionist/consistent-template-ref-name': 'error',
+      'vue-perfectionist/define-macros-newline': 'error',
+      'vue-perfectionist/prefer-ref-pattern': 'error',
+      'vue-perfectionist/sort-script-setup': 'error',
+    },
+  },
+]
+```
+
+</details>
 
 For JavaScript-only SFCs, omit the TypeScript parser import and
 `parserOptions.parser`. If an existing Vue configuration already supplies the

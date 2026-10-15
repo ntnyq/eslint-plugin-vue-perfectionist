@@ -152,6 +152,10 @@ Vue.onMounted(handler)
 
 Imports from other modules, local functions, and shadowed bindings do not match built-ins. Type-only imports do not match. Default imports are not treated as named Vue APIs.
 
+In SFCs with both script blocks, a local declaration in `<script setup>` shadows
+a same-name import only inside setup. Imports from either script block remain
+available in module scope, matching Vue's import hoisting.
+
 For auto-imports, enable `settings['vue-perfectionist'].autoImport: true`
 (see the [shared setup](../guide/index.md#auto-imported-vue-apis)), or configure
 `vueGlobals: ['onMounted', 'watch', 'watchEffect']` for this rule alone. An explicit

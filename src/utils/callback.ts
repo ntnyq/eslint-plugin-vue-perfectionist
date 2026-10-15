@@ -1,6 +1,9 @@
-import { ASTUtils } from '@typescript-eslint/utils'
 import { CALLBACK_APIS } from '../constants/callback-style.ts'
-import { getCallIdentity, unwrapExpression } from './ast.ts'
+import {
+  getCallIdentity,
+  getScriptVariableDefinitions,
+  unwrapExpression,
+} from './ast.ts'
 import { resolveVueGlobals } from './vue-globals.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type { CallbackTargetOptions, SourceCode } from '../types/index.ts'
@@ -55,7 +58,7 @@ export function createCallbackVisitor(
       const callee = unwrapExpression(node.callee)
       const definition =
         callee.type === 'Identifier'
-          ? ASTUtils.findVariable(sourceCode.getScope(callee), callee)?.defs[0]
+          ? getScriptVariableDefinitions(callee, sourceCode)[0]
           : undefined
       const name =
         definition?.type === 'ImportBinding' &&
