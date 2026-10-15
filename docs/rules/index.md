@@ -14,6 +14,7 @@ See the [setup guide](/guide/#basic-usage) for configuration instructions.
 | [define-macros-type-style](./define-macros-type-style.md)                                 | Enforce declaration styles for Vue macro types.                    |
 | [max-lines-per-callback](./max-lines-per-callback.md)                                     | Limit the length of inline callbacks for Vue APIs.                 |
 | [no-complex-v-for-source](./no-complex-v-for-source.md)                                   | Disallow complex expressions in Vue v-for sources.                 |
+| [prefer-composable-options](./prefer-composable-options.md)                               | Prefer a final options object for composable parameters.           |
 | [prefer-function-result-pattern](./prefer-function-result-pattern.md)                     | Enforce naming patterns for function result bindings.              |
 | [prefer-ref-pattern](./prefer-ref-pattern.md)                                             | Enforce naming patterns for template refs.                         |
 | [prefer-simple-event-handler](./prefer-simple-event-handler.md)                           | Require simple expressions in named template event handlers.       |

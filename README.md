@@ -95,6 +95,7 @@ for scope, limitations, and ESLint globals.
 | [define-macros-type-style](https://vue-perfectionist.vercel.app/rules/define-macros-type-style)                                 | Enforce declaration styles for Vue macro types.                    |
 | [max-lines-per-callback](https://vue-perfectionist.vercel.app/rules/max-lines-per-callback)                                     | Limit the length of inline callbacks for Vue APIs.                 |
 | [no-complex-v-for-source](https://vue-perfectionist.vercel.app/rules/no-complex-v-for-source)                                   | Disallow complex expressions in Vue v-for sources.                 |
+| [prefer-composable-options](https://vue-perfectionist.vercel.app/rules/prefer-composable-options)                               | Prefer a final options object for composable parameters.           |
 | [prefer-function-result-pattern](https://vue-perfectionist.vercel.app/rules/prefer-function-result-pattern)                     | Enforce naming patterns for function result bindings.              |
 | [prefer-ref-pattern](https://vue-perfectionist.vercel.app/rules/prefer-ref-pattern)                                             | Enforce naming patterns for template refs.                         |
 | [prefer-simple-event-handler](https://vue-perfectionist.vercel.app/rules/prefer-simple-event-handler)                           | Require simple expressions in named template event handlers.       |

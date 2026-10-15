@@ -74,7 +74,7 @@ For JavaScript-only SFCs, omit the TypeScript parser import and
 parsers, add the plugin and your chosen rules to that configuration.
 
 To check standalone JavaScript and TypeScript files, enable `callback-style`,
-`max-lines-per-callback`,
+`max-lines-per-callback`, `prefer-composable-options`,
 `consistent-template-ref-name`, `prefer-function-result-pattern`, and the script targets of `prefer-ref-pattern`
 in configurations matching those files, using their usual ESLint parsers.
 The example above matches `.vue` files only.
@@ -168,6 +168,12 @@ Use [`no-complex-v-for-source`](../rules/no-complex-v-for-source.md) to keep
 primitive literals are allowed by default and can be disabled independently.
 Array and object literals, branching, and other complex sources are reported
 without fixes or suggestions.
+
+Use [`prefer-composable-options`](../rules/prefer-composable-options.md) to keep
+composable inputs in a final options object. By default no positional parameters
+are allowed; `maxPositionalParams` permits leading inputs, but multiple parameters
+must still end in options. It checks definitions using syntax and supported local
+types, reports uncertain options types, and provides no fixes or suggestions.
 
 Use [`prefer-function-result-pattern`](../rules/prefer-function-result-pattern.md)
 to constrain function result bindings with regular expressions. Its `targets`

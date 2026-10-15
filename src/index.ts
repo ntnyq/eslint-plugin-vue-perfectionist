@@ -24,6 +24,7 @@ export type {
   GroupEntry,
   MaxLinesPerCallbackOptions,
   NoComplexVForSourceOptions,
+  PreferComposableOptionsOptions,
   PreferFunctionResultPatternOptions,
   PreferFunctionResultPatternTarget,
   PreferRefPatternOptions,

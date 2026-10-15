@@ -75,6 +75,10 @@ export function getThemeConfig(): DefaultTheme.Config {
             text: 'no-complex-v-for-source',
           },
           {
+            link: '/rules/prefer-composable-options',
+            text: 'prefer-composable-options',
+          },
+          {
             link: '/rules/prefer-function-result-pattern',
             text: 'prefer-function-result-pattern',
           },

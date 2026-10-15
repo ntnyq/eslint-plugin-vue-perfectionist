@@ -4,6 +4,26 @@ import plugin, * as pluginExports from '../src'
 import { vueLanguageOptions } from './internal'
 
 describe('plugin contract', () => {
+  it('checks composable definitions through an aliased plugin without fixes', () => {
+    const linter = new Linter()
+    const source = 'function useComments(id, thread = "") {}'
+    const result = linter.verifyAndFix(source, {
+      plugins: { vp: plugin },
+      rules: {
+        'vp/prefer-composable-options': ['error', { maxPositionalParams: 2 }],
+      },
+    })
+    expect(result.messages).toHaveLength(1)
+    expect(result.messages[0]).toMatchObject({
+      ruleId: 'vp/prefer-composable-options',
+      messageId: 'expectedOptionsObject',
+    })
+    expect(result.fixed).toBe(false)
+    expect(result.output).toBe(source)
+    expect(result.messages[0]?.fix).toBeUndefined()
+    expect(result.messages[0]?.suggestions).toBeUndefined()
+  })
+
   it('combines callback style and length without replacing inline callbacks', () => {
     const linter = new Linter()
     const configuration: Linter.Config = {
@@ -169,6 +189,7 @@ onMounted(handler)
       'define-macros-type-style',
       'max-lines-per-callback',
       'no-complex-v-for-source',
+      'prefer-composable-options',
       'prefer-function-result-pattern',
       'prefer-ref-pattern',
       'prefer-simple-event-handler',
