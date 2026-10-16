@@ -5,15 +5,12 @@ import { describe, expect, it } from 'vitest'
 import * as vueParser from 'vue-eslint-parser'
 import plugin from '../../src/index.ts'
 import { preferRefPattern } from '../../src/rules/prefer-ref-pattern.ts'
+import { createVueSFC } from '../helpers/create-vue-sfc.ts'
 import { run, vueLanguageOptions } from '../internal.ts'
 import type {
   PreferRefPatternMessageId,
   PreferRefPatternOptions,
 } from '../../src/types/index.ts'
-
-function sfc(script: string, template = ''): string {
-  return `<script setup lang="ts">\n${script}\n</script>\n<template>${template}</template>`
-}
 
 await run<PreferRefPatternOptions, PreferRefPatternMessageId>({
   name: 'prefer-ref-pattern',
@@ -31,10 +28,14 @@ await run<PreferRefPatternOptions, PreferRefPatternMessageId>({
   valid: [
     {
       description: 'skips auto-imported APIs when disabled',
-      code: sfc(
-        'const panel = ref(null); useTemplateRef("bad"); h("div", { ref: "bad" })',
-        '<div :ref="panel" />',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const panel = ref(null); useTemplateRef("bad"); h("div", { ref: "bad" })
+          </script>
+        `,
+        template: '<template><div :ref="panel" /></template>',
+      }),
       settings: { 'vue-perfectionist': { autoImport: false } },
     },
     ...[
@@ -44,22 +45,37 @@ await run<PreferRefPatternOptions, PreferRefPatternMessageId>({
       'let panel = ref(null); panel = () => {}',
     ].map(script => ({
       description: `preserves ref identity with auto-imports: ${script}`,
-      code: sfc(script, '<div :ref="panel" />'),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${script}
+</script>`,
+        template: '<template><div :ref="panel" /></template>',
+      }),
       settings: { 'vue-perfectionist': { autoImport: true } },
     })),
     {
       description: 'respects template-local shadowing with auto-imports',
-      code: sfc(
-        'const panel = ref(null)',
-        '<div v-for="panel in panels" :ref="panel" />',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const panel = ref(null)
+          </script>
+        `,
+        template:
+          '<template><div v-for="panel in panels" :ref="panel" /></template>',
+      }),
       settings: { 'vue-perfectionist': { autoImport: true } },
     },
     {
       description: 'respects shadowed render and template-ref APIs',
-      code: sfc(
-        'function render(h, useTemplateRef) { h("div", { ref: "bad" }); useTemplateRef("bad") }',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          function render(h, useTemplateRef) { h("div", { ref: "bad" }); useTemplateRef("bad") }
+          </script>
+        `,
+        template: `<template></template>`,
+      }),
       settings: { 'vue-perfectionist': { autoImport: true } },
     },
     {
@@ -70,77 +86,132 @@ await run<PreferRefPatternOptions, PreferRefPatternMessageId>({
     {
       description:
         'ignores unrelated attributes and missing or non-string arguments',
-      code: sfc(
-        'import { h, useTemplateRef } from "vue"; useTemplateRef(); useTemplateRef(42); h("div"); h("div", props); h("div", { ref: null })',
-        '<div ref :ref="null" @ref="capture" :id="\'bad\'" />',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { h, useTemplateRef } from "vue"; useTemplateRef(); useTemplateRef(42); h("div"); h("div", props); h("div", { ref: null })
+          </script>
+        `,
+        template:
+          '<template><div ref :ref="null" @ref="capture" :id="\'bad\'" /></template>',
+      }),
     },
     {
       code: '<template><div ref="tableRef" /><div :ref="\'tableRef\'" /><div :ref="`tableRef`" /></template>',
     },
     {
       description: 'does not require the variable name to match the key',
-      code: sfc(
-        'import { useTemplateRef } from "vue"; const element = useTemplateRef("tableRef")',
-        '<div ref="tableRef" />',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { useTemplateRef } from "vue"; const element = useTemplateRef("tableRef")
+          </script>
+        `,
+        template: '<template><div ref="tableRef" /></template>',
+      }),
     },
     {
       description: 'ignores reactive state that is not used as a template ref',
-      code: sfc(
-        'import { ref, shallowRef } from "vue"; const count = ref(0); const visible = shallowRef(false)',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, shallowRef } from "vue"; const count = ref(0); const visible = shallowRef(false)
+          </script>
+        `,
+        template: `<template></template>`,
+      }),
     },
     {
       description: 'accepts confirmed ref variables with matching names',
-      code: sfc(
-        'import { ref, h } from "vue"; const tableRef = ref(null); h("div", { ref: tableRef })',
-        '<div :ref="tableRef" />',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, h } from "vue"; const tableRef = ref(null); h("div", { ref: tableRef })
+          </script>
+        `,
+        template: '<template><div :ref="tableRef" /></template>',
+      }),
     },
     {
       description: 'skips function refs and dynamic expressions',
-      code: sfc(
-        'import { h, useTemplateRef } from "vue"; const capture = el => {}; useTemplateRef(key); h("div", { ref: capture }); h("div", { ref: el => {} })',
-        // This interpolation belongs to the Vue fixture, not the test itself.
-        // eslint-disable-next-line no-template-curly-in-string
-        '<div :ref="capture" /><div :ref="el => {}" /><div :ref="condition ? a : b" /><div :ref="`item${index}`" /><div :[key]="\'bad\'" />',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { h, useTemplateRef } from "vue"; const capture = el => {}; useTemplateRef(key); h("div", { ref: capture }); h("div", { ref: el => {} })
+          </script>
+        `,
+        template:
+          // This interpolation belongs to the Vue fixture, not the test itself.
+          // eslint-disable-next-line no-template-curly-in-string
+          '<template><div :ref="capture" /><div :ref="el => {}" /><div :ref="condition ? a : b" /><div :ref="`item${index}`" /><div :[key]="\'bad\'" /></template>',
+      }),
     },
     {
       description: 'skips globals, other modules, and default imports',
-      code: sfc(
-        'import h from "vue"; import { useTemplateRef, ref } from "other"; const panel = ref(null); useTemplateRef("bad"); h("div", { ref: "bad" })',
-        '<div :ref="panel" />',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import h from "vue"; import { useTemplateRef, ref } from "other"; const panel = ref(null); useTemplateRef("bad"); h("div", { ref: "bad" })
+          </script>
+        `,
+        template: '<template><div :ref="panel" /></template>',
+      }),
     },
-    { code: sfc('useTemplateRef("bad"); h("div", { ref: "bad" })') },
+    {
+      code: createVueSFC({
+        script: `
+        <script setup lang="ts">
+        useTemplateRef("bad"); h("div", { ref: "bad" })
+        </script>
+      `,
+        template: `<template></template>`,
+      }),
+    },
     {
       description: 'skips type-only Vue imports',
-      code: sfc(
-        'import type { h, useTemplateRef, ref } from "vue"; const panel = ref(null); h("div", { ref: "bad" }); useTemplateRef("bad")',
-        '<div :ref="panel" />',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import type { h, useTemplateRef, ref } from "vue"; const panel = ref(null); h("div", { ref: "bad" }); useTemplateRef("bad")
+          </script>
+        `,
+        template: '<template><div :ref="panel" /></template>',
+      }),
     },
     {
       description: 'respects shadowed API and ref bindings',
-      code: sfc(
-        'import { h, ref, useTemplateRef } from "vue"; const panel = ref(null); function render(h, useTemplateRef) { h("div", { ref: "bad" }); useTemplateRef("bad") }; function another(panel) { return h("div", { ref: panel }) }; function local(ref) { const element = ref(null); return h("div", { ref: element }) }',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { h, ref, useTemplateRef } from "vue"; const panel = ref(null); function render(h, useTemplateRef) { h("div", { ref: "bad" }); useTemplateRef("bad") }; function another(panel) { return h("div", { ref: panel }) }; function local(ref) { const element = ref(null); return h("div", { ref: element }) }
+          </script>
+        `,
+        template: `<template></template>`,
+      }),
     },
     {
       description: 'respects shadowed namespace bindings',
-      code: sfc(
-        'import * as Vue from "vue"; function render(Vue) { Vue.h("div", { ref: "bad" }); Vue.useTemplateRef("bad") }',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import * as Vue from "vue"; function render(Vue) { Vue.h("div", { ref: "bad" }); Vue.useTemplateRef("bad") }
+          </script>
+        `,
+        template: `<template></template>`,
+      }),
     },
     {
       description:
         'respects v-for and slot scope, including same-element bindings',
-      code: sfc(
-        'import { ref } from "vue"; const panel = ref(null)',
-        '<div v-for="panel in panels" :ref="panel" /><Widget v-slot="{ panel }"><div :ref="panel" /></Widget>',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref } from "vue"; const panel = ref(null)
+          </script>
+        `,
+        template:
+          '<template><div v-for="panel in panels" :ref="panel" /><Widget v-slot="{ panel }"><div :ref="panel" /></Widget></template>',
+      }),
     },
     {
       description: 'does not infer Options API exposure from a module variable',
@@ -152,33 +223,63 @@ await run<PreferRefPatternOptions, PreferRefPatternMessageId>({
       'let panel = ref(null); function replace() { panel = el => {} }',
     ].map(script => ({
       description: `respects setup shadowing and reassignment: ${script}`,
-      code: `<script lang="ts">import { h, ref } from "vue"; const panel = ref(null)</script>${sfc(`${script}; h("div", { ref: panel })`, '<div :ref="panel" />')}`,
+      code: `<script lang="ts">import { h, ref } from "vue"; const panel = ref(null)</script>${createVueSFC(
+        {
+          script: `<script setup lang="ts">
+${script}; h("div", { ref: panel })
+</script>`,
+          template: '<template><div :ref="panel" /></template>',
+        },
+      )}`,
     })),
     {
       description:
         'does not expose an ordinary script ref through an unrelated setup block',
-      code: `<script lang="ts">import { ref } from "vue"; const panel = ref(null)</script>${sfc('const other = 1', '<div :ref="panel" />')}`,
+      code: `<script lang="ts">import { ref } from "vue"; const panel = ref(null)</script>${createVueSFC(
+        {
+          script: `
+          <script setup lang="ts">
+          const other = 1
+          </script>
+        `,
+          template: '<template><div :ref="panel" /></template>',
+        },
+      )}`,
     },
     {
       description:
         'skips reassigned variables and destructured ref initializers',
-      code: sfc(
-        'import { ref, h } from "vue"; let panel = ref(null); panel = el => {}; const { value: element } = ref(null); h("div", { ref: panel }); h("div", { ref: element })',
-        '<div :ref="panel" /><div :ref="element" />',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, h } from "vue"; let panel = ref(null); panel = el => {}; const { value: element } = ref(null); h("div", { ref: panel }); h("div", { ref: element })
+          </script>
+        `,
+        template:
+          '<template><div :ref="panel" /><div :ref="element" /></template>',
+      }),
     },
     {
       description: 'checks only the effective known render ref property',
-      code: sfc(
-        'import { h } from "vue"; h("div", { ref: "bad", ref: "goodRef" }); h("div", { ref: "bad", ...props }); h("div", { ref: "bad", [key]: value }); h("div", { ref() {} }); h("div", { get ref() { return "bad" } }); h(...args, { ref: "bad" })',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { h } from "vue"; h("div", { ref: "bad", ref: "goodRef" }); h("div", { ref: "bad", ...props }); h("div", { ref: "bad", [key]: value }); h("div", { ref() {} }); h("div", { get ref() { return "bad" } }); h(...args, { ref: "bad" })
+          </script>
+        `,
+        template: `<template></template>`,
+      }),
     },
     {
       description: 'an empty target list disables all checks',
-      code: sfc(
-        'import { useTemplateRef, h } from "vue"; useTemplateRef("bad"); h("div", { ref: "bad" })',
-        '<div ref="bad" />',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { useTemplateRef, h } from "vue"; useTemplateRef("bad"); h("div", { ref: "bad" })
+          </script>
+        `,
+        template: '<template><div ref="bad" /></template>',
+      }),
       options: { targets: [] },
     },
     {
@@ -198,7 +299,12 @@ await run<PreferRefPatternOptions, PreferRefPatternMessageId>({
     ...['ref', 'shallowRef', 'useTemplateRef'].flatMap(api =>
       [false, true].map(withGlobals => ({
         description: `recognizes auto-imported ${api} in template bindings, globals: ${withGlobals}`,
-        code: sfc(`const panel = ${api}(null)`, '<div :ref="panel" />'),
+        code: createVueSFC({
+          script: `<script setup lang="ts">
+const panel = ${api}(null)
+</script>`,
+          template: '<template><div :ref="panel" /></template>',
+        }),
         settings: { 'vue-perfectionist': { autoImport: true } },
         languageOptions: withGlobals
           ? { globals: { [api]: 'readonly' as const } }
@@ -209,9 +315,14 @@ await run<PreferRefPatternOptions, PreferRefPatternMessageId>({
     ),
     {
       description: 'checks auto-imported template-ref keys and render refs',
-      code: sfc(
-        'const panel = ref(null); useTemplateRef("bad"); h("div", { ref: panel }); h("div", { ref: "bad" })',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const panel = ref(null); useTemplateRef("bad"); h("div", { ref: panel }); h("div", { ref: "bad" })
+          </script>
+        `,
+        template: `<template></template>`,
+      }),
       settings: { 'vue-perfectionist': { autoImport: true } },
       errors: [
         'unexpectedRefPattern',
@@ -240,15 +351,27 @@ await run<PreferRefPatternOptions, PreferRefPatternMessageId>({
     ),
     {
       description: 'keeps ordinary script refs available to setup render calls',
-      code: `<script lang="ts">import { h, ref } from "vue"; const panel = ref(null)</script>${sfc('h("div", { ref: panel })')}`,
+      code: `<script lang="ts">import { h, ref } from "vue"; const panel = ref(null)</script>${createVueSFC(
+        {
+          script: `
+          <script setup lang="ts">
+          h("div", { ref: panel })
+          </script>
+        `,
+          template: `<template></template>`,
+        },
+      )}`,
       errors: ['unexpectedRefPattern'],
       output: null,
     },
     ...['0', '[1]', '1n', '[-1]', '["ref" as const]'].map(key => ({
       description: `checks render refs with a static trailing key: ${key}`,
-      code: sfc(
-        `import { h } from "vue"; h("div", { ref: "bad", ${key}: "bad" })`,
-      ),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+import { h } from "vue"; h("div", { ref: "bad", ${key}: "bad" })
+</script>`,
+        template: `<template></template>`,
+      }),
       errors: ['unexpectedRefPattern' as const],
       output: null,
     })),
@@ -261,10 +384,14 @@ await run<PreferRefPatternOptions, PreferRefPatternMessageId>({
     },
     {
       description: 'supports the same-name v-bind shorthand',
-      code: sfc(
-        'import { ref as makeRef } from "vue"; const ref = makeRef(null)',
-        '<div :ref />',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref as makeRef } from "vue"; const ref = makeRef(null)
+          </script>
+        `,
+        template: '<template><div :ref /></template>',
+      }),
       errors: ['unexpectedRefPattern'],
       output: null,
     },
@@ -304,19 +431,25 @@ await run<PreferRefPatternOptions, PreferRefPatternMessageId>({
     },
     ...['ref', 'shallowRef', 'useTemplateRef'].map(api => ({
       description: `checks a template variable initialized with ${api}`,
-      code: sfc(
-        `import { ${api} } from "vue"; const panel = ${api}("panelRef")`,
-        '<div :ref="panel" />',
-      ),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+import { ${api} } from "vue"; const panel = ${api}("panelRef")
+</script>`,
+        template: '<template><div :ref="panel" /></template>',
+      }),
       errors: ['unexpectedRefPattern' as const],
       output: null,
     })),
     {
       description: 'handles Vue import aliases and TypeScript wrappers',
-      code: sfc(
-        'import { ref as makeRef, h as createElement, useTemplateRef as templateRef } from "vue"; const panel = (makeRef<HTMLElement | null>(null) as unknown); templateRef("bad" as string); createElement("div", { ref: panel! } satisfies object)',
-        '<div :ref="panel as unknown" />',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref as makeRef, h as createElement, useTemplateRef as templateRef } from "vue"; const panel = (makeRef<HTMLElement | null>(null) as unknown); templateRef("bad" as string); createElement("div", { ref: panel! } satisfies object)
+          </script>
+        `,
+        template: '<template><div :ref="panel as unknown" /></template>',
+      }),
       errors: [
         'unexpectedRefPattern',
         'unexpectedRefPattern',
@@ -326,10 +459,14 @@ await run<PreferRefPatternOptions, PreferRefPatternMessageId>({
     },
     {
       description: 'handles namespace imports and static computed API names',
-      code: sfc(
-        'import * as Vue from "vue"; const panel = Vue.shallowRef(null); Vue.useTemplateRef(`bad`); Vue["h"]("div", { ["ref"]: panel }); Vue.h("div", { "ref": "bad" })',
-        '<div :ref="panel" />',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import * as Vue from "vue"; const panel = Vue.shallowRef(null); Vue.useTemplateRef(\`bad\`); Vue["h"]("div", { ["ref"]: panel }); Vue.h("div", { "ref": "bad" })
+          </script>
+        `,
+        template: '<template><div :ref="panel" /></template>',
+      }),
       errors: [
         'unexpectedRefPattern',
         'unexpectedRefPattern',
@@ -346,9 +483,14 @@ await run<PreferRefPatternOptions, PreferRefPatternMessageId>({
     },
     {
       description: 'checks shorthand render props and properties after spreads',
-      code: sfc(
-        'import { h, ref as makeRef } from "vue"; const ref = makeRef(null); h("div", { ref }); h("div", { ...props, ref: "bad" }); h("div", { ref: `bad` }, "text")',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { h, ref as makeRef } from "vue"; const ref = makeRef(null); h("div", { ref }); h("div", { ...props, ref: "bad" }); h("div", { ref: \`bad\` }, "text")
+          </script>
+        `,
+        template: `<template></template>`,
+      }),
       errors: [
         'unexpectedRefPattern',
         'unexpectedRefPattern',
@@ -358,10 +500,14 @@ await run<PreferRefPatternOptions, PreferRefPatternMessageId>({
     },
     ...(['template', 'useTemplateRef', 'render'] as const).map(target => ({
       description: `enables only the ${target} target`,
-      code: sfc(
-        'import { useTemplateRef, h } from "vue"; useTemplateRef("bad"); h("div", { ref: "bad" })',
-        '<div ref="bad" />',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { useTemplateRef, h } from "vue"; useTemplateRef("bad"); h("div", { ref: "bad" })
+          </script>
+        `,
+        template: '<template><div ref="bad" /></template>',
+      }),
       options: { targets: [target] },
       errors: ['unexpectedRefPattern' as const],
       output: null,

@@ -1,6 +1,7 @@
 import { createRuleTester } from 'eslint-vitest-rule-tester'
 import { expect, it } from 'vitest'
 import { noComplexVForSource } from '../../src/rules/no-complex-v-for-source.ts'
+import { createVueSFC } from '../helpers/create-vue-sfc.ts'
 import { run, vueLanguageOptions } from '../internal.ts'
 import type {
   NoComplexVForSourceMessageId,
@@ -8,7 +9,9 @@ import type {
 } from '../../src/types/index.ts'
 
 function template(source: string, delimiter = 'in') {
-  return `<template><div v-for="item ${delimiter} ${source}" /></template>`
+  return createVueSFC({
+    template: `<template><div v-for="item ${delimiter} ${source}" /></template>`,
+  })
 }
 
 const references = [

@@ -3,15 +3,12 @@ import { createRuleTester } from 'eslint-vitest-rule-tester'
 import { describe, expect, it } from 'vitest'
 import { compileScript, parse } from 'vue/compiler-sfc'
 import { sortScriptSetup } from '../../src/rules/sort-script-setup'
+import { createVueSFC } from '../helpers/create-vue-sfc.ts'
 import { run, vueLanguageOptions } from '../internal'
 import type {
   SortScriptSetupMessageId,
   SortScriptSetupOptions,
 } from '../../src/types'
-
-function setup(body: string): string {
-  return `<script setup lang="ts">\n${body}\n</script>`
-}
 
 await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
   name: 'sort-script-setup',
@@ -28,40 +25,90 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
   valid: [
     {
       description: 'keeps auto-import recognition opt-in',
-      code: setup('const z = computed(() => 1)\nconst a = ref(0)'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = computed(() => 1)
+          const a = ref(0)
+          </script>
+        `,
+      }),
       settings: { 'vue-perfectionist': { autoImport: false } },
     },
     {
       description: 'explicit empty globals override shared auto-imports',
-      code: setup('const z = computed(() => 1)\nconst a = ref(0)'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = computed(() => 1)
+          const a = ref(0)
+          </script>
+        `,
+      }),
       options: { vueGlobals: [] },
       settings: { 'vue-perfectionist': { autoImport: true } },
     },
     {
       description: 'does not override local bindings with auto-imports',
-      code: setup('const z = 1\nconst ref = () => 0\nconst a = ref()'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 1
+          const ref = () => 0
+          const a = ref()
+          </script>
+        `,
+      }),
       options: { groups: ['constant', 'function', 'variable', 'ref'] },
       settings: { 'vue-perfectionist': { autoImport: true } },
     },
     {
       description: 'preserves eager callback dependencies with auto-imports',
-      code: setup('const state = ref(0)\nwatchEffect(() => state.value)'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const state = ref(0)
+          watchEffect(() => state.value)
+          </script>
+        `,
+      }),
       options: { groups: ['watch', 'ref'] },
       settings: { 'vue-perfectionist': { autoImport: true } },
     },
     {
       description: 'preserves intra-group order by default',
-      code: setup('const z = 1\nconst a = 2'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 1
+          const a = 2
+          </script>
+        `,
+      }),
     },
     {
       description: 'does not mistake a local ref for Vue ref',
-      code: setup(
-        'import { ref } from "./helper"\nconst a = ref(0)\nfunction run() {}',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref } from "./helper"
+          const a = ref(0)
+          function run() {}
+          </script>
+        `,
+      }),
     },
     {
       description: 'does not override a local binding with vueGlobals',
-      code: setup('const z = 1\nconst ref = () => 0\nconst a = ref()'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 1
+          const ref = () => 0
+          const a = ref()
+          </script>
+        `,
+      }),
       options: {
         groups: ['constant', 'function', 'variable', 'ref'],
         vueGlobals: ['ref'],
@@ -69,20 +116,41 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'groups reactive declarations in one bucket',
-      code: setup(
-        'import { ref, reactive } from "vue"\nconst z = reactive({})\nconst a = ref(0)',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, reactive } from "vue"
+          const z = reactive({})
+          const a = ref(0)
+          </script>
+        `,
+      }),
     },
     {
       description: 'treats unconfigured statements as partition boundaries',
-      code: setup('const z = 1\ndoSomething()\nconst a = 2'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 1
+          doSomething()
+          const a = 2
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
     },
     {
       description: 'allows an empty groups configuration',
-      code: setup('function z() {}\nconst a = 2'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          function z() {}
+          const a = 2
+          </script>
+        `,
+      }),
       options: {
         groups: [],
         newlinesBetween: 2,
@@ -91,7 +159,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'honors case sensitivity in natural comparisons: {"type":"natural"}',
-      code: setup('const Item2 = 0\nconst item2 = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const Item2 = 0
+          const item2 = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
         ignoreCase: true,
@@ -100,7 +175,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'honors case sensitivity in natural comparisons: {"type":"line-length","fallbackSort":{"type":"natural"}}',
-      code: setup('const Item2 = 0\nconst item2 = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const Item2 = 0
+          const item2 = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'line-length',
         fallbackSort: {
@@ -112,7 +194,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'honors case sensitivity in natural comparisons: {"groups":[{"group":"constant","type":"natural"}]}',
-      code: setup('const Item2 = 0\nconst item2 = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const Item2 = 0
+          const item2 = 0
+          </script>
+        `,
+      }),
       options: {
         groups: [
           {
@@ -126,7 +215,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'compares custom alphabets and name lengths by Unicode code point',
-      code: setup('const 𠮷 = 0\nconst a = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const 𠮷 = 0
+          const a = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'custom',
         alphabet: 'x',
@@ -134,14 +230,28 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'supports alphabetical sorting',
-      code: setup('const item10 = 0\nconst item2 = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const item10 = 0
+          const item2 = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'alphabetical',
       },
     },
     {
       description: 'retains ties and disables fallback for unsorted',
-      code: setup('const a = 0\nconst A = 1'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const a = 0
+          const A = 1
+          </script>
+        `,
+      }),
       options: {
         type: 'alphabetical',
         ignoreCase: true,
@@ -149,7 +259,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'retains ties and disables fallback for unsorted',
-      code: setup('const z = 0\nconst a = 1'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 0
+          const a = 1
+          </script>
+        `,
+      }),
       options: {
         fallbackSort: {
           type: 'natural',
@@ -158,7 +275,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'normalizes special characters for comparison',
-      code: setup('const _a = 0\nconst a = 1'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const _a = 0
+          const a = 1
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
         specialCharacters: 'trim',
@@ -166,7 +290,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'normalizes special characters for comparison',
-      code: setup('const a_b = 0\nconst ab = 1'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const a_b = 0
+          const ab = 1
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
         specialCharacters: 'remove',
@@ -175,7 +306,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'does not use subgroup-specific overrides in a merged bucket',
-      code: setup('function z() {}\nfunction a() {}'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          function z() {}
+          function a() {}
+          </script>
+        `,
+      }),
       options: {
         groups: [['functions', 'constant']],
         customGroups: [
@@ -189,7 +327,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'ignores sorting preferences in both settings namespaces',
-      code: setup('const z = 0\nconst a = 1'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 0
+          const a = 1
+          </script>
+        `,
+      }),
       settings: {
         perfectionist: {
           type: 'natural',
@@ -201,7 +346,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'uses explicit rule options regardless of settings',
-      code: setup('const z = 0\nconst a = 1'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 0
+          const a = 1
+          </script>
+        `,
+      }),
       options: {
         type: 'unsorted',
       },
@@ -213,7 +365,15 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'respects explicit and structural partitions',
-      code: setup('const z = 0\n\nconst a = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 0
+
+          const a = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
         partitionByNewLine: true,
@@ -222,7 +382,15 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'respects explicit and structural partitions',
-      code: setup('const z = 0\n// section\nconst a = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 0
+          // section
+          const a = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
         partitionByNewLine: true,
@@ -231,7 +399,15 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'respects explicit and structural partitions',
-      code: setup('const z = 0\nif (true) {}\nconst a = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 0
+          if (true) {}
+          const a = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
         partitionByNewLine: true,
@@ -240,7 +416,15 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'respects explicit and structural partitions',
-      code: setup('const z = 0\nawait run()\nconst a = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 0
+          await run()
+          const a = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
         partitionByNewLine: true,
@@ -249,7 +433,15 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'respects explicit and structural partitions',
-      code: setup('const z = 0\nconst data = await run()\nconst a = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 0
+          const data = await run()
+          const a = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
         partitionByNewLine: true,
@@ -258,7 +450,15 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'respects explicit and structural partitions',
-      code: setup('const z = 0\nconst x = 1, y = 2\nconst a = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 0
+          const x = 1, y = 2
+          const a = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
         partitionByNewLine: true,
@@ -267,7 +467,15 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'respects explicit and structural partitions',
-      code: setup('const z = 0\nimport "side-effects"\nconst a = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 0
+          import "side-effects"
+          const a = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
         partitionByNewLine: true,
@@ -277,9 +485,15 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'does not move protected statements: // eslint-disable-next-line no-unused-vars\nconst z = 0\nconst a = 0',
-      code: setup(
-        '// eslint-disable-next-line no-unused-vars\nconst z = 0\nconst a = 0',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          // eslint-disable-next-line no-unused-vars
+          const z = 0
+          const a = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
@@ -287,7 +501,15 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'does not move protected statements: // @ts-expect-error intentional\nconst z = 0\nconst a = 0',
-      code: setup('// @ts-expect-error intentional\nconst z = 0\nconst a = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          // @ts-expect-error intentional
+          const z = 0
+          const a = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
@@ -295,9 +517,16 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'does not move protected statements: // eslint-disable no-unused-vars\nconst z = 0\nconst a = 0\n// eslint-enable no-unused-vars',
-      code: setup(
-        '// eslint-disable no-unused-vars\nconst z = 0\nconst a = 0\n// eslint-enable no-unused-vars',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          // eslint-disable no-unused-vars
+          const z = 0
+          const a = 0
+          // eslint-enable no-unused-vars
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
@@ -305,9 +534,16 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'preserves state read by synchronous Vue callbacks: watch(() => z.value, () => {})',
-      code: setup(
-        'import { ref, watch, watchEffect, watchSyncEffect } from "vue"\nfunction read() { return z.value }\nconst z = ref(0)\nconst stop = watch(() => z.value, () => {})',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, watch, watchEffect, watchSyncEffect } from "vue"
+          function read() { return z.value }
+          const z = ref(0)
+          const stop = watch(() => z.value, () => {})
+          </script>
+        `,
+      }),
       options: {
         groups: ['function', 'watch', 'ref'],
       },
@@ -315,9 +551,16 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'preserves state read by synchronous Vue callbacks: watch([() => z.value], () => {})',
-      code: setup(
-        'import { ref, watch, watchEffect, watchSyncEffect } from "vue"\nfunction read() { return z.value }\nconst z = ref(0)\nconst stop = watch([() => z.value], () => {})',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, watch, watchEffect, watchSyncEffect } from "vue"
+          function read() { return z.value }
+          const z = ref(0)
+          const stop = watch([() => z.value], () => {})
+          </script>
+        `,
+      }),
       options: {
         groups: ['function', 'watch', 'ref'],
       },
@@ -325,9 +568,16 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'preserves state read by synchronous Vue callbacks: watch(read, () => {})',
-      code: setup(
-        'import { ref, watch, watchEffect, watchSyncEffect } from "vue"\nfunction read() { return z.value }\nconst z = ref(0)\nconst stop = watch(read, () => {})',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, watch, watchEffect, watchSyncEffect } from "vue"
+          function read() { return z.value }
+          const z = ref(0)
+          const stop = watch(read, () => {})
+          </script>
+        `,
+      }),
       options: {
         groups: ['function', 'watch', 'ref'],
       },
@@ -335,9 +585,16 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'preserves state read by synchronous Vue callbacks: watch([read], () => {})',
-      code: setup(
-        'import { ref, watch, watchEffect, watchSyncEffect } from "vue"\nfunction read() { return z.value }\nconst z = ref(0)\nconst stop = watch([read], () => {})',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, watch, watchEffect, watchSyncEffect } from "vue"
+          function read() { return z.value }
+          const z = ref(0)
+          const stop = watch([read], () => {})
+          </script>
+        `,
+      }),
       options: {
         groups: ['function', 'watch', 'ref'],
       },
@@ -345,9 +602,16 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'preserves state read by synchronous Vue callbacks: watch(() => 0, read, { immediate: true })',
-      code: setup(
-        'import { ref, watch, watchEffect, watchSyncEffect } from "vue"\nfunction read() { return z.value }\nconst z = ref(0)\nconst stop = watch(() => 0, read, { immediate: true })',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, watch, watchEffect, watchSyncEffect } from "vue"
+          function read() { return z.value }
+          const z = ref(0)
+          const stop = watch(() => 0, read, { immediate: true })
+          </script>
+        `,
+      }),
       options: {
         groups: ['function', 'watch', 'ref'],
       },
@@ -355,9 +619,16 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'preserves state read by synchronous Vue callbacks: watch(() => 0, read, options)',
-      code: setup(
-        'import { ref, watch, watchEffect, watchSyncEffect } from "vue"\nfunction read() { return z.value }\nconst z = ref(0)\nconst stop = watch(() => 0, read, options)',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, watch, watchEffect, watchSyncEffect } from "vue"
+          function read() { return z.value }
+          const z = ref(0)
+          const stop = watch(() => 0, read, options)
+          </script>
+        `,
+      }),
       options: {
         groups: ['function', 'watch', 'ref'],
       },
@@ -365,9 +636,16 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'preserves state read by synchronous Vue callbacks: watchEffect(read)',
-      code: setup(
-        'import { ref, watch, watchEffect, watchSyncEffect } from "vue"\nfunction read() { return z.value }\nconst z = ref(0)\nconst stop = watchEffect(read)',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, watch, watchEffect, watchSyncEffect } from "vue"
+          function read() { return z.value }
+          const z = ref(0)
+          const stop = watchEffect(read)
+          </script>
+        `,
+      }),
       options: {
         groups: ['function', 'watch', 'ref'],
       },
@@ -375,9 +653,16 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'preserves state read by synchronous Vue callbacks: watchSyncEffect(read)',
-      code: setup(
-        'import { ref, watch, watchEffect, watchSyncEffect } from "vue"\nfunction read() { return z.value }\nconst z = ref(0)\nconst stop = watchSyncEffect(read)',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, watch, watchEffect, watchSyncEffect } from "vue"
+          function read() { return z.value }
+          const z = ref(0)
+          const stop = watchSyncEffect(read)
+          </script>
+        `,
+      }),
       options: {
         groups: ['function', 'watch', 'ref'],
       },
@@ -385,9 +670,16 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'preserves state read by synchronous Vue callbacks: watchEffect((read as () => number))',
-      code: setup(
-        'import { ref, watch, watchEffect, watchSyncEffect } from "vue"\nfunction read() { return z.value }\nconst z = ref(0)\nconst stop = watchEffect((read as () => number))',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, watch, watchEffect, watchSyncEffect } from "vue"
+          function read() { return z.value }
+          const z = ref(0)
+          const stop = watchEffect((read as () => number))
+          </script>
+        `,
+      }),
       options: {
         groups: ['function', 'watch', 'ref'],
       },
@@ -395,9 +687,16 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'keeps deferred Vue callbacks free of immediate dependencies: watch(() => 0, read)',
-      code: setup(
-        'import { ref, watch, watchEffect, watchPostEffect } from "vue"\nfunction read() { return z.value }\nconst stop = watch(() => 0, read)\nconst z = ref(0)',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, watch, watchEffect, watchPostEffect } from "vue"
+          function read() { return z.value }
+          const stop = watch(() => 0, read)
+          const z = ref(0)
+          </script>
+        `,
+      }),
       options: {
         groups: ['function', 'watch', 'ref'],
       },
@@ -405,9 +704,16 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'keeps deferred Vue callbacks free of immediate dependencies: watch(() => 0, read, { immediate: false })',
-      code: setup(
-        'import { ref, watch, watchEffect, watchPostEffect } from "vue"\nfunction read() { return z.value }\nconst stop = watch(() => 0, read, { immediate: false })\nconst z = ref(0)',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, watch, watchEffect, watchPostEffect } from "vue"
+          function read() { return z.value }
+          const stop = watch(() => 0, read, { immediate: false })
+          const z = ref(0)
+          </script>
+        `,
+      }),
       options: {
         groups: ['function', 'watch', 'ref'],
       },
@@ -415,9 +721,16 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'keeps deferred Vue callbacks free of immediate dependencies: watchEffect(read, { flush: "post" })',
-      code: setup(
-        'import { ref, watch, watchEffect, watchPostEffect } from "vue"\nfunction read() { return z.value }\nconst stop = watchEffect(read, { flush: "post" })\nconst z = ref(0)',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, watch, watchEffect, watchPostEffect } from "vue"
+          function read() { return z.value }
+          const stop = watchEffect(read, { flush: "post" })
+          const z = ref(0)
+          </script>
+        `,
+      }),
       options: {
         groups: ['function', 'watch', 'ref'],
       },
@@ -425,9 +738,16 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'keeps deferred Vue callbacks free of immediate dependencies: watchEffect(read, { flush: "post" } as const)',
-      code: setup(
-        'import { ref, watch, watchEffect, watchPostEffect } from "vue"\nfunction read() { return z.value }\nconst stop = watchEffect(read, { flush: "post" } as const)\nconst z = ref(0)',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, watch, watchEffect, watchPostEffect } from "vue"
+          function read() { return z.value }
+          const stop = watchEffect(read, { flush: "post" } as const)
+          const z = ref(0)
+          </script>
+        `,
+      }),
       options: {
         groups: ['function', 'watch', 'ref'],
       },
@@ -435,9 +755,16 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'keeps deferred Vue callbacks free of immediate dependencies: watchPostEffect(read)',
-      code: setup(
-        'import { ref, watch, watchEffect, watchPostEffect } from "vue"\nfunction read() { return z.value }\nconst stop = watchPostEffect(read)\nconst z = ref(0)',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, watch, watchEffect, watchPostEffect } from "vue"
+          function read() { return z.value }
+          const stop = watchPostEffect(read)
+          const z = ref(0)
+          </script>
+        `,
+      }),
       options: {
         groups: ['function', 'watch', 'ref'],
       },
@@ -445,18 +772,32 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'keeps deferred Vue callbacks free of immediate dependencies: watchEffect(() => { onCleanup(read) })',
-      code: setup(
-        'import { ref, watch, watchEffect, watchPostEffect } from "vue"\nfunction read() { return z.value }\nconst stop = watchEffect(() => { onCleanup(read) })\nconst z = ref(0)',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, watch, watchEffect, watchPostEffect } from "vue"
+          function read() { return z.value }
+          const stop = watchEffect(() => { onCleanup(read) })
+          const z = ref(0)
+          </script>
+        `,
+      }),
       options: {
         groups: ['function', 'watch', 'ref'],
       },
     },
     {
       description: 'resolves function-valued variables used as watch callbacks',
-      code: setup(
-        'import { ref, watchEffect } from "vue"\nconst read = () => z.value\nconst z = ref(0)\nconst stop = watchEffect(read)',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, watchEffect } from "vue"
+          const read = () => z.value
+          const z = ref(0)
+          const stop = watchEffect(read)
+          </script>
+        `,
+      }),
       options: {
         groups: ['function', 'watch', 'ref'],
       },
@@ -464,9 +805,16 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'tracks Vue callbacks nested in immediately called local functions',
-      code: setup(
-        'import { ref, watchEffect } from "vue"\nfunction start() { return watchEffect(() => z.value) }\nconst z = ref(0)\nconst stop = start()',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, watchEffect } from "vue"
+          function start() { return watchEffect(() => z.value) }
+          const z = ref(0)
+          const stop = start()
+          </script>
+        `,
+      }),
       options: {
         groups: ['function', 'variable', 'ref'],
       },
@@ -474,9 +822,15 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'resolves imported aliases and explicit globals for synchronous callbacks',
-      code: setup(
-        'import { ref, watch as observe } from "vue"\nconst z = ref(0)\nconst stop = observe(() => z.value, () => {})',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, watch as observe } from "vue"
+          const z = ref(0)
+          const stop = observe(() => z.value, () => {})
+          </script>
+        `,
+      }),
       options: {
         groups: ['watch', 'ref'],
       },
@@ -484,7 +838,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'resolves imported aliases and explicit globals for synchronous callbacks',
-      code: setup('const z = ref(0)\nconst stop = watchEffect(() => z.value)'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = ref(0)
+          const stop = watchEffect(() => z.value)
+          </script>
+        `,
+      }),
       options: {
         groups: ['watch', 'ref'],
         vueGlobals: ['ref', 'watchEffect'],
@@ -493,9 +854,17 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'tracks a named customRef factory without executing returned accessors',
-      code: setup(
-        'import { customRef } from "vue"\nfunction factory() { record(z); return { get: () => later, set() {} } }\nconst z = {}\nconst value = customRef(factory)\nconst later = {}',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { customRef } from "vue"
+          function factory() { record(z); return { get: () => later, set() {} } }
+          const z = {}
+          const value = customRef(factory)
+          const later = {}
+          </script>
+        `,
+      }),
       options: {
         groups: ['function', 'ref', 'variable'],
       },
@@ -503,25 +872,44 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'does not infer Vue callback execution from a foreign customRef name',
-      code: setup(
-        'import { customRef } from "./helpers"\nconst a = customRef(() => z)\nconst z = {}',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { customRef } from "./helpers"
+          const a = customRef(() => z)
+          const z = {}
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
     },
     {
       description: 'prioritizes initialization dependencies over group order',
-      code: setup(
-        'import { ref } from "vue"\nconst count = ref(0)\nconst snapshot = count.value',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref } from "vue"
+          const count = ref(0)
+          const snapshot = count.value
+          </script>
+        `,
+      }),
       options: {
         groups: ['variable', 'ref'],
       },
     },
     {
       description: 'keeps initialization dependencies in descending order',
-      code: setup('const a = {}\nconst z = a'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const a = {}
+          const z = a
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
         order: 'desc',
@@ -529,18 +917,30 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'does not treat a deferred capture as an immediate read',
-      code: setup(
-        'import { ref, computed } from "vue"\nconst z = computed(() => a.value)\nconst a = ref(0)',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, computed } from "vue"
+          const z = computed(() => a.value)
+          const a = ref(0)
+          </script>
+        `,
+      }),
       options: {
         groups: ['computed', 'ref'],
       },
     },
     {
       description: 'tracks reads through immediately invoked local functions',
-      code: setup(
-        'const dependency = {}\nconst first = read()\nfunction read() { return dependency }',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const dependency = {}
+          const first = read()
+          function read() { return dependency }
+          </script>
+        `,
+      }),
       options: {
         groups: ['variable', 'function'],
         type: 'natural',
@@ -548,41 +948,76 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'tracks reads through an IIFE',
-      code: setup('const z = {}\nconst a = (() => z)()'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = {}
+          const a = (() => z)()
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
     },
     {
       description: 'retains cycles without an automatic fix',
-      code: setup('const z = a\nconst a = z'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = a
+          const a = z
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
     },
     {
       description: 'does not reorder interface merging or function overloads',
-      code: setup(
-        'interface Z { value: string }\ninterface Z { other: number }\ninterface A {}\nfunction f(x: string): string\nfunction f(x: number): number\nfunction f(x: unknown) { return x }',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          interface Z { value: string }
+          interface Z { other: number }
+          interface A {}
+          function f(x: string): string
+          function f(x: number): number
+          function f(x: unknown) { return x }
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
     },
     {
       description: 'does not recognize type-only imports as runtime APIs',
-      code: setup(
-        'import type { ref } from "vue"\nconst a = ref(0)\nconst b = 1',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import type { ref } from "vue"
+          const a = ref(0)
+          const b = 1
+          </script>
+        `,
+      }),
       options: {
         groups: ['variable', 'constant', 'ref'],
       },
     },
     {
       description: 'does not recognize type-only imports as runtime APIs',
-      code: setup(
-        'import { type ref } from "vue"\nconst a = ref(0)\nconst b = 1',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { type ref } from "vue"
+          const a = ref(0)
+          const b = 1
+          </script>
+        `,
+      }),
       options: {
         groups: ['variable', 'constant', 'ref'],
       },
@@ -590,7 +1025,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'does not match calls inside function bodies as custom initializers',
-      code: setup('function run() { useRouter() }\nconst a = 1'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          function run() { useRouter() }
+          const a = 1
+          </script>
+        `,
+      }),
       options: {
         groups: ['function', 'constant', 'router'],
         customGroups: [
@@ -603,7 +1045,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'does not infer sources for unresolved auto-imports',
-      code: setup('const route = useRouter()\nconst a = 1'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const route = useRouter()
+          const a = 1
+          </script>
+        `,
+      }),
       options: {
         groups: ['variable', 'constant', 'router'],
         customGroups: [
@@ -616,16 +1065,31 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'leaves dynamic and optional Vue calls unclassified',
-      code: setup(
-        'import * as Vue from "vue"\nconst a = Vue["ref"](0)\nconst b = Vue.ref?.(0)',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import * as Vue from "vue"
+          const a = Vue["ref"](0)
+          const b = Vue.ref?.(0)
+          </script>
+        `,
+      }),
       options: {
         groups: ['ref', 'variable'],
       },
     },
     {
       description: 'does not move expose across await',
-      code: setup('const a = 1\ndefineExpose({ a })\nawait run()\nconst b = 2'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const a = 1
+          defineExpose({ a })
+          await run()
+          const b = 2
+          </script>
+        `,
+      }),
       options: {
         groups: ['constant', 'define-expose'],
       },
@@ -633,7 +1097,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'keeps unknown members stable even with a global name comparator',
-      code: setup('zebra()\nalpha()'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          zebra()
+          alpha()
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
         groups: ['unknown'],
@@ -641,7 +1112,13 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'ignores invalid settings when rule options are provided',
-      code: setup('const a = 1'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const a = 1
+          </script>
+        `,
+      }),
       options: {
         type: 'unsorted',
       },
@@ -675,7 +1152,15 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
       ['', { pattern: '' }, ['']].flatMap(pattern =>
         [false, true].map(anyOf => ({
           description: `matches only calls with ${key} ${JSON.stringify(pattern)} and anyOf: ${anyOf}`,
-          code: setup('import { make } from "./factory"\nconst z = 1\nmake()'),
+          code: createVueSFC({
+            script: `
+              <script setup lang="ts">
+              import { make } from "./factory"
+              const z = 1
+              make()
+              </script>
+            `,
+          }),
           options: {
             groups: ['matches', 'constant', 'unknown'],
             customGroups: [
@@ -699,7 +1184,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     ),
     ...[false, true].map(withGlobals => ({
       description: `classifies auto-imports without unsafe fixes, globals: ${withGlobals}`,
-      code: setup('const z = computed(() => 1)\nconst a = ref(0)'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = computed(() => 1)
+          const a = ref(0)
+          </script>
+        `,
+      }),
       settings: { 'vue-perfectionist': { autoImport: true } },
       languageOptions: withGlobals
         ? {
@@ -719,7 +1211,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     })),
     {
       description: 'enforces grouping with unsorted',
-      code: setup('function run() {}\ninterface Props {}'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          function run() {}
+          interface Props {}
+          </script>
+        `,
+      }),
       errors: [
         {
           messageId: 'unexpectedGroupOrder',
@@ -730,14 +1229,26 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('interface Props {}\nfunction run() {}'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          interface Props {}
+          function run() {}
+          </script>
+        `,
+      }),
     },
     {
       description:
         'recognizes macro declarations and withDefaults without moving them',
-      code: setup(
-        'const emit = defineEmits(["update"])\nconst { title } = withDefaults(defineProps<{ title?: string }>(), { title: "" })',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const emit = defineEmits(["update"])
+          const { title } = withDefaults(defineProps<{ title?: string }>(), { title: "" })
+          </script>
+        `,
+      }),
       errors: [
         {
           messageId: 'unsafeReorder',
@@ -752,9 +1263,16 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'recognizes imported aliases and namespace members',
-      code: setup(
-        'import { ref as makeRef } from "vue"\nimport * as Vue from "vue"\nconst z = Vue.computed(() => 1)\nconst a = makeRef(0)',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref as makeRef } from "vue"
+          import * as Vue from "vue"
+          const z = Vue.computed(() => 1)
+          const a = makeRef(0)
+          </script>
+        `,
+      }),
       errors: [
         {
           messageId: 'unsafeReorder',
@@ -769,7 +1287,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'recognizes explicit Vue globals',
-      code: setup('const z = computed(() => 1)\nconst a = ref(0)'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = computed(() => 1)
+          const a = ref(0)
+          </script>
+        `,
+      }),
       options: {
         vueGlobals: ['ref', 'computed'],
       },
@@ -787,9 +1312,15 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'supports additional exact Vue import sources',
-      code: setup(
-        'import { ref, computed } from "@vue/reactivity"\nconst z = computed(() => 1)\nconst a = ref(0)',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, computed } from "@vue/reactivity"
+          const z = computed(() => 1)
+          const a = ref(0)
+          </script>
+        `,
+      }),
       options: {
         vueImportSources: ['@vue/reactivity'],
       },
@@ -807,9 +1338,15 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'groups reactive declarations in one bucket',
-      code: setup(
-        'import { ref, reactive } from "vue"\nconst z = reactive({})\nconst a = ref(0)',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, reactive } from "vue"
+          const z = reactive({})
+          const a = ref(0)
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
@@ -827,7 +1364,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'matches modifier groups before plain selectors',
-      code: setup('async function run() {}\nfunction stop() {}'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          async function run() {}
+          function stop() {}
+          </script>
+        `,
+      }),
       options: {
         groups: ['function', 'async-function'],
       },
@@ -841,13 +1385,26 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('function stop() {}\nasync function run() {}'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          function stop() {}
+          async function run() {}
+          </script>
+        `,
+      }),
     },
     {
       description: 'does not infer ref(null) to be a template-ref',
-      code: setup(
-        'import { ref, useTemplateRef } from "vue"\nconst el = ref(null)\nconst input = useTemplateRef("input")',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, useTemplateRef } from "vue"
+          const el = ref(null)
+          const input = useTemplateRef("input")
+          </script>
+        `,
+      }),
       errors: [
         {
           messageId: 'unsafeReorder',
@@ -862,9 +1419,15 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'classifies watch handles and lifecycle registrations',
-      code: setup(
-        'import { watchEffect, onMounted } from "vue"\nonMounted(() => {})\nconst stop = watchEffect(() => {})',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { watchEffect, onMounted } from "vue"
+          onMounted(() => {})
+          const stop = watchEffect(() => {})
+          </script>
+        `,
+      }),
       errors: [
         {
           messageId: 'unsafeReorder',
@@ -879,7 +1442,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'allows an explicit unknown group',
-      code: setup('doSomething()\nconst a = 2'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          doSomething()
+          const a = 2
+          </script>
+        `,
+      }),
       options: {
         groups: ['constant', 'unknown'],
       },
@@ -898,7 +1468,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'negotiates multiple locales for Unicode names: {"type":"natural"}',
-      code: setup('const ä = 1\nconst z = 2'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const ä = 1
+          const z = 2
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
         locales: ['zz-ZZ', 'sv-SE', 'en-US'],
@@ -912,12 +1489,26 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const z = 2\nconst ä = 1'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 2
+          const ä = 1
+          </script>
+        `,
+      }),
     },
     {
       description:
         'negotiates multiple locales for Unicode names: {"type":"line-length","fallbackSort":{"type":"natural"}}',
-      code: setup('const ä = 1\nconst z = 2'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const ä = 1
+          const z = 2
+          </script>
+        `,
+      }),
       options: {
         type: 'line-length',
         fallbackSort: {
@@ -934,12 +1525,26 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const z = 2\nconst ä = 1'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 2
+          const ä = 1
+          </script>
+        `,
+      }),
     },
     {
       description:
         'negotiates multiple locales for Unicode names: {"groups":[{"group":"constant","type":"natural"}]}',
-      code: setup('const ä = 1\nconst z = 2'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const ä = 1
+          const z = 2
+          </script>
+        `,
+      }),
       options: {
         groups: [
           {
@@ -958,12 +1563,26 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const z = 2\nconst ä = 1'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 2
+          const ä = 1
+          </script>
+        `,
+      }),
     },
     {
       description:
         'honors case sensitivity in natural comparisons: {"type":"natural"}',
-      code: setup('const Item2 = 0\nconst item2 = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const Item2 = 0
+          const item2 = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
         ignoreCase: false,
@@ -977,12 +1596,26 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const item2 = 0\nconst Item2 = 0'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const item2 = 0
+          const Item2 = 0
+          </script>
+        `,
+      }),
     },
     {
       description:
         'honors case sensitivity in natural comparisons: {"type":"natural"}',
-      code: setup('const item2 = 0\nconst Item2 = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const item2 = 0
+          const Item2 = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
         ignoreCase: false,
@@ -997,12 +1630,26 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const Item2 = 0\nconst item2 = 0'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const Item2 = 0
+          const item2 = 0
+          </script>
+        `,
+      }),
     },
     {
       description:
         'honors case sensitivity in natural comparisons: {"type":"line-length","fallbackSort":{"type":"natural"}}',
-      code: setup('const Item2 = 0\nconst item2 = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const Item2 = 0
+          const item2 = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'line-length',
         fallbackSort: {
@@ -1019,12 +1666,26 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const item2 = 0\nconst Item2 = 0'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const item2 = 0
+          const Item2 = 0
+          </script>
+        `,
+      }),
     },
     {
       description:
         'honors case sensitivity in natural comparisons: {"type":"line-length","fallbackSort":{"type":"natural"}}',
-      code: setup('const item2 = 0\nconst Item2 = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const item2 = 0
+          const Item2 = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'line-length',
         fallbackSort: {
@@ -1042,12 +1703,26 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const Item2 = 0\nconst item2 = 0'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const Item2 = 0
+          const item2 = 0
+          </script>
+        `,
+      }),
     },
     {
       description:
         'honors case sensitivity in natural comparisons: {"groups":[{"group":"constant","type":"natural"}]}',
-      code: setup('const Item2 = 0\nconst item2 = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const Item2 = 0
+          const item2 = 0
+          </script>
+        `,
+      }),
       options: {
         groups: [
           {
@@ -1066,12 +1741,26 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const item2 = 0\nconst Item2 = 0'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const item2 = 0
+          const Item2 = 0
+          </script>
+        `,
+      }),
     },
     {
       description:
         'honors case sensitivity in natural comparisons: {"groups":[{"group":"constant","type":"natural"}]}',
-      code: setup('const item2 = 0\nconst Item2 = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const item2 = 0
+          const Item2 = 0
+          </script>
+        `,
+      }),
       options: {
         groups: [
           {
@@ -1091,12 +1780,26 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const Item2 = 0\nconst item2 = 0'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const Item2 = 0
+          const item2 = 0
+          </script>
+        `,
+      }),
     },
     {
       description:
         'keeps numeric precedence when natural sorting is case sensitive',
-      code: setup('const item10 = 0\nconst Item2 = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const item10 = 0
+          const Item2 = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
         ignoreCase: false,
@@ -1110,12 +1813,26 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const Item2 = 0\nconst item10 = 0'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const Item2 = 0
+          const item10 = 0
+          </script>
+        `,
+      }),
     },
     {
       description:
         'compares custom alphabets and name lengths by Unicode code point',
-      code: setup('const 𠮷 = 0\nconst 𠮶 = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const 𠮷 = 0
+          const 𠮶 = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'custom',
         alphabet: '𠮶𠮷',
@@ -1129,12 +1846,26 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const 𠮶 = 0\nconst 𠮷 = 0'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const 𠮶 = 0
+          const 𠮷 = 0
+          </script>
+        `,
+      }),
     },
     {
       description:
         'compares custom alphabets and name lengths by Unicode code point',
-      code: setup('const a = 0\nconst 𠮷 = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const a = 0
+          const 𠮷 = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'custom',
         alphabet: '𠮷a',
@@ -1148,12 +1879,26 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const 𠮷 = 0\nconst a = 0'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const 𠮷 = 0
+          const a = 0
+          </script>
+        `,
+      }),
     },
     {
       description:
         'compares custom alphabets and name lengths by Unicode code point',
-      code: setup('const 𠮶 = 0\nconst 𠮷 = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const 𠮶 = 0
+          const 𠮷 = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'custom',
         alphabet: '𠮶𠮷',
@@ -1168,11 +1913,25 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const 𠮷 = 0\nconst 𠮶 = 0'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const 𠮷 = 0
+          const 𠮶 = 0
+          </script>
+        `,
+      }),
     },
     {
       description: 'supports natural sorting',
-      code: setup('const item10 = 0\nconst item2 = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const item10 = 0
+          const item2 = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
@@ -1185,13 +1944,27 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const item2 = 0\nconst item10 = 0'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const item2 = 0
+          const item10 = 0
+          </script>
+        `,
+      }),
     },
     {
       description: 'applies descending order only inside groups',
-      code: setup(
-        'function alpha() {}\nfunction zebra() {}\nconst b = 2\nconst a = 1',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          function alpha() {}
+          function zebra() {}
+          const b = 2
+          const a = 1
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
         order: 'desc',
@@ -1206,13 +1979,28 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup(
-        'const b = 2\nconst a = 1\nfunction zebra() {}\nfunction alpha() {}',
-      ),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const b = 2
+          const a = 1
+          function zebra() {}
+          function alpha() {}
+          </script>
+        `,
+      }),
     },
     {
       description: 'uses source length and a fallback for equal lengths',
-      code: setup('const zz = 0\nconst bb = 0\nconst a = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const zz = 0
+          const bb = 0
+          const a = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'line-length',
         fallbackSort: {
@@ -1228,11 +2016,26 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const a = 0\nconst bb = 0\nconst zz = 0'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const a = 0
+          const bb = 0
+          const zz = 0
+          </script>
+        `,
+      }),
     },
     {
       description: 'supports custom alphabets',
-      code: setup('const a = 0\nconst b = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const a = 0
+          const b = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'custom',
         alphabet: 'ba',
@@ -1246,11 +2049,25 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const b = 0\nconst a = 0'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const b = 0
+          const a = 0
+          </script>
+        `,
+      }),
     },
     {
       description: 'supports subgroup order as a fallback',
-      code: setup('type T = {}\ninterface I {}'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          type T = {}
+          interface I {}
+          </script>
+        `,
+      }),
       options: {
         groups: [['interface', 'type']],
         type: 'custom',
@@ -1268,11 +2085,25 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('interface I {}\ntype T = {}'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          interface I {}
+          type T = {}
+          </script>
+        `,
+      }),
     },
     {
       description: 'supports locale arrays',
-      code: setup('const z = 0\nconst a = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 0
+          const a = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'alphabetical',
         locales: ['en-US'],
@@ -1286,14 +2117,28 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const a = 0\nconst z = 0'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const a = 0
+          const z = 0
+          </script>
+        `,
+      }),
     },
     {
       description:
         'matches import sources and original imported function names',
-      code: setup(
-        'import { useRouter as router } from "vue-router"\nimport { ref } from "vue"\nconst count = ref(0)\nconst route = router()',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { useRouter as router } from "vue-router"
+          import { ref } from "vue"
+          const count = ref(0)
+          const route = router()
+          </script>
+        `,
+      }),
       options: {
         groups: ['router', 'ref'],
         customGroups: [
@@ -1318,7 +2163,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'uses the first matching custom group and anyOf',
-      code: setup('function run() {}\nfunction handleClick() {}'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          function run() {}
+          function handleClick() {}
+          </script>
+        `,
+      }),
       options: {
         groups: ['handlers', 'others'],
         customGroups: [
@@ -1350,11 +2202,25 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('function handleClick() {}\nfunction run() {}'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          function handleClick() {}
+          function run() {}
+          </script>
+        `,
+      }),
     },
     {
       description: 'lets custom overrides win over a standalone group override',
-      code: setup('function a() {}\nfunction z() {}'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          function a() {}
+          function z() {}
+          </script>
+        `,
+      }),
       options: {
         groups: [
           {
@@ -1380,11 +2246,25 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('function z() {}\nfunction a() {}'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          function z() {}
+          function a() {}
+          </script>
+        `,
+      }),
     },
     {
       description: 'sorts using explicit rule options',
-      code: setup('const z = 0\nconst a = 1'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 0
+          const a = 1
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
@@ -1397,12 +2277,26 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const a = 1\nconst z = 0'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const a = 1
+          const z = 0
+          </script>
+        `,
+      }),
     },
     {
       description:
         'inherits rule order for fallback sorting and ignores settings',
-      code: setup('const aa = 0\nconst zz = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const aa = 0
+          const zz = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'line-length',
         order: 'desc',
@@ -1427,11 +2321,25 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const zz = 0\nconst aa = 0'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const zz = 0
+          const aa = 0
+          </script>
+        `,
+      }),
     },
     {
       description: 'handles global regex flags deterministically',
-      code: setup('function z() {}\nfunction a() {}'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          function z() {}
+          function a() {}
+          </script>
+        `,
+      }),
       options: {
         groups: ['functions'],
         customGroups: [
@@ -1454,14 +2362,28 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('function a() {}\nfunction z() {}'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          function a() {}
+          function z() {}
+          </script>
+        `,
+      }),
     },
     {
       description:
         'moves documentation and trailing comments with declarations',
-      code: setup(
-        '/** Z */\nconst z = 0 // last\n/** A */\nconst a = 0 // first',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          /** Z */
+          const z = 0 // last
+          /** A */
+          const a = 0 // first
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
@@ -1474,14 +2396,30 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup(
-        '/** A */\nconst a = 0 // first\n/** Z */\nconst z = 0 // last',
-      ),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          /** A */
+          const a = 0 // first
+          /** Z */
+          const z = 0 // last
+          </script>
+        `,
+      }),
     },
     {
       description:
         'keeps region markers fixed while sorting their following region',
-      code: setup('const z = 0\n// #region next\nconst c = 0\nconst b = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 0
+          // #region next
+          const c = 0
+          const b = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
         partitionByComment: {
@@ -1498,11 +2436,29 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const z = 0\n// #region next\nconst b = 0\nconst c = 0'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 0
+          // #region next
+          const b = 0
+          const c = 0
+          </script>
+        `,
+      }),
     },
     {
       description: 'formats inside and between groups independently',
-      code: setup('const a = 0\n\nconst b = 0\nfunction run() {}'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const a = 0
+
+          const b = 0
+          function run() {}
+          </script>
+        `,
+      }),
       options: {
         newlinesBetween: 1,
         newlinesInside: 0,
@@ -1521,11 +2477,27 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const a = 0\nconst b = 0\n\nfunction run() {}'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const a = 0
+          const b = 0
+
+          function run() {}
+          </script>
+        `,
+      }),
     },
     {
       description: 'resolves newline separators across absent groups',
-      code: setup('const a = 0\nfunction run() {}'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const a = 0
+          function run() {}
+          </script>
+        `,
+      }),
       options: {
         newlinesBetween: 0,
         groups: [
@@ -1545,11 +2517,28 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const a = 0\n\n\nfunction run() {}'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const a = 0
+
+
+          function run() {}
+          </script>
+        `,
+      }),
     },
     {
       description: 'supports the legacy newlinesInside compatibility value',
-      code: setup('const a = 0\n\nconst b = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const a = 0
+
+          const b = 0
+          </script>
+        `,
+      }),
       options: {
         newlinesBetween: 1,
         newlinesInside: 'newlinesBetween',
@@ -1562,13 +2551,26 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const a = 0\nconst b = 0'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const a = 0
+          const b = 0
+          </script>
+        `,
+      }),
     },
     {
       description: 'never automatically moves runtime-sensitive statements',
-      code: setup(
-        'import { ref } from "vue"\nconst z = ref(0)\nconst a = ref(0)',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref } from "vue"
+          const z = ref(0)
+          const a = ref(0)
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
@@ -1586,9 +2588,15 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'never automatically moves runtime-sensitive statements',
-      code: setup(
-        'import { useZ, useA } from "./composables"\nconst z = useZ()\nconst a = useA()',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { useZ, useA } from "./composables"
+          const z = useZ()
+          const a = useA()
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
@@ -1606,7 +2614,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'never automatically moves runtime-sensitive statements',
-      code: setup('const z = state.value\nconst a = state.other'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = state.value
+          const a = state.other
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
@@ -1624,7 +2639,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'never automatically moves runtime-sensitive statements',
-      code: setup('const { z } = getState()\nconst { a } = getState()'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const { z } = getState()
+          const { a } = getState()
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
@@ -1642,7 +2664,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'never automatically moves runtime-sensitive statements',
-      code: setup('class Z {}\nclass A {}'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          class Z {}
+          class A {}
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
@@ -1660,7 +2689,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'never automatically moves runtime-sensitive statements',
-      code: setup('enum Z { Value }\nenum A { Value }'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          enum Z { Value }
+          enum A { Value }
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
@@ -1678,9 +2714,17 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'fixes safe islands without moving surrounding calls',
-      code: setup(
-        'const z = 0\nconst a = 0\nimportedCall()\nconst y = 0\nconst b = 0',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 0
+          const a = 0
+          importedCall()
+          const y = 0
+          const b = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
@@ -1700,13 +2744,29 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup(
-        'const a = 0\nconst z = 0\nimportedCall()\nconst b = 0\nconst y = 0',
-      ),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const a = 0
+          const z = 0
+          importedCall()
+          const b = 0
+          const y = 0
+          </script>
+        `,
+      }),
     },
     {
       description: 'turns off all fixes without changing safe diagnostics',
-      code: setup('const z = 0\n\nconst a = 0'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 0
+
+          const a = 0
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
         newlinesInside: 0,
@@ -1725,9 +2785,17 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'produces code accepted by the Vue compiler',
-      code: setup(
-        'function zebra() { return 2 }\nfunction alpha() { return 1 }\ninterface Props { title: string }\nconst z = 2\nconst a = 1',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          function zebra() { return 2 }
+          function alpha() { return 1 }
+          interface Props { title: string }
+          const z = 2
+          const a = 1
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
@@ -1741,9 +2809,17 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup(
-        'interface Props { title: string }\nconst a = 1\nconst z = 2\nfunction alpha() { return 1 }\nfunction zebra() { return 2 }',
-      ),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          interface Props { title: string }
+          const a = 1
+          const z = 2
+          function alpha() { return 1 }
+          function zebra() { return 2 }
+          </script>
+        `,
+      }),
       after({ output }) {
         const parsed = parse(output)
         expect(parsed.errors).toEqual([])
@@ -1754,9 +2830,15 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'tracks runtime sources for default imported composables',
-      code: setup(
-        'import useStore from "./store"\nconst a = 1\nconst store = useStore()',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import useStore from "./store"
+          const a = 1
+          const store = useStore()
+          </script>
+        `,
+      }),
       options: {
         groups: ['store', 'constant'],
         customGroups: [
@@ -1781,7 +2863,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'can match a secondary destructuring binding',
-      code: setup('const a = 1\nconst { x, special } = getState()'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const a = 1
+          const { x, special } = getState()
+          </script>
+        `,
+      }),
       options: {
         groups: ['special', 'constant'],
         customGroups: [
@@ -1805,9 +2894,15 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'recognizes calls inside TypeScript expression wrappers',
-      code: setup(
-        'import { ref, computed } from "vue"\nconst z = computed(() => 1) as unknown\nconst a = ref(0)!',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import { ref, computed } from "vue"
+          const z = computed(() => 1) as unknown
+          const a = ref(0)!
+          </script>
+        `,
+      }),
       errors: [
         {
           messageId: 'unsafeReorder',
@@ -1823,9 +2918,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'does not partition the outer scope on an async function body',
-      code: setup(
-        'async function zebra() { await run() }\nfunction alpha() {}',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          async function zebra() { await run() }
+          function alpha() {}
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
@@ -1838,13 +2938,25 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup(
-        'function alpha() {}\nasync function zebra() { await run() }',
-      ),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          function alpha() {}
+          async function zebra() { await run() }
+          </script>
+        `,
+      }),
     },
     {
       description: 'does not use nested comments as top-level partitions',
-      code: setup('function zebra() { /* section */ }\nfunction alpha() {}'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          function zebra() { /* section */ }
+          function alpha() {}
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
         partitionByComment: true,
@@ -1858,12 +2970,27 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('function alpha() {}\nfunction zebra() { /* section */ }'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          function alpha() {}
+          function zebra() { /* section */ }
+          </script>
+        `,
+      }),
     },
     {
       description:
         'preserves an ASI-sensitive boundary after a proposed movement',
-      code: setup('const z = 1\nfunction a() {}\n(() => {})()'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const z = 1
+          function a() {}
+          (() => {})()
+          </script>
+        `,
+      }),
       options: {
         groups: ['function', 'constant'],
       },
@@ -1881,7 +3008,16 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'does not move statements with ambiguous detached comments',
-      code: setup('// heading\n\nconst z = 1\nconst a = 2'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          // heading
+
+          const z = 1
+          const a = 2
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
@@ -1900,7 +3036,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     {
       description:
         'allows explicit unknown-group sorting without claiming safe fixes',
-      code: setup('zebra()\nalpha()'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          zebra()
+          alpha()
+          </script>
+        `,
+      }),
       options: {
         groups: [
           {
@@ -1923,7 +3066,14 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'accepts natural sorting with multiple locales',
-      code: setup('const item10 = 1\nconst item2 = 2'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const item10 = 1
+          const item2 = 2
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
         locales: ['en-US', 'zh-CN'],
@@ -1937,12 +3087,27 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
           },
         },
       ],
-      output: setup('const item2 = 2\nconst item10 = 1'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const item2 = 2
+          const item10 = 1
+          </script>
+        `,
+      }),
     },
     {
       description:
         'retains runtime results when independently initialized constants move',
-      code: setup('const zebra = 2\nconst alpha = 1\nrecord([zebra, alpha])'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const zebra = 2
+          const alpha = 1
+          record([zebra, alpha])
+          </script>
+        `,
+      }),
       options: {
         type: 'natural',
       },
@@ -1957,7 +3122,15 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
       ],
       output(output, input) {
         expect(output).toBe(
-          setup('const alpha = 1\nconst zebra = 2\nrecord([zebra, alpha])'),
+          createVueSFC({
+            script: `
+              <script setup lang="ts">
+              const alpha = 1
+              const zebra = 2
+              record([zebra, alpha])
+              </script>
+            `,
+          }),
         )
         const transformed = output.slice(
           output.indexOf('>') + 1,
@@ -1980,10 +3153,28 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
     {
       description: 'does not cross the two script blocks',
-      code: `<script lang="ts">const z = 1\nconst a = 2</script>\n${setup('const y = 1\nconst b = 2')}`,
+      code: `<script lang="ts">const z = 1\nconst a = 2</script>\n${createVueSFC(
+        {
+          script: `
+          <script setup lang="ts">
+          const y = 1
+          const b = 2
+          </script>
+        `,
+        },
+      )}`,
       options: { type: 'natural' },
       errors: ['unexpectedOrder'],
-      output: `<script lang="ts">const z = 1\nconst a = 2</script>\n${setup('const b = 2\nconst y = 1')}`,
+      output: `<script lang="ts">const z = 1\nconst a = 2</script>\n${createVueSFC(
+        {
+          script: `
+          <script setup lang="ts">
+          const b = 2
+          const y = 1
+          </script>
+        `,
+        },
+      )}`,
     },
     {
       description: 'supports JavaScript setup without a TypeScript parser',
@@ -2046,7 +3237,16 @@ describe('option validation', () => {
     { sortImports: true },
   ])('rejects invalid configuration: %j', async options => {
     await expect(
-      tester.valid({ code: setup('const a = 1'), options }),
+      tester.valid({
+        code: createVueSFC({
+          script: `
+          <script setup lang="ts">
+          const a = 1
+          </script>
+        `,
+        }),
+        options,
+      }),
     ).rejects.toThrow()
   })
 
@@ -2070,14 +3270,30 @@ describe('option validation', () => {
     },
   ])('ignores ESLint settings: %j', async settings => {
     await expect(
-      tester.valid({ code: setup('const z = 0\nconst a = 1'), settings }),
+      tester.valid({
+        code: createVueSFC({
+          script: `
+          <script setup lang="ts">
+          const z = 0
+          const a = 1
+          </script>
+        `,
+        }),
+        settings,
+      }),
     ).resolves.toMatchObject({ result: { fixed: false, messages: [] } })
   })
 
   it('rejects numeric newline overrides in partitioned custom groups', async () => {
     await expect(
       tester.valid({
-        code: setup('function a() {}'),
+        code: createVueSFC({
+          script: `
+            <script setup lang="ts">
+            function a() {}
+            </script>
+          `,
+        }),
         options: {
           partitionByNewLine: true,
           groups: ['f'],

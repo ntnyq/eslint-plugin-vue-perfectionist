@@ -1,6 +1,7 @@
 import { createRuleTester } from 'eslint-vitest-rule-tester'
 import { expect, it } from 'vitest'
 import { preferSimpleEventHandler } from '../../src/rules/prefer-simple-event-handler.ts'
+import { createVueSFC } from '../helpers/create-vue-sfc.ts'
 import { run, vueLanguageOptions } from '../internal.ts'
 import type {
   PreferSimpleEventHandlerMessageId,
@@ -8,7 +9,9 @@ import type {
 } from '../../src/types/index.ts'
 
 function template(expression: string, event = '@click') {
-  return `<template><button ${event}="${expression}" /></template>`
+  return createVueSFC({
+    template: `<template><button ${event}="${expression}" /></template>`,
+  })
 }
 
 const invalidExpressions: [string, PreferSimpleEventHandlerMessageId][] = [

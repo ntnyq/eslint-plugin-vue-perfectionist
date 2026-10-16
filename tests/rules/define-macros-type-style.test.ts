@@ -2,8 +2,9 @@ import * as tsParser from '@typescript-eslint/parser'
 import { createRuleTester } from 'eslint-vitest-rule-tester'
 import { expect, it } from 'vitest'
 import { defineMacrosTypeStyle } from '../../src/rules/define-macros-type-style.ts'
+import { createVueSFC } from '../helpers/create-vue-sfc.ts'
 import { run, vueLanguageOptions } from '../internal.ts'
-import { checkedMacroTypes, sfc, skippedMacroTypes } from '../macro-types.ts'
+import { checkedMacroTypes, skippedMacroTypes } from '../macro-types.ts'
 import type {
   DefineMacrosTypeStyle,
   DefineMacrosTypeStyleMessageId,
@@ -55,11 +56,19 @@ await run<DefineMacrosTypeStyleOptions, DefineMacrosTypeStyleMessageId>({
   valid: [
     ...macros.flatMap(macro =>
       localDeclarations.map(declaration => ({
-        code: sfc(`${declaration}; ${macro}<Props>()`),
+        code: createVueSFC({
+          script: `<script setup lang="ts">
+${declaration}; ${macro}<Props>()
+</script>`,
+        }),
       })),
     ),
     ...importedDeclarations.map(declaration => ({
-      code: sfc(`${declaration}; defineProps<Props>()`),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${declaration}; defineProps<Props>()
+</script>`,
+      }),
       options: { macros: { defineProps: 'imported' as const } },
     })),
     ...[
@@ -68,7 +77,11 @@ await run<DefineMacrosTypeStyleOptions, DefineMacrosTypeStyleMessageId>({
       'defineProps<import("types").Props>()',
       'defineProps<import("types").Props<string>>()',
     ].map(script => ({
-      code: sfc(script),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${script}
+</script>`,
+      }),
       options: { macros: { defineProps: 'imported' as const } },
     })),
     ...[
@@ -77,33 +90,63 @@ await run<DefineMacrosTypeStyleOptions, DefineMacrosTypeStyleMessageId>({
       '({ title: string })',
       '{ title: import("types").Title }',
     ].map(type => ({
-      code: sfc(`defineProps<${type}>()`),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+defineProps<${type}>()
+</script>`,
+      }),
       options: { macros: { defineProps: 'inline' as const } },
     })),
     ...combinations.flatMap(styles =>
       styles.map(style => ({
         description: `accepts ${style} in ${styles.join(', ')}`,
-        code: sfc(
-          style === 'inline'
-            ? 'defineProps<{}>()'
-            : style === 'local'
-              ? 'type Props = {}; defineProps<Props>()'
-              : 'import type { Props } from "types"; defineProps<Props>()',
-        ),
+        code: createVueSFC({
+          script: `<script setup lang="ts">
+${
+  style === 'inline'
+    ? 'defineProps<{}>()'
+    : style === 'local'
+      ? 'type Props = {}; defineProps<Props>()'
+      : 'import type { Props } from "types"; defineProps<Props>()'
+}
+</script>`,
+        }),
         options: { macros: { defineProps: styles } },
       })),
     ),
     ...skippedMacroTypes.map(script => ({
-      code: sfc(script),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${script}
+</script>`,
+      }),
     })),
-    { code: sfc('defineProps<Props>(); type Props = {}') },
     {
-      code: sfc(
-        'type Props<T> = {}; defineProps<Props<import("types").Value>>()',
-      ),
+      code: createVueSFC({
+        script: `
+        <script setup lang="ts">
+        defineProps<Props>(); type Props = {}
+        </script>
+      `,
+      }),
     },
     {
-      code: sfc('defineProps<{}>(); defineEmits<{}>(); defineSlots<{}>()'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          type Props<T> = {}; defineProps<Props<import("types").Value>>()
+          </script>
+        `,
+      }),
+    },
+    {
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineProps<{}>(); defineEmits<{}>(); defineSlots<{}>()
+          </script>
+        `,
+      }),
       options: {
         macros: { defineProps: false, defineEmits: false, defineSlots: false },
       },
@@ -115,7 +158,13 @@ await run<DefineMacrosTypeStyleOptions, DefineMacrosTypeStyleMessageId>({
         'import type { Props } from "types"',
       ].map(declaration => {
         const ordinary = `<script lang="ts">${declaration}</script>`
-        const setup = sfc('defineProps<Props>()')
+        const setup = createVueSFC({
+          script: `
+            <script setup lang="ts">
+            defineProps<Props>()
+            </script>
+          `,
+        })
         return {
           code: reverse ? setup + ordinary : ordinary + setup,
           options: {
@@ -128,7 +177,13 @@ await run<DefineMacrosTypeStyleOptions, DefineMacrosTypeStyleMessageId>({
     ),
     { code: '<script lang="ts">defineProps<{}>()</script>' },
     {
-      code: `<script lang="ts">defineProps<{}>()</script>${sfc('const value = 1')}`,
+      code: `<script lang="ts">defineProps<{}>()</script>${createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const value = 1
+          </script>
+        `,
+      })}`,
     },
     { code: '<template>{{ defineProps() }}</template>' },
     {
@@ -142,7 +197,11 @@ await run<DefineMacrosTypeStyleOptions, DefineMacrosTypeStyleMessageId>({
   invalid: [
     ...macros.flatMap(macro =>
       [undefined, {}, { macros: {} }].map(options => ({
-        code: sfc(`${macro}<{}>()`),
+        code: createVueSFC({
+          script: `<script setup lang="ts">
+${macro}<{}>()
+</script>`,
+        }),
         options,
         errors: [
           {
@@ -154,12 +213,20 @@ await run<DefineMacrosTypeStyleOptions, DefineMacrosTypeStyleMessageId>({
       })),
     ),
     ...checkedMacroTypes.map(script => ({
-      code: sfc(script),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${script}
+</script>`,
+      }),
       errors: ['unexpectedTypeStyle' as const],
       output: null,
     })),
     ...importedDeclarations.map(declaration => ({
-      code: sfc(`${declaration}; defineProps<Props>()`),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${declaration}; defineProps<Props>()
+</script>`,
+      }),
       errors: [
         {
           messageId: 'unexpectedTypeStyle' as const,
@@ -182,7 +249,11 @@ await run<DefineMacrosTypeStyleOptions, DefineMacrosTypeStyleMessageId>({
       'import type { Props } from "types"; interface Props {}; defineProps<Props>()',
       'import * as Props from "types"; defineProps<Props>()',
     ].map(script => ({
-      code: sfc(script),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${script}
+</script>`,
+      }),
       options: { macros: { defineProps: allStyles } },
       errors: ['unknownTypeSource' as const],
       output: null,
@@ -206,7 +277,11 @@ await run<DefineMacrosTypeStyleOptions, DefineMacrosTypeStyleMessageId>({
       'Props[]',
       '[Props]',
     ].map(type => ({
-      code: sfc(`defineProps<${type}>()`),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+defineProps<${type}>()
+</script>`,
+      }),
       errors: ['unsupportedTypeForm' as const],
       output: null,
     })),
@@ -215,18 +290,34 @@ await run<DefineMacrosTypeStyleOptions, DefineMacrosTypeStyleMessageId>({
       'import Contracts from "types"; defineProps<Contracts.Props>()',
       'import { Contracts } from "types"; defineProps<Contracts.Props>()',
     ].map(script => ({
-      code: sfc(script),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${script}
+</script>`,
+      }),
       errors: ['unsupportedTypeForm' as const],
       output: null,
     })),
     {
-      code: sfc('defineProps<{}>(); defineEmits<{}>(); defineSlots<{}>()'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineProps<{}>(); defineEmits<{}>(); defineSlots<{}>()
+          </script>
+        `,
+      }),
       options: { macros: { defineProps: false } },
       errors: ['unexpectedTypeStyle', 'unexpectedTypeStyle'],
       output: null,
     },
     {
-      code: sfc('defineProps<{}>()'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineProps<{}>()
+          </script>
+        `,
+      }),
       options: { macros: { defineProps: ['imported', 'local'] } },
       errors: [
         {
@@ -245,7 +336,13 @@ await run<DefineMacrosTypeStyleOptions, DefineMacrosTypeStyleMessageId>({
       output: null,
     },
     {
-      code: sfc('defineProps<{}>()').replaceAll('\n', '\r\n'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineProps<{}>()
+          </script>
+        `,
+      }).replaceAll('\n', '\r\n'),
       errors: ['unexpectedTypeStyle'],
       output: null,
     },
@@ -269,6 +366,15 @@ it.each([
   ),
 ])('rejects invalid options %j', async options => {
   await expect(
-    tester.valid({ code: sfc('defineProps<Props>()'), options }),
+    tester.valid({
+      code: createVueSFC({
+        script: `
+        <script setup lang="ts">
+        defineProps<Props>()
+        </script>
+      `,
+      }),
+      options,
+    }),
   ).rejects.toThrow()
 })

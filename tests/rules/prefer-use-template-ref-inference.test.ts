@@ -1,6 +1,7 @@
 import { createRuleTester } from 'eslint-vitest-rule-tester'
 import { describe, expect, it } from 'vitest'
 import { preferUseTemplateRefInference } from '../../src/rules/prefer-use-template-ref-inference.ts'
+import { createVueSFC } from '../helpers/create-vue-sfc.ts'
 import { run, vueLanguageOptions } from '../internal.ts'
 import type {
   PreferUseTemplateRefInferenceMessageId,
@@ -11,12 +12,13 @@ const call = "const videoRef = useTemplateRef<HTMLVideoElement>('videoRef')"
 const imported = "import { useTemplateRef } from 'vue'"
 const autoImportSettings = { 'vue-perfectionist': { autoImport: true } }
 
-function sfc(script = call, template = '<video ref="videoRef" />'): string {
-  return `<script setup lang="ts">\n${script}\n</script>\n<template>${template}</template>`
-}
-
 function withImport(script = call, template?: string): string {
-  return sfc(`${imported}\n${script}`, template)
+  return createVueSFC({
+    script: `<script setup lang="ts">
+${imported}\n${script}
+</script>`,
+    template: `<template>${template ?? '<video ref="videoRef" />'}</template>`,
+  })
 }
 
 await run<
@@ -37,10 +39,31 @@ await run<
   },
   valid: [
     { code: withImport("const videoRef = useTemplateRef('videoRef')") },
-    { description: 'auto-imports default to disabled', code: sfc() },
-    { code: sfc(), settings: { 'vue-perfectionist': { autoImport: false } } },
     {
-      code: sfc(),
+      description: 'auto-imports default to disabled',
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${call}
+</script>`,
+        template: `<template><video ref="videoRef" /></template>`,
+      }),
+    },
+    {
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${call}
+</script>`,
+        template: `<template><video ref="videoRef" /></template>`,
+      }),
+      settings: { 'vue-perfectionist': { autoImport: false } },
+    },
+    {
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${call}
+</script>`,
+        template: `<template><video ref="videoRef" /></template>`,
+      }),
       languageOptions: { globals: { useTemplateRef: 'readonly' } },
     },
     { code: withImport(), options: { ignoreRefs: ['videoRef'] } },
@@ -55,7 +78,12 @@ await run<
       'declare function useTemplateRef<T>(key: string): T',
     ].map(binding => ({
       description: `preserves binding identity: ${binding}`,
-      code: sfc(`${binding}\n${call}`),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${binding}\n${call}
+</script>`,
+        template: `<template><video ref="videoRef" /></template>`,
+      }),
       settings: autoImportSettings,
     })),
     ...[
@@ -83,7 +111,12 @@ await run<
       "const videoRef = (useTemplateRef)<HTMLVideoElement>('videoRef')",
     ].map(script => ({
       description: `skips unsupported calls: ${script}`,
-      code: sfc(script),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${script}
+</script>`,
+        template: `<template><video ref="videoRef" /></template>`,
+      }),
       settings: autoImportSettings,
     })),
     ...[
@@ -170,11 +203,23 @@ await run<
     },
     {
       description: 'skips ordinary script calls in dual-script SFCs',
-      code: `<script lang="ts">${imported}; ${call}</script>${sfc('const value = 1')}`,
+      code: `<script lang="ts">${imported}; ${call}</script>${createVueSFC({
+        script: `
+          <script setup lang="ts">
+          const value = 1
+          </script>
+        `,
+        template: `<template><video ref="videoRef" /></template>`,
+      })}`,
     },
     {
       description: 'setup locals shadow ordinary script imports',
-      code: `<script lang="ts">${imported}</script>${sfc(`const useTemplateRef = <T>(key: string) => null; ${call}`)}`,
+      code: `<script lang="ts">${imported}</script>${createVueSFC({
+        script: `<script setup lang="ts">
+const useTemplateRef = <T>(key: string) => null; ${call}
+</script>`,
+        template: `<template><video ref="videoRef" /></template>`,
+      })}`,
       settings: autoImportSettings,
     },
     {
@@ -202,14 +247,24 @@ await run<
     },
     {
       description: 'recognizes shared auto-import settings',
-      code: sfc(),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${call}
+</script>`,
+        template: `<template><video ref="videoRef" /></template>`,
+      }),
       settings: autoImportSettings,
       errors: ['unexpectedTypeArguments'],
       output: null,
     },
     {
       description: 'recognizes configured globals when opted in',
-      code: sfc(),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${call}
+</script>`,
+        template: `<template><video ref="videoRef" /></template>`,
+      }),
       settings: autoImportSettings,
       languageOptions: { globals: { useTemplateRef: 'readonly' } },
       errors: ['unexpectedTypeArguments'],
@@ -275,7 +330,12 @@ await run<
     },
     {
       description: 'uses imports from the ordinary script in setup',
-      code: `<script lang="ts">${imported}</script>${sfc()}`,
+      code: `<script lang="ts">${imported}</script>${createVueSFC({
+        script: `<script setup lang="ts">
+${call}
+</script>`,
+        template: `<template><video ref="videoRef" /></template>`,
+      })}`,
       errors: ['unexpectedTypeArguments'],
       output: null,
     },
@@ -325,7 +385,12 @@ describe('prefer-use-template-ref-inference configuration', () => {
     async autoImport => {
       await expect(
         tester.valid({
-          code: sfc(),
+          code: createVueSFC({
+            script: `<script setup lang="ts">
+${call}
+</script>`,
+            template: `<template><video ref="videoRef" /></template>`,
+          }),
           settings: { 'vue-perfectionist': { autoImport } },
         }),
       ).rejects.toThrow('autoImport must be a boolean')

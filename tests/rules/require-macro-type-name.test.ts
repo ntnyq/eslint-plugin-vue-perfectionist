@@ -3,8 +3,9 @@ import { createRuleTester } from 'eslint-vitest-rule-tester'
 import ts from 'typescript'
 import { expect, it } from 'vitest'
 import { requireMacroTypeName } from '../../src/rules/require-macro-type-name.ts'
+import { createVueSFC } from '../helpers/create-vue-sfc.ts'
 import { run, vueLanguageOptions } from '../internal.ts'
-import { checkedMacroTypes, sfc, skippedMacroTypes } from '../macro-types.ts'
+import { checkedMacroTypes, skippedMacroTypes } from '../macro-types.ts'
 import type {
   RequireMacroTypeNameMessageId,
   RequireMacroTypeNameOptions,
@@ -56,36 +57,76 @@ await run<RequireMacroTypeNameOptions, RequireMacroTypeNameMessageId>({
         `${macro}<${name}<Other>>()`,
         `${macro}<(${name})>()`,
       ].map(script => ({
-        code: sfc(script),
+        code: createVueSFC({
+          script: `<script setup lang="ts">
+${script}
+</script>`,
+        }),
       })),
     ),
     ...customNames.map(name => ({
-      code: sfc(`type ${name} = {}; defineProps<${name}>()`),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+type ${name} = {}; defineProps<${name}>()
+</script>`,
+      }),
       options: { macros: { defineProps: name } },
     })),
     ...checkedMacroTypes.map(script => ({
-      code: sfc(script.replace('{}>', 'Props>')),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${script.replace('{}>', 'Props>')}
+</script>`,
+      }),
     })),
     ...skippedMacroTypes.map(script => ({
-      code: sfc(script),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${script}
+</script>`,
+      }),
     })),
-    { code: sfc('defineProps<\\u0050rops>()') },
     {
-      code: sfc('defineProps<{}>(); defineEmits<{}>(); defineSlots<{}>()'),
+      code: createVueSFC({
+        script: `
+        <script setup lang="ts">
+        defineProps<\\u0050rops>()
+        </script>
+      `,
+      }),
+    },
+    {
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineProps<{}>(); defineEmits<{}>(); defineSlots<{}>()
+          </script>
+        `,
+      }),
       options: {
         macros: { defineProps: false, defineEmits: false, defineSlots: false },
       },
     },
     {
-      code: sfc(
-        'defineProps<ButtonProps>(); defineEmits<Emits>(); defineSlots<Slots>()',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineProps<ButtonProps>(); defineEmits<Emits>(); defineSlots<Slots>()
+          </script>
+        `,
+      }),
       options: { macros: { defineProps: 'ButtonProps' } },
     },
     ...[true, false].map(reverse => {
       const script =
         '<script lang="ts">defineProps<Wrong>(); interface Props {}</script>'
-      const setup = sfc('defineProps<Props>()')
+      const setup = createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineProps<Props>()
+          </script>
+        `,
+      })
       return {
         code: reverse ? setup + script : script + setup,
       }
@@ -106,7 +147,11 @@ await run<RequireMacroTypeNameOptions, RequireMacroTypeNameMessageId>({
   invalid: [
     ...macros.flatMap(([macro, expected]) =>
       [undefined, {}, { macros: {} }].map(options => ({
-        code: sfc(`${macro}<Wrong>()`),
+        code: createVueSFC({
+          script: `<script setup lang="ts">
+${macro}<Wrong>()
+</script>`,
+        }),
         ...(options ? { options } : {}),
         errors: [
           {
@@ -118,14 +163,22 @@ await run<RequireMacroTypeNameOptions, RequireMacroTypeNameMessageId>({
       })),
     ),
     ...macros.map(([macro, expected]) => ({
-      code: sfc(`${macro}<{}>()`),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${macro}<{}>()
+</script>`,
+      }),
       errors: [
         { messageId: 'expectedNamedType' as const, data: { macro, expected } },
       ],
       output: null,
     })),
     ...checkedMacroTypes.map(script => ({
-      code: sfc(script),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${script}
+</script>`,
+      }),
       errors: ['expectedNamedType' as const],
       output: null,
     })),
@@ -141,24 +194,42 @@ await run<RequireMacroTypeNameOptions, RequireMacroTypeNameMessageId>({
       'typeof props',
       'string',
     ].map(type => ({
-      code: sfc(`defineProps<${type}>()`),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+defineProps<${type}>()
+</script>`,
+      }),
       errors: ['expectedNamedType' as const],
       output: null,
     })),
     ...['Partial<Props>', 'props', 'ButtonProps'].map(type => ({
-      code: sfc(`defineProps<${type}>()`),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+defineProps<${type}>()
+</script>`,
+      }),
       errors: ['unexpectedTypeName' as const],
       output: null,
     })),
     {
-      code: sfc(
-        'import type { Props as ButtonProps } from "types"; defineProps<ButtonProps>()',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          import type { Props as ButtonProps } from "types"; defineProps<ButtonProps>()
+          </script>
+        `,
+      }),
       errors: ['unexpectedTypeName'],
       output: null,
     },
     {
-      code: sfc('defineProps<Wrong<Other>>()'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineProps<Wrong<Other>>()
+          </script>
+        `,
+      }),
       errors: [
         {
           messageId: 'unexpectedTypeName',
@@ -172,7 +243,13 @@ await run<RequireMacroTypeNameOptions, RequireMacroTypeNameMessageId>({
       output: null,
     },
     {
-      code: sfc('defineProps<{}>()'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineProps<{}>()
+          </script>
+        `,
+      }),
       errors: [
         {
           messageId: 'expectedNamedType',
@@ -185,9 +262,13 @@ await run<RequireMacroTypeNameOptions, RequireMacroTypeNameMessageId>({
       output: null,
     },
     {
-      code: sfc(
-        'defineProps<Props>(); defineEmits<Emits>(); defineSlots<Slots>()',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineProps<Props>(); defineEmits<Emits>(); defineSlots<Slots>()
+          </script>
+        `,
+      }),
       options: {
         macros: {
           defineProps: 'ButtonProps',
@@ -203,18 +284,36 @@ await run<RequireMacroTypeNameOptions, RequireMacroTypeNameMessageId>({
       output: null,
     },
     {
-      code: sfc('defineProps<{}>(); defineEmits<{}>(); defineSlots<{}>()'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineProps<{}>(); defineEmits<{}>(); defineSlots<{}>()
+          </script>
+        `,
+      }),
       options: { macros: { defineProps: false } },
       errors: ['expectedNamedType', 'expectedNamedType'],
       output: null,
     },
     {
-      code: sfc('defineProps<Wrong>()').replaceAll('\n', '\r\n'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineProps<Wrong>()
+          </script>
+        `,
+      }).replaceAll('\n', '\r\n'),
       errors: ['unexpectedTypeName'],
       output: null,
     },
     {
-      code: sfc('defineProps<Wrong>()'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineProps<Wrong>()
+          </script>
+        `,
+      }),
       languageOptions: { globals: { defineProps: 'readonly' } },
       errors: ['unexpectedTypeName'],
       output: null,
@@ -278,7 +377,16 @@ it.each([
   })),
 ])('rejects invalid options %j', async options => {
   await expect(
-    tester.valid({ code: sfc('defineProps<Props>()'), options }),
+    tester.valid({
+      code: createVueSFC({
+        script: `
+        <script setup lang="ts">
+        defineProps<Props>()
+        </script>
+      `,
+      }),
+      options,
+    }),
   ).rejects.toThrow()
 })
 

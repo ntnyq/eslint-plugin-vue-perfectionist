@@ -1,10 +1,3 @@
-/**
- * Shared scope fixtures for both macro type rules.
- */
-export function sfc(script: string): string {
-  return `<script setup lang="ts">\n${script}\n</script>`
-}
-
 export const skippedMacroTypes = [
   'defineProps()',
   'defineProps({ title: String })',

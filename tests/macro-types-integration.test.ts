@@ -2,8 +2,8 @@ import { Linter } from 'eslint'
 import { expect, it } from 'vitest'
 import { compileScript, parse } from 'vue/compiler-sfc'
 import plugin from '../src/index.ts'
+import { createVueSFC } from './helpers/create-vue-sfc.ts'
 import { vueLanguageOptions } from './internal.ts'
-import { sfc } from './macro-types.ts'
 
 it.each([
   {
@@ -70,7 +70,11 @@ it.each([
 }[])(
   'composes independent policies: $script ($style / $name)',
   ({ script, style, name, messages }) => {
-    const source = sfc(script)
+    const source = createVueSFC({
+      script: `<script setup lang="ts">
+${script}
+</script>`,
+    })
     const linter = new Linter()
     const config: Linter.Config = {
       files: ['**/*.vue'],
@@ -93,16 +97,50 @@ it.each([
 )
 
 it.each([
-  sfc('interface Props { title: string }; defineProps<Props>()'),
-  sfc('type Emits = { save: [value: string] }; defineEmits<Emits>()'),
-  sfc(
-    'type Slots = { default(props: { title: string }): unknown }; defineSlots<Slots>()',
-  ),
-  sfc(
-    'interface Props { title?: string }; withDefaults(defineProps<Props>(), { title: "Hello" })',
-  ),
-  `<script lang="ts">export interface Props { title: string }</script>${sfc('defineProps<Props>()')}`,
-  `${sfc('defineProps<Props>()')}<script lang="ts">export interface Props { title: string }</script>`,
+  createVueSFC({
+    script: `
+      <script setup lang="ts">
+      interface Props { title: string }; defineProps<Props>()
+      </script>
+    `,
+  }),
+  createVueSFC({
+    script: `
+      <script setup lang="ts">
+      type Emits = { save: [value: string] }; defineEmits<Emits>()
+      </script>
+    `,
+  }),
+  createVueSFC({
+    script: `
+      <script setup lang="ts">
+      type Slots = { default(props: { title: string }): unknown }; defineSlots<Slots>()
+      </script>
+    `,
+  }),
+  createVueSFC({
+    script: `
+      <script setup lang="ts">
+      interface Props { title?: string }; withDefaults(defineProps<Props>(), { title: "Hello" })
+      </script>
+    `,
+  }),
+  `<script lang="ts">export interface Props { title: string }</script>${createVueSFC(
+    {
+      script: `
+      <script setup lang="ts">
+      defineProps<Props>()
+      </script>
+    `,
+    },
+  )}`,
+  `${createVueSFC({
+    script: `
+      <script setup lang="ts">
+      defineProps<Props>()
+      </script>
+    `,
+  })}<script lang="ts">export interface Props { title: string }</script>`,
 ])('accepts contracts supported by the Vue compiler: %s', source => {
   const { descriptor } = parse(source)
   expect(() =>

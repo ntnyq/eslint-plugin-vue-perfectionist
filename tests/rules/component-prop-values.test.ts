@@ -1,6 +1,7 @@
 import { createRuleTester } from 'eslint-vitest-rule-tester'
 import { describe, expect, it } from 'vitest'
 import { componentPropValues } from '../../src/rules/component-prop-values.ts'
+import { createVueSFC } from '../helpers/create-vue-sfc.ts'
 import { run, vueLanguageOptions } from '../internal.ts'
 import type {
   ComponentPropValueConstraint,
@@ -19,8 +20,11 @@ function optionsFor(
 }
 const options = optionsFor()
 const strict = optionsFor({ multipleOf: 10 }, 'report')
-const template = (content: string) => `<template>${content}</template>`
-const counter = (attributes: string) => template(`<AppCounter ${attributes} />`)
+
+const counter = (attributes: string) =>
+  createVueSFC({
+    template: `<template><AppCounter ${attributes} /></template>`,
+  })
 
 await run<ComponentPropValuesOptions, ComponentPropValuesMessageId>({
   name: 'component-prop-values',
@@ -85,14 +89,16 @@ await run<ComponentPropValuesOptions, ComponentPropValuesMessageId>({
       '<div v-pre><AppCounter :count="25" /></div>',
       '<component :is="current" :count="25" />',
     ].map(content => ({
-      code: template(content),
+      code: createVueSFC({ template: `<template>${content}</template>` }),
       options: strict,
     })),
     { code: 'const count = 25', filename: 'test.js', options },
     { code: 'const count: number = 25', filename: 'test.ts', options },
     { code: '<script setup>const count = 25</script>', options },
     {
-      code: template('<div :count="25" /><svg :count="25" />'),
+      code: createVueSFC({
+        template: '<template><div :count="25" /><svg :count="25" /></template>',
+      }),
       options: {
         targets: [
           { components: ['div', 'svg'], props: { count: { multipleOf: 10 } } },
@@ -141,7 +147,9 @@ await run<ComponentPropValuesOptions, ComponentPropValuesMessageId>({
     {
       description:
         'equivalent normalized constraints merge regardless of key or enum order',
-      code: template('<app-counter :page-size="20" />'),
+      code: createVueSFC({
+        template: '<template><app-counter :page-size="20" /></template>',
+      }),
       options: {
         targets: [
           {
@@ -274,7 +282,7 @@ await run<ComponentPropValuesOptions, ComponentPropValuesMessageId>({
       '<component is="AppCounter" :count="25" />',
       '<component :is="\'AppCounter\'" :count="25" />',
     ].map(content => ({
-      code: template(content),
+      code: createVueSFC({ template: `<template>${content}</template>` }),
       options,
       errors: ['invalidPropValue' as const],
       output: null,
@@ -338,10 +346,14 @@ await run<ComponentPropValuesOptions, ComponentPropValuesMessageId>({
     },
     ...[
       `<script setup>const undefined = 20</script>${counter(':count="undefined"')}`,
-      template('<AppCounter v-for="undefined in items" :count="undefined" />'),
-      template(
-        '<Wrapper v-slot="{ undefined }"><AppCounter :count="undefined" /></Wrapper>',
-      ),
+      createVueSFC({
+        template:
+          '<template><AppCounter v-for="undefined in items" :count="undefined" /></template>',
+      }),
+      createVueSFC({
+        template:
+          '<template><Wrapper v-slot="{ undefined }"><AppCounter :count="undefined" /></Wrapper></template>',
+      }),
     ].map(code => ({
       code,
       options: strict,
@@ -350,7 +362,10 @@ await run<ComponentPropValuesOptions, ComponentPropValuesMessageId>({
     })),
     {
       description: 'mixed prop spellings keep precedence uncertain',
-      code: template('<AppCounter :page-size="20" :pageSize="25" />'),
+      code: createVueSFC({
+        template:
+          '<template><AppCounter :page-size="20" :pageSize="25" /></template>',
+      }),
       options: {
         targets: [
           {
@@ -365,7 +380,9 @@ await run<ComponentPropValuesOptions, ComponentPropValuesMessageId>({
     },
     {
       description: 'default v-model checks modelValue',
-      code: template('<AppCounter v-model="value" />'),
+      code: createVueSFC({
+        template: '<template><AppCounter v-model="value" /></template>',
+      }),
       options: {
         targets: [
           {

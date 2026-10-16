@@ -1,6 +1,7 @@
 import { createRuleTester } from 'eslint-vitest-rule-tester'
 import { describe, expect, it } from 'vitest'
 import { componentPropTypes } from '../../src/rules/component-prop-types.ts'
+import { createVueSFC } from '../helpers/create-vue-sfc.ts'
 import { run, vueLanguageOptions } from '../internal.ts'
 import type {
   ComponentPropTypeConstraint,
@@ -18,8 +19,11 @@ function optionsFor(
   }
 }
 const options = optionsFor()
-const template = (content: string) => `<template>${content}</template>`
-const counter = (attributes: string) => template(`<AppCounter ${attributes} />`)
+
+const counter = (attributes: string) =>
+  createVueSFC({
+    template: `<template><AppCounter ${attributes} /></template>`,
+  })
 
 await run<ComponentPropTypesOptions, ComponentPropTypesMessageId>({
   name: 'component-prop-types',
@@ -73,7 +77,7 @@ await run<ComponentPropTypesOptions, ComponentPropTypesMessageId>({
       '<div v-pre><AppCounter count="wrong" /></div>',
       '<component :is="current" count="wrong" />',
     ].map(content => ({
-      code: template(content),
+      code: createVueSFC({ template: `<template>${content}</template>` }),
       options,
     })),
     {
@@ -83,7 +87,10 @@ await run<ComponentPropTypesOptions, ComponentPropTypesMessageId>({
     { code: 'const count = "wrong"', filename: 'test.js', options },
     { code: 'const count: string = "wrong"', filename: 'test.ts', options },
     {
-      code: template('<div count="wrong" /><svg count="wrong" />'),
+      code: createVueSFC({
+        template:
+          '<template><div count="wrong" /><svg count="wrong" /></template>',
+      }),
       options: {
         targets: [{ components: ['div', 'svg'], props: { count: 'number' } }],
       },
@@ -133,7 +140,9 @@ await run<ComponentPropTypesOptions, ComponentPropTypesMessageId>({
       options: optionsFor({ type: 'boolean', booleanCasting: true }, 'report'),
     })),
     {
-      code: template('<AppCounter is-ready="is-ready" />'),
+      code: createVueSFC({
+        template: '<template><AppCounter is-ready="is-ready" /></template>',
+      }),
       options: {
         targets: [
           {
@@ -273,7 +282,7 @@ await run<ComponentPropTypesOptions, ComponentPropTypesMessageId>({
       '<component is="AppCounter" count="wrong" />',
       '<component :is="\'AppCounter\'" count="wrong" />',
     ].map(content => ({
-      code: template(content),
+      code: createVueSFC({ template: `<template>${content}</template>` }),
       options,
       errors: ['invalidPropType' as const],
       output: null,
@@ -347,11 +356,15 @@ await run<ComponentPropTypesOptions, ComponentPropTypesMessageId>({
     },
     ...[
       `<script setup>const undefined = 1</script>${counter(':count="undefined"')}`,
-      template('<AppCounter v-for="undefined in items" :count="undefined" />'),
-      template(
-        '<Wrapper v-slot="{ undefined }"><AppCounter :count="undefined" /></Wrapper>',
-      ),
-      `${template('<AppCounter :count="undefined" />')}<script setup>const undefined = 1</script>`,
+      createVueSFC({
+        template:
+          '<template><AppCounter v-for="undefined in items" :count="undefined" /></template>',
+      }),
+      createVueSFC({
+        template:
+          '<template><Wrapper v-slot="{ undefined }"><AppCounter :count="undefined" /></Wrapper></template>',
+      }),
+      `${createVueSFC({ template: '<template><AppCounter :count="undefined" /></template>' })}<script setup>const undefined = 1</script>`,
     ].map(code => ({
       description: 'does not classify shadowed undefined as the global value',
       code,
@@ -361,7 +374,10 @@ await run<ComponentPropTypesOptions, ComponentPropTypesMessageId>({
     })),
     {
       description: 'mixed raw spellings keep value precedence unknown',
-      code: template('<AppCounter page-size="wrong" :pageSize="1" />'),
+      code: createVueSFC({
+        template:
+          '<template><AppCounter page-size="wrong" :pageSize="1" /></template>',
+      }),
       options: {
         targets: [
           { components: ['AppCounter'], props: { pageSize: 'number' } },
@@ -374,7 +390,9 @@ await run<ComponentPropTypesOptions, ComponentPropTypesMessageId>({
     {
       description:
         'default v-model supplies modelValue without modifier coercion',
-      code: template('<AppCounter v-model.number="value" />'),
+      code: createVueSFC({
+        template: '<template><AppCounter v-model.number="value" /></template>',
+      }),
       options: {
         targets: [
           { components: ['AppCounter'], props: { modelValue: 'number' } },

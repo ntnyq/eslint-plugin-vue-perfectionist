@@ -4,16 +4,13 @@ import { format } from 'oxfmt'
 import { describe, expect, it } from 'vitest'
 import * as vueParser from 'vue-eslint-parser'
 import { defineMacrosNewline } from '../../src/rules/define-macros-newline.ts'
+import { createVueSFC } from '../helpers/create-vue-sfc.ts'
 import { run, vueLanguageOptions } from '../internal.ts'
 import type { Linter } from 'eslint'
 import type {
   DefineMacrosNewlineMessageId,
   DefineMacrosNewlineOptions,
 } from '../../src/types/index.ts'
-
-function sfc(script: string): string {
-  return `<script setup lang="ts">\n${script}\n</script>`
-}
 
 const declarations = [
   'defineProps<{ name: string }>()',
@@ -94,7 +91,11 @@ await run<DefineMacrosNewlineOptions, DefineMacrosNewlineMessageId>({
       'import * as Vue from "vue"; Vue.defineProps({ name: String })',
     ].map(script => ({
       description: `accepts or skips: ${script}`,
-      code: sfc(script),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${script}
+</script>`,
+      }),
     })),
     ...['test.js', 'test.ts', 'test.tsx'].map(filename => ({
       description: `skips ${filename}`,
@@ -114,21 +115,37 @@ await run<DefineMacrosNewlineOptions, DefineMacrosNewlineMessageId>({
     })),
     {
       description: 'an empty macro list disables all checks',
-      code: sfc(
-        'defineProps({ name: String }); defineExpose({ open }); defineOptions({ name: "Test" })',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineProps({ name: String }); defineExpose({ open }); defineOptions({ name: "Test" })
+          </script>
+        `,
+      }),
       options: { macros: [] },
     },
     {
       description:
         'preserves a valid declaration with a trailing comma comment',
-      code: sfc('defineExpose({\nopen, // keep trailing comma\n})'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineExpose({
+          open, // keep trailing comma
+          })
+          </script>
+        `,
+      }),
     },
   ],
   invalid: [
     ...declarations.map(script => ({
       description: `reports an inline declaration and remains valid after Oxfmt: ${script}`,
-      code: sfc(script),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${script}
+</script>`,
+      }),
       errors: [
         {
           messageId: 'expectedNewlines' as const,
@@ -163,37 +180,73 @@ await run<DefineMacrosNewlineOptions, DefineMacrosNewlineMessageId>({
     },
     {
       description: 'checks globals supplied by an existing Vue ESLint config',
-      code: sfc('defineProps({ name: String })'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineProps({ name: String })
+          </script>
+        `,
+      }),
       languageOptions: { globals: { defineProps: 'readonly' } },
       errors: ['expectedNewlines'],
-      output: sfc('defineProps({\nname: String\n})'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineProps({
+          name: String
+          })
+          </script>
+        `,
+      }),
     },
     {
       description: 'reports only the selected macros and replaces the defaults',
-      code: sfc(
-        'defineProps({ name: String }); defineExpose({ open }); defineOptions({ name: "Test" })',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineProps({ name: String }); defineExpose({ open }); defineOptions({ name: "Test" })
+          </script>
+        `,
+      }),
       options: { macros: ['defineOptions'] },
       errors: [
         { messageId: 'expectedNewlines', data: { name: 'defineOptions' } },
       ],
-      output: sfc(
-        'defineProps({ name: String }); defineExpose({ open }); defineOptions({\nname: "Test"\n})',
-      ),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineProps({ name: String }); defineExpose({ open }); defineOptions({
+          name: "Test"
+          })
+          </script>
+        `,
+      }),
     },
     {
       description: 'checks multiple explicitly selected macros',
-      code: sfc(
-        'defineProps({ name: String }); defineExpose({ open }); defineOptions({ name: "Test" })',
-      ),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineProps({ name: String }); defineExpose({ open }); defineOptions({ name: "Test" })
+          </script>
+        `,
+      }),
       options: { macros: ['defineProps', 'defineOptions'] },
       errors: [
         { messageId: 'expectedNewlines', data: { name: 'defineProps' } },
         { messageId: 'expectedNewlines', data: { name: 'defineOptions' } },
       ],
-      output: sfc(
-        'defineProps({\nname: String\n}); defineExpose({ open }); defineOptions({\nname: "Test"\n})',
-      ),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineProps({
+          name: String
+          }); defineExpose({ open }); defineOptions({
+          name: "Test"
+          })
+          </script>
+        `,
+      }),
     },
     ...(
       [
@@ -234,9 +287,17 @@ await run<DefineMacrosNewlineOptions, DefineMacrosNewlineMessageId>({
       ] as const
     ).map(([input, output]) => ({
       description: `only inserts required line breaks in ${input}`,
-      code: sfc(input),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${input}
+</script>`,
+      }),
       errors: ['expectedNewlines' as const],
-      output: sfc(output),
+      output: createVueSFC({
+        script: `<script setup lang="ts">
+${output}
+</script>`,
+      }),
     })),
     ...[
       'defineExpose({ ...api, [key]: value, get name() { return "test" }, open() {} })',
@@ -250,21 +311,54 @@ await run<DefineMacrosNewlineOptions, DefineMacrosNewlineMessageId>({
       'defineExpose({ /* multi\nline */ open, close })',
     ].map(script => ({
       description: `preserves tokens, comments and fix idempotence: ${script}`,
-      code: sfc(script),
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+${script}
+</script>`,
+      }),
       errors: ['expectedNewlines' as const],
     })),
     {
       description: 'preserves CRLF line endings',
-      code: sfc('defineExpose({ open, close })').replaceAll('\n', '\r\n'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineExpose({ open, close })
+          </script>
+        `,
+      }).replaceAll('\n', '\r\n'),
       errors: ['expectedNewlines'],
-      output: sfc('defineExpose({\nopen,\nclose\n})').replaceAll('\n', '\r\n'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineExpose({
+          open,
+          close
+          })
+          </script>
+        `,
+      }).replaceAll('\n', '\r\n'),
     },
     {
       description: 'fixes explicitly enabled defineOptions',
-      code: sfc('defineOptions({ name: "Test" })'),
+      code: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineOptions({ name: "Test" })
+          </script>
+        `,
+      }),
       options: { macros: ['defineOptions'] },
       errors: ['expectedNewlines'],
-      output: sfc('defineOptions({\nname: "Test"\n})'),
+      output: createVueSFC({
+        script: `
+          <script setup lang="ts">
+          defineOptions({
+          name: "Test"
+          })
+          </script>
+        `,
+      }),
     },
   ],
 })
@@ -279,6 +373,17 @@ describe('define-macros-newline configuration', () => {
     { macros: null },
     { deep: true },
   ])('rejects invalid options: %j', async options => {
-    await expect(tester.valid({ code: sfc(''), options })).rejects.toThrow()
+    await expect(
+      tester.valid({
+        code: createVueSFC({
+          script: `
+        <script setup lang="ts">
+
+        </script>
+      `,
+        }),
+        options,
+      }),
+    ).rejects.toThrow()
   })
 })

@@ -4,6 +4,7 @@ import { expect, it } from 'vitest'
 import { compile, createSSRApp } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 import { preferTemplateLiteralInInterpolation } from '../../src/rules/prefer-template-literal-in-interpolation.ts'
+import { createVueSFC } from '../helpers/create-vue-sfc.ts'
 import { run, vueLanguageOptions } from '../internal.ts'
 import type {
   PreferTemplateLiteralInInterpolationMessageId,
@@ -11,7 +12,9 @@ import type {
 } from '../../src/types/index.ts'
 
 function template(content: string) {
-  return `<template><span>${content}</span></template>`
+  return createVueSFC({
+    template: `<template><span>${content}</span></template>`,
+  })
 }
 
 function interpolation(expression: string, nullable = false) {

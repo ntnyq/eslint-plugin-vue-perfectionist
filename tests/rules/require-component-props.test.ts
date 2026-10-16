@@ -1,6 +1,7 @@
 import { createRuleTester } from 'eslint-vitest-rule-tester'
 import { describe, expect, it } from 'vitest'
 import { requireComponentProps } from '../../src/rules/require-component-props.ts'
+import { createVueSFC } from '../helpers/create-vue-sfc.ts'
 import { run, vueLanguageOptions } from '../internal.ts'
 import type {
   RequireComponentPropsMessageId,
@@ -10,7 +11,6 @@ import type {
 const options: RequireComponentPropsOptions = {
   targets: [{ components: ['AppCounter'], props: ['count'] }],
 }
-const template = (content: string) => `<template>${content}</template>`
 
 await run<RequireComponentPropsOptions, RequireComponentPropsMessageId>({
   name: 'require-component-props',
@@ -30,15 +30,21 @@ await run<RequireComponentPropsOptions, RequireComponentPropsMessageId>({
     {
       description:
         'uses Vue camelization for uppercase and numeric hyphen segments',
-      code: template('<AppCounter :page-Size="1" :value-1="2" />'),
+      code: createVueSFC({
+        template:
+          '<template><AppCounter :page-Size="1" :value-1="2" /></template>',
+      }),
       options: {
         targets: [
           { components: ['AppCounter'], props: ['pageSize', 'value1'] },
         ],
       },
     },
-    { code: template('<AppCounter />') },
-    { code: template('<AppCounter />'), options: { targets: [] } },
+    { code: createVueSFC({ template: '<template><AppCounter /></template>' }) },
+    {
+      code: createVueSFC({ template: '<template><AppCounter /></template>' }),
+      options: { targets: [] },
+    },
     ...[
       '<Other />',
       '<appcounter />',
@@ -68,14 +74,17 @@ await run<RequireComponentPropsOptions, RequireComponentPropsMessageId>({
       '<component is="AppCounter" count />',
       '<component :is="\'AppCounter\'" count />',
     ].map(content => ({
-      code: template(content),
+      code: createVueSFC({ template: `<template>${content}</template>` }),
       options,
     })),
     { code: '<script setup>const count = 1</script>', options },
     { code: 'const count = 1', filename: 'test.js', options },
     { code: 'const count: number = 1', filename: 'test.ts', options },
     {
-      code: template('<div /><input /><svg><path /><linearGradient /></svg>'),
+      code: createVueSFC({
+        template:
+          '<template><div /><input /><svg><path /><linearGradient /></svg></template>',
+      }),
       options: {
         targets: [
           {
@@ -86,11 +95,16 @@ await run<RequireComponentPropsOptions, RequireComponentPropsMessageId>({
       },
     },
     {
-      code: template('<AppCounter v-bind="extra" />'),
+      code: createVueSFC({
+        template: '<template><AppCounter v-bind="extra" /></template>',
+      }),
       options: { ...options, unknownBindings: 'ignore' },
     },
     {
-      code: template('<AppCounter page-size="1" v-model="value" />'),
+      code: createVueSFC({
+        template:
+          '<template><AppCounter page-size="1" v-model="value" /></template>',
+      }),
       options: {
         targets: [
           { components: ['app-counter'], props: ['pageSize', 'modelValue'] },
@@ -98,7 +112,9 @@ await run<RequireComponentPropsOptions, RequireComponentPropsMessageId>({
       },
     },
     {
-      code: template('<AppCounter :page-size.camel="1" />'),
+      code: createVueSFC({
+        template: '<template><AppCounter :page-size.camel="1" /></template>',
+      }),
       options: {
         targets: [{ components: ['AppCounter'], props: ['pageSize'] }],
       },
@@ -106,7 +122,7 @@ await run<RequireComponentPropsOptions, RequireComponentPropsMessageId>({
   ],
   invalid: [
     {
-      code: template('<AppCounter />'),
+      code: createVueSFC({ template: '<template><AppCounter /></template>' }),
       options,
       errors: [
         {
@@ -131,7 +147,7 @@ await run<RequireComponentPropsOptions, RequireComponentPropsMessageId>({
       '<AppCounter v-bind="{ ...void 0, 1: true }" />',
       '<AppCounter v-bind="{ ...null, other: 1 }" />',
     ].map(content => ({
-      code: template(content),
+      code: createVueSFC({ template: `<template>${content}</template>` }),
       options,
       errors: ['missingProp' as const],
       output: null,
@@ -145,28 +161,34 @@ await run<RequireComponentPropsOptions, RequireComponentPropsMessageId>({
       '<AppCounter :count.attr="1" />',
       '<AppCounter v-model:[key]="value" />',
     ].map(content => ({
-      code: template(content),
+      code: createVueSFC({ template: `<template>${content}</template>` }),
       options,
       errors: ['unverifiableRequiredProp' as const],
       output: null,
     })),
     {
       description: 'ignore only suppresses uncertain presence',
-      code: template('<AppCounter v-bind="{ other: 1 }" />'),
+      code: createVueSFC({
+        template: '<template><AppCounter v-bind="{ other: 1 }" /></template>',
+      }),
       options: { ...options, unknownBindings: 'ignore' },
       errors: ['missingProp'],
       output: null,
     },
     {
       description: 'forced unrelated attributes do not mask missing props',
-      code: template('<AppCounter :other.prop="1" />'),
+      code: createVueSFC({
+        template: '<template><AppCounter :other.prop="1" /></template>',
+      }),
       options,
       errors: ['missingProp'],
       output: null,
     },
     {
       description: 'merges overlapping targets and normalizes only hyphens',
-      code: template('<AppCounter pagesize="1" />'),
+      code: createVueSFC({
+        template: '<template><AppCounter pagesize="1" /></template>',
+      }),
       options: {
         targets: [
           { components: ['AppCounter'], props: ['pageSize'] },
@@ -187,7 +209,7 @@ await run<RequireComponentPropsOptions, RequireComponentPropsMessageId>({
     },
     ...[false, true].map(typescript => ({
       description: `checks templates with both script blocks (${typescript ? 'TS' : 'JS'})`,
-      code: `<script${typescript ? ' lang="ts"' : ''}>export default {}</script><script setup${typescript ? ' lang="ts"' : ''}>const count = 1</script>${template('<AppCounter />')}`,
+      code: `<script${typescript ? ' lang="ts"' : ''}>export default {}</script><script setup${typescript ? ' lang="ts"' : ''}>const count = 1</script>${createVueSFC({ template: '<template><AppCounter /></template>' })}`,
       languageOptions: typescript
         ? vueLanguageOptions
         : { parserOptions: { parser: null } },
