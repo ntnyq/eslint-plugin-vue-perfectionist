@@ -239,6 +239,10 @@ Filters are `selector`, `modifiers`, `elementNamePattern`, `callNamePattern`, an
 
 Patterns accept a string, `{ pattern, flags }`, or an array of either. Arrays mean OR. Patterns are not implicitly anchored and do not inherit `ignoreCase`. Invalid expressions are configuration errors. Destructured declarations match `elementNamePattern` if any local binding matches.
 
+An empty pattern matches any available value; it does not disable the filter.
+For example, `callNamePattern: ''` matches calls, and `importSourcePattern: ''`
+matches calls with a resolved import source. Neither matches a literal constant.
+
 `callNamePattern` refers to the direct initializer or call statement, not calls nested in a function body. Named import aliases are normalized to exported names; default imports use their local binding name. `importSourcePattern` refers to the static source of that direct call, not arbitrary imports elsewhere in the statement. Unresolved auto-imports and type-only imports have no inferred runtime source.
 
 For a standalone custom group, its sorting overrides win over its `groups` object overrides. Inside a nested group array, individual custom-group overrides do not apply; the entire group uses one comparator. This avoids contradictory comparisons between members of the same group.

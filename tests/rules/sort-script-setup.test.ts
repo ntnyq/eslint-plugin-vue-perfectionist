@@ -671,6 +671,32 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
   ],
   invalid: [
+    ...(['callNamePattern', 'importSourcePattern'] as const).flatMap(key =>
+      ['', { pattern: '' }, ['']].flatMap(pattern =>
+        [false, true].map(anyOf => ({
+          description: `matches only calls with ${key} ${JSON.stringify(pattern)} and anyOf: ${anyOf}`,
+          code: setup('import { make } from "./factory"\nconst z = 1\nmake()'),
+          options: {
+            groups: ['matches', 'constant', 'unknown'],
+            customGroups: [
+              {
+                groupName: 'matches',
+                ...(anyOf
+                  ? { anyOf: [{ [key]: pattern }] }
+                  : { [key]: pattern }),
+              },
+            ],
+          },
+          errors: [
+            {
+              messageId: 'unsafeReorder' as const,
+              data: { name: 'make', before: 'z', group: 'matches' },
+            },
+          ],
+          output: null,
+        })),
+      ),
+    ),
     ...[false, true].map(withGlobals => ({
       description: `classifies auto-imports without unsafe fixes, globals: ${withGlobals}`,
       code: setup('const z = computed(() => 1)\nconst a = ref(0)'),

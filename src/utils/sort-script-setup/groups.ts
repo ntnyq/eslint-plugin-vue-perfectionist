@@ -1,4 +1,4 @@
-import { isArray, isString } from '@ntnyq/utils'
+import { isArray, isString, isUndefined } from '@ntnyq/utils'
 import { MODIFIERS, SELECTORS } from '../../constants/sort-script-setup.ts'
 import { invalid, matchesPattern } from './validation.ts'
 import type {
@@ -308,7 +308,7 @@ function matchesCondition(
          */
         modifier => statement.modifiers.includes(modifier),
       )) &&
-    (!namePattern ||
+    (isUndefined(namePattern) ||
       (statement.names.length ? statement.names : [statement.name]).some(
         /**
          * Match a declared or fallback statement name against the configured
@@ -320,10 +320,10 @@ function matchesCondition(
          */
         name => matchesPattern(name, namePattern),
       )) &&
-    (!condition.callNamePattern ||
+    (isUndefined(condition.callNamePattern) ||
       (statement.callName !== undefined &&
         matchesPattern(statement.callName, condition.callNamePattern))) &&
-    (!condition.importSourcePattern ||
+    (isUndefined(condition.importSourcePattern) ||
       (statement.importSource !== undefined &&
         matchesPattern(statement.importSource, condition.importSourcePattern)))
   )
