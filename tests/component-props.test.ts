@@ -63,7 +63,7 @@ describe('component prop contracts with Vue compilation and runtime', () => {
       ).replace(/\r?\n/gu, () => (lineEnding === 'LF' ? '\n' : '\r\n'))
       const examples = [
         ...markdown.matchAll(
-          /::: (correct|incorrect)\s+```vue\r?\n([\s\S]*?)\r?\n```\s+:::/gu,
+          /::: (correct|incorrect)\s+(?:<!-- eslint-skip -->\s+)?```vue(?: [^\r\n]*)?\r?\n([\s\S]*?)\r?\n```\s+:::/gu,
         ),
       ]
       expect(examples.length).toBeGreaterThan(0)
@@ -115,20 +115,88 @@ describe('component prop contracts with Vue compilation and runtime', () => {
       }
     },
   )
-  it.each([
+  it.each<[string, number | string, boolean?]>([
     ['count="wrong" v-bind="{ count: 1 }"', 1],
     ['v-bind="{ count: 1 }" count="wrong"', 'wrong'],
     ['v-bind="{ ...extra, count: 1 }"', 1],
-    ['v-bind="{ count: 1, ...extra }"', 'wrong'],
-    [':count="1" v-bind="extra"', 'wrong'],
+    ['v-bind="{ count: 1, ...extra }"', 'wrong', true],
+    [':count="1" v-bind="extra"', 'wrong', true],
     ['v-bind="extra" :count="1"', 1],
-  ])('uses Vue merge order for %s', (attributes, expected) => {
-    expect(
-      resolveRuntimeProps(`<AppCounter ${attributes} />`, {
-        extra: { count: 'wrong' },
-      }).count,
-    ).toBe(expected)
-  })
+    ['count="wrong" :count="1"', 'wrong'],
+    [':count="1" count="wrong"', 1],
+    [':count="1" v-bind:count="\'wrong\'"', 1],
+    [':count="1" title="counter" count="wrong"', 1],
+    ['count="wrong" :[\'count\']="1"', 1],
+    [':[\'count\']="1" count="wrong"', 'wrong'],
+    [':count="1" :[key]="\'wrong\'" count="ignored"', 'wrong', true],
+    ['count="wrong" v-bind="{ count: 1 }" :count="1"', 1],
+    ['v-bind="{ count: 1 }" count="wrong" :count="1"', 'wrong'],
+    [':count="1" v-bind="{}" count="wrong"', 'wrong'],
+    ['count="wrong" v-bind="{}" :count="1"', 1],
+    [':count="1" v-on="{}" count="wrong"', 'wrong'],
+    ['count="wrong" v-on="{}" :count="1"', 1],
+    [':count="1" @[event]="handler" count="wrong"', 'wrong'],
+    ['count="wrong" @[event]="handler" :count="1"', 1],
+    [':count="1" @click="handler" count="wrong"', 1],
+    [':count="1" v-model:count="model"', 1],
+    ['v-model:count="model" :count="1"', 'wrong', true],
+  ])(
+    'uses Vue merge order for %s',
+    (attributes, expected, isUnknown = false) => {
+      expect(
+        resolveRuntimeProps(`<AppCounter ${attributes} />`, {
+          extra: { count: 'wrong' },
+          key: 'count',
+          event: 'click',
+          handler() {},
+          model: 'wrong',
+        }).count,
+      ).toBe(expected)
+      const linter = new Linter()
+      const code = `<template><AppCounter ${attributes} /></template>`
+      const result = linter.verifyAndFix(
+        code,
+        {
+          files: ['**/*.vue'],
+          languageOptions: vueLanguageOptions,
+          plugins: { 'vue-perfectionist': plugin },
+          rules: {
+            'vue-perfectionist/component-prop-types': [
+              'error',
+              {
+                targets: [
+                  { components: ['AppCounter'], props: { count: 'number' } },
+                ],
+                unknownValues: 'report',
+              },
+            ],
+            'vue-perfectionist/component-prop-values': [
+              'error',
+              {
+                targets: [
+                  {
+                    components: ['AppCounter'],
+                    props: { count: { enum: [1] } },
+                  },
+                ],
+                unknownValues: 'report',
+              },
+            ],
+          },
+        },
+        'Test.vue',
+      )
+      expect(result.messages.map(message => message.messageId)).toEqual(
+        isUnknown
+          ? ['unverifiablePropType', 'unverifiablePropValue']
+          : expected === 1
+            ? []
+            : ['invalidPropType', 'invalidPropValue'],
+      )
+      expect(result.fixed).toBe(false)
+      expect(result.output).toBe(code)
+    },
+  )
 
   it.each([
     ['disabled', true],

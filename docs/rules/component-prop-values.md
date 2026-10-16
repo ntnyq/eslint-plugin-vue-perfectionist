@@ -106,8 +106,8 @@ diagnostic explaining that it cannot be verified:
 
 :::
 
-An unknown later binding may overwrite a known value. A known later binding
-can establish it again:
+An unknown object binding may overwrite a known value. A known binding in a
+later group can establish it again:
 
 ::: correct
 
@@ -118,6 +118,42 @@ can establish it again:
     :count="20"
   />
   <AppStepCounter v-bind="{ ...extra, count: 20 }" />
+</template>
+```
+
+:::
+
+Duplicate static keys within one group of explicit attributes and named bindings
+keep the first value. Object `v-bind`, object `v-on`, and dynamic event names
+start a new group; later groups overwrite earlier values. Object literal keys
+use the last value. Computed binding arguments remain ordered writes, even when
+their names are constant strings.
+
+::: correct
+
+<!-- eslint-skip -->
+
+```vue eslint-check=vue-perfectionist/component-prop-values
+<template>
+  <AppStepCounter
+    :count="20"
+    v-bind:count="25"
+  />
+</template>
+```
+
+:::
+
+::: incorrect
+
+<!-- eslint-skip -->
+
+```vue eslint-check=vue-perfectionist/component-prop-values
+<template>
+  <AppStepCounter
+    :count="25"
+    v-bind:count="20"
+  />
 </template>
 ```
 
@@ -220,9 +256,9 @@ Combine the two rules for required props with strict value checking.
   static computed arguments, and `v-model` are supported. Default `v-model` supplies
   `modelValue`; modifiers do not imply value coercion.
 - Unknown spreads, computed keys, `.prop`/`.attr`, or mixed raw spellings for one
-  normalized prop leave affected values uncertain. Raw keys follow source order;
-  getters are never executed. Reserved attributes and event listener names cannot
-  be configured as prop contracts.
+  normalized prop leave affected values uncertain. Raw keys follow Vue's
+  deduplication and merge order; getters are never executed. Reserved attributes
+  and event listener names cannot be configured as prop contracts.
 - Recognizes scalar literals, interpolation-free template strings, conditional
   branches, numeric unary `+`, `-`, `~`, and numeric binary `+`, `-`, `*`, `/`, `%`,
   `**`. Both conditional branches are checked conservatively. TypeScript assertions,

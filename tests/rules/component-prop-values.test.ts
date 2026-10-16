@@ -52,6 +52,9 @@ await run<ComponentPropValuesOptions, ComponentPropValuesMessageId>({
       ':count="30 % 20"',
       ':count="10 ** 2"',
       ':count="flag ? 20 : 30"',
+      ':count="20" v-bind:count="25"',
+      ':count="20" count="wrong"',
+      ':count="25" v-bind="{}" v-bind:count="20"',
       ':count="(flag ? 1 : 2) * 10"',
       'v-bind="{ count: 25, count: 20 }"',
       'v-bind="extra" :count="20"',
@@ -154,6 +157,17 @@ await run<ComponentPropValuesOptions, ComponentPropValuesMessageId>({
     },
   ],
   invalid: [
+    ...[
+      ':count="25" v-bind:count="20"',
+      'count="wrong" :count="20"',
+      ':count="20" v-bind="{}" v-bind:count="25"',
+      'v-bind="{ count: 20 }" count="wrong" :count="20"',
+    ].map(attributes => ({
+      code: counter(attributes),
+      options: strict,
+      errors: ['invalidPropValue' as const],
+      output: null,
+    })),
     {
       description: 'bounds deep expression analysis',
       code: counter(`:count="${'+('.repeat(34)}20${')'.repeat(34)}"`),

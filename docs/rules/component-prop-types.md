@@ -70,11 +70,18 @@ Missing props are not type errors. Use [require-component-props](./require-compo
 
 ### Effective values and binding order
 
-The rule follows ordinary prop overwrite order for explicit attributes and object bindings:
+The rule follows Vue's compiler and runtime prop merging. Within one group of
+explicit attributes and named bindings, the first occurrence of a static raw key
+wins. Inside an object literal, the last key wins. Object `v-bind`, object `v-on`,
+and dynamic event names split explicit binding groups; later groups overwrite
+earlier values. Computed binding arguments remain ordered writes, even when the
+argument is a constant string.
 
 ::: correct
 
-```vue
+<!-- eslint-skip -->
+
+```vue eslint-check=vue-perfectionist/component-prop-types
 <template>
   <AppStepper
     count="wrong"
@@ -85,6 +92,10 @@ The rule follows ordinary prop overwrite order for explicit attributes and objec
     :count="1"
   />
   <AppStepper v-bind="{ ...extra, count: 1 }" />
+  <AppStepper
+    :count="1"
+    count="wrong"
+  />
 </template>
 ```
 
@@ -92,13 +103,19 @@ The rule follows ordinary prop overwrite order for explicit attributes and objec
 
 ::: incorrect
 
-```vue
+<!-- eslint-skip -->
+
+```vue eslint-check=vue-perfectionist/component-prop-types
 <template>
   <AppStepper
     v-bind="{ count: 1 }"
     count="wrong"
   />
   <AppStepper v-bind="{ ...extra, count: 'wrong' }" />
+  <AppStepper
+    count="wrong"
+    :count="1"
+  />
 </template>
 ```
 

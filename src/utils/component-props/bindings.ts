@@ -126,6 +126,7 @@ export function analyzeComponentBindings(
   inferValue: typeof inferPropValue = inferPropValue,
 ): Map<string, ComponentPropBinding> {
   const bindings = new Map<string, ComponentPropBinding>()
+  const explicitNames = new Set<string>()
   for (const name of propNames) {
     bindings.set(name, {
       presence: 'absent',
@@ -168,6 +169,24 @@ export function analyzeComponentBindings(
     // Vue normalizes aliases after raw-key merging. Do not invent precedence.
     binding.value =
       binding.rawNames.size > 1 ? unknownPropValue(value.node) : value
+  }
+
+  /**
+   * Keep the first static key in a compiler-generated explicit prop object.
+   * Computed keys remain ordered writes, even when their names are known.
+   *
+   * @param rawName - The raw attribute or directive argument name.
+   * @param value - The value supplied by the explicit binding.
+   * @param isStatic - Whether Vue deduplicates this key; defaults to true.
+   */
+  function writeExplicit(rawName: string, value: PropValue, isStatic = true) {
+    if (isStatic) {
+      if (explicitNames.has(rawName)) {
+        return
+      }
+      explicitNames.add(rawName)
+    }
+    write(rawName, value)
   }
 
   /**
@@ -289,7 +308,7 @@ export function analyzeComponentBindings(
 
   for (const attribute of element.startTag.attributes) {
     if (!attribute.directive) {
-      write(
+      writeExplicit(
         attribute.key.rawName,
         stringPropValue(
           attribute.value?.value ?? '',
@@ -299,10 +318,18 @@ export function analyzeComponentBindings(
       continue
     }
     const directive = attribute.key.name.name
+    const argument = attribute.key.argument
+    // Object bindings and dynamic event names flush Vue's explicit prop object.
+    if (
+      directive === 'on' &&
+      (!argument || argument.type === 'VExpressionContainer')
+    ) {
+      explicitNames.clear()
+      continue
+    }
     if (directive !== 'bind' && directive !== 'model') {
       continue
     }
-    const argument = attribute.key.argument
     let name = argument
       ? resolveArgument(argument)
       : directive === 'model'
@@ -324,6 +351,7 @@ export function analyzeComponentBindings(
       continue
     }
     if (!argument && directive === 'bind') {
+      explicitNames.clear()
       if (attribute.value?.expression) {
         spread(attribute.value.expression, attribute.value)
       } else {
@@ -348,11 +376,12 @@ export function analyzeComponentBindings(
     ) {
       name = normalizePropName(name)
     }
-    write(
+    writeExplicit(
       name,
       attribute.value?.expression
         ? infer(attribute.value.expression, attribute.value)
         : unknownPropValue(attribute),
+      !argument || argument.type === 'VIdentifier',
     )
   }
   return bindings
