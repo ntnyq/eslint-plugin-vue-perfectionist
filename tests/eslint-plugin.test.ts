@@ -4,6 +4,42 @@ import plugin, * as pluginExports from '../src'
 import { vueLanguageOptions } from './internal'
 
 describe('plugin contract', () => {
+  it.each([false, true])(
+    'checks template ref inference through an aliased plugin with autoImport: %s',
+    autoImport => {
+      const linter = new Linter()
+      const source = `<script setup lang="ts">
+const videoRef = useTemplateRef<HTMLVideoElement>('videoRef')
+</script>
+<template><video ref="videoRef" /></template>`
+      const configuration: Linter.Config = {
+        files: ['**/*.vue'],
+        languageOptions: vueLanguageOptions,
+        plugins: { vp: plugin },
+        settings: { 'vue-perfectionist': { autoImport } },
+        rules: {
+          'vp/consistent-template-ref-name': 'error',
+          'vp/prefer-ref-pattern': 'error',
+          'vp/prefer-use-template-ref-inference': 'error',
+        },
+      }
+      const result = linter.verifyAndFix(source, configuration, 'Test.vue')
+      expect(result.messages.map(message => message.messageId)).toEqual(
+        autoImport ? ['unexpectedTypeArguments'] : [],
+      )
+      expect(result.fixed).toBe(false)
+      expect(result.output).toBe(source)
+      for (const message of result.messages) {
+        expect(message.ruleId).toBe('vp/prefer-use-template-ref-inference')
+        expect(message.fix).toBeUndefined()
+        expect(message.suggestions).toBeUndefined()
+      }
+      expect(
+        linter.verifyAndFix(result.output, configuration, 'Test.vue'),
+      ).toEqual(result)
+    },
+  )
+
   it('checks composable definitions through an aliased plugin without fixes', () => {
     const linter = new Linter()
     const source = 'function useComments(id, thread = "") {}'
@@ -194,6 +230,7 @@ onMounted(handler)
       'prefer-ref-pattern',
       'prefer-simple-event-handler',
       'prefer-template-literal-in-interpolation',
+      'prefer-use-template-ref-inference',
       'require-component-props',
       'require-macro-type-name',
       'sort-script-setup',

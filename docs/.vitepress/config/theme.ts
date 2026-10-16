@@ -92,6 +92,10 @@ export function getThemeConfig(): DefaultTheme.Config {
             text: 'prefer-template-literal-in-interpolation',
           },
           {
+            link: '/rules/prefer-use-template-ref-inference',
+            text: 'prefer-use-template-ref-inference',
+          },
+          {
             link: '/rules/require-component-props',
             text: 'require-component-props',
           },

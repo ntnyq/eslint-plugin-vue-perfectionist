@@ -137,7 +137,8 @@ When using `unplugin-auto-import` with Vue APIs, enable the shared opt-in in
 
 `autoImport` is a boolean and defaults to `false`. It enables recognition of
 unbound, same-name Vue APIs already supported by `sort-script-setup`,
-`callback-style`, `max-lines-per-callback`, `consistent-template-ref-name`, and `prefer-ref-pattern`.
+`callback-style`, `max-lines-per-callback`, `consistent-template-ref-name`,
+`prefer-ref-pattern`, and `prefer-use-template-ref-inference`.
 `callback-style` and `max-lines-per-callback` also recognize configured `customCallbacks` names.
 `prefer-function-result-pattern` recognizes all configured target names under this
 setting, including `ref`, `shallowRef`, `computed`, and VueUse's `useToggle` by default.
@@ -234,6 +235,13 @@ Use [`prefer-template-literal-in-interpolation`](../rules/prefer-template-litera
 to combine mixed template text and interpolation. By default it reports only
 fragments with safe automatic fixes based on static expression types. Enable
 `reportUnfixable` to also report fragments that need manual review.
+
+Use [`prefer-use-template-ref-inference`](../rules/prefer-use-template-ref-inference.md) to prefer
+template-derived types for direct top-level `useTemplateRef<T>()` calls in
+TypeScript script setup. It requires a unique static template ref, supports
+shared auto-import settings, and accepts exact key exemptions through `ignoreRefs`.
+It reports without fixes or suggestions because removing a generic can change
+type checking.
 
 ### Configuring Statement Ordering
 

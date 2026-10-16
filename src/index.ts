@@ -30,6 +30,7 @@ export type {
   PreferRefPatternOptions,
   PreferSimpleEventHandlerOptions,
   PreferTemplateLiteralInInterpolationOptions,
+  PreferUseTemplateRefInferenceOptions,
   RefPatternTarget,
   RequireComponentPropsOptions,
   RequireComponentPropsTarget,

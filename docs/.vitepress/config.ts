@@ -53,6 +53,7 @@ const exampleRules = {
   'vue-perfectionist/prefer-ref-pattern': 'error',
   'vue-perfectionist/prefer-simple-event-handler': 'error',
   'vue-perfectionist/prefer-template-literal-in-interpolation': 'error',
+  'vue-perfectionist/prefer-use-template-ref-inference': 'error',
   'vue-perfectionist/require-component-props': [
     'error',
     {

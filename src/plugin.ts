@@ -12,6 +12,7 @@ import { preferFunctionResultPattern } from './rules/prefer-function-result-patt
 import { preferRefPattern } from './rules/prefer-ref-pattern.ts'
 import { preferSimpleEventHandler } from './rules/prefer-simple-event-handler.ts'
 import { preferTemplateLiteralInInterpolation } from './rules/prefer-template-literal-in-interpolation.ts'
+import { preferUseTemplateRefInference } from './rules/prefer-use-template-ref-inference.ts'
 import { requireComponentProps } from './rules/require-component-props.ts'
 import { requireMacroTypeName } from './rules/require-macro-type-name.ts'
 import { sortScriptSetup } from './rules/sort-script-setup.ts'
@@ -37,6 +38,7 @@ export const plugin: VuePerfectionistPlugin = {
     'prefer-simple-event-handler': preferSimpleEventHandler,
     'prefer-template-literal-in-interpolation':
       preferTemplateLiteralInInterpolation,
+    'prefer-use-template-ref-inference': preferUseTemplateRefInference,
     'require-component-props': requireComponentProps,
     'require-macro-type-name': requireMacroTypeName,
     'sort-script-setup': sortScriptSetup,
