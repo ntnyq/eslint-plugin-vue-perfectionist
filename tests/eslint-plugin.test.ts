@@ -4,6 +4,42 @@ import plugin, * as pluginExports from '../src'
 import { vueLanguageOptions } from './internal'
 
 describe('plugin contract', () => {
+  it('fixes tag padding through an aliased plugin and replaces defaults', () => {
+    const linter = new Linter()
+    const configuration: Linter.Config = {
+      files: ['**/*.vue'],
+      languageOptions: vueLanguageOptions,
+      plugins: { vp: plugin },
+      rules: {
+        'vp/padding-line-between-tags': ['error', [{ tag: 'Item' }]],
+      },
+    }
+    const source =
+      '<template><Other />\n<Other />\n<Item />\n<Item /></template>'
+    const result = linter.verifyAndFix(source, configuration, 'Test.vue')
+    expect(result).toEqual({
+      fixed: true,
+      messages: [],
+      output: '<template><Other />\n<Other />\n<Item />\n\n<Item /></template>',
+    })
+    expect(
+      linter.verifyAndFix(result.output, configuration, 'Test.vue'),
+    ).toEqual({
+      ...result,
+      fixed: false,
+    })
+    expect(
+      linter.verifyAndFix(
+        source,
+        {
+          ...configuration,
+          rules: { 'vp/padding-line-between-tags': ['error', []] },
+        },
+        'Test.vue',
+      ),
+    ).toEqual({ fixed: false, messages: [], output: source })
+  })
+
   it('checks generic comments and exemptions through an aliased plugin', () => {
     const linter = new Linter()
     const source = `<template>
@@ -270,6 +306,7 @@ onMounted(handler)
       'define-macros-type-style',
       'max-lines-per-callback',
       'no-complex-v-for-source',
+      'padding-line-between-tags',
       'prefer-composable-options',
       'prefer-function-result-pattern',
       'prefer-ref-pattern',

@@ -217,6 +217,14 @@ primitive literals are allowed by default and can be disabled independently.
 Array and object literals, branching, and other complex sources are reported
 without fixes or suggestions.
 
+Use [`padding-line-between-tags`](../rules/padding-line-between-tags.md) to require
+an exact number of blank lines between consecutive template tags. Unlike the
+[official Vue rule](https://eslint.vuejs.org/rules/padding-line-between-tags.html),
+whose `always` policy allows any positive number of blank lines, numeric policies
+require exactly the configured count. It defaults to one blank line, supports
+`tag` shorthand and ordered `prev`/`next` pairs, and only fixes tags already on
+separate lines. Disable the official rule for pairs controlled by this rule.
+
 Use [`prefer-composable-options`](../rules/prefer-composable-options.md) to keep
 composable inputs in a final options object. By default no positional parameters
 are allowed; `maxPositionalParams` permits leading inputs, but multiple parameters

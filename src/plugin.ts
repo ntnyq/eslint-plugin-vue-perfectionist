@@ -7,6 +7,7 @@ import { defineMacrosNewline } from './rules/define-macros-newline.ts'
 import { defineMacrosTypeStyle } from './rules/define-macros-type-style.ts'
 import { maxLinesPerCallback } from './rules/max-lines-per-callback.ts'
 import { noComplexVForSource } from './rules/no-complex-v-for-source.ts'
+import { paddingLineBetweenTags } from './rules/padding-line-between-tags.ts'
 import { preferComposableOptions } from './rules/prefer-composable-options.ts'
 import { preferFunctionResultPattern } from './rules/prefer-function-result-pattern.ts'
 import { preferRefPattern } from './rules/prefer-ref-pattern.ts'
@@ -33,6 +34,7 @@ export const plugin: VuePerfectionistPlugin = {
     'define-macros-type-style': defineMacrosTypeStyle,
     'max-lines-per-callback': maxLinesPerCallback,
     'no-complex-v-for-source': noComplexVForSource,
+    'padding-line-between-tags': paddingLineBetweenTags,
     'prefer-composable-options': preferComposableOptions,
     'prefer-function-result-pattern': preferFunctionResultPattern,
     'prefer-ref-pattern': preferRefPattern,

@@ -75,6 +75,10 @@ export function getThemeConfig(): DefaultTheme.Config {
             text: 'no-complex-v-for-source',
           },
           {
+            link: '/rules/padding-line-between-tags',
+            text: 'padding-line-between-tags',
+          },
+          {
             link: '/rules/prefer-composable-options',
             text: 'prefer-composable-options',
           },
