@@ -5,6 +5,12 @@ import type { SourceCode } from '../types/eslint.ts'
 
 type ParameterKind = 'options' | 'positional' | 'undefined' | 'unknown'
 
+interface TypeClassificationState {
+  cache: Map<TSESTree.TypeNode, ParameterKind>
+  visiting: Set<TSESTree.TypeNode>
+  cycleCount: number
+}
+
 /**
  * Resolve only the type namespace, preserving lexical shadowing and SFC scopes.
  *
@@ -72,25 +78,56 @@ function classifyMembers(members: TSESTree.TypeElement[]): ParameterKind {
 }
 
 /**
- * Classify outer shapes only; field types do not change the options container.
- * A recursion path prevents cyclic aliases from being mistaken for evidence.
+ * Reuse completed shapes within a parameter's type graph while detecting cycles.
  *
  * @param node - The type annotation to classify.
  * @param sourceCode - The source code used to resolve local type declarations.
- * @param seen - The declarations already visited on this recursion path;
- * defaults to an empty set.
+ * @param state - The shared cache and active recursion path; defaults to a new
+ * analysis for this parameter.
  * @returns The parameter shape, with unknown for unsupported or cyclic
  * declarations.
  */
 function classifyType(
   node: TSESTree.TypeNode,
   sourceCode: SourceCode,
-  seen = new Set<TSESTree.Node>(),
+  state: TypeClassificationState = {
+    cache: new Map(),
+    visiting: new Set(),
+    cycleCount: 0,
+  },
 ): ParameterKind {
-  if (seen.has(node)) {
+  if (state.visiting.has(node)) {
+    state.cycleCount++
     return 'unknown'
   }
-  const path = new Set(seen).add(node)
+  const cached = state.cache.get(node)
+  if (cached !== undefined) {
+    return cached
+  }
+  const cycleCount = state.cycleCount
+  state.visiting.add(node)
+  const kind = resolveType(node, sourceCode, state)
+  state.visiting.delete(node)
+  // A cycle's result depends on the active path; only reuse independent shapes.
+  if (state.cycleCount === cycleCount) {
+    state.cache.set(node, kind)
+  }
+  return kind
+}
+
+/**
+ * Classify outer shapes only; field types do not change the options container.
+ *
+ * @param node - The type annotation to classify.
+ * @param sourceCode - The source code used to resolve local type declarations.
+ * @param state - The shared cache and active recursion path.
+ * @returns The parameter shape, with unknown for unsupported or cyclic types.
+ */
+function resolveType(
+  node: TSESTree.TypeNode,
+  sourceCode: SourceCode,
+  state: TypeClassificationState,
+): ParameterKind {
   switch (node.type) {
     case 'TSUndefinedKeyword':
       return 'undefined'
@@ -105,7 +142,7 @@ function classifyType(
            * @param type - The union or intersection constituent.
            * @returns The parameter shape of the constituent.
            */
-          type => classifyType(type, sourceCode, path),
+          type => classifyType(type, sourceCode, state),
         ),
       )
       if (kinds.has('positional')) {
@@ -124,7 +161,7 @@ function classifyType(
          * @param type - The union or intersection constituent.
          * @returns The parameter shape of the constituent.
          */
-        type => classifyType(type, sourceCode, path),
+        type => classifyType(type, sourceCode, state),
       )
       if (
         kinds.every(
@@ -155,7 +192,7 @@ function classifyType(
         declaration?.type === 'TSTypeAliasDeclaration' &&
         !declaration.typeParameters
       ) {
-        return classifyType(declaration.typeAnnotation, sourceCode, path)
+        return classifyType(declaration.typeAnnotation, sourceCode, state)
       }
       const members: TSESTree.TypeElement[] = []
       for (const definition of definitions) {

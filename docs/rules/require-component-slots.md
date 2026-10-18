@@ -75,13 +75,14 @@ The second example reports `Component <AppDialog> requires slot "footer".` on th
 
 ### Default slots
 
-Use `default` in the contract for the default slot. Explicit `#default`, argumentless `v-slot`, component-level `v-slot`, and implicit child content satisfy it. Modifier-only forms without a slot argument also refer to `default`; their suffix is not a literal slot name. Text, interpolations, and child elements count as implicit content; whitespace and comments alone do not.
+Use `default` in the contract for the default slot. Explicit `#default`, argumentless `v-slot`, component-level `v-slot`, and implicit child content satisfy it. Modifier-only forms without a slot argument also refer to `default`; their suffix is not a literal slot name. Text, interpolations, and child elements count as implicit content. Formatting whitespace (spaces, tabs, line breaks, and form feeds) and comments alone do not. Unicode spacing characters such as `&nbsp;` and `&#x2003;` count as content, matching Vue's compiler.
 
 ::: correct
 
 ```vue
 <template>
   <AppButton>Confirm</AppButton>
+  <AppButton>&nbsp;</AppButton>
   <AppButton>{{ label }}</AppButton>
   <AppButton><span /></AppButton>
   <AppButton>

@@ -78,6 +78,12 @@ await run<RequireComponentSlotsOptions, RequireComponentSlotsMessageId>({
     })),
     ...[
       '<AppButton>Confirm</AppButton>',
+      '<AppButton>&nbsp;</AppButton>',
+      '<AppButton>&#x2003;</AppButton>',
+      '<AppButton>\u{A0}</AppButton>',
+      '<AppButton>\u{2003}</AppButton>',
+      '<AppButton><template #header />&nbsp;</AppButton>',
+      '<AppButton><template #header />&#x2003;</AppButton>',
       '<AppButton>{{ label }}</AppButton>',
       '<AppButton><span /></AppButton>',
       '<AppButton><slot /></AppButton>',
@@ -329,6 +335,9 @@ await run<RequireComponentSlotsOptions, RequireComponentSlotsMessageId>({
     ...[
       '<AppButton />',
       '<AppButton>  \n\t </AppButton>',
+      '<AppButton>\r\n\f </AppButton>',
+      '<AppButton>&#x20;&#x9;&#xA;</AppButton>',
+      '<AppButton><template #header /> \n\t </AppButton>',
       '<AppButton><!-- comment --></AppButton>',
       '<AppButton> \n<!-- comment -->\n </AppButton>',
       '<AppButton><template #header /></AppButton>',

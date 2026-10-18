@@ -19,6 +19,18 @@ function diagnostic(
   }
 }
 
+function repeatedAliases(base: string, operator: '&' | '|', levels = 22) {
+  return [
+    `type Shape0 = ${base}`,
+    ...Array.from(
+      { length: levels },
+      (_, index) =>
+        `type Shape${index + 1} = Shape${index} ${operator} Shape${index}`,
+    ),
+    `function useComments(options: Shape${levels}) {}`,
+  ].join('\n')
+}
+
 await run<PreferComposableOptionsOptions, PreferComposableOptionsMessageId>({
   name: 'prefer-composable-options',
   rule: preferComposableOptions,
@@ -32,6 +44,10 @@ await run<PreferComposableOptionsOptions, PreferComposableOptionsMessageId>({
     }
   },
   valid: [
+    ...(['&', '|'] as const).map(operator => ({
+      description: `resolves shared options aliases in ${operator} graphs`,
+      code: repeatedAliases('{ id: string }', operator),
+    })),
     {
       description: 'the documented API supports destructured and named options',
       code: `interface UseCommentsOptions {
@@ -183,6 +199,29 @@ function useCurrentUser() {}`,
     },
   ],
   invalid: [
+    ...(['&', '|'] as const).flatMap(operator =>
+      [
+        { base: 'string', messageId: 'expectedOptionsObject' as const },
+        { base: 'unknown', messageId: 'unknownOptionsObject' as const },
+      ].map(({ base, messageId }) => ({
+        description: `retains ${base} classification in shared ${operator} graphs`,
+        code: repeatedAliases(base, operator),
+        errors: [diagnostic(messageId)],
+        output: null,
+      })),
+    ),
+    {
+      description: 'keeps recursive aliases unconfirmed',
+      code: 'type First = Second; type Second = First; function useComments(options: First | Second) {}',
+      errors: [diagnostic('unknownOptionsObject')],
+      output: null,
+    },
+    {
+      description: 'does not reuse path-dependent cycle results',
+      code: 'type First = Second | string; type Second = First; function useComments(options: First & Second) {}',
+      errors: [diagnostic('expectedOptionsObject')],
+      output: null,
+    },
     {
       description: 'computed keys alone do not establish named fields',
       code: 'declare const key: unique symbol; function useComments(options: { [key]: string }) {}',

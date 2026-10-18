@@ -176,7 +176,11 @@ export const requireComponentSlots = createRule<
                 : undefined
             if (directive) {
               collectSlot(directive)
-            } else if (child.type !== 'VText' || child.value.trim()) {
+            } else if (
+              child.type !== 'VText' ||
+              // Vue retains Unicode spacing characters as slot content.
+              /[^\t\r\n\f ]/u.test(child.value)
+            ) {
               // Comments are not children in vue-eslint-parser's template AST.
               slots.add('default')
             }
