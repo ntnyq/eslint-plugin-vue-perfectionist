@@ -93,11 +93,14 @@ defineProps<{
 
 ## :wrench: Options
 
-```js
+```json
 {
-  'vue-perfectionist/define-macros-newline': ['error', {
-    macros: ['defineProps', 'defineEmits', 'defineSlots', 'defineExpose'],
-  }],
+  "vue-perfectionist/define-macros-newline": [
+    "error",
+    {
+      "macros": ["defineProps", "defineEmits", "defineSlots", "defineExpose"]
+    }
+  ]
 }
 ```
 
@@ -113,9 +116,9 @@ defineProps<{
 
 For example, check only exposed APIs and component options:
 
-```js
+```json
 {
-  macros: ['defineExpose', 'defineOptions'],
+  "macros": ["defineExpose", "defineOptions"]
 }
 ```
 

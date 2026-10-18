@@ -125,13 +125,13 @@ The example above matches `.vue` files only.
 When using `unplugin-auto-import` with Vue APIs, enable the shared opt-in in
 `eslint.config.mjs`:
 
-```js
+```json
 {
-  settings: {
-    'vue-perfectionist': {
-      autoImport: true,
-    },
-  },
+  "settings": {
+    "vue-perfectionist": {
+      "autoImport": true
+    }
+  }
 }
 ```
 
@@ -273,11 +273,16 @@ type checking.
 
 To sort names naturally, configure `sort-script-setup` with an explicit option:
 
-```js
+```json
 {
-  rules: {
-    'vue-perfectionist/sort-script-setup': ['error', { type: 'natural' }],
-  },
+  "rules": {
+    "vue-perfectionist/sort-script-setup": [
+      "error",
+      {
+        "type": "natural"
+      }
+    ]
+  }
 }
 ```
 

@@ -187,10 +187,10 @@ This reports only the unverifiable `footer` requirement. Set `unknownSlots: 'ign
 
 Defaults:
 
-```js
+```json
 {
-  targets: [],
-  unknownSlots: 'report',
+  "targets": [],
+  "unknownSlots": "report"
 }
 ```
 
@@ -200,12 +200,18 @@ Type: `{ components: string[], slots: string[] }[]`. Default: `[]`.
 
 Each entry requires nonempty component and slot lists with unique, nonempty strings containing no whitespace. An empty `targets` array disables checks; there are no built-in contracts to extend. Overlapping targets merge their slot requirements, with at most one report per slot and component usage.
 
-```js
+```json
 {
-  targets: [
-    { components: ['AppDialog', 'AppDrawer'], slots: ['header', 'footer'] },
-    { components: ['app-dialog'], slots: ['default'] },
-  ],
+  "targets": [
+    {
+      "components": ["AppDialog", "AppDrawer"],
+      "slots": ["header", "footer"]
+    },
+    {
+      "components": ["app-dialog"],
+      "slots": ["default"]
+    }
+  ]
 }
 ```
 

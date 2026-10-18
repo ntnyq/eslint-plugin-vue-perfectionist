@@ -83,11 +83,14 @@ The nullish example is fixed to a template substitution using `?? ''`. It keeps
 
 ## :wrench: Options
 
-```js
+```json
 {
-  'vue-perfectionist/prefer-template-literal-in-interpolation': ['error', {
-    reportUnfixable: false,
-  }],
+  "vue-perfectionist/prefer-template-literal-in-interpolation": [
+    "error",
+    {
+      "reportUnfixable": false
+    }
+  ]
 }
 ```
 

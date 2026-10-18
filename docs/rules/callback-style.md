@@ -77,17 +77,20 @@ that function from the inline callback.
 
 ## :wrench: Options
 
-```js
+```json
 {
-  'vue-perfectionist/callback-style': ['error', {
-    groups: ['lifecycle', 'watch'],
-    functionStyle: 'arrow',
-    bodyStyle: 'block',
-    exclude: [],
-    customCallbacks: [],
-    vueGlobals: [],
-    vueImportSources: ['vue'],
-  }],
+  "vue-perfectionist/callback-style": [
+    "error",
+    {
+      "groups": ["lifecycle", "watch"],
+      "functionStyle": "arrow",
+      "bodyStyle": "block",
+      "exclude": [],
+      "customCallbacks": [],
+      "vueGlobals": [],
+      "vueImportSources": ["vue"]
+    }
+  ]
 }
 ```
 
@@ -171,25 +174,25 @@ There is no prefix guessing or cross-file analysis. Computed member access, opti
 
 ### Custom callbacks
 
-```js
+```json
 {
-  customCallbacks: [
+  "customCallbacks": [
     {
-      source: 'vue-router',
-      name: 'onBeforeRouteLeave',
-      callbackIndices: [0],
+      "source": "vue-router",
+      "name": "onBeforeRouteLeave",
+      "callbackIndices": [0]
     },
     {
-      source: '@vueuse/core',
-      name: 'watchDebounced',
-      callbackIndices: [1],
+      "source": "@vueuse/core",
+      "name": "watchDebounced",
+      "callbackIndices": [1]
     },
     {
-      source: '@/composables/events',
-      name: 'subscribe',
-      callbackIndices: [1, 2],
-    },
-  ],
+      "source": "@/composables/events",
+      "name": "subscribe",
+      "callbackIndices": [1, 2]
+    }
+  ]
 }
 ```
 
@@ -204,20 +207,37 @@ continue to match regardless of this option.
 
 For example, configure these VueUse callbacks to inherit the shared setting:
 
-```js
+```json
 {
-  settings: {
-    'vue-perfectionist': { autoImport: true },
+  "settings": {
+    "vue-perfectionist": {
+      "autoImport": true
+    }
   },
-  rules: {
-    'vue-perfectionist/callback-style': ['error', {
-      customCallbacks: [
-        { source: '@vueuse/core', name: 'useResizeObserver', callbackIndices: [1] },
-        { source: '@vueuse/core', name: 'tryOnMounted', callbackIndices: [0] },
-        { source: '@vueuse/core', name: 'tryOnUnmounted', callbackIndices: [0] },
-      ],
-    }],
-  },
+  "rules": {
+    "vue-perfectionist/callback-style": [
+      "error",
+      {
+        "customCallbacks": [
+          {
+            "source": "@vueuse/core",
+            "name": "useResizeObserver",
+            "callbackIndices": [1]
+          },
+          {
+            "source": "@vueuse/core",
+            "name": "tryOnMounted",
+            "callbackIndices": [0]
+          },
+          {
+            "source": "@vueuse/core",
+            "name": "tryOnUnmounted",
+            "callbackIndices": [0]
+          }
+        ]
+      }
+    ]
+  }
 }
 ```
 

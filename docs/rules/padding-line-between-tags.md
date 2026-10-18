@@ -103,10 +103,16 @@ Multiple blank lines also violate the default exact count:
 The single rule option is an object with an optional `targets` array. The
 effective default is:
 
-```js
-;({
-  targets: [{ prev: '*', next: '*', blankLine: 1 }],
-})
+```json
+{
+  "targets": [
+    {
+      "prev": "*",
+      "next": "*",
+      "blankLine": 1
+    }
+  ]
+}
 ```
 
 Omitting the option, passing `{}`, or omitting `targets` keeps the default.
@@ -122,14 +128,23 @@ The former direct-array option is no longer accepted. To migrate, change
 
 Use either `tag` or both `prev` and `next` in each `targets` entry:
 
-```js
-;({
-  targets: [
-    { tag: 'ElFormItem' },
-    { tag: 'ElButton', blankLine: 'never' },
-    { prev: 'PageHeader', next: 'PageContent', blankLine: 2 },
-  ],
-})
+```json
+{
+  "targets": [
+    {
+      "tag": "ElFormItem"
+    },
+    {
+      "tag": "ElButton",
+      "blankLine": "never"
+    },
+    {
+      "prev": "PageHeader",
+      "next": "PageContent",
+      "blankLine": 2
+    }
+  ]
+}
 ```
 
 - `tag: 'ElFormItem'` is shorthand for
@@ -160,13 +175,20 @@ entry and defaults to `1`.
 
 Use a later exception to override a general policy:
 
-```js
-;({
-  targets: [
-    { prev: '*', next: '*', blankLine: 1 },
-    { tag: 'ElFormItem', blankLine: 'ignore' },
-  ],
-})
+```json
+{
+  "targets": [
+    {
+      "prev": "*",
+      "next": "*",
+      "blankLine": 1
+    },
+    {
+      "tag": "ElFormItem",
+      "blankLine": "ignore"
+    }
+  ]
+}
 ```
 
 ## Scope

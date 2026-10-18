@@ -133,18 +133,21 @@ onMounted(() => {
 
 ## :wrench: Options
 
-```js
+```json
 {
-  'vue-perfectionist/max-lines-per-callback': ['error', {
-    max: 20,
-    skipBlankLines: false,
-    skipComments: false,
-    groups: ['lifecycle', 'watch'],
-    exclude: [],
-    customCallbacks: [],
-    vueGlobals: [],
-    vueImportSources: ['vue'],
-  }],
+  "vue-perfectionist/max-lines-per-callback": [
+    "error",
+    {
+      "max": 20,
+      "skipBlankLines": false,
+      "skipComments": false,
+      "groups": ["lifecycle", "watch"],
+      "exclude": [],
+      "customCallbacks": [],
+      "vueGlobals": [],
+      "vueImportSources": ["vue"]
+    }
+  ]
 }
 ```
 
@@ -198,26 +201,26 @@ An explicit `vueGlobals` list overrides the shared setting only for built-ins.
 
 ### Custom callbacks
 
-```js
+```json
 {
-  customCallbacks: [
+  "customCallbacks": [
     {
-      source: '@vueuse/core',
-      name: 'watchDebounced',
-      callbackIndices: [1],
-      autoImport: true,
+      "source": "@vueuse/core",
+      "name": "watchDebounced",
+      "callbackIndices": [1],
+      "autoImport": true
     },
     {
-      source: 'vue-router',
-      name: 'onBeforeRouteLeave',
-      callbackIndices: [0],
+      "source": "vue-router",
+      "name": "onBeforeRouteLeave",
+      "callbackIndices": [0]
     },
     {
-      source: '@/composables/events',
-      name: 'subscribe',
-      callbackIndices: [1, 2],
-    },
-  ],
+      "source": "@/composables/events",
+      "name": "subscribe",
+      "callbackIndices": [1, 2]
+    }
+  ]
 }
 ```
 

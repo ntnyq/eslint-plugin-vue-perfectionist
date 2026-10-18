@@ -79,14 +79,19 @@ compiler; the rules enforce a source convention.
 
 Accept one options object. The following is the fully expanded default:
 
-```js
-'vue-perfectionist/define-macros-type-style': ['error', {
-  macros: {
-    defineProps: 'local',
-    defineEmits: 'local',
-    defineSlots: 'local',
-  },
-}]
+```json
+{
+  "vue-perfectionist/define-macros-type-style": [
+    "error",
+    {
+      "macros": {
+        "defineProps": "local",
+        "defineEmits": "local",
+        "defineSlots": "local"
+      }
+    }
+  ]
+}
 ```
 
 Each macro accepts `'inline'`, `'local'`, `'imported'`, a nonempty unique array
@@ -179,14 +184,19 @@ const props = defineProps<{ title: string }>()
 
 To permit separate declarations in either the SFC or another module:
 
-```js
-'vue-perfectionist/define-macros-type-style': ['error', {
-  macros: {
-    defineProps: ['local', 'imported'],
-    defineEmits: ['local', 'imported'],
-    defineSlots: ['local', 'imported'],
-  },
-}]
+```json
+{
+  "vue-perfectionist/define-macros-type-style": [
+    "error",
+    {
+      "macros": {
+        "defineProps": ["local", "imported"],
+        "defineEmits": ["local", "imported"],
+        "defineSlots": ["local", "imported"]
+      }
+    }
+  ]
+}
 ```
 
 Under that configuration, the following is accepted:
@@ -209,14 +219,19 @@ const props = defineProps<Props>()
 
 Accept one options object, with the same per-key merge and `false` semantics:
 
-```js
-'vue-perfectionist/require-macro-type-name': ['error', {
-  macros: {
-    defineProps: 'Props',
-    defineEmits: 'Emits',
-    defineSlots: 'Slots',
-  },
-}]
+```json
+{
+  "vue-perfectionist/require-macro-type-name": [
+    "error",
+    {
+      "macros": {
+        "defineProps": "Props",
+        "defineEmits": "Emits",
+        "defineSlots": "Slots"
+      }
+    }
+  ]
+}
 ```
 
 Each value is an exact, case-sensitive type identifier or `false`. Reject
@@ -303,10 +318,12 @@ const props = defineProps<ButtonProps>()
 
 Enabling both rules with defaults requires local named contracts:
 
-```js
-rules: {
-  'vue-perfectionist/define-macros-type-style': 'error',
-  'vue-perfectionist/require-macro-type-name': 'error',
+```json
+{
+  "rules": {
+    "vue-perfectionist/define-macros-type-style": "error",
+    "vue-perfectionist/require-macro-type-name": "error"
+  }
 }
 ```
 

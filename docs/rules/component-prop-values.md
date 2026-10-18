@@ -163,10 +163,10 @@ their names are constant strings.
 
 The defaults perform no checks until targets are configured:
 
-```js
+```json
 {
-  targets: [],
-  unknownValues: 'ignore',
+  "targets": [],
+  "unknownValues": "ignore"
 }
 ```
 
@@ -201,18 +201,28 @@ field is needed or accepted. All constraints for one prop must hold, including
 
 For example:
 
-```js
+```json
 {
-  targets: [
+  "targets": [
     {
-      components: ['AppStepCounter'],
-      props: {
-        count: { multipleOf: 10, minimum: 0, maximum: 100 },
-        label: { minLength: 1, maxLength: 20, pattern: '^\\S' },
-        variant: { enum: ['primary', 'secondary', 'danger'] },
-      },
-    },
-  ],
+      "components": ["AppStepCounter"],
+      "props": {
+        "count": {
+          "multipleOf": 10,
+          "minimum": 0,
+          "maximum": 100
+        },
+        "label": {
+          "minLength": 1,
+          "maxLength": 20,
+          "pattern": "^\\S"
+        },
+        "variant": {
+          "enum": ["primary", "secondary", "danger"]
+        }
+      }
+    }
+  ]
 }
 ```
 

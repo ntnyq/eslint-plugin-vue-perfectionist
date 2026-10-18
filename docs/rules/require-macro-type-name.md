@@ -131,15 +131,18 @@ identifier only. At most one diagnostic is emitted per eligible macro call.
 
 The expanded defaults are:
 
-```js
+```json
 {
-  'vue-perfectionist/require-macro-type-name': ['error', {
-    macros: {
-      defineProps: 'Props',
-      defineEmits: 'Emits',
-      defineSlots: 'Slots',
-    },
-  }],
+  "vue-perfectionist/require-macro-type-name": [
+    "error",
+    {
+      "macros": {
+        "defineProps": "Props",
+        "defineEmits": "Emits",
+        "defineSlots": "Slots"
+      }
+    }
+  ]
 }
 ```
 
@@ -149,11 +152,11 @@ keys retain the defaults, including with `{}` or `{ macros: {} }`.
 
 For component-specific props naming while keeping the default emits and slots checks:
 
-```js
+```json
 {
-  macros: {
-    defineProps: 'ButtonProps',
-  },
+  "macros": {
+    "defineProps": "ButtonProps"
+  }
 }
 ```
 

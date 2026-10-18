@@ -105,10 +105,10 @@ Once a key is definitely provided, a later unknown spread can change its value b
 
 Defaults:
 
-```js
+```json
 {
-  targets: [],
-  unknownBindings: 'report',
+  "targets": [],
+  "unknownBindings": "report"
 }
 ```
 
@@ -118,12 +118,18 @@ Type: `{ components: string[], props: string[] }[]`. Default: `[]`.
 
 Each entry requires nonempty, unique component and prop lists. An empty `targets` array disables checks. There are no built-in targets to extend. Overlapping targets merge their required props, including equivalent camelCase/kebab-case names, with at most one report per prop and element.
 
-```js
+```json
 {
-  targets: [
-    { components: ['AppPagination'], props: ['currentPage', 'pageSize'] },
-    { components: ['AppInput', 'AppSelect'], props: ['modelValue'] },
-  ],
+  "targets": [
+    {
+      "components": ["AppPagination"],
+      "props": ["currentPage", "pageSize"]
+    },
+    {
+      "components": ["AppInput", "AppSelect"],
+      "props": ["modelValue"]
+    }
+  ]
 }
 ```
 

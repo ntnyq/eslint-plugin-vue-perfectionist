@@ -235,16 +235,16 @@ defaults, object and array values, and nested functions:
 
 The default configuration is:
 
-```js
+```json
 {
-  'vue-perfectionist/prefer-simple-event-handler': [
-    'error',
+  "vue-perfectionist/prefer-simple-event-handler": [
+    "error",
     {
-      allowInlineFunctions: true,
-      allowConditional: false,
-      allowLogical: false,
-    },
-  ],
+      "allowInlineFunctions": true,
+      "allowConditional": false,
+      "allowLogical": false
+    }
+  ]
 }
 ```
 

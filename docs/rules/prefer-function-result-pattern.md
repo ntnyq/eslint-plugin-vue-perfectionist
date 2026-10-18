@@ -92,23 +92,23 @@ const [open] = VueUse.useToggle(false)
 
 Omitting `targets` uses these defaults:
 
-```js
+```json
 {
-  targets: [
+  "targets": [
     {
-      source: 'vue',
-      names: ['ref', 'shallowRef', 'computed'],
-      pattern: '^(is|has|should|can)[A-Z]',
-      booleanOnly: true,
+      "source": "vue",
+      "names": ["ref", "shallowRef", "computed"],
+      "pattern": "^(is|has|should|can)[A-Z]",
+      "booleanOnly": true
     },
     {
-      source: '@vueuse/core',
-      names: ['useToggle'],
-      pattern: '^(is|has|should|can)[A-Z]',
-      returnIndex: 0,
-      booleanOnly: true,
-    },
-  ],
+      "source": "@vueuse/core",
+      "names": ["useToggle"],
+      "pattern": "^(is|has|should|can)[A-Z]",
+      "returnIndex": 0,
+      "booleanOnly": true
+    }
+  ]
 }
 ```
 
@@ -137,12 +137,20 @@ when needed. For example, `Ready` also matches `wasReadyBefore`.
 
 This configuration gives Vue methods a shared pattern and overrides only `ref`:
 
-```js
+```json
 {
-  targets: [
-    { source: 'vue', names: ['ref', 'shallowRef'], pattern: '^is[A-Z]' },
-    { source: 'vue', names: ['ref'], pattern: '^has[A-Z]' },
-  ],
+  "targets": [
+    {
+      "source": "vue",
+      "names": ["ref", "shallowRef"],
+      "pattern": "^is[A-Z]"
+    },
+    {
+      "source": "vue",
+      "names": ["ref"],
+      "pattern": "^has[A-Z]"
+    }
+  ]
 }
 ```
 
@@ -182,13 +190,26 @@ A direct binding and array element zero are different positions.
 Custom functions use the same target format. They need no boolean evidence
 unless `booleanOnly: true` is configured:
 
-```js
+```json
 {
-  targets: [
-    { source: '@vueuse/core', names: ['useDark', 'useOnline'], pattern: '^is[A-Z]' },
-    { source: './state', names: ['useFlag'], pattern: '^(is|has|should|can)[A-Z]', returnIndex: 1 },
-    { source: './default', names: ['default'], pattern: '^(is|has|should|can)[A-Z]' },
-  ],
+  "targets": [
+    {
+      "source": "@vueuse/core",
+      "names": ["useDark", "useOnline"],
+      "pattern": "^is[A-Z]"
+    },
+    {
+      "source": "./state",
+      "names": ["useFlag"],
+      "pattern": "^(is|has|should|can)[A-Z]",
+      "returnIndex": 1
+    },
+    {
+      "source": "./default",
+      "names": ["default"],
+      "pattern": "^(is|has|should|can)[A-Z]"
+    }
+  ]
 }
 ```
 
@@ -315,14 +336,16 @@ another source keeps the generic filter rather than inspecting its getter.
 
 For `unplugin-auto-import`, enable the shared setting:
 
-```js
+```json
 {
-  settings: {
-    'vue-perfectionist': { autoImport: true },
+  "settings": {
+    "vue-perfectionist": {
+      "autoImport": true
+    }
   },
-  rules: {
-    'vue-perfectionist/prefer-function-result-pattern': 'error',
-  },
+  "rules": {
+    "vue-perfectionist/prefer-function-result-pattern": "error"
+  }
 }
 ```
 
@@ -330,12 +353,22 @@ This enables unbound names from **all configured targets**, including custom
 methods and names declared in ESLint's `languageOptions.globals`. Each target
 can override the setting independently:
 
-```js
+```json
 {
-  targets: [
-    { source: 'vue', names: ['ref', 'shallowRef'], pattern: '^is[A-Z]', autoImport: false },
-    { source: '@vueuse/core', names: ['useDark', 'useOnline'], pattern: '^is[A-Z]', autoImport: true },
-  ],
+  "targets": [
+    {
+      "source": "vue",
+      "names": ["ref", "shallowRef"],
+      "pattern": "^is[A-Z]",
+      "autoImport": false
+    },
+    {
+      "source": "@vueuse/core",
+      "names": ["useDark", "useOnline"],
+      "pattern": "^is[A-Z]",
+      "autoImport": true
+    }
+  ]
 }
 ```
 

@@ -162,10 +162,10 @@ comment. Unknown unrelated props do not exempt the entire component.
 
 Defaults:
 
-```js
+```json
 {
-  targets: [],
-  unknownValues: 'report',
+  "targets": [],
+  "unknownValues": "report"
 }
 ```
 
@@ -206,22 +206,34 @@ listener keys are rejected, as with the component prop rules.
 For example, this exempts either an index column or a column whose field starts
 with `internal` and whose count is an even number between 2 and 4:
 
-```js
+```json
 {
-  targets: [
+  "targets": [
     {
-      components: ['AppColumn'],
-      ignoreWhen: [
-        { props: { type: { enum: ['index'] } } },
+      "components": ["AppColumn"],
+      "ignoreWhen": [
         {
-          props: {
-            fieldName: { pattern: '^internal' },
-            count: { minimum: 2, maximum: 4, multipleOf: 2 },
-          },
+          "props": {
+            "type": {
+              "enum": ["index"]
+            }
+          }
         },
-      ],
-    },
-  ],
+        {
+          "props": {
+            "fieldName": {
+              "pattern": "^internal"
+            },
+            "count": {
+              "minimum": 2,
+              "maximum": 4,
+              "multipleOf": 2
+            }
+          }
+        }
+      ]
+    }
+  ]
 }
 ```
 

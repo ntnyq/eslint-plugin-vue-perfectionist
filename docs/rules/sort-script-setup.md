@@ -165,27 +165,27 @@ Natural sorting negotiates locale arrays in preference order. With `ignoreCase: 
 
 The default groups are:
 
-```js
-;[
-  ['interface', 'type'],
-  'define-options',
-  'define-props',
-  'define-emits',
-  'define-slots',
-  'define-model',
-  'constant',
-  'inject',
-  'composable',
-  'template-ref',
-  ['ref', 'reactive'],
-  'computed',
-  'variable',
-  ['enum', 'class'],
-  'function',
-  'watch',
-  'lifecycle-hook',
-  'provide',
-  'define-expose',
+```json
+[
+  ["interface", "type"],
+  "define-options",
+  "define-props",
+  "define-emits",
+  "define-slots",
+  "define-model",
+  "constant",
+  "inject",
+  "composable",
+  "template-ref",
+  ["ref", "reactive"],
+  "computed",
+  "variable",
+  ["enum", "class"],
+  "function",
+  "watch",
+  "lifecycle-hook",
+  "provide",
+  "define-expose"
 ]
 ```
 
@@ -203,33 +203,39 @@ Candidates that do not match a configured group stay fixed and partition the sur
 
 Group objects can override sorting and spacing:
 
-```js
+```json
 {
-  groups: [
-    'constant',
-    { newlinesBetween: 1 },
-    { group: 'function', type: 'natural', newlinesInside: 1 },
-  ],
+  "groups": [
+    "constant",
+    {
+      "newlinesBetween": 1
+    },
+    {
+      "group": "function",
+      "type": "natural",
+      "newlinesInside": 1
+    }
+  ]
 }
 ```
 
 ## Custom groups
 
-```js
+```json
 {
-  groups: ['router', 'stores', ['ref', 'reactive'], 'computed', 'function'],
-  customGroups: [
+  "groups": ["router", "stores", ["ref", "reactive"], "computed", "function"],
+  "customGroups": [
     {
-      groupName: 'router',
-      callNamePattern: '^use(Route|Router)$',
-      importSourcePattern: '^vue-router$',
+      "groupName": "router",
+      "callNamePattern": "^use(Route|Router)$",
+      "importSourcePattern": "^vue-router$"
     },
     {
-      groupName: 'stores',
-      callNamePattern: '^use[A-Z].*Store$',
-      importSourcePattern: '^(@/stores/|~/stores/)',
-    },
-  ],
+      "groupName": "stores",
+      "callNamePattern": "^use[A-Z].*Store$",
+      "importSourcePattern": "^(@/stores/|~/stores/)"
+    }
+  ]
 }
 ```
 

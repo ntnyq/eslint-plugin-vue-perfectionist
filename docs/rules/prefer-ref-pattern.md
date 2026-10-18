@@ -23,14 +23,17 @@ Enable this naming preference explicitly in your ESLint configuration.
 
 Add the rule to your existing Vue parser and plugin configuration:
 
-```js
+```json
 {
-  rules: {
-    'vue-perfectionist/prefer-ref-pattern': ['error', {
-      pattern: '.+Ref$',
-      targets: ['template', 'useTemplateRef', 'render'],
-    }],
-  },
+  "rules": {
+    "vue-perfectionist/prefer-ref-pattern": [
+      "error",
+      {
+        "pattern": ".+Ref$",
+        "targets": ["template", "useTemplateRef", "render"]
+      }
+    ]
+  }
 }
 ```
 
@@ -151,10 +154,10 @@ match over the whole name. Invalid regular expressions are configuration errors.
 For example, enforce a kebab-case convention only on template names and
 `useTemplateRef` keys:
 
-```js
+```json
 {
-  pattern: '^[a-z][a-z0-9]*(?:-[a-z0-9]+)*-ref$',
-  targets: ['template', 'useTemplateRef'],
+  "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*-ref$",
+  "targets": ["template", "useTemplateRef"]
 }
 ```
 

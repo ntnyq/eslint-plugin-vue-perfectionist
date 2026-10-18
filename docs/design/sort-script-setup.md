@@ -127,28 +127,30 @@ valid regular expressions, and constraints between fields.
 
 ### Default Groups
 
-```js
-groups: [
-  ['interface', 'type'],
-  'define-options',
-  'define-props',
-  'define-emits',
-  'define-slots',
-  'define-model',
-  'constant',
-  'inject',
-  'composable',
-  'template-ref',
-  ['ref', 'reactive'],
-  'computed',
-  'variable',
-  ['enum', 'class'],
-  'function',
-  'watch',
-  'lifecycle-hook',
-  'provide',
-  'define-expose',
-]
+```json
+{
+  "groups": [
+    ["interface", "type"],
+    "define-options",
+    "define-props",
+    "define-emits",
+    "define-slots",
+    "define-model",
+    "constant",
+    "inject",
+    "composable",
+    "template-ref",
+    ["ref", "reactive"],
+    "computed",
+    "variable",
+    ["enum", "class"],
+    "function",
+    "watch",
+    "lifecycle-hook",
+    "provide",
+    "define-expose"
+  ]
+}
 ```
 
 This is a configurable reading order. Dependencies preserve required
@@ -218,8 +220,10 @@ boundaries such as control flow remain fixed.
 
 ### Merged Arrays
 
-```js
-groups: [['interface', 'type'], ['ref', 'reactive'], 'computed']
+```json
+{
+  "groups": [["interface", "type"], ["ref", "reactive"], "computed"]
+}
 ```
 
 Each nested array forms one group. Natural sorting interleaves its categories
@@ -301,40 +305,43 @@ The canonical call name for `withDefaults(defineProps(...))` is `defineProps`.
 
 ### Project-specific Groups
 
-```js
+```json
 {
-  groups: [
-    ['interface', 'type'],
-    'define-props',
-    'define-emits',
-    'router',
-    'stores',
-    'composable',
-    ['ref', 'reactive'],
-    'computed',
-    { group: 'handlers', type: 'natural' },
-    'function',
-    'watch',
-    'lifecycle-hook',
-    'define-expose',
+  "groups": [
+    ["interface", "type"],
+    "define-props",
+    "define-emits",
+    "router",
+    "stores",
+    "composable",
+    ["ref", "reactive"],
+    "computed",
+    {
+      "group": "handlers",
+      "type": "natural"
+    },
+    "function",
+    "watch",
+    "lifecycle-hook",
+    "define-expose"
   ],
-  customGroups: [
+  "customGroups": [
     {
-      groupName: 'router',
-      callNamePattern: '^use(Route|Router)$',
-      importSourcePattern: '^vue-router$',
+      "groupName": "router",
+      "callNamePattern": "^use(Route|Router)$",
+      "importSourcePattern": "^vue-router$"
     },
     {
-      groupName: 'stores',
-      callNamePattern: '^use[A-Z].*Store$',
-      importSourcePattern: '^(@/stores/|~/stores/)',
+      "groupName": "stores",
+      "callNamePattern": "^use[A-Z].*Store$",
+      "importSourcePattern": "^(@/stores/|~/stores/)"
     },
     {
-      groupName: 'handlers',
-      selector: 'function',
-      elementNamePattern: '^(handle|on)[A-Z]',
-    },
-  ],
+      "groupName": "handlers",
+      "selector": "function",
+      "elementNamePattern": "^(handle|on)[A-Z]"
+    }
+  ]
 }
 ```
 
@@ -385,14 +392,14 @@ Nuxt-specific mode is required.
 Partition options determine which statements can be compared together;
 `groups` determines ordering within a partition.
 
-```js
+```json
 {
-  partitionByComment: {
-    line: '^\\s*#region\\b',
-    block: false,
+  "partitionByComment": {
+    "line": "^\\s*#region\\b",
+    "block": false
   },
-  newlinesBetween: 1,
-  newlinesInside: 'ignore',
+  "newlinesBetween": 1,
+  "newlinesInside": "ignore"
 }
 ```
 
@@ -406,14 +413,20 @@ line between statements. The legacy `newlinesInside: 'newlinesBetween'`
 resolves to `ignore` when global `newlinesBetween` is `ignore`, otherwise `0`.
 Prefer explicit numbers or `ignore` in new configurations.
 
-```js
-groups: [
-  'define-props',
-  { newlinesBetween: 0 },
-  'define-emits',
-  { newlinesBetween: 1 },
-  ['ref', 'reactive'],
-]
+```json
+{
+  "groups": [
+    "define-props",
+    {
+      "newlinesBetween": 0
+    },
+    "define-emits",
+    {
+      "newlinesBetween": 1
+    },
+    ["ref", "reactive"]
+  ]
+}
 ```
 
 When intermediate groups are absent, combine the crossed boundaries between
@@ -457,25 +470,31 @@ and `fallbackSort` objects, following the upstream
 Group-level fallback overrides inherit individual fields; a missing fallback
 order uses the group's order.
 
-```js
+```json
 {
-  rules: {
-    'vue-perfectionist/sort-script-setup': ['error', {
-      newlinesBetween: 1,
-      newlinesInside: 'ignore',
-      groups: [
-        ['interface', 'type'],
-        'define-props',
-        'define-emits',
-        ['ref', 'reactive'],
-        'computed',
-        { group: 'function', type: 'natural' },
-        'watch',
-        'lifecycle-hook',
-        'define-expose',
-      ],
-    }],
-  },
+  "rules": {
+    "vue-perfectionist/sort-script-setup": [
+      "error",
+      {
+        "newlinesBetween": 1,
+        "newlinesInside": "ignore",
+        "groups": [
+          ["interface", "type"],
+          "define-props",
+          "define-emits",
+          ["ref", "reactive"],
+          "computed",
+          {
+            "group": "function",
+            "type": "natural"
+          },
+          "watch",
+          "lifecycle-hook",
+          "define-expose"
+        ]
+      }
+    ]
+  }
 }
 ```
 
@@ -648,19 +667,22 @@ than reporting them as source diagnostics.
 The following override assumes the corresponding plugins and parsers have
 already been configured. Place it after related presets:
 
-```js
+```json
 {
-  files: ['**/*.vue'],
-  rules: {
-    'perfectionist/sort-modules': 'off',
-    'vue/define-macros-order': 'off',
-    'vue-perfectionist/sort-script-setup': ['error', {
-      type: 'unsorted',
-      newlinesBetween: 'ignore',
-      newlinesInside: 'ignore',
-      fix: 'safe',
-    }],
-  },
+  "files": ["**/*.vue"],
+  "rules": {
+    "perfectionist/sort-modules": "off",
+    "vue/define-macros-order": "off",
+    "vue-perfectionist/sort-script-setup": [
+      "error",
+      {
+        "type": "unsorted",
+        "newlinesBetween": "ignore",
+        "newlinesInside": "ignore",
+        "fix": "safe"
+      }
+    ]
+  }
 }
 ```
 

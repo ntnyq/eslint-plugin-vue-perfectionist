@@ -157,11 +157,11 @@ one positional slot; it is not treated as confirmed options.
 
 Defaults:
 
-```js
+```json
 {
-  maxPositionalParams: 0,
-  functionPattern: '^use[A-Z]',
-  ignoreNames: [],
+  "maxPositionalParams": 0,
+  "functionPattern": "^use[A-Z]",
+  "ignoreNames": []
 }
 ```
 
@@ -231,10 +231,10 @@ errors. `ignoreNames` takes precedence over a pattern match.
 
 For a different convention and one explicit exception:
 
-```js
+```json
 {
-  functionPattern: '^create[A-Z]',
-  ignoreNames: ['createLegacyComments'],
+  "functionPattern": "^create[A-Z]",
+  "ignoreNames": ["createLegacyComments"]
 }
 ```
 

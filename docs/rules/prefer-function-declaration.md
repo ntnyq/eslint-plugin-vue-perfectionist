@@ -145,12 +145,12 @@ function useForm() {
 
 Defaults:
 
-```js
+```json
 {
-  scopes: ['sfc', 'composables'],
-  functionPattern: '^use[A-Z]',
-  ignoreNames: [],
-  allowTypeAnnotation: false,
+  "scopes": ["sfc", "composables"],
+  "functionPattern": "^use[A-Z]",
+  "ignoreNames": [],
+  "allowTypeAnnotation": false
 }
 ```
 
@@ -254,10 +254,10 @@ No import, file path, or directory convention is required.
 
 For a custom convention:
 
-```js
+```json
 {
-  functionPattern: '^create[A-Z]',
-  ignoreNames: ['createLegacyForm'],
+  "functionPattern": "^create[A-Z]",
+  "ignoreNames": ["createLegacyForm"]
 }
 ```
 

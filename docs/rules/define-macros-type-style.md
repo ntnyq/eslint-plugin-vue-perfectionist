@@ -77,15 +77,18 @@ const props = defineProps<Props>()
 
 The expanded defaults are:
 
-```js
+```json
 {
-  'vue-perfectionist/define-macros-type-style': ['error', {
-    macros: {
-      defineProps: 'local',
-      defineEmits: 'local',
-      defineSlots: 'local',
-    },
-  }],
+  "vue-perfectionist/define-macros-type-style": [
+    "error",
+    {
+      "macros": {
+        "defineProps": "local",
+        "defineEmits": "local",
+        "defineSlots": "local"
+      }
+    }
+  ]
 }
 ```
 
@@ -96,13 +99,13 @@ macro's default. Omitted keys retain their defaults, including with `{}` or
 
 To accept both local declarations and imports for props, while skipping the other macros:
 
-```js
+```json
 {
-  macros: {
-    defineProps: ['local', 'imported'],
-    defineEmits: false,
-    defineSlots: false,
-  },
+  "macros": {
+    "defineProps": ["local", "imported"],
+    "defineEmits": false,
+    "defineSlots": false
+  }
 }
 ```
 

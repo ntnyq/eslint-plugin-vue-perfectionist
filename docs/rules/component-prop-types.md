@@ -127,10 +127,10 @@ In `:count="1" v-bind="extra"` and `{ count: 1, ...extra }`, the key remains pre
 
 Defaults:
 
-```js
+```json
 {
-  targets: [],
-  unknownValues: 'ignore',
+  "targets": [],
+  "unknownValues": "ignore"
 }
 ```
 
@@ -140,18 +140,23 @@ Type: `{ components: string[], props: Record<string, Constraint> }[]`. Default: 
 
 Each target requires a nonempty list of unique component names and a nonempty prop map. An empty `targets` array disables checks. There are no built-in targets. Each constraint accepts a single type, a nonempty union of unique types, or a descriptor:
 
-```js
+```json
 {
-  targets: [{
-    components: ['AppSelect'],
-    props: {
-      label: 'string',
-      modelValue: ['string', 'number', 'null'],
-      options: 'array',
-      filter: 'function',
-      disabled: { type: 'boolean', booleanCasting: true },
-    },
-  }],
+  "targets": [
+    {
+      "components": ["AppSelect"],
+      "props": {
+        "label": "string",
+        "modelValue": ["string", "number", "null"],
+        "options": "array",
+        "filter": "function",
+        "disabled": {
+          "type": "boolean",
+          "booleanCasting": true
+        }
+      }
+    }
+  ]
 }
 ```
 

@@ -48,11 +48,13 @@ The rule recognizes direct, same-name runtime imports from `vue`. For
 auto-imported `useTemplateRef`, enable the shared setting, which defaults to
 `false`:
 
-```js
+```json
 {
-  settings: {
-    'vue-perfectionist': { autoImport: true },
-  },
+  "settings": {
+    "vue-perfectionist": {
+      "autoImport": true
+    }
+  }
 }
 ```
 
@@ -129,11 +131,14 @@ const element = useTemplateRef<HTMLVideoElement>('videoRef')
 
 Default configuration:
 
-```js
+```json
 {
-  'vue-perfectionist/prefer-use-template-ref-inference': ['error', {
-    ignoreRefs: [],
-  }],
+  "vue-perfectionist/prefer-use-template-ref-inference": [
+    "error",
+    {
+      "ignoreRefs": []
+    }
+  ]
 }
 ```
 

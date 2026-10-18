@@ -184,15 +184,15 @@ are checked recursively, so property access cannot hide a complex source:
 
 The default configuration is:
 
-```js
+```json
 {
-  'vue-perfectionist/no-complex-v-for-source': [
-    'error',
+  "vue-perfectionist/no-complex-v-for-source": [
+    "error",
     {
-      allowCallExpression: true,
-      allowLiteral: true,
-    },
-  ],
+      "allowCallExpression": true,
+      "allowLiteral": true
+    }
+  ]
 }
 ```
 

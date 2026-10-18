@@ -17,11 +17,11 @@ without automatic fixes or suggestions.
 
 Add the rule to your existing parser and plugin configuration:
 
-```js
+```json
 {
-  rules: {
-    'vue-perfectionist/consistent-template-ref-name': 'error',
-  },
+  "rules": {
+    "vue-perfectionist/consistent-template-ref-name": "error"
+  }
 }
 ```
 

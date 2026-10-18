@@ -69,11 +69,13 @@ See the [setup guide](https://vue-perfectionist.vercel.app/guide/) for more conf
 For `unplugin-auto-import` with Vue APIs, add this shared setting to your ESLint
 configuration:
 
-```js
+```json
 {
-  settings: {
-    'vue-perfectionist': { autoImport: true },
-  },
+  "settings": {
+    "vue-perfectionist": {
+      "autoImport": true
+    }
+  }
 }
 ```
 
