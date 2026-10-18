@@ -183,6 +183,11 @@ checks configured value constraints such as numeric multiples, ranges, enums, an
 string lengths or patterns. These rules need explicit `targets`; they perform no checks
 by default and can be enabled independently.
 
+Use [`require-component-slots`](../rules/require-component-slots.md) to require
+named or default slots at configured component usage sites. It has no built-in
+targets, merges overlapping requirements, and reports missing or unverifiable
+slots without fixes. `unknownSlots` controls uncertain dynamic slot names.
+
 Use [`require-vue-generic`](../rules/require-vue-generic.md) to require explicit
 `@vue-generic` comments before configured components. Its `targets` support
 prop-value exemptions through `ignoreWhen`; `unknownValues` controls uncertain

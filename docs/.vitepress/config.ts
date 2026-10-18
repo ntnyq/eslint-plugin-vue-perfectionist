@@ -61,6 +61,15 @@ const exampleRules = {
       targets: [{ components: ['AppCounter'], props: ['count'] }],
     },
   ],
+  'vue-perfectionist/require-component-slots': [
+    'error',
+    {
+      targets: [
+        { components: ['AppDialog'], slots: ['header', 'footer'] },
+        { components: ['AppButton'], slots: ['default'] },
+      ],
+    },
+  ],
   'vue-perfectionist/require-macro-type-name': 'error',
   'vue-perfectionist/require-vue-generic': [
     'error',

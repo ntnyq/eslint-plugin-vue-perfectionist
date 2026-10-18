@@ -37,6 +37,8 @@ export type {
   RefPatternTarget,
   RequireComponentPropsOptions,
   RequireComponentPropsTarget,
+  RequireComponentSlotsOptions,
+  RequireComponentSlotsTarget,
   RequireMacroTypeNameMacro,
   RequireMacroTypeNameOptions,
   RequireVueGenericIgnoreCondition,

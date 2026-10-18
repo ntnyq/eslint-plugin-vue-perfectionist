@@ -103,6 +103,7 @@ for scope, limitations, and ESLint globals.
 | [prefer-template-literal-in-interpolation](https://vue-perfectionist.vercel.app/rules/prefer-template-literal-in-interpolation) | Prefer a single template literal for mixed text and interpolation. |
 | [prefer-use-template-ref-inference](https://vue-perfectionist.vercel.app/rules/prefer-use-template-ref-inference)               | Prefer inferred types for static Vue template refs.                |
 | [require-component-props](https://vue-perfectionist.vercel.app/rules/require-component-props)                                   | Require configured props at component usage sites.                 |
+| [require-component-slots](https://vue-perfectionist.vercel.app/rules/require-component-slots)                                   | Require configured slots at component usage sites.                 |
 | [require-macro-type-name](https://vue-perfectionist.vercel.app/rules/require-macro-type-name)                                   | Require exact call-site names for Vue macro types.                 |
 | [require-vue-generic](https://vue-perfectionist.vercel.app/rules/require-vue-generic)                                           | Require explicit generic comments on configured components.        |
 | [sort-script-setup](https://vue-perfectionist.vercel.app/rules/sort-script-setup)                                               | Group and order top-level statements in `<script setup>`.          |

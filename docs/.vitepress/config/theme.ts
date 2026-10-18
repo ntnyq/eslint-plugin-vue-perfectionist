@@ -104,6 +104,10 @@ export function getThemeConfig(): DefaultTheme.Config {
             text: 'require-component-props',
           },
           {
+            link: '/rules/require-component-slots',
+            text: 'require-component-slots',
+          },
+          {
             link: '/rules/require-macro-type-name',
             text: 'require-macro-type-name',
           },

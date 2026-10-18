@@ -22,6 +22,7 @@ See the [setup guide](/guide/#basic-usage) for configuration instructions.
 | [prefer-template-literal-in-interpolation](./prefer-template-literal-in-interpolation.md) | Prefer a single template literal for mixed text and interpolation. |
 | [prefer-use-template-ref-inference](./prefer-use-template-ref-inference.md)               | Prefer inferred types for static Vue template refs.                |
 | [require-component-props](./require-component-props.md)                                   | Require configured props at component usage sites.                 |
+| [require-component-slots](./require-component-slots.md)                                   | Require configured slots at component usage sites.                 |
 | [require-macro-type-name](./require-macro-type-name.md)                                   | Require exact call-site names for Vue macro types.                 |
 | [require-vue-generic](./require-vue-generic.md)                                           | Require explicit generic comments on configured components.        |
 | [sort-script-setup](./sort-script-setup.md)                                               | Group and order top-level statements in `<script setup>`.          |

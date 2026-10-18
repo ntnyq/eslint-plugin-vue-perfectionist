@@ -15,6 +15,7 @@ import { preferSimpleEventHandler } from './rules/prefer-simple-event-handler.ts
 import { preferTemplateLiteralInInterpolation } from './rules/prefer-template-literal-in-interpolation.ts'
 import { preferUseTemplateRefInference } from './rules/prefer-use-template-ref-inference.ts'
 import { requireComponentProps } from './rules/require-component-props.ts'
+import { requireComponentSlots } from './rules/require-component-slots.ts'
 import { requireMacroTypeName } from './rules/require-macro-type-name.ts'
 import { requireVueGeneric } from './rules/require-vue-generic.ts'
 import { sortScriptSetup } from './rules/sort-script-setup.ts'
@@ -43,6 +44,7 @@ export const plugin: VuePerfectionistPlugin = {
       preferTemplateLiteralInInterpolation,
     'prefer-use-template-ref-inference': preferUseTemplateRefInference,
     'require-component-props': requireComponentProps,
+    'require-component-slots': requireComponentSlots,
     'require-macro-type-name': requireMacroTypeName,
     'require-vue-generic': requireVueGeneric,
     'sort-script-setup': sortScriptSetup,

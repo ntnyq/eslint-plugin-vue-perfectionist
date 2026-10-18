@@ -4,6 +4,45 @@ import plugin, * as pluginExports from '../src'
 import { vueLanguageOptions } from './internal'
 
 describe('plugin contract', () => {
+  it('checks required component slots through an aliased plugin', () => {
+    const linter = new Linter()
+    const source = `<template>
+<AppDialog><template #header /><template #[name] /></AppDialog>
+<app-dialog />
+</template>`
+    const configuration: Linter.Config = {
+      files: ['**/*.vue'],
+      languageOptions: vueLanguageOptions,
+      plugins: { vp: plugin },
+      rules: {
+        'vp/require-component-slots': [
+          'error',
+          {
+            targets: [
+              { components: ['AppDialog'], slots: ['header', 'footer'] },
+            ],
+          },
+        ],
+      },
+    }
+    const result = linter.verifyAndFix(source, configuration, 'Test.vue')
+    expect(result.messages.map(message => message.messageId)).toEqual([
+      'unverifiableRequiredSlot',
+      'missingSlot',
+      'missingSlot',
+    ])
+    expect(result.fixed).toBe(false)
+    expect(result.output).toBe(source)
+    for (const message of result.messages) {
+      expect(message.ruleId).toBe('vp/require-component-slots')
+      expect(message.fix).toBeUndefined()
+      expect(message.suggestions).toBeUndefined()
+    }
+    expect(
+      linter.verifyAndFix(result.output, configuration, 'Test.vue'),
+    ).toEqual(result)
+  })
+
   it('fixes tag padding through an aliased plugin and replaces defaults', () => {
     const linter = new Linter()
     const configuration: Linter.Config = {
@@ -314,6 +353,7 @@ onMounted(handler)
       'prefer-template-literal-in-interpolation',
       'prefer-use-template-ref-inference',
       'require-component-props',
+      'require-component-slots',
       'require-macro-type-name',
       'require-vue-generic',
       'sort-script-setup',
