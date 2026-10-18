@@ -216,6 +216,18 @@ await run<CallbackStyleOptions, CallbackStyleMessageId>({
   ],
   invalid: [
     ...[
+      '(Vue as typeof Vue)',
+      '(Vue satisfies typeof Vue)',
+      '(<typeof Vue>Vue)',
+      'Vue!',
+      '((Vue as typeof Vue)!)',
+    ].map(expression => ({
+      description: 'preserves namespace wrappers when fixing callback bodies',
+      code: `import * as Vue from 'vue'; ${expression}.onMounted(() => 1)`,
+      errors: ['expectedBlockBody' as const],
+      output: `import * as Vue from 'vue'; ${expression}.onMounted(() => { return (1) })`,
+    })),
+    ...[
       [true, undefined],
       [undefined, true],
       [false, true],

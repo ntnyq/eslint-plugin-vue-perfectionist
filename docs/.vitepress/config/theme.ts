@@ -83,6 +83,10 @@ export function getThemeConfig(): DefaultTheme.Config {
             text: 'prefer-composable-options',
           },
           {
+            link: '/rules/prefer-function-declaration',
+            text: 'prefer-function-declaration',
+          },
+          {
             link: '/rules/prefer-function-result-pattern',
             text: 'prefer-function-result-pattern',
           },

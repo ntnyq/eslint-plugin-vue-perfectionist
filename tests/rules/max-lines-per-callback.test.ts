@@ -44,6 +44,11 @@ await run<MaxLinesPerCallbackOptions, MaxLinesPerCallbackMessageId>({
     }
   },
   valid: [
+    {
+      description: 'namespace wrappers do not bypass parameter shadowing',
+      code: `import * as Vue from 'vue'; function local(Vue: unknown) { (Vue as typeof Vue).onMounted(${longCallback}) }`,
+      options: { max: 3 },
+    },
     { code: withVue(`onMounted(${callbackWithLines(20)})`) },
     { code: withVue('onMounted(() => {})'), options: { max: 1 } },
     {
@@ -170,6 +175,13 @@ await run<MaxLinesPerCallbackOptions, MaxLinesPerCallbackMessageId>({
     },
   ],
   invalid: [
+    {
+      description: 'recognizes wrapped namespace receivers for length checks',
+      code: `import * as Vue from 'vue'; (Vue as typeof Vue).onMounted(${longCallback})`,
+      options: { max: 3 },
+      errors: [diagnostic()],
+      output: null,
+    },
     {
       description: 'reports the callback range and default limit',
       code: withVue(`onMounted(${callbackWithLines(21)})`),

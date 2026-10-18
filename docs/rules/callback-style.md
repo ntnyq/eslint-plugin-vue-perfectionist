@@ -138,6 +138,9 @@ watch(
 
 Named import aliases and namespace imports match the original export name:
 
+TypeScript wrappers around namespace receivers, such as
+`(Vue as typeof Vue).onMounted(...)`, preserve import and shadowing checks.
+
 ::: incorrect
 
 ```ts

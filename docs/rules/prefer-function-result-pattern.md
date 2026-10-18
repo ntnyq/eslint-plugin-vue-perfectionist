@@ -72,8 +72,9 @@ const [visible, toggle] = useToggle()
 
 :::
 
-Named import aliases and namespace imports are supported. These declarations
-are reported without automatic renaming:
+Named import aliases and namespace imports are supported, including TypeScript
+wrappers around namespace receivers such as `(Vue as typeof Vue).ref(false)`.
+These declarations are reported without automatic renaming:
 
 ::: incorrect
 

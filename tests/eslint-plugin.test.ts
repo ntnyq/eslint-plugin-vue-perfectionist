@@ -4,6 +4,35 @@ import plugin, * as pluginExports from '../src'
 import { vueLanguageOptions } from './internal'
 
 describe('plugin contract', () => {
+  it('reports function expressions through an aliased plugin without fixes', () => {
+    const linter = new Linter()
+    const source = `<script setup>
+const useForm = () => {
+  const save = () => {}
+  return { save }
+}
+</script>`
+    const configuration: Linter.Config = {
+      files: ['**/*.vue'],
+      languageOptions: vueLanguageOptions,
+      plugins: { vp: plugin },
+      rules: { 'vp/prefer-function-declaration': 'error' },
+    }
+    const result = linter.verifyAndFix(source, configuration, 'Test.vue')
+    expect(result.messages).toHaveLength(2)
+    expect(result.fixed).toBe(false)
+    expect(result.output).toBe(source)
+    for (const message of result.messages) {
+      expect(message.ruleId).toBe('vp/prefer-function-declaration')
+      expect(message.messageId).toBe('expectedFunctionDeclaration')
+      expect(message.fix).toBeUndefined()
+      expect(message.suggestions).toBeUndefined()
+    }
+    expect(
+      linter.verifyAndFix(result.output, configuration, 'Test.vue'),
+    ).toEqual(result)
+  })
+
   it('checks required component slots through an aliased plugin', () => {
     const linter = new Linter()
     const source = `<template>
@@ -347,6 +376,7 @@ onMounted(handler)
       'no-complex-v-for-source',
       'padding-line-between-tags',
       'prefer-composable-options',
+      'prefer-function-declaration',
       'prefer-function-result-pattern',
       'prefer-ref-pattern',
       'prefer-simple-event-handler',

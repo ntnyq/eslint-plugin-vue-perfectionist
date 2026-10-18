@@ -9,6 +9,7 @@ import { maxLinesPerCallback } from './rules/max-lines-per-callback.ts'
 import { noComplexVForSource } from './rules/no-complex-v-for-source.ts'
 import { paddingLineBetweenTags } from './rules/padding-line-between-tags.ts'
 import { preferComposableOptions } from './rules/prefer-composable-options.ts'
+import { preferFunctionDeclaration } from './rules/prefer-function-declaration.ts'
 import { preferFunctionResultPattern } from './rules/prefer-function-result-pattern.ts'
 import { preferRefPattern } from './rules/prefer-ref-pattern.ts'
 import { preferSimpleEventHandler } from './rules/prefer-simple-event-handler.ts'
@@ -37,6 +38,7 @@ export const plugin: VuePerfectionistPlugin = {
     'no-complex-v-for-source': noComplexVForSource,
     'padding-line-between-tags': paddingLineBetweenTags,
     'prefer-composable-options': preferComposableOptions,
+    'prefer-function-declaration': preferFunctionDeclaration,
     'prefer-function-result-pattern': preferFunctionResultPattern,
     'prefer-ref-pattern': preferRefPattern,
     'prefer-simple-event-handler': preferSimpleEventHandler,

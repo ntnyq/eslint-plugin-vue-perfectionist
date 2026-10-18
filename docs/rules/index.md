@@ -16,6 +16,7 @@ See the [setup guide](/guide/#basic-usage) for configuration instructions.
 | [no-complex-v-for-source](./no-complex-v-for-source.md)                                   | Disallow complex expressions in Vue v-for sources.                 |
 | [padding-line-between-tags](./padding-line-between-tags.md)                               | Enforce blank-line counts between consecutive template tags.       |
 | [prefer-composable-options](./prefer-composable-options.md)                               | Prefer a final options object for composable parameters.           |
+| [prefer-function-declaration](./prefer-function-declaration.md)                           | Require function declarations in SFCs and composables.             |
 | [prefer-function-result-pattern](./prefer-function-result-pattern.md)                     | Enforce naming patterns for function result bindings.              |
 | [prefer-ref-pattern](./prefer-ref-pattern.md)                                             | Enforce naming patterns for template refs.                         |
 | [prefer-simple-event-handler](./prefer-simple-event-handler.md)                           | Require simple expressions in named template event handlers.       |

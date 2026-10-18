@@ -28,6 +28,8 @@ export type {
   PaddingLineBetweenTagsEntry,
   PaddingLineBetweenTagsOptions,
   PreferComposableOptionsOptions,
+  PreferFunctionDeclarationOptions,
+  PreferFunctionDeclarationScope,
   PreferFunctionResultPatternOptions,
   PreferFunctionResultPatternTarget,
   PreferRefPatternOptions,

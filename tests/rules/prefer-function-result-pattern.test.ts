@@ -63,6 +63,11 @@ await run<
     }
   },
   valid: [
+    {
+      description: 'namespace wrappers do not bypass parameter shadowing',
+      code: "import * as Vue from 'vue'; function local(Vue: unknown) { const ready = (Vue as typeof Vue).ref(false) }",
+      settings: autoImport,
+    },
     ...['isReady', 'hasPermission', 'shouldRender', 'canEdit'].map(name => ({
       code: withComputed(`const ${name} = computed(() => count.value > 0)`),
     })),
@@ -353,6 +358,12 @@ const isReady = makeFlag()`,
     },
   ],
   invalid: [
+    {
+      description: 'recognizes wrapped namespace receivers for result naming',
+      code: "import * as Vue from 'vue'; const ready = (Vue as typeof Vue).ref(false)",
+      errors,
+      output: null,
+    },
     ...[
       '() => true',
       '() => false',

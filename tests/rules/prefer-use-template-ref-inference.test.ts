@@ -90,6 +90,7 @@ ${binding}\n${call}
       "import { useTemplateRef as useTplRef } from 'vue'; const videoRef = useTplRef<HTMLVideoElement>('videoRef')",
       `import { ref as useTemplateRef } from 'vue'; ${call}`,
       "import * as Vue from 'vue'; const videoRef = Vue.useTemplateRef<HTMLVideoElement>('videoRef')",
+      "import * as Vue from 'vue'; const videoRef = (Vue as typeof Vue).useTemplateRef<HTMLVideoElement>('videoRef')",
       "import * as Vue from 'vue'; const videoRef = Vue['useTemplateRef']<HTMLVideoElement>('videoRef')",
       "const videoRef = useTemplateRef?.<HTMLVideoElement>('videoRef')",
       "const videoRef = (useTemplateRef as Function)<HTMLVideoElement>('videoRef')",

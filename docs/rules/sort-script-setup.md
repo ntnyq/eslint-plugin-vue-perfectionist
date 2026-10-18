@@ -249,6 +249,10 @@ For a standalone custom group, its sorting overrides win over its `groups` objec
 
 ## Configuration
 
+Namespace calls retain their import identity through TypeScript wrappers such
+as `(Vue as typeof Vue).watch(...)`. Their groups and synchronous callback
+dependencies are analyzed under the same fix safety rules as plain calls.
+
 Configure sorting preferences directly in the rule options. Explicit options
 override the rule defaults; sorting preferences in shared settings are ignored.
 

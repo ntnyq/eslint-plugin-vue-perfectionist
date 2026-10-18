@@ -23,6 +23,36 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     }
   },
   valid: [
+    ...['watch(() => 0, read, { immediate: true })', 'watchEffect(read)'].map(
+      call => ({
+        description:
+          'preserves immediate dependencies through namespace wrappers',
+        code: createVueSFC({
+          script: `<script setup lang="ts">
+import * as Vue from 'vue'
+function read() { return z.value }
+const z = Vue.ref(0)
+const stop = (Vue as typeof Vue).${call}
+</script>`,
+        }),
+        options: { groups: ['function', 'watch', 'ref'] },
+      }),
+    ),
+    ...['watch(() => 0, read)', 'watchEffect(read, { flush: "post" })'].map(
+      call => ({
+        description:
+          'keeps wrapped deferred callbacks free of immediate dependencies',
+        code: createVueSFC({
+          script: `<script setup lang="ts">
+import * as Vue from 'vue'
+function read() { return z.value }
+const stop = (Vue as typeof Vue).${call}
+const z = Vue.ref(0)
+</script>`,
+        }),
+        options: { groups: ['function', 'watch', 'ref'] },
+      }),
+    ),
     {
       description: 'keeps auto-import recognition opt-in',
       code: createVueSFC({
@@ -1148,6 +1178,23 @@ await run<SortScriptSetupOptions, SortScriptSetupMessageId>({
     },
   ],
   invalid: [
+    {
+      description: 'recognizes wrapped Vue calls without allowing unsafe fixes',
+      code: createVueSFC({
+        script: `<script setup lang="ts">
+import * as Vue from 'vue'
+const z = (Vue as typeof Vue).computed(() => 1)
+const a = (Vue satisfies typeof Vue).ref(0)
+</script>`,
+      }),
+      errors: [
+        {
+          messageId: 'unsafeReorder',
+          data: { name: 'a', before: 'z', group: 'ref / reactive' },
+        },
+      ],
+      output: null,
+    },
     ...(['callNamePattern', 'importSourcePattern'] as const).flatMap(key =>
       ['', { pattern: '' }, ['']].flatMap(pattern =>
         [false, true].map(anyOf => ({

@@ -97,6 +97,7 @@ for scope, limitations, and ESLint globals.
 | [no-complex-v-for-source](https://vue-perfectionist.vercel.app/rules/no-complex-v-for-source)                                   | Disallow complex expressions in Vue v-for sources.                 |
 | [padding-line-between-tags](https://vue-perfectionist.vercel.app/rules/padding-line-between-tags)                               | Enforce blank-line counts between consecutive template tags.       |
 | [prefer-composable-options](https://vue-perfectionist.vercel.app/rules/prefer-composable-options)                               | Prefer a final options object for composable parameters.           |
+| [prefer-function-declaration](https://vue-perfectionist.vercel.app/rules/prefer-function-declaration)                           | Require function declarations in SFCs and composables.             |
 | [prefer-function-result-pattern](https://vue-perfectionist.vercel.app/rules/prefer-function-result-pattern)                     | Enforce naming patterns for function result bindings.              |
 | [prefer-ref-pattern](https://vue-perfectionist.vercel.app/rules/prefer-ref-pattern)                                             | Enforce naming patterns for template refs.                         |
 | [prefer-simple-event-handler](https://vue-perfectionist.vercel.app/rules/prefer-simple-event-handler)                           | Require simple expressions in named template event handlers.       |

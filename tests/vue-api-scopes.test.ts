@@ -26,6 +26,54 @@ const variants = ['', ' lang="ts"'].flatMap(language =>
   ),
 )
 
+it.each([false, true])(
+  'isolates wrapped namespace receivers across scripts (setup first: %s)',
+  setupFirst => {
+    const calls = `
+(Vue as typeof Vue).defineComponent(() => { const save = () => {} });
+(Vue satisfies typeof Vue).onMounted(handler);
+(Vue!).onMounted(() => {
+  first()
+  second()
+});
+const ready = (Vue as typeof Vue).ref(false);
+`
+    const ordinary = `<script lang="ts">import * as Vue from 'vue';${calls}</script>`
+    const setup = `<script setup lang="ts">
+const Vue = { defineComponent: value => value, onMounted: fn => fn(), ref: value => value };${calls}</script>`
+    const source = setupFirst ? setup + ordinary : ordinary + setup
+    const composedConfig: Linter.Config = {
+      ...config,
+      settings: { 'vue-perfectionist': { autoImport: true } },
+      rules: {
+        'vp/prefer-function-declaration': 'error',
+        'vp/callback-style': 'error',
+        'vp/max-lines-per-callback': ['error', { max: 3 }],
+        'vp/prefer-function-result-pattern': 'error',
+      },
+    }
+    const linter = new Linter()
+    const result = linter.verifyAndFix(source, composedConfig, 'Test.vue')
+    expect(
+      result.messages.map(message => [message.ruleId, message.messageId]),
+    ).toEqual([
+      ['vp/prefer-function-declaration', 'expectedFunctionDeclaration'],
+      ['vp/callback-style', 'expectedInlineCallback'],
+      ['vp/max-lines-per-callback', 'exceededMaxLines'],
+      ['vp/prefer-function-result-pattern', 'unexpectedFunctionResultPattern'],
+    ])
+    expect(result.fixed).toBe(false)
+    expect(result.output).toBe(source)
+    for (const message of result.messages) {
+      expect(message.fix).toBeUndefined()
+      expect(message.suggestions).toBeUndefined()
+    }
+    expect(
+      linter.verifyAndFix(result.output, composedConfig, 'Test.vue'),
+    ).toEqual(result)
+  },
+)
+
 it.each(variants)(
   'isolates setup-local APIs ($language, setup first: $setupFirst, namespace: $namespace)',
   ({ language, setupFirst, namespace }) => {

@@ -184,6 +184,8 @@ of `watch` is checked; source getters and source arrays are left alone.
 ### Import identity and auto-imports
 
 Named import aliases and namespace imports match their original export names.
+TypeScript wrappers around namespace receivers, such as
+`(Vue as typeof Vue).onMounted(...)`, preserve import and shadowing checks.
 Local declarations, shadowed parameters, imports from other modules, and
 type-only imports do not match. Default imports are not built-in Vue APIs.
 For re-export modules, configure `vueImportSources: ['vue', '#imports']`.

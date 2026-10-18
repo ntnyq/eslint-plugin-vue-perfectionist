@@ -56,8 +56,9 @@ export function getRuntimeImportBinding(
 }
 
 /**
- * Resolve direct and non-computed namespace calls. Optional calls remain
- * outside this contract; ref recognition has its own broader syntax policy.
+ * Resolve direct and non-computed namespace calls through TypeScript wrappers
+ * around the callee or namespace receiver. Optional calls remain outside this
+ * contract; ref recognition has its own broader syntax policy.
  *
  * @param call - The call expression to resolve.
  * @param sourceCode - The source code used to resolve visible runtime bindings.
@@ -94,13 +95,16 @@ export function getCallIdentity(
     callee.type === 'MemberExpression' &&
     !callee.computed &&
     !callee.optional &&
-    callee.object.type === 'Identifier' &&
     callee.property.type === 'Identifier'
   ) {
+    const object = unwrapExpression(callee.object)
+    if (object.type !== 'Identifier') {
+      return undefined
+    }
     const binding = getRuntimeImportBinding(
-      getScriptVariableDefinitions(callee.object, sourceCode)[0],
+      getScriptVariableDefinitions(object, sourceCode)[0],
     )
-    const localName = `${callee.object.name}.${callee.property.name}`
+    const localName = `${object.name}.${callee.property.name}`
     if (binding?.kind === 'namespace') {
       return {
         name: callee.property.name,
