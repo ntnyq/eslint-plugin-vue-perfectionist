@@ -42,7 +42,7 @@ export default [
       'vue/padding-line-between-tags': 'off',
       'vue-perfectionist/padding-line-between-tags': [
         'error',
-        [{ tag: 'ElFormItem' }],
+        { targets: [{ tag: 'ElFormItem' }] },
       ],
     },
   },
@@ -100,26 +100,36 @@ Multiple blank lines also violate the default exact count:
 
 ## :wrench: Options
 
-The single rule option is an array of entries. The default is:
+The single rule option is an object with an optional `targets` array. The
+effective default is:
 
 ```js
-;[{ prev: '*', next: '*', blankLine: 1 }]
+;({
+  targets: [{ prev: '*', next: '*', blankLine: 1 }],
+})
 ```
 
-An explicit array replaces the default; `[]` disables all checks. Unmatched pairs
-are ignored. When several entries match, the **last matching entry wins**,
-regardless of whether it uses shorthand or the full form.
+Omitting the option, passing `{}`, or omitting `targets` keeps the default.
+An explicit `targets` array replaces the default; `{ targets: [] }` disables all
+checks. Unmatched pairs are ignored. When several entries match, the **last
+matching entry wins**, regardless of whether it uses shorthand or the full form.
+Unknown option properties are rejected.
 
-### Matching tags
+The former direct-array option is no longer accepted. To migrate, change
+`['error', entries]` to `['error', { targets: entries }]`.
 
-Use either `tag` or both `prev` and `next` in each entry:
+### targets
+
+Use either `tag` or both `prev` and `next` in each `targets` entry:
 
 ```js
-;[
-  { tag: 'ElFormItem' },
-  { tag: 'ElButton', blankLine: 'never' },
-  { prev: 'PageHeader', next: 'PageContent', blankLine: 2 },
-]
+;({
+  targets: [
+    { tag: 'ElFormItem' },
+    { tag: 'ElButton', blankLine: 'never' },
+    { prev: 'PageHeader', next: 'PageContent', blankLine: 2 },
+  ],
+})
 ```
 
 - `tag: 'ElFormItem'` is shorthand for
@@ -134,7 +144,7 @@ Use either `tag` or both `prev` and `next` in each entry:
   properties are configuration errors. Glob patterns and regular expressions
   are not supported.
 
-### blankLine
+### targets[].blankLine
 
 | Value               | Meaning                                                                |
 | ------------------- | ---------------------------------------------------------------------- |
@@ -151,10 +161,12 @@ entry and defaults to `1`.
 Use a later exception to override a general policy:
 
 ```js
-;[
-  { prev: '*', next: '*', blankLine: 1 },
-  { tag: 'ElFormItem', blankLine: 'ignore' },
-]
+;({
+  targets: [
+    { prev: '*', next: '*', blankLine: 1 },
+    { tag: 'ElFormItem', blankLine: 'ignore' },
+  ],
+})
 ```
 
 ## Scope

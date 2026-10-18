@@ -79,7 +79,10 @@ const useForm = () => {
       languageOptions: vueLanguageOptions,
       plugins: { vp: plugin },
       rules: {
-        'vp/padding-line-between-tags': ['error', [{ tag: 'Item' }]],
+        'vp/padding-line-between-tags': [
+          'error',
+          { targets: [{ tag: 'Item' }] },
+        ],
       },
     }
     const source =
@@ -101,7 +104,7 @@ const useForm = () => {
         source,
         {
           ...configuration,
-          rules: { 'vp/padding-line-between-tags': ['error', []] },
+          rules: { 'vp/padding-line-between-tags': ['error', { targets: [] }] },
         },
         'Test.vue',
       ),

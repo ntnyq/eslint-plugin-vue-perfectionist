@@ -25,63 +25,72 @@ export const paddingLineBetweenTags = createRule<
     fixable: 'whitespace',
     schema: [
       {
-        type: 'array',
-        description: 'Ordered tag-pair policies; the last matching entry wins.',
-        items: {
-          type: 'object',
-          properties: {
-            tag: {
-              type: 'string',
-              minLength: 1,
-              not: { type: 'string', enum: ['*'] },
-              description: 'Concrete source tag name to match on both sides.',
-            },
-            prev: {
-              type: 'string',
-              minLength: 1,
-              description: 'Previous source tag name, or * for any tag.',
-            },
-            next: {
-              type: 'string',
-              minLength: 1,
-              description: 'Next source tag name, or * for any tag.',
-            },
-            blankLine: {
-              description: 'Exact blank-line count or policy; defaults to 1.',
-              anyOf: [
-                {
-                  type: 'integer',
-                  minimum: 0,
-                  maximum: Number.MAX_SAFE_INTEGER,
+        type: 'object',
+        properties: {
+          targets: {
+            type: 'array',
+            description:
+              'Ordered tag-pair policies; the last matching entry wins.',
+            items: {
+              type: 'object',
+              properties: {
+                tag: {
+                  type: 'string',
+                  minLength: 1,
+                  not: { type: 'string', enum: ['*'] },
+                  description:
+                    'Concrete source tag name to match on both sides.',
                 },
-                { type: 'string', enum: ['always', 'never', 'ignore'] },
+                prev: {
+                  type: 'string',
+                  minLength: 1,
+                  description: 'Previous source tag name, or * for any tag.',
+                },
+                next: {
+                  type: 'string',
+                  minLength: 1,
+                  description: 'Next source tag name, or * for any tag.',
+                },
+                blankLine: {
+                  description:
+                    'Exact blank-line count or policy; defaults to 1.',
+                  anyOf: [
+                    {
+                      type: 'integer',
+                      minimum: 0,
+                      maximum: Number.MAX_SAFE_INTEGER,
+                    },
+                    { type: 'string', enum: ['always', 'never', 'ignore'] },
+                  ],
+                },
+              },
+              oneOf: [
+                {
+                  type: 'object',
+                  additionalProperties: true,
+                  required: ['tag'],
+                  not: {
+                    anyOf: [
+                      { type: 'object', required: ['prev'] },
+                      { type: 'object', required: ['next'] },
+                    ],
+                  },
+                },
+                {
+                  type: 'object',
+                  additionalProperties: true,
+                  required: ['prev', 'next'],
+                  not: { type: 'object', required: ['tag'] },
+                },
               ],
+              additionalProperties: false,
             },
           },
-          oneOf: [
-            {
-              type: 'object',
-              additionalProperties: true,
-              required: ['tag'],
-              not: {
-                anyOf: [
-                  { type: 'object', required: ['prev'] },
-                  { type: 'object', required: ['next'] },
-                ],
-              },
-            },
-            {
-              type: 'object',
-              additionalProperties: true,
-              required: ['prev', 'next'],
-              not: { type: 'object', required: ['tag'] },
-            },
-          ],
-          additionalProperties: false,
         },
+        additionalProperties: false,
       },
     ],
-    defaultOptions: [[{ prev: '*', next: '*', blankLine: 1 }]],
+    defaultOptions: [{}],
     messages: {
       expectedBlankLines:
         'Expected {{count}} blank line(s) between <{{prev}}> and <{{next}}> tags.',
@@ -89,11 +98,12 @@ export const paddingLineBetweenTags = createRule<
         'Expected at least one blank line between <{{prev}}> and <{{next}}> tags.',
     },
   },
-  defaultOptions: [[{ prev: '*', next: '*', blankLine: 1 }]],
+  defaultOptions: [{}],
   create(context, [options]) {
+    const targets = options.targets ?? [{ prev: '*', next: '*', blankLine: 1 }]
     const sourceCode = context.sourceCode
     const services = sourceCode.parserServices
-    if (!hasTemplateVisitor(services) || !options.length) {
+    if (!hasTemplateVisitor(services) || !targets.length) {
       return {}
     }
 
@@ -104,7 +114,7 @@ export const paddingLineBetweenTags = createRule<
       if (!/^[\t \r\n]*$/u.test(gap)) {
         return
       }
-      const entry = options.findLast(option =>
+      const entry = targets.findLast(option =>
         option.tag === undefined
           ? (option.prev === '*' || option.prev === previous.rawName) &&
             (option.next === '*' || option.next === next.rawName)

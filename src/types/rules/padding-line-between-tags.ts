@@ -39,11 +39,14 @@ export type PaddingLineBetweenTagsEntry = {
     }
 )
 
-/**
- * Ordered matching entries; the last match wins. Replaces the default wildcard
- * entry requiring exactly one blank line. An empty array disables checks.
- */
-export type PaddingLineBetweenTagsOptions = PaddingLineBetweenTagsEntry[]
+export interface PaddingLineBetweenTagsOptions {
+  /**
+   * Ordered matching entries; the last match wins. Defaults to a wildcard entry
+   * requiring exactly one blank line. An explicit array replaces the default;
+   * an empty array disables checks.
+   */
+  targets?: PaddingLineBetweenTagsEntry[]
+}
 
 export type PaddingLineBetweenTagsMessageId =
   | 'expectedAtLeastOneBlankLine'

@@ -79,32 +79,36 @@ await run<[PaddingLineBetweenTagsOptions], PaddingLineBetweenTagsMessageId>({
       code: '<script>const markup = "<Item /><Item />"</script><style>.a { color: red }</style>',
     },
     {
-      description: 'an empty array replaces the default',
+      description: 'empty targets replace the default',
       code: template('<Item /><Item />'),
-      options: [[]] satisfies [PaddingLineBetweenTagsOptions],
+      options: [{ targets: [] }] satisfies [PaddingLineBetweenTagsOptions],
     },
     {
       description: 'only explicitly configured pairs are checked',
       code: template('<Other />\n<Other />\n<Item />\n<div />\n<Item />'),
-      options: [[{ tag: 'Item' }]] satisfies [PaddingLineBetweenTagsOptions],
+      options: [{ targets: [{ tag: 'Item' }] }] satisfies [
+        PaddingLineBetweenTagsOptions,
+      ],
     },
     {
       description: 'source tag names are case-sensitive and not normalized',
       code: template('<Item />\n<item />\n<item />\n<my-item />\n<my-item />'),
-      options: [[{ tag: 'Item' }, { tag: 'MyItem' }]] satisfies [
+      options: [{ targets: [{ tag: 'Item' }, { tag: 'MyItem' }] }] satisfies [
         PaddingLineBetweenTagsOptions,
       ],
     },
     {
       description: 'does not infer the component selected by is',
       code: template('<component :is="Item" />\n<component is="Item" />'),
-      options: [[{ tag: 'Item' }]] satisfies [PaddingLineBetweenTagsOptions],
+      options: [{ targets: [{ tag: 'Item' }] }] satisfies [
+        PaddingLineBetweenTagsOptions,
+      ],
     },
     ...(['never', 0] as const).flatMap(blankLine =>
       ['', ' ', '\n', '\n  '].map(gap => ({
         description: 'zero blank lines allows inline and separate-line tags',
         code: template(`<Item />${gap}<Item />`),
-        options: [[{ tag: 'Item', blankLine }]] satisfies [
+        options: [{ targets: [{ tag: 'Item', blankLine }] }] satisfies [
           PaddingLineBetweenTagsOptions,
         ],
       })),
@@ -113,7 +117,7 @@ await run<[PaddingLineBetweenTagsOptions], PaddingLineBetweenTagsMessageId>({
       (['always', 'ignore', count] as const).map(blankLine => ({
         description: `accepts ${count} blank lines for ${blankLine}`,
         code: template(`<Item />${'\n'.repeat(count + 1)}<Item />`),
-        options: [[{ tag: 'Item', blankLine }]] satisfies [
+        options: [{ targets: [{ tag: 'Item', blankLine }] }] satisfies [
           PaddingLineBetweenTagsOptions,
         ],
       })),
@@ -122,21 +126,30 @@ await run<[PaddingLineBetweenTagsOptions], PaddingLineBetweenTagsMessageId>({
       description: 'ignore overrides an earlier wildcard entry',
       code: template('<Item />\n<Item />'),
       options: [
-        [
-          { prev: '*', next: '*' },
-          { tag: 'Item', blankLine: 'ignore' },
-        ],
+        {
+          targets: [
+            { prev: '*', next: '*' },
+            { tag: 'Item', blankLine: 'ignore' },
+          ],
+        },
       ] satisfies [PaddingLineBetweenTagsOptions],
     },
     {
       description: 'full pairs are directional',
       code: template('<Content />\n<Header />'),
-      options: [[{ prev: 'Header', next: 'Content' }]] satisfies [
+      options: [{ targets: [{ prev: 'Header', next: 'Content' }] }] satisfies [
         PaddingLineBetweenTagsOptions,
       ],
     },
   ],
   invalid: [
+    {
+      description: 'an empty options object keeps the default wildcard policy',
+      code: template('<Item />\n<Other />'),
+      options: [{}] satisfies [PaddingLineBetweenTagsOptions],
+      errors: ['expectedBlankLines'],
+      output: template('<Item />\n\n<Other />'),
+    },
     ...[
       'Pre',
       'Textarea',
@@ -156,7 +169,7 @@ await run<[PaddingLineBetweenTagsOptions], PaddingLineBetweenTagsMessageId>({
     ...[1e9, Number.MAX_SAFE_INTEGER].map(blankLine => ({
       description: 'reports large safe counts without allocating a replacement',
       code: template('<Item />\n<Item />'),
-      options: [[{ tag: 'Item', blankLine }]] satisfies [
+      options: [{ targets: [{ tag: 'Item', blankLine }] }] satisfies [
         PaddingLineBetweenTagsOptions,
       ],
       errors: [
@@ -173,7 +186,7 @@ await run<[PaddingLineBetweenTagsOptions], PaddingLineBetweenTagsMessageId>({
     ].map(({ eol, blankLine }) => ({
       description: 'fixes padding at the replacement length limit',
       code: template(`<Item />${eol}<Item />`),
-      options: [[{ tag: 'Item', blankLine }]] satisfies [
+      options: [{ targets: [{ tag: 'Item', blankLine }] }] satisfies [
         PaddingLineBetweenTagsOptions,
       ],
       errors: ['expectedBlankLines' as const],
@@ -187,7 +200,7 @@ await run<[PaddingLineBetweenTagsOptions], PaddingLineBetweenTagsMessageId>({
       description:
         'includes line-ending width and preserved whitespace in the fix limit',
       code: template(`<Item />${gap}<Item />`),
-      options: [[{ tag: 'Item', blankLine }]] satisfies [
+      options: [{ targets: [{ tag: 'Item', blankLine }] }] satisfies [
         PaddingLineBetweenTagsOptions,
       ],
       errors: ['expectedBlankLines' as const],
@@ -220,9 +233,9 @@ await run<[PaddingLineBetweenTagsOptions], PaddingLineBetweenTagsMessageId>({
         .map(actual => ({
           description: `changes ${actual} blank lines to exactly ${count}`,
           code: template(`<Item />${'\n'.repeat(actual + 1)}<Item />`),
-          options: [[{ tag: 'Item', blankLine: count }]] satisfies [
-            PaddingLineBetweenTagsOptions,
-          ],
+          options: [
+            { targets: [{ tag: 'Item', blankLine: count }] },
+          ] satisfies [PaddingLineBetweenTagsOptions],
           errors: ['expectedBlankLines' as const],
           output: template(`<Item />${'\n'.repeat(count + 1)}<Item />`),
         })),
@@ -232,7 +245,7 @@ await run<[PaddingLineBetweenTagsOptions], PaddingLineBetweenTagsMessageId>({
       code: template(
         `<Item />${blankLine === 'always' ? '\n' : '\n\n'}<Item />`,
       ),
-      options: [[{ tag: 'Item', blankLine }]] satisfies [
+      options: [{ targets: [{ tag: 'Item', blankLine }] }] satisfies [
         PaddingLineBetweenTagsOptions,
       ],
       errors: [
@@ -250,7 +263,7 @@ await run<[PaddingLineBetweenTagsOptions], PaddingLineBetweenTagsMessageId>({
           description:
             'reports inline siblings without adding rendered whitespace',
           code: template(`<Item />${gap}<Item />`),
-          options: [[{ tag: 'Item', blankLine }]] satisfies [
+          options: [{ targets: [{ tag: 'Item', blankLine }] }] satisfies [
             PaddingLineBetweenTagsOptions,
           ],
           errors: [
@@ -278,7 +291,9 @@ await run<[PaddingLineBetweenTagsOptions], PaddingLineBetweenTagsMessageId>({
     {
       description: 'does not bridge comments but still checks subsequent pairs',
       code: template('<Item />\n<!-- keep -->\n<Item />\n<Item />'),
-      options: [[{ tag: 'Item' }]] satisfies [PaddingLineBetweenTagsOptions],
+      options: [{ targets: [{ tag: 'Item' }] }] satisfies [
+        PaddingLineBetweenTagsOptions,
+      ],
       errors: ['expectedBlankLines'],
       output: template('<Item />\n<!-- keep -->\n<Item />\n\n<Item />'),
     },
@@ -287,7 +302,7 @@ await run<[PaddingLineBetweenTagsOptions], PaddingLineBetweenTagsMessageId>({
         'later full entries override shorthand without extra priority',
       code: template('<Item />\n\n<Item />'),
       options: [
-        [{ tag: 'Item' }, { prev: '*', next: '*', blankLine: 2 }],
+        { targets: [{ tag: 'Item' }, { prev: '*', next: '*', blankLine: 2 }] },
       ] satisfies [PaddingLineBetweenTagsOptions],
       errors: ['expectedBlankLines'],
       output: template('<Item />\n\n\n<Item />'),
@@ -299,7 +314,7 @@ await run<[PaddingLineBetweenTagsOptions], PaddingLineBetweenTagsMessageId>({
     ].map(entry => ({
       description: 'supports ordered pairs and a wildcard on either side',
       code: template('<Header />\n<Content />'),
-      options: [[entry]] satisfies [PaddingLineBetweenTagsOptions],
+      options: [{ targets: [entry] }] satisfies [PaddingLineBetweenTagsOptions],
       errors: ['expectedBlankLines' as const],
       output: template('<Header />\n\n<Content />'),
     })),
@@ -307,7 +322,12 @@ await run<[PaddingLineBetweenTagsOptions], PaddingLineBetweenTagsMessageId>({
       description: 'a later shorthand can override ignore',
       code: template('<Item />\n<Item />'),
       options: [
-        [{ prev: '*', next: '*', blankLine: 'ignore' }, { tag: 'Item' }],
+        {
+          targets: [
+            { prev: '*', next: '*', blankLine: 'ignore' },
+            { tag: 'Item' },
+          ],
+        },
       ] satisfies [PaddingLineBetweenTagsOptions],
       errors: ['expectedBlankLines'],
       output: template('<Item />\n\n<Item />'),
@@ -343,9 +363,9 @@ await run<[PaddingLineBetweenTagsOptions], PaddingLineBetweenTagsMessageId>({
       ([0, 1, 2] as const).map(blankLine => ({
         description: `preserves rendered spacing in ${whitespace} mode for ${blankLine}`,
         code: template('<span>first</span>\n\n\n\n<span>second</span>'),
-        options: [[{ prev: '*', next: '*', blankLine }]] satisfies [
-          PaddingLineBetweenTagsOptions,
-        ],
+        options: [
+          { targets: [{ prev: '*', next: '*', blankLine }] },
+        ] satisfies [PaddingLineBetweenTagsOptions],
         errors: ['expectedBlankLines' as const],
         output: template(
           `<span>first</span>${'\n'.repeat(blankLine + 1)}<span>second</span>`,
@@ -389,33 +409,43 @@ await run<[PaddingLineBetweenTagsOptions], PaddingLineBetweenTagsMessageId>({
 describe('padding-line-between-tags configuration', () => {
   it.each(
     [
-      {},
       null,
       'Item',
-      [null],
-      [{}],
-      [{ tag: '*' }],
-      [{ tag: '' }],
-      [{ prev: 'Item' }],
-      [{ next: 'Item' }],
-      [{ prev: '', next: 'Item' }],
-      [{ tag: 'Item', prev: 'Item' }],
-      [{ tag: 'Item', next: 'Item' }],
-      [{ tag: 'Item', prev: 'Item', next: 'Item' }],
+      [],
+      [{ tag: 'Item' }],
+      { extra: true },
+      { targets: [], extra: true },
+      ...[null, {}, 'Item', true].map(targets => ({
+        targets,
+      })),
       ...[
-        -1,
-        1.5,
-        Number.POSITIVE_INFINITY,
-        Number.NEGATIVE_INFINITY,
-        Number.NaN,
-        Number.MAX_SAFE_INTEGER + 1,
-        true,
-        null,
-        'consistent',
-        '1',
-      ].map(blankLine => [{ tag: 'Item', blankLine }]),
-      [{ tag: 'Item', extra: true }],
-      [{ prev: ['Item'], next: 'Item' }],
+        [null],
+        [{}],
+        [{ tag: '*' }],
+        [{ tag: '' }],
+        [{ prev: 'Item' }],
+        [{ next: 'Item' }],
+        [{ prev: '', next: 'Item' }],
+        [{ tag: 'Item', prev: 'Item' }],
+        [{ tag: 'Item', next: 'Item' }],
+        [{ tag: 'Item', prev: 'Item', next: 'Item' }],
+        ...[
+          -1,
+          1.5,
+          Number.POSITIVE_INFINITY,
+          Number.NEGATIVE_INFINITY,
+          Number.NaN,
+          Number.MAX_SAFE_INTEGER + 1,
+          true,
+          null,
+          'consistent',
+          '1',
+        ].map(blankLine => [{ tag: 'Item', blankLine }]),
+        [{ tag: 'Item', extra: true }],
+        [{ prev: ['Item'], next: 'Item' }],
+      ].map(targets => ({
+        targets,
+      })),
     ].map(options => ({
       options,
     })),
