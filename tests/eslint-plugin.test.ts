@@ -4,6 +4,51 @@ import plugin, * as pluginExports from '../src'
 import { vueLanguageOptions } from './internal'
 
 describe('plugin contract', () => {
+  it('checks generic comments and exemptions through an aliased plugin', () => {
+    const linter = new Linter()
+    const source = `<template>
+<!-- @vue-generic {import('#types').IAiCourse} -->
+<ElTableColumn />
+<ElTableColumn type="index" />
+<ElTableColumn :type="columnType" />
+<ElTableColumn />
+</template>`
+    const configuration: Linter.Config = {
+      files: ['**/*.vue'],
+      languageOptions: vueLanguageOptions,
+      plugins: { vp: plugin },
+      rules: {
+        'vp/require-vue-generic': [
+          'error',
+          {
+            targets: [
+              {
+                components: ['ElTableColumn'],
+                ignoreWhen: [{ props: { type: { enum: ['index'] } } }],
+              },
+            ],
+            unknownValues: 'ignore',
+          },
+        ],
+      },
+    }
+    const result = linter.verifyAndFix(source, configuration, 'Test.vue')
+    expect(result.messages).toHaveLength(1)
+    expect(result.messages[0]).toMatchObject({
+      ruleId: 'vp/require-vue-generic',
+      messageId: 'missingVueGeneric',
+      line: 6,
+      column: 2,
+    })
+    expect(result.fixed).toBe(false)
+    expect(result.output).toBe(source)
+    expect(result.messages[0]?.fix).toBeUndefined()
+    expect(result.messages[0]?.suggestions).toBeUndefined()
+    expect(
+      linter.verifyAndFix(result.output, configuration, 'Test.vue'),
+    ).toEqual(result)
+  })
+
   it.each([false, true])(
     'checks template ref inference through an aliased plugin with autoImport: %s',
     autoImport => {
@@ -233,6 +278,7 @@ onMounted(handler)
       'prefer-use-template-ref-inference',
       'require-component-props',
       'require-macro-type-name',
+      'require-vue-generic',
       'sort-script-setup',
     ])
   })

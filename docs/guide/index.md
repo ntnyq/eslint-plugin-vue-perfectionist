@@ -183,6 +183,12 @@ checks configured value constraints such as numeric multiples, ranges, enums, an
 string lengths or patterns. These rules need explicit `targets`; they perform no checks
 by default and can be enabled independently.
 
+Use [`require-vue-generic`](../rules/require-vue-generic.md) to require explicit
+`@vue-generic` comments before configured components. Its `targets` support
+prop-value exemptions through `ignoreWhen`; `unknownValues` controls uncertain
+exemptions. No components are checked by default. It reports without fixes or
+suggestions because the generic type must be chosen by the author.
+
 Use [`define-macros-type-style`](../rules/define-macros-type-style.md) to require
 inline, local, or imported type arguments for `defineProps`, `defineEmits`, and
 `defineSlots`. It defaults to local declarations and reports without fixes.

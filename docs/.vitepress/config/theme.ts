@@ -103,6 +103,7 @@ export function getThemeConfig(): DefaultTheme.Config {
             link: '/rules/require-macro-type-name',
             text: 'require-macro-type-name',
           },
+          { link: '/rules/require-vue-generic', text: 'require-vue-generic' },
           { link: '/rules/sort-script-setup', text: 'sort-script-setup' },
         ],
       },

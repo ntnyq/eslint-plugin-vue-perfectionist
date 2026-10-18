@@ -61,6 +61,17 @@ const exampleRules = {
     },
   ],
   'vue-perfectionist/require-macro-type-name': 'error',
+  'vue-perfectionist/require-vue-generic': [
+    'error',
+    {
+      targets: [
+        {
+          components: ['ElTableColumn'],
+          ignoreWhen: [{ props: { type: { enum: ['index'] } } }],
+        },
+      ],
+    },
+  ],
   'vue-perfectionist/sort-script-setup': 'error',
 } satisfies Record<string, Linter.RuleEntry>
 

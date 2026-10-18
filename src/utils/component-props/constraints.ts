@@ -30,7 +30,7 @@ export interface CompiledValueConstraint {
  * @throws {SyntaxError} If the configured pattern is not a valid Unicode
  * regular expression.
  */
-function compileConstraint(
+export function compileConstraint(
   name: string,
   constraint: ComponentPropValueConstraint,
 ): CompiledValueConstraint {

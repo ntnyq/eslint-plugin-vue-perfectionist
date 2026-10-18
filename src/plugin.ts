@@ -15,6 +15,7 @@ import { preferTemplateLiteralInInterpolation } from './rules/prefer-template-li
 import { preferUseTemplateRefInference } from './rules/prefer-use-template-ref-inference.ts'
 import { requireComponentProps } from './rules/require-component-props.ts'
 import { requireMacroTypeName } from './rules/require-macro-type-name.ts'
+import { requireVueGeneric } from './rules/require-vue-generic.ts'
 import { sortScriptSetup } from './rules/sort-script-setup.ts'
 import type { ESLint } from 'eslint'
 import type { VuePerfectionistPlugin } from './types/index.ts'
@@ -41,6 +42,7 @@ export const plugin: VuePerfectionistPlugin = {
     'prefer-use-template-ref-inference': preferUseTemplateRefInference,
     'require-component-props': requireComponentProps,
     'require-macro-type-name': requireMacroTypeName,
+    'require-vue-generic': requireVueGeneric,
     'sort-script-setup': sortScriptSetup,
   } as unknown as NonNullable<ESLint.Plugin['rules']>,
 }
