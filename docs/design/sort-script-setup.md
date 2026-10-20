@@ -470,32 +470,36 @@ and `fallbackSort` objects, following the upstream
 Group-level fallback overrides inherit individual fields; a missing fallback
 order uses the group's order.
 
-```json
-{
-  "rules": {
-    "vue-perfectionist/sort-script-setup": [
-      "error",
-      {
-        "newlinesBetween": 1,
-        "newlinesInside": "ignore",
-        "groups": [
-          ["interface", "type"],
-          "define-props",
-          "define-emits",
-          ["ref", "reactive"],
-          "computed",
-          {
-            "group": "function",
-            "type": "natural"
-          },
-          "watch",
-          "lifecycle-hook",
-          "define-expose"
-        ]
-      }
-    ]
-  }
-}
+```js
+import { defineConfig } from 'eslint/config'
+
+export default defineConfig([
+  {
+    rules: {
+      'vue-perfectionist/sort-script-setup': [
+        'error',
+        {
+          newlinesBetween: 1,
+          newlinesInside: 'ignore',
+          groups: [
+            ['interface', 'type'],
+            'define-props',
+            'define-emits',
+            ['ref', 'reactive'],
+            'computed',
+            {
+              group: 'function',
+              type: 'natural',
+            },
+            'watch',
+            'lifecycle-hook',
+            'define-expose',
+          ],
+        },
+      ],
+    },
+  },
+])
 ```
 
 This preserves order within ordinary groups and naturally sorts functions.
@@ -667,23 +671,27 @@ than reporting them as source diagnostics.
 The following override assumes the corresponding plugins and parsers have
 already been configured. Place it after related presets:
 
-```json
-{
-  "files": ["**/*.vue"],
-  "rules": {
-    "perfectionist/sort-modules": "off",
-    "vue/define-macros-order": "off",
-    "vue-perfectionist/sort-script-setup": [
-      "error",
-      {
-        "type": "unsorted",
-        "newlinesBetween": "ignore",
-        "newlinesInside": "ignore",
-        "fix": "safe"
-      }
-    ]
-  }
-}
+```js
+import { defineConfig } from 'eslint/config'
+
+export default defineConfig([
+  {
+    files: ['**/*.vue'],
+    rules: {
+      'perfectionist/sort-modules': 'off',
+      'vue/define-macros-order': 'off',
+      'vue-perfectionist/sort-script-setup': [
+        'error',
+        {
+          type: 'unsorted',
+          newlinesBetween: 'ignore',
+          newlinesInside: 'ignore',
+          fix: 'safe',
+        },
+      ],
+    },
+  },
+])
 ```
 
 ## 14. Acceptance Matrix

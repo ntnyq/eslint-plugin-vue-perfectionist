@@ -23,18 +23,22 @@ Enable this naming preference explicitly in your ESLint configuration.
 
 Add the rule to your existing Vue parser and plugin configuration:
 
-```json
-{
-  "rules": {
-    "vue-perfectionist/prefer-ref-pattern": [
-      "error",
-      {
-        "pattern": ".+Ref$",
-        "targets": ["template", "useTemplateRef", "render"]
-      }
-    ]
-  }
-}
+```js
+import { defineConfig } from 'eslint/config'
+
+export default defineConfig([
+  {
+    rules: {
+      'vue-perfectionist/prefer-ref-pattern': [
+        'error',
+        {
+          pattern: '.+Ref$',
+          targets: ['template', 'useTemplateRef', 'render'],
+        },
+      ],
+    },
+  },
+])
 ```
 
 See the [guide](../guide/index.md#basic-usage) for a complete flat configuration.

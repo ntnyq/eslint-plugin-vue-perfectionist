@@ -14,10 +14,11 @@ description: Enforce configured prop value types at Vue component usage sites.
 Configure the Vue parser and list the component contracts to enforce. No components are checked by default.
 
 ```js
+import { defineConfig } from 'eslint/config'
 import vuePerfectionist from 'eslint-plugin-vue-perfectionist'
 import vueParser from 'vue-eslint-parser'
 
-export default [
+export default defineConfig([
   {
     files: ['**/*.vue'],
     languageOptions: { parser: vueParser },
@@ -32,7 +33,7 @@ export default [
       ],
     },
   },
-]
+])
 ```
 
 For TypeScript SFCs, also configure `@typescript-eslint/parser` as `languageOptions.parserOptions.parser`, as shown in the [guide](../guide/index.md).

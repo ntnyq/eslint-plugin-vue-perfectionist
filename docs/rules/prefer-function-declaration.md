@@ -20,10 +20,11 @@ Register the plugin and configure parsers for the files you want to check:
 
 ```js
 import tsParser from '@typescript-eslint/parser'
+import { defineConfig } from 'eslint/config'
 import vuePerfectionist from 'eslint-plugin-vue-perfectionist'
 import vueParser from 'vue-eslint-parser'
 
-export default [
+export default defineConfig([
   {
     files: ['**/*.{js,ts,vue}'],
     plugins: { 'vue-perfectionist': vuePerfectionist },
@@ -40,7 +41,7 @@ export default [
       parserOptions: { parser: tsParser },
     },
   },
-]
+])
 ```
 
 TypeScript type information and a project configuration are not required.

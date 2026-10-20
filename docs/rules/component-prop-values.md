@@ -22,10 +22,11 @@ value can change application behavior.
 Register the plugin with the Vue parser in your flat configuration:
 
 ```js
+import { defineConfig } from 'eslint/config'
 import vuePerfectionist from 'eslint-plugin-vue-perfectionist'
 import vueParser from 'vue-eslint-parser'
 
-export default [
+export default defineConfig([
   {
     files: ['**/*.vue'],
     languageOptions: { parser: vueParser },
@@ -45,7 +46,7 @@ export default [
       ],
     },
   },
-]
+])
 ```
 
 For TypeScript SFCs, configure `@typescript-eslint/parser` as the Vue parser's

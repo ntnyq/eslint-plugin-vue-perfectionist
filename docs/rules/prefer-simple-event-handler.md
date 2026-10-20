@@ -21,9 +21,10 @@ This complete flat configuration supports JavaScript and TypeScript Vue SFCs:
 ```js
 import tsParser from '@typescript-eslint/parser'
 import vueParser from 'vue-eslint-parser'
+import { defineConfig } from 'eslint/config'
 import vuePerfectionist from 'eslint-plugin-vue-perfectionist'
 
-export default [
+export default defineConfig([
   {
     files: ['**/*.vue'],
     languageOptions: {
@@ -35,7 +36,7 @@ export default [
       'vue-perfectionist/prefer-simple-event-handler': 'error',
     },
   },
-]
+])
 ```
 
 ## :book: Rule Details

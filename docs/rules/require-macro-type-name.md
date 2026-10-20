@@ -15,9 +15,10 @@ Enable the rule alongside your existing `vue-eslint-parser` configuration with
 `@typescript-eslint/parser` as its script parser:
 
 ```js
+import { defineConfig } from 'eslint/config'
 import vuePerfectionist from 'eslint-plugin-vue-perfectionist'
 
-export default [
+export default defineConfig([
   // Your existing Vue and TypeScript parser configurations go here.
   {
     files: ['**/*.vue'],
@@ -26,7 +27,7 @@ export default [
       'vue-perfectionist/require-macro-type-name': 'error',
     },
   },
-]
+])
 ```
 
 ## :book: Rule Details

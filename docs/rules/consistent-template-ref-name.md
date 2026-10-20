@@ -17,12 +17,16 @@ without automatic fixes or suggestions.
 
 Add the rule to your existing parser and plugin configuration:
 
-```json
-{
-  "rules": {
-    "vue-perfectionist/consistent-template-ref-name": "error"
-  }
-}
+```js
+import { defineConfig } from 'eslint/config'
+
+export default defineConfig([
+  {
+    rules: {
+      'vue-perfectionist/consistent-template-ref-name': 'error',
+    },
+  },
+])
 ```
 
 See the [guide](../guide/index.md#basic-usage) for plugin registration and a

@@ -18,10 +18,11 @@ This complete flat configuration supports JavaScript and TypeScript Vue SFCs:
 
 ```js
 import tsParser from '@typescript-eslint/parser'
+import { defineConfig } from 'eslint/config'
 import vuePerfectionist from 'eslint-plugin-vue-perfectionist'
 import vueParser from 'vue-eslint-parser'
 
-export default [
+export default defineConfig([
   {
     files: ['**/*.vue'],
     languageOptions: {
@@ -33,7 +34,7 @@ export default [
       'vue-perfectionist/prefer-template-literal-in-interpolation': 'error',
     },
   },
-]
+])
 ```
 
 ## :book: Rule Details

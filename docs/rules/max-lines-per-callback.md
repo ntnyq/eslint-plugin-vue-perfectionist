@@ -18,9 +18,10 @@ reports excessive length without automatic fixes or suggestions.
 Enable the rule alongside your existing Vue and TypeScript parser configuration:
 
 ```js
+import { defineConfig } from 'eslint/config'
 import vuePerfectionist from 'eslint-plugin-vue-perfectionist'
 
-export default [
+export default defineConfig([
   // Your existing Vue and TypeScript parser configurations go here.
   {
     files: ['**/*.{vue,js,ts}'],
@@ -37,7 +38,7 @@ export default [
       ],
     },
   },
-]
+])
 ```
 
 The two rules have independent options. `callback-style` requires inline

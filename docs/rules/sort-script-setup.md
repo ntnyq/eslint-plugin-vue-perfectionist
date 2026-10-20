@@ -96,9 +96,10 @@ not automatically moved. See [Partitions and automatic fixes](#partitions-and-au
 ```js
 import tsParser from '@typescript-eslint/parser'
 import vueParser from 'vue-eslint-parser'
+import { defineConfig } from 'eslint/config'
 import vuePerfectionist from 'eslint-plugin-vue-perfectionist'
 
-export default [
+export default defineConfig([
   {
     files: ['**/*.vue'],
     languageOptions: {
@@ -123,7 +124,7 @@ export default [
       ],
     },
   },
-]
+])
 ```
 
 For JavaScript-only SFCs, omit `parserOptions.parser`. If your existing Vue configuration already supplies the parsers, keep that configuration and add the plugin and rule.

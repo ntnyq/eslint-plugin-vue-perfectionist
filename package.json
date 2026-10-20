@@ -61,19 +61,19 @@
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
-    "eslint": "^9.10.0 || ^10.0.0",
+    "eslint": "^10.0.0",
     "vue-eslint-parser": "^10.0.0"
   },
   "dependencies": {
     "@ntnyq/utils": "^0.23.0",
-    "@typescript-eslint/utils": "^8.71.2",
+    "@typescript-eslint/utils": "^8.72.0",
     "natural-orderby": "^5.0.0"
   },
   "devDependencies": {
-    "@ntnyq/eslint-config": "^7.0.0-beta.25",
+    "@ntnyq/eslint-config": "^7.0.0-beta.27",
     "@ntnyq/tsconfig": "^3.1.0",
     "@types/node": "^26.6.5",
-    "@typescript-eslint/parser": "^8.71.2",
+    "@typescript-eslint/parser": "^8.72.0",
     "bumpp": "^12.3.0",
     "eslint": "^10.13.0",
     "eslint-plugin-eslint-plugin": "^7.6.2",
@@ -82,7 +82,7 @@
     "husky": "^9.1.7",
     "nano-staged": "^1.0.2",
     "npm-run-all2": "^9.0.3",
-    "oxfmt": "^0.73.0",
+    "oxfmt": "^0.74.0",
     "tsdown": "^0.23.1",
     "typescript": "^6.0.3",
     "vitest": "^5.0.5",

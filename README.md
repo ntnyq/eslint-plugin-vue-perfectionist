@@ -18,7 +18,7 @@ script blocks, or standalone JavaScript and TypeScript files.
 
 ## Setup
 
-Requires ESLint 9.10+ or 10 and `vue-eslint-parser` 10.
+Requires ESLint 10 and `vue-eslint-parser` 10.
 
 ```shell
 pnpm add -D eslint eslint-plugin-vue-perfectionist vue-eslint-parser
@@ -35,10 +35,11 @@ The plugin provides rules only, with no built-in configurations:
 
 ```js
 import tsParser from '@typescript-eslint/parser'
+import { defineConfig } from 'eslint/config'
 import vuePerfectionist from 'eslint-plugin-vue-perfectionist'
 import vueParser from 'vue-eslint-parser'
 
-export default [
+export default defineConfig([
   {
     files: ['**/*.vue'],
     languageOptions: {
@@ -56,7 +57,7 @@ export default [
       'vue-perfectionist/sort-script-setup': 'error',
     },
   },
-]
+])
 ```
 
 For JavaScript-only SFCs, omit the TypeScript parser import and `parserOptions.parser`.
@@ -69,14 +70,18 @@ See the [setup guide](https://vue-perfectionist.vercel.app/guide/) for more conf
 For `unplugin-auto-import` with Vue APIs, add this shared setting to your ESLint
 configuration:
 
-```json
-{
-  "settings": {
-    "vue-perfectionist": {
-      "autoImport": true
-    }
-  }
-}
+```js
+import { defineConfig } from 'eslint/config'
+
+export default defineConfig([
+  {
+    settings: {
+      'vue-perfectionist': {
+        autoImport: true,
+      },
+    },
+  },
+])
 ```
 
 It defaults to `false` and enables same-name Vue API recognition across the

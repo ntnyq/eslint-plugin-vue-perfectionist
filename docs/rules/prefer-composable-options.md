@@ -19,10 +19,11 @@ Register the plugin and enable the rule for the files you want to check:
 
 ```js
 import tsParser from '@typescript-eslint/parser'
+import { defineConfig } from 'eslint/config'
 import vuePerfectionist from 'eslint-plugin-vue-perfectionist'
 import vueParser from 'vue-eslint-parser'
 
-export default [
+export default defineConfig([
   {
     files: ['**/*.{js,ts,vue}'],
     plugins: { 'vue-perfectionist': vuePerfectionist },
@@ -39,7 +40,7 @@ export default [
       parserOptions: { parser: tsParser },
     },
   },
-]
+])
 ```
 
 This rule uses syntax and local scope information only. It does not require a

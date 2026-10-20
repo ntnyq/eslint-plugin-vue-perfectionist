@@ -26,10 +26,11 @@ Add the rule to a flat configuration for TypeScript Vue SFCs:
 
 ```js [eslint.config.mjs]
 import tsParser from '@typescript-eslint/parser'
+import { defineConfig } from 'eslint/config'
 import vuePerfectionist from 'eslint-plugin-vue-perfectionist'
 import vueParser from 'vue-eslint-parser'
 
-export default [
+export default defineConfig([
   {
     files: ['**/*.vue'],
     languageOptions: {
@@ -41,21 +42,25 @@ export default [
       'vue-perfectionist/prefer-use-template-ref-inference': 'error',
     },
   },
-]
+])
 ```
 
 The rule recognizes direct, same-name runtime imports from `vue`. For
 auto-imported `useTemplateRef`, enable the shared setting, which defaults to
 `false`:
 
-```json
-{
-  "settings": {
-    "vue-perfectionist": {
-      "autoImport": true
-    }
-  }
-}
+```js
+import { defineConfig } from 'eslint/config'
+
+export default defineConfig([
+  {
+    settings: {
+      'vue-perfectionist': {
+        autoImport: true,
+      },
+    },
+  },
+])
 ```
 
 The setting also recognizes names declared in ESLint's `languageOptions.globals`.

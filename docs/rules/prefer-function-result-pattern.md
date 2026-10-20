@@ -15,9 +15,10 @@ Add the rule to your flat config. Configure the usual parsers for TypeScript
 and Vue SFCs separately; JavaScript uses ESLint's default parser.
 
 ```js
+import { defineConfig } from 'eslint/config'
 import vuePerfectionist from 'eslint-plugin-vue-perfectionist'
 
-export default [
+export default defineConfig([
   {
     files: ['**/*.{vue,js,jsx,ts,tsx}'],
     plugins: { 'vue-perfectionist': vuePerfectionist },
@@ -25,7 +26,7 @@ export default [
       'vue-perfectionist/prefer-function-result-pattern': 'error',
     },
   },
-]
+])
 ```
 
 ## :book: Rule Details
@@ -336,17 +337,21 @@ another source keeps the generic filter rather than inspecting its getter.
 
 For `unplugin-auto-import`, enable the shared setting:
 
-```json
-{
-  "settings": {
-    "vue-perfectionist": {
-      "autoImport": true
-    }
+```js
+import { defineConfig } from 'eslint/config'
+
+export default defineConfig([
+  {
+    settings: {
+      'vue-perfectionist': {
+        autoImport: true,
+      },
+    },
+    rules: {
+      'vue-perfectionist/prefer-function-result-pattern': 'error',
+    },
   },
-  "rules": {
-    "vue-perfectionist/prefer-function-result-pattern": "error"
-  }
-}
+])
 ```
 
 This enables unbound names from **all configured targets**, including custom

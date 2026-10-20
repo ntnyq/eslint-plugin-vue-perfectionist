@@ -318,13 +318,17 @@ const props = defineProps<ButtonProps>()
 
 Enabling both rules with defaults requires local named contracts:
 
-```json
-{
-  "rules": {
-    "vue-perfectionist/define-macros-type-style": "error",
-    "vue-perfectionist/require-macro-type-name": "error"
-  }
-}
+```js
+import { defineConfig } from 'eslint/config'
+
+export default defineConfig([
+  {
+    rules: {
+      'vue-perfectionist/define-macros-type-style': 'error',
+      'vue-perfectionist/require-macro-type-name': 'error',
+    },
+  },
+])
 ```
 
 These fragments assume plugin registration and Vue/TypeScript parser

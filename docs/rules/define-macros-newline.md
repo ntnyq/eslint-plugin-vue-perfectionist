@@ -18,9 +18,10 @@ This is an autofixable `layout` rule for `.vue` files with `<script setup>`. Ena
 Enable it alongside your existing Vue parser configuration:
 
 ```js
+import { defineConfig } from 'eslint/config'
 import vuePerfectionist from 'eslint-plugin-vue-perfectionist'
 
-export default [
+export default defineConfig([
   // Your existing Vue and TypeScript parser configurations go here.
   {
     files: ['**/*.vue'],
@@ -29,7 +30,7 @@ export default [
       'vue-perfectionist/define-macros-newline': 'error',
     },
   },
-]
+])
 ```
 
 ## :book: Rule Details

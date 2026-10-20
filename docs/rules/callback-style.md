@@ -18,9 +18,10 @@ The rule checks JavaScript and TypeScript files and both ordinary and setup scri
 Enable the rule alongside your existing parser configuration:
 
 ```js
+import { defineConfig } from 'eslint/config'
 import vuePerfectionist from 'eslint-plugin-vue-perfectionist'
 
-export default [
+export default defineConfig([
   // Your existing Vue and TypeScript parser configurations go here.
   {
     files: ['**/*.{vue,js,ts}'],
@@ -29,7 +30,7 @@ export default [
       'vue-perfectionist/callback-style': 'error',
     },
   },
-]
+])
 ```
 
 ## :book: Rule Details
@@ -207,38 +208,42 @@ continue to match regardless of this option.
 
 For example, configure these VueUse callbacks to inherit the shared setting:
 
-```json
-{
-  "settings": {
-    "vue-perfectionist": {
-      "autoImport": true
-    }
+```js
+import { defineConfig } from 'eslint/config'
+
+export default defineConfig([
+  {
+    settings: {
+      'vue-perfectionist': {
+        autoImport: true,
+      },
+    },
+    rules: {
+      'vue-perfectionist/callback-style': [
+        'error',
+        {
+          customCallbacks: [
+            {
+              source: '@vueuse/core',
+              name: 'useResizeObserver',
+              callbackIndices: [1],
+            },
+            {
+              source: '@vueuse/core',
+              name: 'tryOnMounted',
+              callbackIndices: [0],
+            },
+            {
+              source: '@vueuse/core',
+              name: 'tryOnUnmounted',
+              callbackIndices: [0],
+            },
+          ],
+        },
+      ],
+    },
   },
-  "rules": {
-    "vue-perfectionist/callback-style": [
-      "error",
-      {
-        "customCallbacks": [
-          {
-            "source": "@vueuse/core",
-            "name": "useResizeObserver",
-            "callbackIndices": [1]
-          },
-          {
-            "source": "@vueuse/core",
-            "name": "tryOnMounted",
-            "callbackIndices": [0]
-          },
-          {
-            "source": "@vueuse/core",
-            "name": "tryOnUnmounted",
-            "callbackIndices": [0]
-          }
-        ]
-      }
-    ]
-  }
-}
+])
 ```
 
 With this configuration:

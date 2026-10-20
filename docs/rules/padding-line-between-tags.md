@@ -30,10 +30,11 @@ rule for tag pairs controlled by this rule to avoid conflicting fixes.
 Register the plugin and configure `vue-eslint-parser` in your flat configuration:
 
 ```js
+import { defineConfig } from 'eslint/config'
 import vuePerfectionist from 'eslint-plugin-vue-perfectionist'
 import vueParser from 'vue-eslint-parser'
 
-export default [
+export default defineConfig([
   {
     files: ['**/*.vue'],
     languageOptions: { parser: vueParser },
@@ -46,7 +47,7 @@ export default [
       ],
     },
   },
-]
+])
 ```
 
 This configuration checks only consecutive `ElFormItem` tags, requiring exactly
