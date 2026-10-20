@@ -21,6 +21,11 @@ export function getThemeConfig(): DefaultTheme.Config {
         activeMatch: '^/rules/',
       },
       {
+        link: '/design/',
+        text: 'Architecture',
+        activeMatch: '^/design/',
+      },
+      {
         text: `v${appVersion}`,
         items: [
           { link: '/', text: `v${appVersion} (current)` },
@@ -41,6 +46,9 @@ export function getThemeConfig(): DefaultTheme.Config {
         items: [
           { link: '/', text: 'Home' },
           { link: '/guide/', text: 'Getting Started' },
+          { link: '/guide/configuration', text: 'Configuration' },
+          { link: '/guide/rule-composition', text: 'Rule Composition' },
+          { link: '/guide/contributing', text: 'Contributing' },
         ],
       },
       {
@@ -120,8 +128,10 @@ export function getThemeConfig(): DefaultTheme.Config {
         ],
       },
       {
-        text: 'Design',
+        text: 'Architecture and Design',
+        link: '/design/',
         items: [
+          { link: '/design/', text: 'Overview' },
           { link: '/design/source-structure', text: 'Source Structure' },
           { link: '/design/define-macros-types', text: 'Macro Type Rules' },
           { link: '/design/sort-script-setup', text: 'sort-script-setup' },

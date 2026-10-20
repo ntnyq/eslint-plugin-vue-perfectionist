@@ -7,9 +7,13 @@
 
 ESLint rules for consistent, readable, and maintainable Vue 3 code.
 
-Configure callback styles, macro declaration layout, template ref naming, component prop
-contracts, and statement ordering. Depending on the rule, checks apply to Vue SFC templates,
+Define conventions for callbacks and composables, macro types and layout,
+ref and result naming, component usage contracts, template expressions, and
+setup statement ordering. Each rule defines its own scope: Vue SFC templates,
 script blocks, or standalone JavaScript and TypeScript files.
+
+The plugin provides **rules only**, with no built-in configurations. Choose
+rules explicitly and configure their options for your project.
 
 > [!WARNING]
 > This project is under active development. The API is unstable and may introduce breaking changes before the first stable release.
@@ -18,7 +22,7 @@ script blocks, or standalone JavaScript and TypeScript files.
 
 ## Setup
 
-Requires ESLint 10 and `vue-eslint-parser` 10.
+This ESM package requires ESLint `^10.0.0` and `vue-eslint-parser` `^10.0.0`.
 
 ```shell
 pnpm add -D eslint eslint-plugin-vue-perfectionist vue-eslint-parser
@@ -65,32 +69,22 @@ If your Vue configuration already supplies the parsers, add the plugin and your 
 
 See the [setup guide](https://vue-perfectionist.vercel.app/guide/) for more configuration options.
 
-## Vue Auto-imports
+## Configuration
 
-For `unplugin-auto-import` with Vue APIs, add this shared setting to your ESLint
-configuration:
-
-```js
-import { defineConfig } from 'eslint/config'
-
-export default defineConfig([
-  {
-    settings: {
-      'vue-perfectionist': {
-        autoImport: true,
-      },
-    },
-  },
-])
-```
-
-It defaults to `false` and enables same-name Vue API recognition across the
-sorting, callback, and ref rules. Local bindings still take precedence.
-Explicit rule-level `vueGlobals` override it, including an empty list.
-See the [auto-import guide](https://vue-perfectionist.vercel.app/guide/#auto-imported-vue-apis)
-for scope, limitations, and ESLint globals.
+- [File scopes and parsers](https://vue-perfectionist.vercel.app/guide/configuration): configure Vue SFCs and standalone JS/TS files.
+- [Auto-imported APIs](https://vue-perfectionist.vercel.app/guide/configuration#auto-imported-vue-apis): enable `settings['vue-perfectionist'].autoImport` for supported unbound API names. It defaults to `false`; local bindings and rule-level overrides take precedence. Configure ESLint globals separately.
+- [Rule composition](https://vue-perfectionist.vercel.app/guide/rule-composition): combine related checks and avoid overlapping sorting or padding rules.
+- [Public types](https://vue-perfectionist.vercel.app/guide/configuration#public-typescript-api): import rule option types and `VuePerfectionistSettings` from the package root. The default export and named `plugin` export refer to the same plugin object.
 
 ## Rules
+
+Component prop, slot, and generic-comment rules need explicit `targets`; they
+check no components by default. `sort-script-setup` orders groups by default;
+set `type: 'natural'` or another comparator to sort names within groups.
+
+See the [rules overview](https://vue-perfectionist.vercel.app/rules/) for file
+scopes and automatic fix availability. Only supported cases are fixed; naming,
+type, and component contract diagnostics require manual changes.
 
 | Rule                                                                                                                            | Description                                                        |
 | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
@@ -115,6 +109,23 @@ for scope, limitations, and ESLint globals.
 | [require-macro-type-name](https://vue-perfectionist.vercel.app/rules/require-macro-type-name)                                   | Require exact call-site names for Vue macro types.                 |
 | [require-vue-generic](https://vue-perfectionist.vercel.app/rules/require-vue-generic)                                           | Require explicit generic comments on configured components.        |
 | [sort-script-setup](https://vue-perfectionist.vercel.app/rules/sort-script-setup)                                               | Group and order top-level statements in `<script setup>`.          |
+
+## Development
+
+Use the Node version selected by `.node-version` and the pnpm version pinned in
+`package.json`:
+
+```shell
+pnpm install --frozen-lockfile
+pnpm test
+pnpm docs:dev
+```
+
+See [Contributing](https://vue-perfectionist.vercel.app/guide/contributing) for
+build, validation, testing, and documentation workflows, and
+[Architecture and Design](https://vue-perfectionist.vercel.app/design/) for
+repository structure and analysis boundaries. Package build output in `dist/`
+is generated.
 
 ## Credits
 

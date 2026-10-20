@@ -1,8 +1,32 @@
-# Source structure
+---
+description: Repository layout, source ownership, shared analysis contracts, and behavior boundaries.
+---
+
+# Source Structure
 
 The plugin keeps rule entry files flat and groups analysis by its narrowest owner.
-Public rule names, configuration types, diagnostics, and automatic fix boundaries
-are unchanged by this organization.
+Public configuration types are exported explicitly; internal analysis stays with
+its consumers.
+
+## Repository Layout
+
+| Location                            | Responsibility                                                                   |
+| ----------------------------------- | -------------------------------------------------------------------------------- |
+| `src/index.ts`                      | Default and named plugin exports and public configuration types.                 |
+| `src/plugin.ts` and `src/meta.ts`   | Rule registration and metadata derived from `package.json`.                      |
+| `src/`                              | Rule implementations, configuration types, constants, and analysis utilities.    |
+| `tests/rules/`                      | Rule behavior, options, diagnostics, and fix regression suites.                  |
+| `tests/`                            | Shared analysis tests, plugin integration tests, and the shared rule tester.     |
+| `docs/guide/` and `docs/rules/`     | Consumer setup, configuration, contributor workflows, and public rule reference. |
+| `docs/design/`                      | Source ownership and detailed rule design contracts.                             |
+| `docs/.vitepress/`                  | Site configuration, navigation, theme, diagnostic rendering, and sorting demo.   |
+| `patches/`                          | Documentation dependency patches and compatibility notes.                        |
+| `.github/workflows/`                | CI, autofix, and tag-triggered release workflows.                                |
+| `dist/` and `docs/.vitepress/dist/` | Generated package and documentation output.                                      |
+
+The root package is published; `docs/` is a private pnpm workspace. See
+[Contributing](/guide/contributing) for commands and
+[the package contract](/design/#package-contract) for supported entry points.
 
 ## Ownership
 

@@ -1,11 +1,11 @@
 ---
 layout: home
-description: ESLint rules for consistent, readable, and maintainable Vue 3 code, covering callback styles, macro layout, template ref naming, and statement ordering.
+description: Configurable ESLint rules for Vue 3 callbacks, composables, macros, naming, component contracts, templates, and setup ordering.
 
 hero:
   name: Vue Perfectionist
   text: Consistent conventions for Vue.
-  tagline: Make Vue 3 code easier to read and maintain with configurable rules for callback styles, macro layout, template ref naming, and statement ordering.
+  tagline: Choose the rules that fit your Vue 3 project, from callbacks and macro types to component contracts, template readability, and setup ordering.
   image:
     light: /logo-light.svg
     dark: /logo-dark.svg
@@ -23,60 +23,50 @@ hero:
 
 features:
   - icon: 🧩
-    title: Callback Styles
-    details: Require inline callbacks for Vue APIs and configure their function and body styles in components and standalone JavaScript or TypeScript files.
-    link: /rules/callback-style
-    linkText: Configure callbacks
+    title: Callbacks and Composables
+    details: Configure callback style and length, composable parameter shape, and function declarations in supported Vue and standalone scripts.
+    link: /guide/rule-composition#callbacks-and-composables
+    linkText: Organize script conventions
   - icon: 📝
-    title: Macro Layout
-    details: Keep inline compiler macro declarations readable with line breaks around braces and between members in script setup blocks.
-    link: /rules/define-macros-newline
-    linkText: Format macro declarations
+    title: Macro Layout and Types
+    details: Choose inline, local, or imported macro types, require call-site type names, and format inline macro declarations.
+    link: /guide/rule-composition#macro-types-and-layout
+    linkText: Compose macro rules
   - icon: 🏷️
-    title: Template Ref Naming
-    details: Enforce naming patterns for template ref attributes, useTemplateRef keys, and ref properties in render functions.
-    link: /rules/prefer-ref-pattern
-    linkText: Define ref naming patterns
-  - icon: 🎛️
-    title: Statement Ordering
-    details: Group top-level script setup statements by their Vue roles, choose a sorting style, and preserve execution dependencies.
-    link: /rules/sort-script-setup
-    linkText: Configure statement ordering
+    title: Refs and Result Names
+    details: Align template ref variables and keys, enforce naming patterns, and prefer inferred template ref types where supported.
+    link: /guide/rule-composition#template-refs
+    linkText: Configure ref conventions
   - icon: 📦
-    title: Compose Your Rules
-    details: Enable the rules and options that fit your project. Each rule defines its own scope, and no built-in configuration enables rules for you.
-    link: /rules/
-    linkText: Choose your rules
-  - icon: 🛡️
-    title: Documented Fixes
-    details: Apply supported fixes with ESLint and review remaining diagnostics. Each rule documents which changes can be made automatically.
-    link: /guide/#automatic-fixes
-    linkText: Understand automatic fixes
+    title: Component Usage Contracts
+    details: Declare required props and slots, constrain supplied prop types and values, and require generic comments for selected components.
+    link: /guide/rule-composition#component-usage-contracts
+    linkText: Define component contracts
+  - icon: 📐
+    title: Template Readability
+    details: Keep iteration sources and event handlers simple, combine mixed text interpolation, and configure exact blank-line counts between tags.
+    link: /guide/rule-composition#template-readability
+    linkText: Refine template conventions
+  - icon: 🎛️
+    title: Setup Statement Ordering
+    details: Group setup statements by their Vue roles and choose a sorting style. Automatic movement is limited to declarations proven safe to reorder.
+    link: /rules/sort-script-setup
+    linkText: Explore statement ordering
 ---
 
-## Start with your next component
+## Start with your project conventions
 
-Install the plugin and its peer dependencies:
+Vue Perfectionist provides rules only, with no built-in presets. Register the
+plugin in ESLint's flat configuration and enable the checks you need.
+Each rule documents its file scope, defaults, options, and fix boundaries.
 
-::: code-group
+Follow [Getting Started](/guide/) for installation and a complete Vue SFC
+configuration. Then use [Configuration](/guide/configuration) for standalone
+JS/TS files, auto-import recognition, and public option types, or browse the
+[rules overview](/rules/) to choose checks by purpose.
 
-```shell [pnpm]
-pnpm add -D eslint eslint-plugin-vue-perfectionist vue-eslint-parser
-```
+## Work on the plugin
 
-```shell [npm]
-npm i -D eslint eslint-plugin-vue-perfectionist vue-eslint-parser
-```
-
-```shell [yarn]
-yarn add -D eslint eslint-plugin-vue-perfectionist vue-eslint-parser
-```
-
-:::
-
-Already have ESLint configured for Vue? Register `vuePerfectionist` under
-`plugins` and enable your chosen `vue-perfectionist` rules in `rules`.
-
-Follow the [setup guide](/guide/#basic-usage) for a complete configuration,
-including TypeScript support, or [choose your rules](/rules/)
-and configure their options.
+See [Contributing](/guide/contributing) for local setup, tests, package builds,
+and documentation maintenance. [Architecture and Design](/design/) explains
+source ownership and the analysis and fix contracts behind the rules.

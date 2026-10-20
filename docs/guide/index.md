@@ -1,18 +1,34 @@
-# Guide
+---
+description: Install Vue Perfectionist and enable your first rules in an ESLint flat configuration.
+---
 
-`eslint-plugin-vue-perfectionist` provides configurable ESLint rules for
-consistent, readable, and maintainable Vue 3 code. Rules cover callback styles,
-macro declaration layout, template ref naming, component prop contracts, and statement ordering.
+# Getting Started
 
-Each rule has its own scope. Some check `<script setup>`, while others also
-check templates, ordinary script blocks, or standalone JavaScript and TypeScript
-files. See each rule's documentation for supported syntax and options.
+`eslint-plugin-vue-perfectionist` provides configurable ESLint rules for Vue 3
+scripts and templates. It covers callbacks, composable definitions, macro types
+and layout, naming, component usage contracts, template expressions, and
+statement ordering.
+
+Each rule defines its own scope. Some require `<script setup>`, some inspect
+templates, and others also work in ordinary scripts and standalone JavaScript
+or TypeScript files. The [rules overview](/rules/) lists these scopes.
+
+::: warning Development status
+The API may change before the first stable release. Review
+[release notes](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/releases)
+when upgrading.
+:::
 
 ## Install
 
-Install the plugin together with its ESLint and Vue parser peer dependencies:
+The package declares ESLint `^10.0.0` and `vue-eslint-parser` `^10.0.0` as peer
+dependencies and ships as ESM. Install them together:
 
 ::: code-group
+
+```shell [pnpm]
+pnpm add -D eslint eslint-plugin-vue-perfectionist vue-eslint-parser
+```
 
 ```shell [npm]
 npm i -D eslint eslint-plugin-vue-perfectionist vue-eslint-parser
@@ -22,21 +38,31 @@ npm i -D eslint eslint-plugin-vue-perfectionist vue-eslint-parser
 yarn add -D eslint eslint-plugin-vue-perfectionist vue-eslint-parser
 ```
 
+:::
+
+For TypeScript SFCs, also install the script parser and TypeScript:
+
+::: code-group
+
 ```shell [pnpm]
-pnpm add -D eslint eslint-plugin-vue-perfectionist vue-eslint-parser
+pnpm add -D @typescript-eslint/parser typescript@6
+```
+
+```shell [npm]
+npm i -D @typescript-eslint/parser typescript@6
+```
+
+```shell [yarn]
+yarn add -D @typescript-eslint/parser typescript@6
 ```
 
 :::
 
-The plugin supports ESLint `^10.0.0` and `vue-eslint-parser`
-`^10.0.0`. For `<script setup lang="ts">`, also install
-`@typescript-eslint/parser` and `typescript` as development dependencies.
-
 ## Basic Usage
 
-Use an `eslint.config.mjs` flat configuration file. The following configuration
-supports both JavaScript and TypeScript Vue SFCs and shows how to combine the
-available rules. Keep the rules that match your project's conventions:
+Register the plugin and enable the rules you want in `eslint.config.mjs`.
+The plugin provides rules only; there are no built-in configurations.
+This example supports JavaScript and TypeScript Vue SFCs:
 
 ```js [eslint.config.mjs]
 import tsParser from '@typescript-eslint/parser'
@@ -51,8 +77,6 @@ export default defineConfig([
       parser: vueParser,
       parserOptions: {
         parser: tsParser,
-        ecmaVersion: 'latest',
-        sourceType: 'module',
       },
     },
     plugins: {
@@ -70,230 +94,45 @@ export default defineConfig([
 ```
 
 For JavaScript-only SFCs, omit the TypeScript parser import and
-`parserOptions.parser`. If an existing Vue configuration already supplies the
-parsers, add the plugin and your chosen rules to that configuration.
+`parserOptions.parser`. If your Vue configuration already supplies the parsers,
+add the plugin and your chosen rules to it. See
+[Configuration](/guide/configuration) for standalone JS/TS files and public types.
 
-To check standalone JavaScript and TypeScript files, enable `callback-style`,
-`max-lines-per-callback`, `prefer-composable-options`, `prefer-function-declaration`,
-`consistent-template-ref-name`, `prefer-function-result-pattern`, and the script targets of `prefer-ref-pattern`
-in configurations matching those files, using their usual ESLint parsers.
-The example above matches `.vue` files only.
+Run ESLint against your source files, adding `--fix` to apply supported fixes:
 
-## Auto-imported Vue APIs
-
-When using `unplugin-auto-import` with Vue APIs, enable the shared opt-in in
-`eslint.config.mjs`:
-
-```js
-import { defineConfig } from 'eslint/config'
-
-export default defineConfig([
-  {
-    settings: {
-      'vue-perfectionist': {
-        autoImport: true,
-      },
-    },
-  },
-])
+```shell
+pnpm exec eslint .
+pnpm exec eslint . --fix
 ```
-
-`autoImport` is a boolean and defaults to `false`. It enables recognition of
-unbound, same-name Vue APIs already supported by `sort-script-setup`,
-`callback-style`, `max-lines-per-callback`, `consistent-template-ref-name`,
-`prefer-ref-pattern`, and `prefer-use-template-ref-inference`.
-`callback-style` and `max-lines-per-callback` also recognize configured `customCallbacks` names.
-`prefer-function-result-pattern` recognizes all configured target names under this
-setting, including `ref`, `shallowRef`, `computed`, and VueUse's `useToggle` by default.
-It also recognizes names declared in ESLint's `languageOptions.globals`.
-Local declarations, parameters, imports from other modules, and type-only
-imports still take precedence and are not treated as auto-imports.
-
-For `sort-script-setup`, `callback-style`, and `max-lines-per-callback`, an explicit `vueGlobals` option
-replaces the shared selection of built-in Vue APIs, including `vueGlobals: []`
-to disable it for one rule. Callback `groups` and `exclude` continue to control
-which built-in APIs are checked. Each `customCallbacks` entry in either callback rule has an
-`autoImport` boolean that overrides the shared setting independently of `vueGlobals`.
-For `prefer-function-result-pattern`, each target's `autoImport` boolean overrides
-the shared setting for that group of functions.
-Macros and component prop rules do not require this setting. Literal template
-refs are also checked independently of API imports.
-
-This setting declares that the unbound names come from their supported libraries; it does not read
-Vite configuration, generated declarations, or auto-import manifests. Custom
-auto-import aliases and APIs from other libraries are not inferred. Use explicit
-imports for aliases, or configure `customCallbacks` in either callback rule or
-`prefer-function-result-pattern` targets for additional APIs with auto-import
-recognition enabled. Sorting still preserves its existing fix safety boundaries.
-The settings namespace remains `vue-perfectionist` even if the plugin is
-registered under another name.
-
-This does not configure ESLint's `no-undef` rule. If you use that rule, load the
-globals generated by `unplugin-auto-import` separately; see its
-[ESLint integration](https://github.com/unplugin/unplugin-auto-import#eslint).
-Generated globals alone do not identify an API as belonging to Vue.
 
 ## Choosing Rules
 
-The plugin provides rules only and does not include built-in configurations.
-Enable and combine rules explicitly in your own configuration. Each rule has
-independent options; enabling one rule does not require enabling another.
+Start with the [rules overview](/rules/) to find checks for your code. Rules are
+independent and can be combined to enforce complementary conventions; see
+[Rule Composition](/guide/rule-composition) for examples.
 
-`require-component-props` requires configured props at component usage sites.
-`component-prop-types` checks the types of supplied values that can be inferred
-from template expressions. [`component-prop-values`](../rules/component-prop-values.md)
-checks configured value constraints such as numeric multiples, ranges, enums, and
-string lengths or patterns. These rules need explicit `targets`; they perform no checks
-by default and can be enabled independently.
+Component prop, slot, and generic-comment rules have no built-in component
+targets. Configure their `targets` before expecting diagnostics. Rule pages
+document defaults, options, supported syntax, and uncertainty handling.
 
-Use [`require-component-slots`](../rules/require-component-slots.md) to require
-named or default slots at configured component usage sites. It has no built-in
-targets, merges overlapping requirements, and reports missing or unverifiable
-slots without fixes. `unknownSlots` controls uncertain dynamic slot names.
+## Auto-imported Vue APIs
 
-Use [`require-vue-generic`](../rules/require-vue-generic.md) to require explicit
-`@vue-generic` comments before configured components. Its `targets` support
-prop-value exemptions through `ignoreWhen`; `unknownValues` controls uncertain
-exemptions. No components are checked by default. It reports without fixes or
-suggestions because the generic type must be chosen by the author.
-
-Use [`define-macros-type-style`](../rules/define-macros-type-style.md) to require
-inline, local, or imported type arguments for `defineProps`, `defineEmits`, and
-`defineSlots`. It defaults to local declarations and reports without fixes.
-Combine it with [`require-macro-type-name`](../rules/require-macro-type-name.md)
-to require the call-site names `Props`, `Emits`, and `Slots`. Both rules can be
-configured independently and provide no fixes or suggestions. Disable a macro
-in the naming rule when its style is required to be inline.
-
-Use [`max-lines-per-callback`](../rules/max-lines-per-callback.md) to limit inline
-callback length for Vue APIs or configured custom APIs. It defaults to 20 lines
-and can skip blank or comment-only lines. Combine it with
-[`callback-style`](../rules/callback-style.md) to require short inline callbacks:
-extract long internal logic into separate functions and call them from the
-inline callbacks. Length diagnostics offer no fixes or suggestions.
-
-Browse the [rules overview](/rules/) for all available rules and their descriptions.
-
-Use [`consistent-template-ref-name`](../rules/consistent-template-ref-name.md)
-to require `useTemplateRef()` variables and keys to match. Combine it with
-[`prefer-ref-pattern`](../rules/prefer-ref-pattern.md) when names must also
-follow a naming pattern. Neither rule requires the other.
-
-Use [`no-complex-v-for-source`](../rules/no-complex-v-for-source.md) to keep
-`v-for` sources simple. References and property access are accepted; calls and
-primitive literals are allowed by default and can be disabled independently.
-Array and object literals, branching, and other complex sources are reported
-without fixes or suggestions.
-
-Use [`padding-line-between-tags`](../rules/padding-line-between-tags.md) to require
-an exact number of blank lines between consecutive template tags. Unlike the
-[official Vue rule](https://eslint.vuejs.org/rules/padding-line-between-tags.html),
-whose `always` policy allows any positive number of blank lines, numeric policies
-require exactly the configured count. It defaults to one blank line, supports
-`tag` shorthand and ordered `prev`/`next` pairs, and only fixes tags already on
-separate lines. Disable the official rule for pairs controlled by this rule.
-
-Use [`prefer-composable-options`](../rules/prefer-composable-options.md) to keep
-composable inputs in a final options object. By default no positional parameters
-are allowed; `maxPositionalParams` permits leading inputs, but multiple parameters
-must still end in options. It checks definitions using syntax and supported local
-types, reports uncertain options types, and provides no fixes or suggestions.
-
-Use [`prefer-function-declaration`](../rules/prefer-function-declaration.md) to
-require function declarations for direct function bindings at SFC script and
-component setup top level, and inside matching composables. Configure `scopes`,
-`functionPattern`, `ignoreNames`, and `allowTypeAnnotation` to select containers
-and typed exceptions. Destructuring and factory results are allowed; this rule
-provides no fixes or suggestions.
-
-Use [`prefer-function-result-pattern`](../rules/prefer-function-result-pattern.md)
-to constrain function result bindings with regular expressions. Its `targets`
-array groups methods by import source, pattern, and optional destructuring
-position. Defaults require `is`, `has`, `should`, or `can` prefixes on boolean
-state from Vue refs, supported computed getters, and VueUse toggles. It reports
-without renaming bindings.
-
-Use [`prefer-simple-event-handler`](../rules/prefer-simple-event-handler.md)
-to keep named template event handlers simple. It checks `@event` and `v-on:event`
-values recursively, including inline functions, but skips object-form `v-on`,
-dynamic event names, and script implementations. Options allow inline functions,
-ternary expressions, and logical expressions independently. Complex handlers
-are reported without fixes or suggestions.
-
-Use [`prefer-template-literal-in-interpolation`](../rules/prefer-template-literal-in-interpolation.md)
-to combine mixed template text and interpolation. By default it reports only
-fragments with safe automatic fixes based on static expression types. Enable
-`reportUnfixable` to also report fragments that need manual review.
-
-Use [`prefer-use-template-ref-inference`](../rules/prefer-use-template-ref-inference.md) to prefer
-template-derived types for direct top-level `useTemplateRef<T>()` calls in
-TypeScript script setup. It requires a unique static template ref, supports
-shared auto-import settings, and accepts exact key exemptions through `ignoreRefs`.
-It reports without fixes or suggestions because removing a generic can change
-type checking.
-
-### Configuring Statement Ordering
-
-To sort names naturally, configure `sort-script-setup` with an explicit option:
-
-```js
-import { defineConfig } from 'eslint/config'
-
-export default defineConfig([
-  {
-    rules: {
-      'vue-perfectionist/sort-script-setup': [
-        'error',
-        {
-          type: 'natural',
-        },
-      ],
-    },
-  },
-])
-```
-
-Without explicit sorting options, the rule uses its defaults, including
-`type: 'unsorted'`. Configure sorting preferences directly in the rule options.
-Shared settings affect only [Vue auto-import recognition](#auto-imported-vue-apis);
-sorting preferences in either settings namespace are ignored.
+For auto-import tooling, opt into
+`settings['vue-perfectionist'].autoImport: true`. It defaults to `false`.
+See [auto-import configuration](/guide/configuration#auto-imported-vue-apis)
+for supported rules, rule-level overrides, local shadowing, and ESLint globals.
 
 ## Automatic Fixes
 
-Run ESLint with `--fix` to apply supported fixes. Fix behavior depends on the rule:
-
-- [`callback-style`](../rules/callback-style.md#diagnostics-and-fixes) can convert
-  arrow expression bodies to block bodies while preserving their return values.
-  Callback references and ordinary function expressions are reported without fixes.
-- [`consistent-template-ref-name`](../rules/consistent-template-ref-name.md)
-  reports mismatched variable names and keys without fixes or suggestions because
-  renaming can affect script references and template associations.
-- [`component-prop-types`](../rules/component-prop-types.md),
-  [`component-prop-values`](../rules/component-prop-values.md), and
-  [`require-component-props`](../rules/require-component-props.md) report component
-  contract violations without fixes or suggestions, preserving passed values.
-- [`define-macros-newline`](../rules/define-macros-newline.md#automatic-fixes-and-formatting)
-  inserts line breaks while preserving member order. Run your formatter afterward
-  to finish indentation.
-- [`prefer-ref-pattern`](../rules/prefer-ref-pattern.md) reports naming mismatches
-  without fixes or suggestions because a pattern cannot determine a unique name.
-- [`prefer-template-literal-in-interpolation`](../rules/prefer-template-literal-in-interpolation.md)
-  combines statically safe primitive expressions with adjacent text, preserving
-  nullish display values. Unknown types and whitespace-sensitive fragments are
-  skipped by default.
-- [`sort-script-setup`](../rules/sort-script-setup.md#partitions-and-automatic-fixes)
-  limits movement fixes to eligible declarations within safe contiguous fragments.
-  Initialization dependencies take precedence over sorting preferences; unsafe
-  runtime moves are reported without fixes.
+Five rules offer automatic fixes for supported cases: callback body style,
+macro line breaks, template tag padding, mixed text interpolation, and setup
+statement ordering. Remaining diagnostics need manual changes.
+See [fix boundaries](/guide/rule-composition#automatic-fixes) before applying
+fixes across a project.
 
 ## Using Other Sorting Rules
 
-Continue using `perfectionist/sort-imports` for imports. If your existing
-configuration enables `perfectionist/sort-modules` or
-`vue/define-macros-order`, disable those rules for the same `.vue` files when
-`sort-script-setup` controls declaration and macro order. Keep Vue correctness rules
-such as checks for watchers and lifecycle registration after `await`.
-
-Align any whitespace settings
-with your formatter and padding rules; `sort-script-setup` ignores blank-line
-counts by default. For other rules, follow their documented compatibility guidance.
+When `sort-script-setup` owns declaration and macro order, disable overlapping
+sorting rules for the same `.vue` files. Continue using dedicated import and
+Vue correctness rules. See
+[statement ordering](/guide/rule-composition#statement-ordering) for an override.
