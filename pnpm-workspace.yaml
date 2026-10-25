@@ -1,5 +1,6 @@
 packages:
   - docs
+  - tests/fixtures/vue-runtime-legacy
 
 overrides:
   # Twoslash 4.5.0 patches VMenu internals that changed in FloatingVue 5.4.

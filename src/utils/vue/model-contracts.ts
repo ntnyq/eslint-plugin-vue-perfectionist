@@ -16,7 +16,10 @@ interface ContractMember {
  * @returns Its explicit string name and diagnostic node, when known.
  */
 function getMember(
-  member: TSESTree.Property | TSESTree.TSPropertySignature,
+  member:
+    | TSESTree.Property
+    | TSESTree.TSMethodSignature
+    | TSESTree.TSPropertySignature,
 ): ContractMember | undefined {
   const key = member.key
   const name =
@@ -116,7 +119,10 @@ export function getModelContractMembers(
     if (type.type === 'TSTypeLiteral' || type.type === 'TSInterfaceBody') {
       const members = type.type === 'TSTypeLiteral' ? type.members : type.body
       return members.flatMap(member => {
-        if (member.type === 'TSPropertySignature') {
+        if (
+          member.type === 'TSPropertySignature' ||
+          member.type === 'TSMethodSignature'
+        ) {
           const property = getMember(member)
           return property ? [property] : []
         }

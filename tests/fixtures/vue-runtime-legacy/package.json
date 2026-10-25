@@ -1,0 +1,14 @@
+{
+  "name": "vue-runtime-legacy",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./index.ts",
+    "./compiler-sfc": "./compiler-sfc.ts",
+    "./server-renderer": "./server-renderer.ts"
+  },
+  "dependencies": {
+    "vue": "3.4.38"
+  }
+}

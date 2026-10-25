@@ -84,7 +84,9 @@ const emit = defineEmits<{
 
 Runtime arrays and objects, inline types, local aliases and interfaces,
 intersections, inherited interface members, emits call signatures, and literal
-event unions are supported. `withDefaults(defineProps(), defaults)` is supported.
+event unions are supported. Method signatures are supported for both props and
+emits, including `'update:modelValue'(value: string): void`.
+`withDefaults(defineProps(), defaults)` is supported.
 Unrelated props and events are allowed and must be retained during migration.
 
 ::: incorrect

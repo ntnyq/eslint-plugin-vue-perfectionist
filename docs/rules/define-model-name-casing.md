@@ -142,6 +142,8 @@ the configured casing:
 With these options, `defineModel('file-list')` becomes
 `defineModel('fileList')`. With the default `fix: false`, mismatches are reported
 without fixes. No editor suggestions are provided.
+Fixes also follow the runtime compatibility and collision boundaries below;
+`fix: true` does not make every casing conversion fixable.
 
 ::: warning Component contract changes
 
@@ -163,8 +165,10 @@ or type checker. It does not depend on auto-import settings.
 Imported macros (including aliases and namespaces), shadowed names, optional
 calls, nested functions/blocks, arbitrary outer expressions, ordinary scripts,
 templates, and standalone JS/TS files are skipped. Calls with more than two
-runtime arguments are skipped. Missing names, options-only calls, dynamic
-strings, concatenations, identifiers, and spread arguments are not resolved.
+runtime arguments are skipped for naming diagnostics and fixes, but their static
+model names still participate in collision checks. Missing names, options-only
+calls, dynamic strings, concatenations, identifiers, and spread arguments are
+not resolved.
 
 This rule does not enforce variable names, require an explicit name, change
 template `v-model` arguments, or inspect `defineProps` / `defineEmits` contracts.
@@ -178,15 +182,100 @@ They preserve its quote delimiter, surrounding comments, parentheses, TypeScript
 wrappers, options, receiving variable names, template arguments, and line endings.
 Escapes within the replaced name are normalized to the converted value.
 
+The converted name must be unchanged by Vue's camelization. The rule does not
+infer the consumer's Vue runtime version and has no version override, so it
+applies this conservative boundary even with newer Vue versions. For example,
+when requiring `kebab-case`, `fileList` is reported without a fix: changing it
+to `file-list` makes the returned model lose its value on Vue 3.4.38, even after
+updating the parent binding. Converting `FILE` to the single-word name `file`
+remains fixable.
+
+This also prevents conversion to `model-value`. Even on current Vue, the
+compiler generates `model-valueModifiers` while `useModel` reads the special
+`modelModifiers` prop, so a rename from `modelValue` would lose modifiers despite
+updated parent bindings. Migrate names requiring runtime camelization manually
+after checking both model values and modifiers with the target Vue runtime.
+
+Name arguments containing `satisfies` are reported without fixes, including
+constraints wrapped in assertions or non-null expressions. Renaming the literal
+could violate a literal type, union, or type alias constraint. Without a type
+checker, the rule conservatively treats even `satisfies string` and
+`satisfies unknown` as report-only. A `satisfies` expression around the returned
+model ref does not constrain the name and does not disable its fix.
+
+::: incorrect
+
+```vue
+<script setup lang="ts">
+type Name = 'file-list'
+const files = defineModel('file-list' satisfies Name)
+</script>
+```
+
+:::
+
+Fixes also require the converted name to be stable after one conversion. Some
+Unicode case mappings need multiple passes: in PascalCase, `ß` becomes `SS`,
+which would then become `Ss`; in camelCase, `İ` first becomes `i` plus a
+combining dot, which another pass removes. These names remain report-only,
+including when a later result would collide with another model. This prevents
+partial contract renames. Stable Unicode conversions remain fixable. Constrained
+names, unstable names, and conversions blocked by runtime compatibility reserve
+their existing generated props and runtime modifier lookups during collision
+checks, rather than their hypothetical converted names.
+
 For example, changing `'file-list'` to `'fileList'` changes the generated names
 from `file-list`, `update:file-list`, and `file-listModifiers` to `fileList`,
 `update:fileList`, and `fileListModifiers`. Consumer compatibility is not proven.
 
-Empty conversion results and model or modifiers prop names that conflict with
+Empty conversion results, Vue reserved props such as `key`, `ref`, `ref_key`,
+and vnode lifecycle hooks, and model or modifiers prop names that conflict with
 another model's existing or converted names in the same setup script are
-reported without fixes even with `fix: true`. This includes conflicts with an
-implicit `modelValue` model.
+reported without fixes even with `fix: true`. Reserved-name and collision checks
+use Vue's camelization for both value and modifiers props. For example, a
+`'Foo1'` model cannot be renamed to `'foo1'` alongside an existing `'foo-1'`
+model, because Vue normalizes both to `foo1`. This also includes conflicts with
+an implicit `modelValue` model or a statically named model call that is otherwise
+skipped for naming checks.
+Existing names that camelize to `modelValue`, such as `model-value`, additionally
+reserve `modelModifiers`, because Vue may read it as the model's modifiers even
+though the compiler generates a different modifiers prop. This prevents an
+independent rename from making that model read another model's modifiers.
 These checks do not establish compatibility with other props or consumers.
+
+Collision checks also reserve the original, camelized, and hyphenated modifier
+lookups used by Vue runtimes. Distinct generated prop names alone do not make a
+rename safe: `Foo` can fall back to `fooModifiers` when `FooModifiers` is absent.
+For example, with `casing: 'PascalCase'`, a protected
+`defineModel('foo' satisfies 'foo')` prevents renaming another model from `FOO`
+to `Foo`. Otherwise, the renamed model could inherit the first model's `trim`
+or `number` modifiers and change emitted values, even after parent bindings are
+updated. This also blocks renaming a model value to a prop read by another
+model's modifier fallback. Independent names remain fixable.
+
+Template literal model names require
+[Vue 3.5.31+](https://github.com/vuejs/core/blob/main/CHANGELOG.md#3531-2026-03-25).
+Earlier compilers interpret the template literal as options for the default
+`modelValue` model. The rule does not infer the consumer's compiler version, so
+template literal names also reserve `modelValue` and `modelModifiers`, including
+names constrained by `satisfies` or calls skipped for naming checks. Renames
+that conflict with either compiler interpretation remain report-only.
+Independent model fixes remain available.
+
+Even with `fix: true`, both string literal names below are reported without
+fixes, preventing default model and modifiers collisions in older compilers:
+
+::: incorrect
+
+```vue
+<script setup>
+const other = defineModel(`other`)
+const value = defineModel('ModelValue')
+const modifiers = defineModel('ModelModifiers')
+</script>
+```
+
+:::
 
 See Vue's [defineModel documentation](https://vuejs.org/api/sfc-script-setup.html#definemodel)
 for the generated prop and event contract.

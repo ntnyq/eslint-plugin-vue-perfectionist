@@ -1,8 +1,10 @@
 import * as tsParser from '@typescript-eslint/parser'
 import { createRuleTester } from 'eslint-vitest-rule-tester'
 import { expect, it } from 'vitest'
+import { compileScript, parse } from 'vue/compiler-sfc'
 import { preferDefineModel } from '../../src/rules/prefer-define-model.ts'
 import { run } from '../internal.ts'
+import type { Linter } from 'eslint'
 import type { PreferDefineModelMessageId } from '../../src/types/index.ts'
 
 const pair =
@@ -27,6 +29,7 @@ await run<never, PreferDefineModelMessageId>({
       "defineEmits(['update:modelValue'])",
       "defineProps({ value: String }); defineEmits(['change'])",
       "defineProps({ value: String }); defineEmits(['update:other'])",
+      'defineProps<{ title(): string }>(); defineEmits<{ save(): void }>()',
       "defineProps({ fileList: Array }); defineEmits(['update:file-list'])",
       "defineProps({ '': String }); defineEmits(['update:'])",
       "defineProps({ [key]: String }); defineEmits(['update:modelValue'])",
@@ -67,6 +70,30 @@ await run<never, PreferDefineModelMessageId>({
     { code: '<template>{{ defineProps({ modelValue: String }) }}</template>' },
   ],
   invalid: [
+    ...[
+      "defineProps<{ modelValue: string }>(); defineEmits<{ 'update:modelValue'(value: string): void }>()",
+      "interface Emits { 'update:modelValue'(value: string): void }; defineProps<{ modelValue: string }>(); defineEmits<Emits>()",
+      "type Emits = { 'update:modelValue'(value: string): void }; defineProps<{ modelValue: string }>(); defineEmits<Emits>()",
+      "interface Base { 'update:modelValue'(value: string): void }; interface Emits extends Base {}; defineProps<{ modelValue: string }>(); defineEmits<Emits>()",
+      "defineProps<{ modelValue(): string }>(); defineEmits<{ 'update:modelValue': [value: () => string] }>()",
+      "interface Props { modelValue(): string }; defineProps<Props>(); defineEmits<{ 'update:modelValue': [value: () => string] }>()",
+    ].map(script => ({
+      description: `recognizes method signature declarations: ${script}`,
+      code: sfc(script),
+      errors: [
+        {
+          messageId: 'preferDefineModel' as const,
+          data: { name: 'modelValue' },
+        },
+      ],
+      output: null,
+      after(result: Linter.FixReport) {
+        const { descriptor } = parse(result.output)
+        expect(() =>
+          compileScript(descriptor, { id: 'method-signature-model' }),
+        ).not.toThrow()
+      },
+    })),
     ...[
       pair,
       "const { modelValue } = defineProps(['modelValue']); const emit = defineEmits({ 'update:modelValue': null })",
