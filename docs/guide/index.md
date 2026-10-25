@@ -120,6 +120,9 @@ prop and update-event declarations that can be migrated manually to Vue 3.4+
 `defineModel`. Use [`define-model-name-casing`](/rules/define-model-name-casing)
 to enforce the casing of explicit model names independently of template arguments.
 
+Use [`prefer-watch-effect-alias`](/rules/prefer-watch-effect-alias) to prefer
+`watchPostEffect` and `watchSyncEffect` over static `watchEffect` flush options.
+
 ## Auto-imported Vue APIs
 
 For auto-import tooling, opt into

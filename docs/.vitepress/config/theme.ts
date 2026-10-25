@@ -120,6 +120,10 @@ export function getThemeConfig(): DefaultTheme.Config {
             text: 'prefer-use-template-ref-inference',
           },
           {
+            link: '/rules/prefer-watch-effect-alias',
+            text: 'prefer-watch-effect-alias',
+          },
+          {
             link: '/rules/require-component-props',
             text: 'require-component-props',
           },

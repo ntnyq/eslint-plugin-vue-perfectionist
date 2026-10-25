@@ -10,16 +10,16 @@ registration and parser setup.
 
 ## Choose by Goal
 
-| Goal                      | Rules                                                                                                                             |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Callbacks and composables | `callback-style`, `max-lines-per-callback`, `prefer-composable-options`, `prefer-function-declaration`                            |
-| Macro layout and types    | `define-macros-newline`, `define-macros-type-style`, `require-macro-type-name`                                                    |
-| Component models          | `define-model-name-casing`, `prefer-define-model`                                                                                 |
-| Ref and result naming     | `consistent-template-ref-name`, `prefer-ref-pattern`, `prefer-function-result-pattern`                                            |
-| Template ref types        | `prefer-use-template-ref-inference`                                                                                               |
-| Component usage contracts | `require-component-props`, `component-prop-types`, `component-prop-values`, `require-component-slots`, `require-vue-generic`      |
-| Template readability      | `no-complex-v-for-source`, `padding-line-between-tags`, `prefer-simple-event-handler`, `prefer-template-literal-in-interpolation` |
-| Setup declaration order   | `sort-script-setup`                                                                                                               |
+| Goal                      | Rules                                                                                                                               |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Callbacks and composables | `callback-style`, `max-lines-per-callback`, `prefer-composable-options`, `prefer-function-declaration`, `prefer-watch-effect-alias` |
+| Macro layout and types    | `define-macros-newline`, `define-macros-type-style`, `require-macro-type-name`                                                      |
+| Component models          | `define-model-name-casing`, `prefer-define-model`                                                                                   |
+| Ref and result naming     | `consistent-template-ref-name`, `prefer-ref-pattern`, `prefer-function-result-pattern`                                              |
+| Template ref types        | `prefer-use-template-ref-inference`                                                                                                 |
+| Component usage contracts | `require-component-props`, `component-prop-types`, `component-prop-values`, `require-component-slots`, `require-vue-generic`        |
+| Template readability      | `no-complex-v-for-source`, `padding-line-between-tags`, `prefer-simple-event-handler`, `prefer-template-literal-in-interpolation`   |
+| Setup declaration order   | `sort-script-setup`                                                                                                                 |
 
 See [Rule Composition](/guide/rule-composition) for complementary checks,
 configuration examples, and interactions with other plugins.
@@ -67,6 +67,7 @@ also report problems that require manual changes. See
 | [prefer-simple-event-handler](./prefer-simple-event-handler.md)                           | Require simple expressions in named template event handlers.         | Template            | —               |
 | [prefer-template-literal-in-interpolation](./prefer-template-literal-in-interpolation.md) | Prefer a single template literal for mixed text and interpolation.   | Template            | Supported cases |
 | [prefer-use-template-ref-inference](./prefer-use-template-ref-inference.md)               | Prefer inferred types for static Vue template refs.                  | TS setup + template | —               |
+| [prefer-watch-effect-alias](./prefer-watch-effect-alias.md)                               | Prefer dedicated aliases for post and sync watch effects.            | Scripts             | —               |
 | [require-component-props](./require-component-props.md)                                   | Require configured props at component usage sites.                   | Template            | —               |
 | [require-component-slots](./require-component-slots.md)                                   | Require configured slots at component usage sites.                   | Template            | —               |
 | [require-macro-type-name](./require-macro-type-name.md)                                   | Require exact call-site names for Vue macro types.                   | TS setup            | —               |

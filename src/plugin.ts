@@ -17,6 +17,7 @@ import { preferRefPattern } from './rules/prefer-ref-pattern.ts'
 import { preferSimpleEventHandler } from './rules/prefer-simple-event-handler.ts'
 import { preferTemplateLiteralInInterpolation } from './rules/prefer-template-literal-in-interpolation.ts'
 import { preferUseTemplateRefInference } from './rules/prefer-use-template-ref-inference.ts'
+import { preferWatchEffectAlias } from './rules/prefer-watch-effect-alias.ts'
 import { requireComponentProps } from './rules/require-component-props.ts'
 import { requireComponentSlots } from './rules/require-component-slots.ts'
 import { requireMacroTypeName } from './rules/require-macro-type-name.ts'
@@ -49,6 +50,7 @@ export const plugin: VuePerfectionistPlugin = {
     'prefer-template-literal-in-interpolation':
       preferTemplateLiteralInInterpolation,
     'prefer-use-template-ref-inference': preferUseTemplateRefInference,
+    'prefer-watch-effect-alias': preferWatchEffectAlias,
     'require-component-props': requireComponentProps,
     'require-component-slots': requireComponentSlots,
     'require-macro-type-name': requireMacroTypeName,

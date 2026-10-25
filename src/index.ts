@@ -38,6 +38,7 @@ export type {
   PreferSimpleEventHandlerOptions,
   PreferTemplateLiteralInInterpolationOptions,
   PreferUseTemplateRefInferenceOptions,
+  PreferWatchEffectAliasOptions,
   RefPatternTarget,
   RequireComponentPropsOptions,
   RequireComponentPropsTarget,

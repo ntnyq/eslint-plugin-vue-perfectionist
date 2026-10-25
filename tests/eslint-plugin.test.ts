@@ -397,6 +397,27 @@ onMounted(handler)
     },
   )
 
+  it('reports watch effect aliases through an aliased plugin without fixes', () => {
+    const linter = new Linter()
+    const configuration: Linter.Config = {
+      plugins: { vp: plugin },
+      settings: { 'vue-perfectionist': { autoImport: true } },
+      rules: { 'vp/prefer-watch-effect-alias': 'error' },
+    }
+    const source = "watchEffect(update, { flush: 'sync', onTrack: debug })"
+    const result = linter.verifyAndFix(source, configuration)
+    expect(result.messages).toHaveLength(1)
+    expect(result.messages[0]).toMatchObject({
+      ruleId: 'vp/prefer-watch-effect-alias',
+      messageId: 'preferredAlias',
+    })
+    expect(result.fixed).toBe(false)
+    expect(result.output).toBe(source)
+    expect(result.messages[0]?.fix).toBeUndefined()
+    expect(result.messages[0]?.suggestions).toBeUndefined()
+    expect(linter.verifyAndFix(result.output, configuration)).toEqual(result)
+  })
+
   it('exports rules without built-in configs', () => {
     expect(plugin.meta.name).toBe('eslint-plugin-vue-perfectionist')
     expect(pluginExports.plugin).toBe(plugin)
@@ -421,6 +442,7 @@ onMounted(handler)
       'prefer-simple-event-handler',
       'prefer-template-literal-in-interpolation',
       'prefer-use-template-ref-inference',
+      'prefer-watch-effect-alias',
       'require-component-props',
       'require-component-slots',
       'require-macro-type-name',
