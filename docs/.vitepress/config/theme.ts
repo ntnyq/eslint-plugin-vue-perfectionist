@@ -91,6 +91,10 @@ export function getThemeConfig(): DefaultTheme.Config {
             text: 'prefer-composable-options',
           },
           {
+            link: '/rules/prefer-define-model',
+            text: 'prefer-define-model',
+          },
+          {
             link: '/rules/prefer-function-declaration',
             text: 'prefer-function-declaration',
           },

@@ -50,6 +50,7 @@ const exampleRules = {
   'vue-perfectionist/no-complex-v-for-source': 'error',
   'vue-perfectionist/padding-line-between-tags': 'error',
   'vue-perfectionist/prefer-composable-options': 'error',
+  'vue-perfectionist/prefer-define-model': 'error',
   'vue-perfectionist/prefer-function-declaration': 'error',
   'vue-perfectionist/prefer-function-result-pattern': 'error',
   'vue-perfectionist/prefer-ref-pattern': 'error',

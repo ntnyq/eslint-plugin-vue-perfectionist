@@ -115,6 +115,10 @@ Component prop, slot, and generic-comment rules have no built-in component
 targets. Configure their `targets` before expecting diagnostics. Rule pages
 document defaults, options, supported syntax, and uncertainty handling.
 
+Use [`prefer-define-model`](/rules/prefer-define-model) to identify matching
+prop and update-event declarations that can be migrated manually to Vue 3.4+
+`defineModel`.
+
 ## Auto-imported Vue APIs
 
 For auto-import tooling, opt into

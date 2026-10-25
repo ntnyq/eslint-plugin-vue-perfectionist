@@ -379,6 +379,7 @@ onMounted(handler)
       'no-complex-v-for-source',
       'padding-line-between-tags',
       'prefer-composable-options',
+      'prefer-define-model',
       'prefer-function-declaration',
       'prefer-function-result-pattern',
       'prefer-ref-pattern',

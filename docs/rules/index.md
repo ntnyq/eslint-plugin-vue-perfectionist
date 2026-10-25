@@ -14,6 +14,7 @@ registration and parser setup.
 | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | Callbacks and composables | `callback-style`, `max-lines-per-callback`, `prefer-composable-options`, `prefer-function-declaration`                            |
 | Macro layout and types    | `define-macros-newline`, `define-macros-type-style`, `require-macro-type-name`                                                    |
+| Component models          | `prefer-define-model`                                                                                                             |
 | Ref and result naming     | `consistent-template-ref-name`, `prefer-ref-pattern`, `prefer-function-result-pattern`                                            |
 | Template ref types        | `prefer-use-template-ref-inference`                                                                                               |
 | Component usage contracts | `require-component-props`, `component-prop-types`, `component-prop-values`, `require-component-slots`, `require-vue-generic`      |
@@ -46,26 +47,27 @@ Automatic fixes apply only to documented supported cases. A fixable rule can
 also report problems that require manual changes. See
 [Automatic Fixes](/guide/rule-composition#automatic-fixes) for the boundaries.
 
-| Rule                                                                                      | Description                                                        | Scope               | Automatic fix   |
-| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | ------------------- | --------------- |
-| [callback-style](./callback-style.md)                                                     | Enforce callback styles for Vue APIs.                              | Scripts             | Supported cases |
-| [component-prop-types](./component-prop-types.md)                                         | Enforce configured component prop value types.                     | Template            | —               |
-| [component-prop-values](./component-prop-values.md)                                       | Enforce configured component prop value constraints.               | Template            | —               |
-| [consistent-template-ref-name](./consistent-template-ref-name.md)                         | Require template ref variable names to match their keys.           | Scripts             | —               |
-| [define-macros-newline](./define-macros-newline.md)                                       | Require multiline inline Vue macro declarations.                   | Setup               | Supported cases |
-| [define-macros-type-style](./define-macros-type-style.md)                                 | Enforce declaration styles for Vue macro types.                    | TS setup            | —               |
-| [max-lines-per-callback](./max-lines-per-callback.md)                                     | Limit the length of inline callbacks for Vue APIs.                 | Scripts             | —               |
-| [no-complex-v-for-source](./no-complex-v-for-source.md)                                   | Disallow complex expressions in Vue v-for sources.                 | Template            | —               |
-| [padding-line-between-tags](./padding-line-between-tags.md)                               | Enforce blank-line counts between consecutive template tags.       | Template            | Supported cases |
-| [prefer-composable-options](./prefer-composable-options.md)                               | Prefer a final options object for composable parameters.           | Scripts             | —               |
-| [prefer-function-declaration](./prefer-function-declaration.md)                           | Require function declarations in SFCs and composables.             | Scripts             | —               |
-| [prefer-function-result-pattern](./prefer-function-result-pattern.md)                     | Enforce naming patterns for function result bindings.              | Scripts             | —               |
-| [prefer-ref-pattern](./prefer-ref-pattern.md)                                             | Enforce naming patterns for template refs.                         | Template + scripts  | —               |
-| [prefer-simple-event-handler](./prefer-simple-event-handler.md)                           | Require simple expressions in named template event handlers.       | Template            | —               |
-| [prefer-template-literal-in-interpolation](./prefer-template-literal-in-interpolation.md) | Prefer a single template literal for mixed text and interpolation. | Template            | Supported cases |
-| [prefer-use-template-ref-inference](./prefer-use-template-ref-inference.md)               | Prefer inferred types for static Vue template refs.                | TS setup + template | —               |
-| [require-component-props](./require-component-props.md)                                   | Require configured props at component usage sites.                 | Template            | —               |
-| [require-component-slots](./require-component-slots.md)                                   | Require configured slots at component usage sites.                 | Template            | —               |
-| [require-macro-type-name](./require-macro-type-name.md)                                   | Require exact call-site names for Vue macro types.                 | TS setup            | —               |
-| [require-vue-generic](./require-vue-generic.md)                                           | Require explicit generic comments on configured components.        | Template            | —               |
-| [sort-script-setup](./sort-script-setup.md)                                               | Group and order top-level statements in `<script setup>`.          | Setup               | Supported cases |
+| Rule                                                                                      | Description                                                          | Scope               | Automatic fix   |
+| ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------- | --------------- |
+| [callback-style](./callback-style.md)                                                     | Enforce callback styles for Vue APIs.                                | Scripts             | Supported cases |
+| [component-prop-types](./component-prop-types.md)                                         | Enforce configured component prop value types.                       | Template            | —               |
+| [component-prop-values](./component-prop-values.md)                                       | Enforce configured component prop value constraints.                 | Template            | —               |
+| [consistent-template-ref-name](./consistent-template-ref-name.md)                         | Require template ref variable names to match their keys.             | Scripts             | —               |
+| [define-macros-newline](./define-macros-newline.md)                                       | Require multiline inline Vue macro declarations.                     | Setup               | Supported cases |
+| [define-macros-type-style](./define-macros-type-style.md)                                 | Enforce declaration styles for Vue macro types.                      | TS setup            | —               |
+| [max-lines-per-callback](./max-lines-per-callback.md)                                     | Limit the length of inline callbacks for Vue APIs.                   | Scripts             | —               |
+| [no-complex-v-for-source](./no-complex-v-for-source.md)                                   | Disallow complex expressions in Vue v-for sources.                   | Template            | —               |
+| [padding-line-between-tags](./padding-line-between-tags.md)                               | Enforce blank-line counts between consecutive template tags.         | Template            | Supported cases |
+| [prefer-composable-options](./prefer-composable-options.md)                               | Prefer a final options object for composable parameters.             | Scripts             | —               |
+| [prefer-define-model](./prefer-define-model.md)                                           | Prefer defineModel over matching prop and update event declarations. | Setup               | —               |
+| [prefer-function-declaration](./prefer-function-declaration.md)                           | Require function declarations in SFCs and composables.               | Scripts             | —               |
+| [prefer-function-result-pattern](./prefer-function-result-pattern.md)                     | Enforce naming patterns for function result bindings.                | Scripts             | —               |
+| [prefer-ref-pattern](./prefer-ref-pattern.md)                                             | Enforce naming patterns for template refs.                           | Template + scripts  | —               |
+| [prefer-simple-event-handler](./prefer-simple-event-handler.md)                           | Require simple expressions in named template event handlers.         | Template            | —               |
+| [prefer-template-literal-in-interpolation](./prefer-template-literal-in-interpolation.md) | Prefer a single template literal for mixed text and interpolation.   | Template            | Supported cases |
+| [prefer-use-template-ref-inference](./prefer-use-template-ref-inference.md)               | Prefer inferred types for static Vue template refs.                  | TS setup + template | —               |
+| [require-component-props](./require-component-props.md)                                   | Require configured props at component usage sites.                   | Template            | —               |
+| [require-component-slots](./require-component-slots.md)                                   | Require configured slots at component usage sites.                   | Template            | —               |
+| [require-macro-type-name](./require-macro-type-name.md)                                   | Require exact call-site names for Vue macro types.                   | TS setup            | —               |
+| [require-vue-generic](./require-vue-generic.md)                                           | Require explicit generic comments on configured components.          | Template            | —               |
+| [sort-script-setup](./sort-script-setup.md)                                               | Group and order top-level statements in `<script setup>`.            | Setup               | Supported cases |
