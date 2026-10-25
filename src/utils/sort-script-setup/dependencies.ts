@@ -244,49 +244,96 @@ export function sortByDependencies(
   dependencies: Map<Statement, Set<Statement>>,
   compare: (left: Statement, right: Statement) => number,
 ): Statement[] {
+  interface RankedStatement {
+    statement: Statement
+    rank: number
+    remaining: number
+    dependents: RankedStatement[]
+  }
+  const ordered = statements.toSorted(compare)
+  const entries = new Map<Statement, RankedStatement>(
+    ordered.map((statement, rank) => [
+      statement,
+      { statement, rank, remaining: 0, dependents: [] },
+    ]),
+  )
+  let edgeCount = 0
+  for (const entry of entries.values()) {
+    for (const dependency of dependencies.get(entry.statement) ?? []) {
+      const prerequisite = entries.get(dependency)
+      // Dependencies outside this partition are already satisfied.
+      if (prerequisite) {
+        entry.remaining++
+        prerequisite.dependents.push(entry)
+        edgeCount++
+      }
+    }
+  }
+  if (!edgeCount) {
+    return ordered
+  }
+
+  // Numeric ranks encode the stable style order. The heap only contains ready
+  // statements, including newly unblocked ones before the next selection.
+  const ready: RankedStatement[] = []
+  function push(entry: RankedStatement) {
+    let position = ready.length
+    ready.push(entry)
+    while (position > 0) {
+      const parent = Math.floor((position - 1) / 2)
+      const previous = ready[parent]
+      if (!previous || previous.rank <= entry.rank) {
+        break
+      }
+      ready[position] = previous
+      position = parent
+    }
+    ready[position] = entry
+  }
+  function pop(): RankedStatement | undefined {
+    const first = ready[0]
+    const last = ready.pop()
+    if (ready.length && last) {
+      let position = 0
+      while (position * 2 + 1 < ready.length) {
+        const leftIndex = position * 2 + 1
+        const left = ready[leftIndex]
+        const right = ready[leftIndex + 1]
+        if (!left) {
+          break
+        }
+        const useRight = right && right.rank < left.rank
+        const child = useRight ? right : left
+        if (last.rank <= child.rank) {
+          break
+        }
+        ready[position] = child
+        position = useRight ? leftIndex + 1 : leftIndex
+      }
+      ready[position] = last
+    }
+    return first
+  }
+  for (const entry of entries.values()) {
+    if (entry.remaining === 0) {
+      push(entry)
+    }
+  }
   const pending = new Set(statements)
   const sorted: Statement[] = []
-  while (pending.size) {
-    const ready = [...pending]
-      .filter(
-        /**
-         * Select a statement whose prerequisites have already left the pending
-         * set.
-         *
-         * @param statement - The pending statement to inspect.
-         * @returns Whether every dependency is already satisfied.
-         */
-        statement =>
-          [...(dependencies.get(statement) ?? [])].every(
-            /**
-             * Check whether a prerequisite is no longer pending.
-             *
-             * @param dependency - The prerequisite statement.
-             * @returns Whether the prerequisite is outside the remaining pending
-             * set.
-             */
-            dependency => !pending.has(dependency),
-          ),
-      )
-      .sort(compare)
-    const next = ready[0]
-    if (!next) {
-      return [
-        ...sorted,
-        ...statements.filter(
-          /**
-           * Retain statements still pending when a dependency cycle prevents
-           * progress.
-           *
-           * @param statement - The statement in original order.
-           * @returns Whether the statement remains unsorted.
-           */
-          statement => pending.has(statement),
-        ),
-      ]
+  while (ready.length) {
+    const entry = pop()
+    if (!entry) {
+      break
     }
-    sorted.push(next)
-    pending.delete(next)
+    sorted.push(entry.statement)
+    pending.delete(entry.statement)
+    for (const dependent of entry.dependents) {
+      dependent.remaining--
+      if (dependent.remaining === 0) {
+        push(dependent)
+      }
+    }
   }
-  return sorted
+  return [...sorted, ...statements.filter(statement => pending.has(statement))]
 }

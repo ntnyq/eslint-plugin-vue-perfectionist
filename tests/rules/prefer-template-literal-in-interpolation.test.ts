@@ -5,7 +5,7 @@ import { compile, createSSRApp } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 import { preferTemplateLiteralInInterpolation } from '../../src/rules/prefer-template-literal-in-interpolation.ts'
 import { createVueSFC } from '../helpers/create-vue-sfc.ts'
-import { run, vueLanguageOptions } from '../internal.ts'
+import { run, vueLanguageOptions } from '../helpers/rule-tester.ts'
 import type {
   PreferTemplateLiteralInInterpolationMessageId,
   PreferTemplateLiteralInInterpolationOptions,

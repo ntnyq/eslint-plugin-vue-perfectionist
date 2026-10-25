@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { compile, createSSRApp } from 'vue'
 import { renderToString } from 'vue/server-renderer'
 import { paddingLineBetweenTags } from '../../src/rules/padding-line-between-tags.ts'
-import { run, vueLanguageOptions } from '../internal.ts'
+import { run, vueLanguageOptions } from '../helpers/rule-tester.ts'
 import type { Linter } from 'eslint'
 import type {
   PaddingLineBetweenTagsBlankLine,

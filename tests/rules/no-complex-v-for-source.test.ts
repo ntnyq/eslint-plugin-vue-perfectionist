@@ -2,7 +2,7 @@ import { createRuleTester } from 'eslint-vitest-rule-tester'
 import { expect, it } from 'vitest'
 import { noComplexVForSource } from '../../src/rules/no-complex-v-for-source.ts'
 import { createVueSFC } from '../helpers/create-vue-sfc.ts'
-import { run, vueLanguageOptions } from '../internal.ts'
+import { run, vueLanguageOptions } from '../helpers/rule-tester.ts'
 import type {
   NoComplexVForSourceMessageId,
   NoComplexVForSourceOptions,

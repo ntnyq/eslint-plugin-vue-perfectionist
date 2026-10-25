@@ -5,7 +5,7 @@ import { expect, it } from 'vitest'
 import * as Vue from 'vue'
 import { compileScript, parse } from 'vue/compiler-sfc'
 import { preferWatchEffectAlias } from '../../src/rules/prefer-watch-effect-alias.ts'
-import { run } from '../internal.ts'
+import { run } from '../helpers/rule-tester.ts'
 import type {
   PreferWatchEffectAliasMessageId,
   PreferWatchEffectAliasOptions,

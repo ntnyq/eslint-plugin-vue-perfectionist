@@ -1,8 +1,8 @@
 import { Linter } from 'eslint'
 import { expect, it } from 'vitest'
 import { compileScript, parse } from 'vue/compiler-sfc'
-import plugin from '../src/index.ts'
-import { vueLanguageOptions } from './internal.ts'
+import plugin from '../../src/index.ts'
+import { vueLanguageOptions } from '../helpers/rule-tester.ts'
 
 const config: Linter.Config = {
   files: ['**/*.vue'],

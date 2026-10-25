@@ -3,7 +3,7 @@ import { createRuleTester } from 'eslint-vitest-rule-tester'
 import { expect, it } from 'vitest'
 import { compileScript, parse } from 'vue/compiler-sfc'
 import { preferDefineModel } from '../../src/rules/prefer-define-model.ts'
-import { run } from '../internal.ts'
+import { run } from '../helpers/rule-tester.ts'
 import type { Linter } from 'eslint'
 import type { PreferDefineModelMessageId } from '../../src/types/index.ts'
 

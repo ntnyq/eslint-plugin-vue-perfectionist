@@ -1,9 +1,9 @@
 import { Linter } from 'eslint'
 import { expect, it } from 'vitest'
 import { compileScript, parse } from 'vue/compiler-sfc'
-import plugin from '../src/index.ts'
-import { createVueSFC } from './helpers/create-vue-sfc.ts'
-import { vueLanguageOptions } from './internal.ts'
+import plugin from '../../src/index.ts'
+import { createVueSFC } from '../helpers/create-vue-sfc.ts'
+import { vueLanguageOptions } from '../helpers/rule-tester.ts'
 
 it.each([
   {

@@ -24,20 +24,20 @@ Do not restrict every rule to `<script setup>` or automatically inherit sorting 
 
 The examples use `example-rule` for the rule name, `exampleRule` for its export, and `ExampleRule` as the type prefix. Replace them with the actual names during implementation.
 
-| Action                    | File                               | Content and format                                                                                                                             |
-| ------------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| Add                       | `src/rules/example-rule.ts`        | Named export `exampleRule`, constructed with `createRule`                                                                                      |
-| Add                       | `src/types/rules/example-rule.ts`  | `ExampleRuleOptions`, `ExampleRuleMessageId`, and related types; document option meanings and defaults with JSDoc                              |
-| Add                       | `tests/rules/example-rule.test.ts` | Shared `run({ valid, invalid })` cases covering behavior, options, diagnostics, and fixes                                                      |
-| Add                       | `docs/rules/example-rule.md`       | English rule documentation with `correct` / `incorrect` examples, usage, options, scope, and fix boundaries                                    |
-| Update                    | `src/plugin.ts`                    | Import `exampleRule` and register `'example-rule': exampleRule` in `rules`                                                                     |
-| Update                    | `src/types/index.ts`               | Add `export type * from './rules/example-rule.ts'`                                                                                             |
-| Update for the public API | `src/index.ts`                     | Explicitly export options and related user configuration types in the existing `export type { ... }`; keep internal MessageId types private    |
-| Update                    | `tests/eslint-plugin.test.ts`      | Add the name to the exact rule list in registration order; preserve assertions for matching default/named exports and the absence of `configs` |
-| Update                    | `README.md`                        | Add a Rules table entry linking to `https://vue-perfectionist.vercel.app/rules/example-rule`                                                   |
-| Update                    | `docs/rules/index.md`              | Add a rule table entry with a `./example-rule.md` relative link and a short description                                                        |
-| Update                    | `docs/.vitepress/config/theme.ts`  | Add `{ link: '/rules/example-rule', text: 'example-rule' }` to the Rules sidebar                                                               |
-| Update                    | `docs/guide/index.md`              | Update the rule enumeration and related text under Choosing Rules                                                                              |
+| Action                    | File                                      | Content and format                                                                                                                             |
+| ------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Add                       | `src/rules/example-rule.ts`               | Named export `exampleRule`, constructed with `createRule`                                                                                      |
+| Add                       | `src/types/rules/example-rule.ts`         | `ExampleRuleOptions`, `ExampleRuleMessageId`, and related types; document option meanings and defaults with JSDoc                              |
+| Add                       | `tests/rules/example-rule.test.ts`        | Shared `run({ valid, invalid })` cases covering behavior, options, diagnostics, and fixes                                                      |
+| Add                       | `docs/rules/example-rule.md`              | English rule documentation with `correct` / `incorrect` examples, usage, options, scope, and fix boundaries                                    |
+| Update                    | `src/plugin.ts`                           | Import `exampleRule` and register `'example-rule': exampleRule` in `rules`                                                                     |
+| Update                    | `src/types/index.ts`                      | Add `export type * from './rules/example-rule.ts'`                                                                                             |
+| Update for the public API | `src/index.ts`                            | Explicitly export options and related user configuration types in the existing `export type { ... }`; keep internal MessageId types private    |
+| Update                    | `tests/integration/eslint-plugin.test.ts` | Add the name to the exact rule list in registration order; preserve assertions for matching default/named exports and the absence of `configs` |
+| Update                    | `README.md`                               | Add a Rules table entry linking to `https://vue-perfectionist.vercel.app/rules/example-rule`                                                   |
+| Update                    | `docs/rules/index.md`                     | Add a rule table entry with a `./example-rule.md` relative link and a short description                                                        |
+| Update                    | `docs/.vitepress/config/theme.ts`         | Add `{ link: '/rules/example-rule', text: 'example-rule' }` to the Rules sidebar                                                               |
+| Update                    | `docs/guide/index.md`                     | Update the rule enumeration and related text under Choosing Rules                                                                              |
 
 Registration, plugin contract tests, rule tables, and the Rules sidebar currently use alphabetical rule order. Keep them consistent, with Overview first in the sidebar.
 
@@ -45,7 +45,7 @@ Add or update the following only when needed; do not create empty modules merely
 
 - `src/constants/example-rule.ts`: Large or shared API tables, defaults, and similar constants. Use `UPPER_SNAKE_CASE`. Import constants from their explicit module paths; there is no root constants barrel.
 - `src/utils/ast/`, `src/utils/vue/`, or `src/utils/component-props/`: Reuse the narrowest existing owner for shared analysis. Rule-specific sorting internals belong in `src/utils/sort-script-setup/`. Keep standalone helpers in `src/utils/example-rule.ts` when no domain fits; use explicit imports without a root utility barrel. `src/constants/sort-script-setup-schema.ts` serves sorting options; keep unrelated schemas elsewhere.
-- `tests/internal.ts`: Add helpers only when multiple tests need them. Prefer the existing `run`, `vueLanguageOptions`, and `$` helpers.
+- `tests/helpers/rule-tester.ts`: Add helpers only when multiple tests need them. Prefer the existing `run`, `vueLanguageOptions`, and `$` helpers.
 - `docs/.vitepress/config.ts`: Enable the new rule in the documentation's `eslintConfig` when its Vue examples need rendered diagnostics. Keep the existing `correct` / `incorrect` container renderer.
 - `docs/design/example-rule.md`: Create this when complex semantics, sorting, or fix strategies need a discussion of tradeoffs, and register it in the Design sidebar.
 - `docs/index.md` and documentation demos: Update only when homepage claims or interactive examples are affected. New rules do not require a demo.
@@ -115,13 +115,13 @@ export const exampleRule = createRule<
 
 ## 5. Test format and coverage
 
-Use `eslint-vitest-rule-tester` through the shared `run` helper for all new rule behavior tests. Read `tests/internal.ts` and the closest current rule test before writing cases; do not create another `Linter` / `verify` / `verifyAndFix` harness for rule behavior.
+Use `eslint-vitest-rule-tester` through the shared `run` helper for all new rule behavior tests. Read `tests/helpers/rule-tester.ts` and the closest current rule test before writing cases; do not create another `Linter` / `verify` / `verifyAndFix` harness for rule behavior.
 
-- Table-driven rule cases: Import `run` from `../internal.ts` and call top-level `await run<ExampleRuleOptions, ExampleRuleMessageId>({ name, rule, valid, invalid })`. Its options generic and each case's `options` are the individual options object, unlike the tuple passed to `createRule`. Give nontrivial cases an English `description`; use local `sfc()` or `$` helpers for readable fixtures and `.map()` / `.flatMap()` for related cases.
+- Table-driven rule cases: Import `run` from `../helpers/rule-tester.ts` and call top-level `await run<ExampleRuleOptions, ExampleRuleMessageId>({ name, rule, valid, invalid })`. Its options generic and each case's `options` are the individual options object, unlike the tuple passed to `createRule`. Give nontrivial cases an English `description`; use local `sfc()` or `$` helpers for readable fixtures and `.map()` / `.flatMap()` for related cases.
 - Invalid cases: Declare `errors` with message IDs or diagnostic objects; include `data` and locations when they are part of the behavior. Assert complete `output` for fixes. Set `output: null` for reports without fixes; also assert `fixed: false` and absent `message.fix` / suggestions when none are designed. An unchanged output alone does not prove that no fix was offered.
 - Complex assertions: Use case-level `errors`, `output`, and `after` callbacks for diagnostic details, token and comment preservation, runtime semantics, and formatter compatibility. Use suite-level `onResult(testcase, result)` for shared invariants, as in `callback-style` and `define-macros-newline`. Keep the runner's recursive fix, fix-change, and post-fix checks enabled; do not disable them to make a failing case pass.
 - Invalid configuration: Use `createRuleTester<unknown>` with Vitest's `it.each` and `await expect(tester.valid({ code, options })).rejects.toThrow()`. The `unknown` options type deliberately allows invalid inputs to reach schema and runtime validation.
-- Plugin integration: Keep Vitest and ESLint's `Linter` for tests that exercise actual plugin registration and user-composed flat configs, such as `tests/eslint-plugin.test.ts`.
+- Plugin integration: Keep Vitest and ESLint's `Linter` for tests that exercise actual plugin registration and user-composed flat configs, such as `tests/integration/eslint-plugin.test.ts`.
 
 The shared `run` helper defaults to `Test.vue` and selects parsers by filename: `vueLanguageOptions` for `.vue`, the TS parser for `.ts` / `.tsx`, and ESLint's default JS parser for `.js`. Set `filename` for individual cases or `defaultFilenames: { js: 'test.ts' }` for a standalone TypeScript suite. In Vue SFCs, `vue-eslint-parser` is the outer parser and `@typescript-eslint/parser` parses scripts. Test JS SFC behavior with `languageOptions: { parserOptions: { parser: null } }`; merely removing `lang` from a TS fixture is insufficient. Reuse `vueLanguageOptions` when creating a standalone Vue rule tester. Flat config `files` patterns must match test filenames to avoid false passes caused by unmatched configuration.
 
@@ -129,7 +129,7 @@ Use this existing rule as a minimal shape, replacing its imports and fixtures wi
 
 ```ts
 import { defineMacrosNewline } from '../../src/rules/define-macros-newline.ts'
-import { run } from '../internal.ts'
+import { run } from '../helpers/rule-tester.ts'
 import type {
   DefineMacrosNewlineMessageId,
   DefineMacrosNewlineOptions,
@@ -224,25 +224,25 @@ Leave blank lines around container delimiters, Markdown tables, lists, and code 
 
 ## 7. Final checks
 
-Use the Node version selected by `.node-version` and the `packageManager` from `package.json`; do not hard-code versions that may become outdated in this skill. Under the current RTK convention, prefix shell commands with `rtk`, except `pnpm typecheck`. Use `rtk proxy` for commands that should run without filtering.
+Use the Node version selected by `.node-version` and the `packageManager` from `package.json`; do not hard-code versions that may become outdated in this skill.
 
 During implementation, run targeted checks with the actual rule filename:
 
 ```sh
-rtk proxy pnpm exec vitest run tests/rules/example-rule.test.ts tests/eslint-plugin.test.ts
+pnpm exec vitest run tests/rules/example-rule.test.ts tests/integration/eslint-plugin.test.ts
 ```
 
-Before delivering a new rule, run the repository's required checks. If dependencies are missing, first run `rtk proxy pnpm install --frozen-lockfile`:
+Before delivering a new rule, run the repository's required checks. If dependencies are missing, first run `pnpm install --frozen-lockfile`:
 
 ```sh
-rtk proxy pnpm format:check
-rtk proxy pnpm lint
+pnpm format:check
+pnpm lint
 pnpm typecheck
-rtk proxy pnpm build
-rtk proxy pnpm test
-rtk proxy pnpm docs:build
-rtk git diff --check
-rtk git status --short
+pnpm build
+pnpm test
+pnpm docs:build
+git diff --check
+git status --short
 ```
 
 If formatting fails, format only files changed for the task, then check again. Avoid bulk fixes to unrelated files. Refer to `.github/workflows/ci.yml` for the current platform and Node matrix; passing locally does not mean the entire CI matrix has run.

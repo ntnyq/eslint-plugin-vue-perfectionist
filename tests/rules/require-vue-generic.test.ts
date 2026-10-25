@@ -1,7 +1,7 @@
 import { createRuleTester } from 'eslint-vitest-rule-tester'
 import { describe, expect, it } from 'vitest'
 import { requireVueGeneric } from '../../src/rules/require-vue-generic.ts'
-import { run, vueLanguageOptions } from '../internal.ts'
+import { run, vueLanguageOptions } from '../helpers/rule-tester.ts'
 import type {
   RequireVueGenericMessageId,
   RequireVueGenericOptions,

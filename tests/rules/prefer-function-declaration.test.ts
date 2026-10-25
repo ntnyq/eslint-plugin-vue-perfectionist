@@ -2,7 +2,7 @@ import * as tsParser from '@typescript-eslint/parser'
 import { createRuleTester } from 'eslint-vitest-rule-tester'
 import { describe, expect, it } from 'vitest'
 import { preferFunctionDeclaration } from '../../src/rules/prefer-function-declaration.ts'
-import { run } from '../internal.ts'
+import { run } from '../helpers/rule-tester.ts'
 import type {
   PreferFunctionDeclarationMessageId,
   PreferFunctionDeclarationOptions,

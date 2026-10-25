@@ -1,7 +1,7 @@
 import { createRuleTester } from 'eslint-vitest-rule-tester'
 import { describe, expect, it } from 'vitest'
 import { requireComponentSlots } from '../../src/rules/require-component-slots.ts'
-import { run, vueLanguageOptions } from '../internal.ts'
+import { run, vueLanguageOptions } from '../helpers/rule-tester.ts'
 import type {
   RequireComponentSlotsMessageId,
   RequireComponentSlotsOptions,

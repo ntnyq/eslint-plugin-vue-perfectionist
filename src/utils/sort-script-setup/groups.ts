@@ -1,6 +1,6 @@
 import { isArray, isString, isUndefined } from '@ntnyq/utils'
 import { MODIFIERS, SELECTORS } from '../../constants/sort-script-setup.ts'
-import { invalid, matchesPattern } from './validation.ts'
+import { invalid } from './validation.ts'
 import type {
   GroupEntry,
   GroupOverrides,
@@ -9,6 +9,7 @@ import type {
   Selector,
 } from '../../types/rules/sort-script-setup.ts'
 import type { Group, ResolvedOptions, Statement } from './types.ts'
+import type { PatternMatcher } from './validation.ts'
 
 /**
  * Parse a predefined group selector and its distinct valid modifiers.
@@ -288,12 +289,14 @@ export function resolveGroups(options: ResolvedOptions): Group[] {
  *
  * @param statement - The classified statement to match.
  * @param condition - The custom group match condition.
+ * @param matchesPattern - The configuration-scoped regular expression matcher.
  * @returns Whether the statement satisfies all specified conditions.
  * @throws {Error} If a configured regular expression is invalid.
  */
 function matchesCondition(
   statement: Statement,
   condition: MatchCondition,
+  matchesPattern: PatternMatcher,
 ): boolean {
   const namePattern = condition.elementNamePattern
   return (
@@ -330,75 +333,26 @@ function matchesCondition(
 }
 
 /**
- * Assign the highest-priority matching group and subgroup to a statement.
+ * Prepare selector specificity once, retaining configured order for ties and
+ * the first matching custom group before assigning each statement.
  *
- * @param statement - The statement whose group and subgroup fields are updated.
  * @param groups - The resolved groups in precedence order.
  * @param options - The rule options containing custom group conditions.
- * @returns Whether a matching group was found and assigned.
- * @throws {Error} If a custom group regular expression is invalid.
+ * @param matchesPattern - The configuration-scoped regular expression matcher.
+ * @returns A matcher that assigns a statement's group and subgroup in place.
  */
-export function assignGroup(
-  statement: Statement,
+export function createGroupMatcher(
   groups: Group[],
   options: ResolvedOptions,
-): boolean {
-  const custom = options.customGroups.find(
-    /**
-     * Check a custom group using its direct condition or anyOf alternatives.
-     *
-     * @param group - The custom group definition.
-     * @returns Whether any applicable condition matches the statement.
-     * @throws {Error} If a configured regular expression is invalid.
-     */
-    group =>
-      'anyOf' in group && group.anyOf
-        ? group.anyOf.some(
-            /**
-             * Match one alternative custom group condition.
-             *
-             * @param condition - The alternative match condition.
-             * @returns Whether the statement satisfies the condition.
-             * @throws {Error} If a configured regular expression is invalid.
-             */
-            condition => matchesCondition(statement, condition),
-          )
-        : matchesCondition(statement, group),
-  )
-  const candidates: { group: number; subgroup: number; score: number }[] = []
-  for (const [groupIndex, group] of groups.entries()) {
-    for (const [subgroup, name] of group.names.entries()) {
-      if (custom?.groupName === name) {
-        candidates.push({ group: groupIndex, subgroup, score: 10000 })
-      } else if (name === 'unknown') {
-        candidates.push({ group: groupIndex, subgroup, score: -1 })
-      } else {
+  matchesPattern: PatternMatcher,
+): (statement: Statement) => boolean {
+  const candidates = groups
+    .flatMap((group, groupIndex) =>
+      group.names.map((name, subgroup) => {
         const parsed = parsePredefinedGroup(name)
-        if (
-          parsed?.selector === statement.selector &&
-          parsed.modifiers.every(
-            /**
-             * Check whether the statement includes a required modifier.
-             *
-             * @param modifier - The required modifier.
-             * @returns Whether the statement has the modifier.
-             */
-            modifier => statement.modifiers.includes(modifier),
-          )
-        ) {
-          const score =
-            parsed.modifiers.length * 100 +
+        const score = parsed
+          ? parsed.modifiers.length * 100 +
             MODIFIERS.reduce(
-              /**
-               * Accumulate modifier precedence to break specificity ties.
-               *
-               * @param total - The precedence score accumulated so far.
-               * @param modifier - The modifier at this precedence position.
-               * @param index - The modifier index in the shared precedence
-               * list.
-               * @returns The accumulated score including this modifier when
-               * present.
-               */
               (total, modifier, index) =>
                 total +
                 (parsed.modifiers.includes(modifier)
@@ -406,27 +360,43 @@ export function assignGroup(
                   : 0),
               0,
             )
-          candidates.push({ group: groupIndex, subgroup, score })
+          : name === 'unknown'
+            ? -1
+            : 10000
+        return {
+          name,
+          group: groupIndex,
+          subgroup,
+          parsed,
+          score,
         }
-      }
+      }),
+    )
+    .sort((left, right) => right.score - left.score)
+  return statement => {
+    const custom = options.customGroups.find(group =>
+      'anyOf' in group && group.anyOf
+        ? group.anyOf.some(condition =>
+            matchesCondition(statement, condition, matchesPattern),
+          )
+        : matchesCondition(statement, group, matchesPattern),
+    )
+    const best = candidates.find(
+      ({ name, parsed }) =>
+        custom?.groupName === name ||
+        name === 'unknown' ||
+        (parsed?.selector === statement.selector &&
+          parsed.modifiers.every(modifier =>
+            statement.modifiers.includes(modifier),
+          )),
+    )
+    if (!best) {
+      return false
     }
+    statement.group = best.group
+    statement.subgroup = best.subgroup
+    return true
   }
-  const best = candidates.sort(
-    /**
-     * Order matching groups by descending specificity score.
-     *
-     * @param a - The first group candidate.
-     * @param b - The second group candidate.
-     * @returns A negative result when the first candidate has higher priority.
-     */
-    (a, b) => b.score - a.score,
-  )[0]
-  if (!best) {
-    return false
-  }
-  statement.group = best.group
-  statement.subgroup = best.subgroup
-  return true
 }
 
 /**

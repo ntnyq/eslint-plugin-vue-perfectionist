@@ -8,7 +8,8 @@ This package provides ESLint rules for consistent, readable, and maintainable Vu
 - `src/rules/` contains flat rule entry files. `src/utils/ast/` holds parser-independent AST helpers, `src/utils/vue/` holds Vue parser and scope integration, and `src/utils/component-props/` holds component prop analysis.
 - `src/utils/sort-script-setup/` owns sorting internals, including its internal models, group matching, option resolution, and validation. Public rule options stay in `src/types/rules/`; shared ESLint source types live in `src/types/eslint.ts`.
 - Use explicit utility imports rather than a root barrel. Keep single-purpose helpers such as `composable-options.ts` and `template-interpolation.ts` at `src/utils/` until a real multi-file domain emerges. See `docs/design/source-structure.md` for ownership and behavior boundaries.
-- `tests/rules/` contains rule and plugin contract tests.
+- `tests/rules/` contains single-rule behavior suites; large rules may use a dedicated subdirectory.
+- `tests/integration/` contains plugin contracts, rule composition, and Vue compiler/runtime comparisons. `tests/helpers/` owns shared test facilities, `tests/utils/` covers algorithm contracts, and `tests/fixtures/` holds compatibility environments and static samples.
 - `docs/rules/` documents public options; `docs/design/` records design decisions. VitePress configuration lives in `docs/.vitepress/`.
 - `dist/` is generated build output; do not edit it directly.
 
@@ -33,7 +34,7 @@ Use kebab-case filenames such as `sort-script-setup.ts`, camelCase functions and
 
 ## Testing Guidelines
 
-Add tests in `tests/rules/<rule-name>.test.ts` using `eslint-vitest-rule-tester` through the shared `run` helper in `tests/internal.ts`. Declare `valid` and `invalid` cases with explicit diagnostics and expected output; use `output: null` for reports without fixes. The runner checks recursive fix stability and verifies fixed code. Use `createRuleTester<unknown>` with Vitest for invalid option validation, and reserve ESLint's `Linter` for plugin integration tests. Cover option combinations and JavaScript and TypeScript SFC cases where relevant. No numeric coverage threshold is configured.
+Add tests in `tests/rules/<rule-name>.test.ts` using `eslint-vitest-rule-tester` through the shared `run` helper in `tests/helpers/rule-tester.ts`. Declare `valid` and `invalid` cases with explicit diagnostics and expected output; use `output: null` for reports without fixes. The runner checks recursive fix stability and verifies fixed code. Use `createRuleTester<unknown>` with Vitest for invalid option validation, and reserve ESLint's `Linter` for plugin integration tests. Cover option combinations and JavaScript and TypeScript SFC cases where relevant. No numeric coverage threshold is configured.
 
 Preserve program behavior in automatic fixes. For sorting rules, unsafe runtime reordering must report without autofixing; other rules must respect their own documented fix boundaries. Add regression cases for any changes to these safety boundaries.
 

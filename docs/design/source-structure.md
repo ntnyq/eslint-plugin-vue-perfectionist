@@ -16,7 +16,10 @@ its consumers.
 | `src/plugin.ts` and `src/meta.ts`   | Rule registration and metadata derived from `package.json`.                      |
 | `src/`                              | Rule implementations, configuration types, constants, and analysis utilities.    |
 | `tests/rules/`                      | Rule behavior, options, diagnostics, and fix regression suites.                  |
-| `tests/`                            | Shared analysis tests, plugin integration tests, and the shared rule tester.     |
+| `tests/integration/`                | Plugin contracts, rule composition, and Vue compiler/runtime comparisons.        |
+| `tests/helpers/`                    | Shared rule tester, SFC builders, and common sorting safety assertions.          |
+| `tests/utils/`                      | Focused algorithm contracts and performance regression checks.                   |
+| `tests/fixtures/`                   | Version compatibility environments and static samples.                           |
 | `docs/guide/` and `docs/rules/`     | Consumer setup, configuration, contributor workflows, and public rule reference. |
 | `docs/design/`                      | Source ownership and detailed rule design contracts.                             |
 | `docs/.vitepress/`                  | Site configuration, navigation, theme, diagnostic rendering, and sorting demo.   |
@@ -48,9 +51,19 @@ or constants barrel. Keep sorting's `Statement`, `Group`, and `ResolvedOptions`
 models beside their consumers in `utils/sort-script-setup/types.ts`.
 
 Within sorting, `options.ts` resolves defaults and option interactions, `groups.ts`
-validates and resolves groups and matches statements, and `validation.ts` owns the
-limited JSON Schema and regular expression validation used by that rule. This
-validation is internal to sorting, not a general-purpose schema API.
+validates and resolves groups and prepares statement matchers, and `validation.ts`
+compiles regular expressions once per rule instance. ESLint owns structural option
+validation through the public schema, including safe integer bounds for newline
+counts. The internal checks retain semantic constraints such as group conflicts,
+locales, patterns, option interactions, and explicit `undefined` properties that
+schema validation treats as absent. Compiled regexes reset `lastIndex`
+before every match so global and sticky flags remain deterministic.
+
+Sorting tests are split by responsibility under `tests/rules/sort-script-setup/`.
+Keep detailed diagnostics and fixes in rule suites; use integration suites for
+plugin registration, shared settings, compiler compatibility, and rule interactions.
+The shared sorting runner also checks that report-only cases expose no fix or
+suggestion.
 
 ## Shared contracts
 
@@ -88,8 +101,8 @@ inference with their current rule owners. Do not expand the conservative prop an
 interpolation analysis into a general static evaluator. Promote sorting code to a
 shared sorting module only when another rule has a real matching contract.
 
-The rule suites and `tests/vue-api-scopes.test.ts` cover dual scripts, shadowing,
+The rule suites and `tests/integration/vue-api-scopes.test.ts` cover dual scripts, shadowing,
 default imports, type-only imports, composed rule matching, and fix stability.
-`tests/macro-types-integration.test.ts` protects macro composition. Run formatting,
+`tests/integration/macro-types-integration.test.ts` protects macro composition. Run formatting,
 lint, type checking, tests, package build, and documentation build after changes
 that cross these ownership boundaries.

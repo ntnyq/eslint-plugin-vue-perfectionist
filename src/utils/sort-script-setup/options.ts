@@ -1,15 +1,8 @@
 import { isArray } from '@ntnyq/utils'
-import { OPTIONS_SCHEMA } from '../../constants/sort-script-setup-schema.ts'
 import { DEFAULT_OPTIONS, VUE_APIS } from '../../constants/sort-script-setup.ts'
 import { resolveVueGlobals } from '../vue/globals.ts'
 import { validateGroups } from './groups.ts'
-import {
-  invalid,
-  isRecord,
-  matchesSchema,
-  validatePatterns,
-} from './validation.ts'
-import type { JSONSchema } from '@typescript-eslint/utils'
+import { invalid, isRecord, validateDefinedOptions } from './validation.ts'
 import type { SortScriptSetupRuleContext } from '../../types/rules/sort-script-setup.ts'
 import type { ResolvedOptions } from './types.ts'
 
@@ -20,7 +13,7 @@ import type { ResolvedOptions } from './types.ts'
  * settings.
  * @returns The validated options with effective Vue globals and normalized
  * newline settings.
- * @throws {Error} If options, shared auto-import settings, patterns, locales,
+ * @throws {Error} If shared auto-import settings, locales,
  * groups, or option combinations are invalid.
  */
 export function resolveOptions(
@@ -32,15 +25,7 @@ export function resolveOptions(
     VUE_APIS.keys(),
     context.options[0]?.vueGlobals,
   )
-  for (const [key, value] of Object.entries(options)) {
-    const properties: Record<string, JSONSchema.JSONSchema4> =
-      OPTIONS_SCHEMA.properties
-    const schema = properties[key]
-    if (!schema || !matchesSchema(value, schema)) {
-      invalid(`Invalid option: ${key}`)
-    }
-  }
-  validatePatterns(options)
+  validateDefinedOptions(options)
   try {
     Intl.Collator.supportedLocalesOf(options.locales)
   } catch {

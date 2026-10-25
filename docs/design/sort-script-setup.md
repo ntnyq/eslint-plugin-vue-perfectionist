@@ -612,6 +612,12 @@ handle existing expose-after-await problems.
 Retain cycle members in their original order without movement fixes involving
 the cycle. Independent fragments can still be checked. Stable topological
 selection uses group order, the group comparator, and original index.
+The dependency sorter computes that stable priority once, then uses indegrees
+and a minimum-priority ready queue. Newly unblocked statements compete before
+the next selection; a blocked remainder stays in source order. Partitions with
+no internal dependency edges return the stable style order directly. The cost is
+O(V log V + E) for V statements and E dependency edges.
+
 Uncertain side effects participate in diagnostics but prevent unsafe fixes.
 
 Choose independently validated contiguous fragments with nonoverlapping fix
@@ -622,7 +628,10 @@ on the next pass.
 
 ## 12. Validation and Diagnostics
 
-Beyond basic schema validation, reject:
+ESLint validates the public option schema before rule creation, including the
+nonnegative safe integer limit on newline counts. The rule retains semantic
+validation for option interactions, regexes, locales, and group constraints.
+Together these checks reject:
 
 - Duplicate or unknown group names, including normalized modifier duplicates
   and undefined custom groups.
@@ -698,7 +707,7 @@ export default defineConfig([
 
 This matrix records acceptance requirements rather than claiming that every
 combination has a dedicated test. Executable cases live in
-[the rule tests](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/tests/rules/sort-script-setup.test.ts).
+[the rule tests](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/tree/main/tests/rules/sort-script-setup).
 
 | Area           | Required behavior                                                                                                 |
 | -------------- | ----------------------------------------------------------------------------------------------------------------- |
@@ -725,5 +734,5 @@ safety requires semantic regressions before broadening the allowed forms.
 ## Implementation
 
 - [Rule source](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/src/rules/sort-script-setup.ts)
-- [Test source](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/tests/rules/sort-script-setup.test.ts)
-- [Plugin integration tests](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/tests/eslint-plugin.test.ts)
+- [Test source](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/tree/main/tests/rules/sort-script-setup)
+- [Plugin integration tests](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/tests/integration/eslint-plugin.test.ts)

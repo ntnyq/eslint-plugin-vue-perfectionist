@@ -24,7 +24,7 @@ import { renderToString as renderLegacyToString } from 'vue-runtime-legacy/serve
 import { compileScript, parse } from 'vue/compiler-sfc'
 import { renderToString } from 'vue/server-renderer'
 import { defineModelNameCasing } from '../../src/rules/define-model-name-casing.ts'
-import { run, vueLanguageOptions } from '../internal.ts'
+import { run, vueLanguageOptions } from '../helpers/rule-tester.ts'
 import type { Linter } from 'eslint'
 import type {
   DefineModelNameCasing,

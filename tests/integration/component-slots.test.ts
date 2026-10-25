@@ -1,8 +1,8 @@
 import { Linter } from 'eslint'
 import { describe, expect, it } from 'vitest'
 import { compile, createRenderer, defineComponent } from 'vue'
-import plugin from '../src/index.ts'
-import { vueLanguageOptions } from './internal.ts'
+import plugin from '../../src/index.ts'
+import { vueLanguageOptions } from '../helpers/rule-tester.ts'
 
 /**
  * Observe the slots produced by Vue's compiler and passed to the component.

@@ -1,5 +1,4 @@
-import { isArray, isBoolean, isNumber, isString } from '@ntnyq/utils'
-import type { JSONSchema } from '@typescript-eslint/utils'
+import { isArray, isBoolean, isString } from '@ntnyq/utils'
 import type { RegexOption } from '../../types/rules/sort-script-setup.ts'
 
 /**
@@ -23,148 +22,26 @@ export function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /**
- * Validate the subset of JSON Schema used by the resolved rule options.
+ * Preserve rejection of explicit undefined properties, which ESLint's schema
+ * treats as absent even though option spreading retains them.
  *
- * @param value - The option value to validate.
- * @param schema - The schema describing the supported constraints.
- * @returns Whether the value satisfies the implemented schema constraints.
+ * @param value - The effective option tree after Vue globals are resolved.
+ * @throws {Error} If a configured property explicitly contains undefined.
  */
-export function matchesSchema(
-  value: unknown,
-  schema: JSONSchema.JSONSchema4,
-): boolean {
-  if (schema.anyOf) {
-    return schema.anyOf.some(
-      /**
-       * Check one anyOf schema alternative.
-       *
-       * @param branch - The candidate schema branch.
-       * @returns Whether the value matches that branch.
-       */
-      branch => matchesSchema(value, branch),
-    )
-  }
-  if ('enum' in schema && schema.enum) {
-    const allowed: readonly unknown[] = schema.enum
-    if (!allowed.includes(value)) {
-      return false
-    }
-  }
-  switch (schema.type) {
-    case 'string':
-      return isString(value) && value.length >= (schema.minLength ?? 0)
-    case 'boolean':
-      return isBoolean(value)
-    case 'integer':
-      return (
-        isNumber(value) &&
-        Number.isSafeInteger(value) &&
-        value >= (schema.minimum ?? 0)
-      )
-    case 'array': {
-      if (!isArray(value) || value.length < (schema.minItems ?? 0)) {
-        return false
-      }
-      if (schema.uniqueItems && new Set(value).size !== value.length) {
-        return false
-      }
-      const items = schema.items
-      return (
-        !items ||
-        isArray(items) ||
-        value.every(
-          /**
-           * Check an array element against the shared item schema.
-           *
-           * @param entry - The array element.
-           * @returns Whether the element matches the item schema.
-           */
-          entry => matchesSchema(entry, items),
-        )
-      )
-    }
-    case 'object':
-      if (!isRecord(value)) {
-        return false
-      }
-      if (
-        isArray(schema.required) &&
-        schema.required.some(
-          /**
-           * Detect a missing required object key.
-           *
-           * @param key - The required property name.
-           * @returns Whether the property is absent from the option object.
-           */
-          key => !(key in value),
-        )
-      ) {
-        return false
-      }
-      return Object.entries(value).every(
-        /**
-         * Validate a declared object property or apply the additional-property
-         * policy.
-         *
-         * @param entry - The property name and its option value.
-         * @param entry."0" - The option property name.
-         * @param entry."1" - The property value to validate.
-         * @returns Whether the property value matches its schema or is permitted
-         * as an additional property.
-         */
-        ([key, entry]) => {
-          const property = schema.properties?.[key]
-          return property
-            ? matchesSchema(entry, property)
-            : schema.additionalProperties !== false
-        },
-      )
-    default:
-      return true
-  }
-}
-
-/**
- * Recursively validate regular expressions embedded in resolved options.
- *
- * @param value - The option tree to inspect.
- * @throws {Error} If a configured pattern or comment partition expression is
- * invalid.
- */
-export function validatePatterns(value: unknown) {
+export function validateDefinedOptions(value: unknown) {
   if (isArray(value)) {
-    value.forEach(validatePatterns)
+    value.forEach(validateDefinedOptions)
     return
   }
   if (!isRecord(value)) {
     return
   }
   for (const [key, entry] of Object.entries(value)) {
-    if (key.endsWith('Pattern')) {
-      compilePatterns(entry as RegexOption)
-    } else if (key === 'partitionByComment') {
-      validateCommentPatterns(entry)
-    } else {
-      validatePatterns(entry)
+    if (entry === undefined) {
+      invalid(`Invalid option: ${key}`)
     }
+    validateDefinedOptions(entry)
   }
-}
-
-/**
- * Validate Boolean, patterned, or per-comment-kind partition settings.
- *
- * @param value - The comment partition configuration.
- * @throws {Error} If any comment partition regular expression is invalid.
- */
-function validateCommentPatterns(value: unknown) {
-  if (isBoolean(value)) {
-    return
-  }
-  if (isRecord(value) && !('pattern' in value)) {
-    Object.values(value).forEach(validateCommentPatterns)
-    return
-  }
-  compilePatterns(value as RegexOption)
 }
 
 /**
@@ -175,7 +52,7 @@ function validateCommentPatterns(value: unknown) {
  * @throws {Error} If a pattern or its flags cannot form a valid regular
  * expression.
  */
-export function compilePatterns(pattern: RegexOption): RegExp[] {
+function compilePatterns(pattern: RegexOption): RegExp[] {
   return (isArray(pattern) ? pattern : [pattern]).map(
     /**
      * Compile one configured expression and normalize compilation failures.
@@ -196,22 +73,56 @@ export function compilePatterns(pattern: RegexOption): RegExp[] {
   )
 }
 
+export type PatternMatcher = (value: string, pattern: RegexOption) => boolean
+
 /**
- * Check whether any configured regular expression matches a string.
+ * Compile configured expressions once per rule instance and keep stateful flags
+ * independent of earlier names and comments.
  *
- * @param value - The string to test.
- * @param pattern - The pattern or pattern list to compile.
- * @returns Whether at least one expression matches the string.
- * @throws {Error} If a pattern or its flags are invalid.
+ * @param options - The resolved option tree containing match and comment patterns.
+ * @returns A matcher sharing the validated expressions for this configuration.
+ * @throws {Error} If any configured expression or flags are invalid.
  */
-export function matchesPattern(value: string, pattern: RegexOption): boolean {
-  return compilePatterns(pattern).some(
-    /**
-     * Test one compiled pattern against the candidate value.
-     *
-     * @param regex - The newly compiled regular expression.
-     * @returns Whether the expression matches the value.
-     */
-    regex => regex.test(value),
-  )
+export function createPatternMatcher(options: unknown): PatternMatcher {
+  const cache = new Map<RegexOption, RegExp[]>()
+  function getPatterns(pattern: RegexOption): RegExp[] {
+    let expressions = cache.get(pattern)
+    if (!expressions) {
+      expressions = compilePatterns(pattern)
+      cache.set(pattern, expressions)
+    }
+    return expressions
+  }
+  function visitComments(value: unknown) {
+    if (isBoolean(value)) {
+      return
+    }
+    if (isRecord(value) && !('pattern' in value)) {
+      Object.values(value).forEach(visitComments)
+      return
+    }
+    getPatterns(value as RegexOption)
+  }
+  function visit(value: unknown) {
+    if (isArray(value)) {
+      value.forEach(visit)
+    } else if (isRecord(value)) {
+      for (const [key, entry] of Object.entries(value)) {
+        if (key.endsWith('Pattern')) {
+          getPatterns(entry as RegexOption)
+        } else if (key === 'partitionByComment') {
+          visitComments(entry)
+        } else {
+          visit(entry)
+        }
+      }
+    }
+  }
+  visit(options)
+  return (value, pattern) =>
+    getPatterns(pattern).some(regex => {
+      // Both g and y mutate lastIndex, including after successful matches.
+      regex.lastIndex = 0
+      return regex.test(value)
+    })
 }

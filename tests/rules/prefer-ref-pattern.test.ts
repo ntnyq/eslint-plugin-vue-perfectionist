@@ -6,7 +6,7 @@ import * as vueParser from 'vue-eslint-parser'
 import plugin from '../../src/index.ts'
 import { preferRefPattern } from '../../src/rules/prefer-ref-pattern.ts'
 import { createVueSFC } from '../helpers/create-vue-sfc.ts'
-import { run, vueLanguageOptions } from '../internal.ts'
+import { run, vueLanguageOptions } from '../helpers/rule-tester.ts'
 import type {
   PreferRefPatternMessageId,
   PreferRefPatternOptions,

@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import * as vueParser from 'vue-eslint-parser'
 import { defineMacrosNewline } from '../../src/rules/define-macros-newline.ts'
 import { createVueSFC } from '../helpers/create-vue-sfc.ts'
-import { run, vueLanguageOptions } from '../internal.ts'
+import { run, vueLanguageOptions } from '../helpers/rule-tester.ts'
 import type { Linter } from 'eslint'
 import type {
   DefineMacrosNewlineMessageId,

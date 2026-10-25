@@ -2,7 +2,7 @@ import { createRuleTester } from 'eslint-vitest-rule-tester'
 import { expect, it } from 'vitest'
 import { preferSimpleEventHandler } from '../../src/rules/prefer-simple-event-handler.ts'
 import { createVueSFC } from '../helpers/create-vue-sfc.ts'
-import { run, vueLanguageOptions } from '../internal.ts'
+import { run, vueLanguageOptions } from '../helpers/rule-tester.ts'
 import type {
   PreferSimpleEventHandlerMessageId,
   PreferSimpleEventHandlerOptions,

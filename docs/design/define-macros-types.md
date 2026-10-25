@@ -403,7 +403,7 @@ rule pages provide live diagnostic examples.
 | Diagnostic contract    | Counts, message IDs/data, locations, LF/CRLF, unchanged output, `fixed: false`, absent fixes and suggestions                                                                  |
 | Integration            | Exact plugin rule list, user-composed flat config, no built-in configs, public options and private message IDs                                                                |
 
-Use `tests/internal.ts` and `run({ valid, invalid })`; invalid cases must set
+Use `tests/helpers/rule-tester.ts` and `run({ valid, invalid })`; invalid cases must set
 `output: null` and assert absent fixes/suggestions. Use
 `createRuleTester<unknown>` for invalid options and reserve `Linter` for plugin
 integration. Check that compiler-supported positive fixtures compile with the

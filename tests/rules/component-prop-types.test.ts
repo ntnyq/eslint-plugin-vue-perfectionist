@@ -2,7 +2,7 @@ import { createRuleTester } from 'eslint-vitest-rule-tester'
 import { describe, expect, it } from 'vitest'
 import { componentPropTypes } from '../../src/rules/component-prop-types.ts'
 import { createVueSFC } from '../helpers/create-vue-sfc.ts'
-import { run, vueLanguageOptions } from '../internal.ts'
+import { run, vueLanguageOptions } from '../helpers/rule-tester.ts'
 import type {
   ComponentPropTypeConstraint,
   ComponentPropTypesMessageId,

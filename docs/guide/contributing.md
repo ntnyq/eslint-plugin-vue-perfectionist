@@ -58,7 +58,7 @@ Keep these surfaces synchronized:
 - The rule's page, examples, and any affected composition or design guidance.
 
 Rule behavior tests use `eslint-vitest-rule-tester` through `run` in
-`tests/internal.ts`. Assert diagnostics and expected output, using `output: null`
+`tests/helpers/rule-tester.ts`. Assert diagnostics and expected output, using `output: null`
 for reports without fixes. The shared runner checks repeated-fix stability and
 verifies fixed code. Use `createRuleTester<unknown>` for invalid options, and
 reserve ESLint's `Linter` for plugin integration tests.

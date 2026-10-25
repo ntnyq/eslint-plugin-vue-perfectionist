@@ -1,7 +1,7 @@
 import { createRuleTester } from 'eslint-vitest-rule-tester'
 import { expect, it } from 'vitest'
 import { consistentTemplateRefName } from '../../src/rules/consistent-template-ref-name.ts'
-import { run } from '../internal.ts'
+import { run } from '../helpers/rule-tester.ts'
 import type { ConsistentTemplateRefNameMessageId } from '../../src/types/index.ts'
 
 const vueImport = 'import { useTemplateRef } from "vue";'

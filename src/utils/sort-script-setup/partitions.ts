@@ -1,23 +1,24 @@
 import { isArray, isBoolean } from '@ntnyq/utils'
 import { classifyStatement } from './classify.ts'
-import { assignGroup } from './groups.ts'
-import { matchesPattern } from './validation.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type { SourceCode } from '../../types/eslint.ts'
 import type { CommentPartition } from '../../types/index.ts'
-import type { Group, ResolvedOptions, Statement } from './types.ts'
+import type { ResolvedOptions, Statement } from './types.ts'
+import type { PatternMatcher } from './validation.ts'
 
 /**
  * Check whether a comment starts a new sorting partition.
  *
  * @param comment - The line or block comment to inspect.
  * @param option - The Boolean, pattern, or comment-kind partition policy.
+ * @param matchesPattern - The configuration-scoped regular expression matcher.
  * @returns Whether the comment matches the applicable partition policy.
  * @throws {Error} If a configured comment regular expression is invalid.
  */
 function isPartitionComment(
   comment: TSESTree.Comment,
   option: CommentPartition,
+  matchesPattern: PatternMatcher,
 ): boolean {
   if (isBoolean(option)) {
     return option
@@ -30,7 +31,7 @@ function isPartitionComment(
     const selected = comment.type === 'Line' ? option.line : option.block
     return selected === undefined
       ? false
-      : isPartitionComment(comment, selected)
+      : isPartitionComment(comment, selected, matchesPattern)
   }
   return matchesPattern(comment.value, option)
 }
@@ -102,7 +103,8 @@ function protectedLines(comments: TSESTree.Comment[]): Set<number> {
  * @param nodes - The script statements in source order.
  * @param sourceCode - The source code supplying comments, text, and scopes.
  * @param options - The resolved classification and partitioning options.
- * @param groups - The resolved groups used to assign statement precedence.
+ * @param assignGroup - The prepared group matcher assigning statement precedence.
+ * @param matchesPattern - The configuration-scoped regular expression matcher.
  * @returns Partitions with attached comment ranges, excluding unsupported or
  * protected statements.
  * @throws {Error} If a custom group or partition comment regular expression is
@@ -112,7 +114,8 @@ export function collectPartitions(
   nodes: TSESTree.ProgramStatement[],
   sourceCode: SourceCode,
   options: ResolvedOptions,
-  groups: Group[],
+  assignGroup: (statement: Statement) => boolean,
+  matchesPattern: PatternMatcher,
 ): Statement[][] {
   const comments = sourceCode.getAllComments()
   const protectedSet = protectedLines(comments)
@@ -223,7 +226,7 @@ export function collectPartitions(
          */
         name => (nameCounts.get(name) ?? 0) > 1,
       ) ||
-      !assignGroup(statement, groups, options)
+      !assignGroup(statement)
     ) {
       flush()
       continue
@@ -236,7 +239,8 @@ export function collectPartitions(
        * @returns Whether the configured comment partition policy matches.
        * @throws {Error} If a configured comment regular expression is invalid.
        */
-      comment => isPartitionComment(comment, options.partitionByComment),
+      comment =>
+        isPartitionComment(comment, options.partitionByComment, matchesPattern),
     )
     const leading = marker
       ? before.filter(

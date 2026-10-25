@@ -39,6 +39,7 @@ const regex: JSONSchema.JSONSchema4 = {
 const newlines: JSONSchema.JSONSchema4 = {
   anyOf: [
     {
+      maximum: Number.MAX_SAFE_INTEGER,
       minimum: 0,
       type: 'integer',
     },

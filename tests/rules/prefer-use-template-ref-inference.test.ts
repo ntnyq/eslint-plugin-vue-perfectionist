@@ -2,7 +2,7 @@ import { createRuleTester } from 'eslint-vitest-rule-tester'
 import { describe, expect, it } from 'vitest'
 import { preferUseTemplateRefInference } from '../../src/rules/prefer-use-template-ref-inference.ts'
 import { createVueSFC } from '../helpers/create-vue-sfc.ts'
-import { run, vueLanguageOptions } from '../internal.ts'
+import { run, vueLanguageOptions } from '../helpers/rule-tester.ts'
 import type {
   PreferUseTemplateRefInferenceMessageId,
   PreferUseTemplateRefInferenceOptions,

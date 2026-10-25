@@ -299,4 +299,4 @@ See the [design specification](../design/sort-script-setup.md) for the full clas
 ## :mag: Implementation
 
 - [Rule source](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/src/rules/sort-script-setup.ts)
-- [Test source](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/tests/rules/sort-script-setup.test.ts)
+- [Test source](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/tree/main/tests/rules/sort-script-setup)

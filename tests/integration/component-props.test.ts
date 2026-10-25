@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs'
 import { Linter } from 'eslint'
 import { describe, expect, it } from 'vitest'
 import { compile, createRenderer, defineComponent } from 'vue'
-import plugin from '../src/index.ts'
-import { vueLanguageOptions } from './internal.ts'
+import plugin from '../../src/index.ts'
+import { vueLanguageOptions } from '../helpers/rule-tester.ts'
 
 /**
  * Mount the compiler's output with Vue's prop resolution, without a browser.
@@ -58,7 +58,7 @@ describe('component prop contracts with Vue compilation and runtime', () => {
     'keeps $name documentation examples consistent with rendered diagnostics ($lineEnding)',
     ({ name, lineEnding }) => {
       const markdown = readFileSync(
-        new URL(`../docs/rules/${name}.md`, import.meta.url),
+        new URL(`../../docs/rules/${name}.md`, import.meta.url),
         'utf8',
       ).replace(/\r?\n/gu, () => (lineEnding === 'LF' ? '\n' : '\r\n'))
       const examples = [
@@ -199,23 +199,53 @@ describe('component prop contracts with Vue compilation and runtime', () => {
   )
 
   it.each([
-    ['disabled', true],
-    ['disabled=""', true],
-    ['disabled="disabled"', true],
-    [':disabled="\'\'"', true],
-    ['v-bind="{ disabled: \'disabled\' }"', true],
-    [':disabled="false"', false],
-  ])('uses Vue Boolean casting for %s', (attributes, expected) => {
-    expect(resolveRuntimeProps(`<AppCounter ${attributes} />`).disabled).toBe(
-      expected,
-    )
-  })
-
-  it('casts hyphenated Boolean names', () => {
-    expect(
-      resolveRuntimeProps('<AppCounter is-ready="is-ready" />').isReady,
-    ).toBe(true)
-  })
+    ['disabled', 'disabled', true],
+    ['disabled=""', 'disabled', true],
+    ['disabled="disabled"', 'disabled', true],
+    [':disabled="\'\'"', 'disabled', true],
+    ['v-bind="{ disabled: \'disabled\' }"', 'disabled', true],
+    [':disabled="false"', 'disabled', false],
+    ['is-ready="is-ready"', 'isReady', true],
+    ['disabled="wrong"', 'disabled', 'wrong'],
+    ['is-ready="wrong"', 'isReady', 'wrong'],
+  ] as const)(
+    'matches Vue Boolean casting and plugin diagnostics for %s',
+    (attributes, prop, expected) => {
+      expect(resolveRuntimeProps(`<AppCounter ${attributes} />`)[prop]).toBe(
+        expected,
+      )
+      const code = `<template><AppCounter ${attributes} /></template>`
+      const result = new Linter().verifyAndFix(
+        code,
+        {
+          files: ['**/*.vue'],
+          languageOptions: vueLanguageOptions,
+          plugins: { vp: plugin },
+          rules: {
+            'vp/component-prop-types': [
+              'error',
+              {
+                targets: [
+                  {
+                    components: ['AppCounter'],
+                    props: {
+                      [prop]: { type: 'boolean', booleanCasting: true },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        },
+        'Test.vue',
+      )
+      expect(result.messages.map(message => message.messageId)).toEqual(
+        typeof expected === 'boolean' ? [] : ['invalidPropType'],
+      )
+      expect(result.fixed).toBe(false)
+      expect(result.output).toBe(code)
+    },
+  )
 
   it('combines both rules under the public namespace without fixes', () => {
     const linter = new Linter()

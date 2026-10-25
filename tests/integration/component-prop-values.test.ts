@@ -1,7 +1,7 @@
 import { Linter } from 'eslint'
 import { describe, expect, it } from 'vitest'
-import plugin from '../src/index.ts'
-import { vueLanguageOptions } from './internal.ts'
+import plugin from '../../src/index.ts'
+import { vueLanguageOptions } from '../helpers/rule-tester.ts'
 
 describe('component value contracts through the public plugin', () => {
   it('composes presence, type, and value rules without fixes', () => {

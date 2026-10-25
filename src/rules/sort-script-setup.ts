@@ -5,10 +5,14 @@ import {
   buildDependencies,
   sortByDependencies,
 } from '../utils/sort-script-setup/dependencies.ts'
-import { resolveGroups } from '../utils/sort-script-setup/groups.ts'
+import {
+  createGroupMatcher,
+  resolveGroups,
+} from '../utils/sort-script-setup/groups.ts'
 import { resolveOptions } from '../utils/sort-script-setup/options.ts'
 import { collectPartitions } from '../utils/sort-script-setup/partitions.ts'
 import { reportPartition } from '../utils/sort-script-setup/report.ts'
+import { createPatternMatcher } from '../utils/sort-script-setup/validation.ts'
 import { getSetupRange } from '../utils/vue/script-scope.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type {
@@ -46,7 +50,9 @@ export const sortScriptSetup = createRule<
   defaultOptions: [{}],
   create(context) {
     const options = resolveOptions(context)
+    const matchesPattern = createPatternMatcher(options)
     const groups = resolveGroups(options)
+    const assignGroup = createGroupMatcher(groups, options, matchesPattern)
     const range = getSetupRange(context.sourceCode)
 
     if (!range || !groups.length) {
@@ -64,7 +70,8 @@ export const sortScriptSetup = createRule<
         nodes,
         context.sourceCode,
         options,
-        groups,
+        assignGroup,
+        matchesPattern,
       )) {
         const dependencies = buildDependencies(
           partition,

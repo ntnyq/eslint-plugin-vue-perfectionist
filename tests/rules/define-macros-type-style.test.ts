@@ -3,7 +3,7 @@ import { createRuleTester } from 'eslint-vitest-rule-tester'
 import { expect, it } from 'vitest'
 import { defineMacrosTypeStyle } from '../../src/rules/define-macros-type-style.ts'
 import { createVueSFC } from '../helpers/create-vue-sfc.ts'
-import { run, vueLanguageOptions } from '../internal.ts'
+import { run, vueLanguageOptions } from '../helpers/rule-tester.ts'
 import { checkedMacroTypes, skippedMacroTypes } from '../macro-types.ts'
 import type {
   DefineMacrosTypeStyle,
