@@ -166,12 +166,14 @@ their documented boundaries:
 | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | [`callback-style`](/rules/callback-style#diagnostics-and-fixes)                                                              | Convert arrow expression bodies to blocks while preserving return values.                                |
 | [`define-macros-newline`](/rules/define-macros-newline#automatic-fixes-and-formatting)                                       | Insert line breaks without changing member order; a formatter finishes indentation.                      |
+| [`define-model-name-casing`](/rules/define-model-name-casing#automatic-fixes-and-formatting)                                 | Rename model contracts only with `fix: true` (default `false`); consumers require review.                |
 | [`padding-line-between-tags`](/rules/padding-line-between-tags#automatic-fixes-and-formatting)                               | Adjust blank lines between eligible tags already on separate lines.                                      |
 | [`prefer-template-literal-in-interpolation`](/rules/prefer-template-literal-in-interpolation#automatic-fixes-and-formatting) | Combine statically safe primitive expressions and adjacent text while preserving nullish display values. |
 | [`sort-script-setup`](/rules/sort-script-setup#partitions-and-automatic-fixes)                                               | Reorder eligible declarations within safe contiguous fragments and adjust supported spacing.             |
 
 A fixable rule can still report cases without a fix. In particular,
 `sort-script-setup` reports uncertain runtime movement without reordering it;
-`fix: 'none'` disables all its fixes, including spacing. Naming, type-style,
+`fix: 'none'` disables all its fixes, including spacing. Model-name casing fixes
+are separately opt-in because they change public component contracts. Other naming, type-style,
 component contract, callback-length, and function-declaration diagnostics need
 manual changes.

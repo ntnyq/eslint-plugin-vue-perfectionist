@@ -29,14 +29,29 @@ await run<DefineModelNameCasingOptions, DefineModelNameCasingMessageId>({
   name: 'define-model-name-casing',
   rule: defineModelNameCasing,
   onResult(testcase, result) {
-    expect(result.fixed).toBe(false)
-    expect(result.output).toBe(testcase.code)
+    if (testcase.type === 'invalid' && testcase.output === null) {
+      expect(result.fixed).toBe(false)
+      expect(result.output).toBe(testcase.code)
+      for (const message of result.messages) {
+        expect(message.fix).toBeUndefined()
+      }
+    }
     for (const message of result.messages) {
-      expect(message.fix).toBeUndefined()
       expect(message.suggestions).toBeUndefined()
     }
   },
   valid: [
+    ...[
+      'defineModel()',
+      'defineModel({ required: true })',
+      "defineModel('fileList')",
+      'defineModel(name)',
+      `function defineModel() {}; ${mismatch}`,
+      `import { defineModel } from 'vue'; ${mismatch}`,
+    ].map(script => ({
+      code: sfc(script),
+      options: { fix: true },
+    })),
     ...[
       'defineModel()',
       'defineModel<string>()',
@@ -94,6 +109,111 @@ await run<DefineModelNameCasingOptions, DefineModelNameCasingMessageId>({
     },
   ],
   invalid: [
+    ...casings.flatMap(casing =>
+      casings
+        .filter(other => other !== casing)
+        .map(other => ({
+          description: `renames ${other} to ${casing} only when opted in`,
+          code: sfc(`defineModel('${names[other]}')`),
+          options: { casing, fix: true },
+          errors: [
+            {
+              messageId: 'unexpectedNameCasing' as const,
+              data: { name: names[other], casing },
+            },
+          ],
+          output: sfc(`defineModel('${names[casing]}')`),
+        })),
+    ),
+    ...(
+      [
+        [
+          "const model = defineModel('file-list')",
+          "const model = defineModel('fileList')",
+        ],
+        [
+          'const model = defineModel("file-list")',
+          'const model = defineModel("fileList")',
+        ],
+        [
+          'const model = defineModel(`file-list`)',
+          'const model = defineModel(`fileList`)',
+        ],
+        [
+          "const model = defineModel('file\\u002dlist')",
+          "const model = defineModel('fileList')",
+        ],
+        [
+          "const model = defineModel((/* name */ 'file-list' as const), { required: true })",
+          "const model = defineModel((/* name */ 'fileList' as const), { required: true })",
+        ],
+        [
+          "const [files, modifiers] = defineModel<string[], 'trim'>('file-list')",
+          "const [files, modifiers] = defineModel<string[], 'trim'>('fileList')",
+        ],
+        [
+          "const files = (defineModel('file-list') satisfies unknown)!",
+          "const files = (defineModel('fileList') satisfies unknown)!",
+        ],
+        [
+          "const files = defineModel('élève-nom')",
+          "const files = defineModel('élèveNom')",
+        ],
+      ] satisfies [string, string][]
+    ).map(([before, after]) => ({
+      description: `preserves surrounding syntax when fixing: ${before}`,
+      code: sfc(before),
+      options: { fix: true },
+      errors: ['unexpectedNameCasing' as const],
+      output: sfc(after),
+    })),
+    {
+      description:
+        'preserves JavaScript comments, CRLF, and parent template bindings',
+      code: `<script setup>\r\nconst files = defineModel(/* key */ 'file-list')\r\n</script><template><Child v-model:file-list="files" /></template>`,
+      languageOptions: { parserOptions: { parser: null } },
+      options: { fix: true },
+      errors: ['unexpectedNameCasing'],
+      output: `<script setup>\r\nconst files = defineModel(/* key */ 'fileList')\r\n</script><template><Child v-model:file-list="files" /></template>`,
+    },
+    {
+      description: 'fixes every independent model in one pass',
+      code: sfc("defineModel('file-list'); defineModel('user-name')"),
+      options: { fix: true },
+      errors: ['unexpectedNameCasing', 'unexpectedNameCasing'],
+      output: sfc("defineModel('fileList'); defineModel('userName')"),
+    },
+    ...[
+      { script: "defineModel('file-list'); defineModel('fileList')", count: 1 },
+      { script: "defineModel('file-list'); defineModel('FileList')", count: 2 },
+      { script: "defineModel('model-value'); defineModel()", count: 1 },
+      {
+        script: "defineModel('model-value'); defineModel({ required: true })",
+        count: 1,
+      },
+      { script: "defineModel('!!!')", count: 1 },
+      {
+        script: "defineModel('file-list'); defineModel('fileListModifiers')",
+        count: 1,
+      },
+      {
+        script: "defineModel('model-value'); defineModel('modelModifiers')",
+        count: 1,
+      },
+      {
+        script: "defineModel('file-list'); defineModel('file-list-modifiers')",
+        count: 2,
+      },
+    ].map(({ script, count }) => ({
+      description: `keeps empty or conflicting names report-only even with fixes enabled: ${script}`,
+      code: sfc(script),
+      options: { fix: true },
+      errors: Array.from(
+        { length: count },
+        () => 'unexpectedNameCasing' as const,
+      ),
+      output: null,
+    })),
     {
       description: 'preserves potential name collisions and CRLF comments',
       code: `<script setup>\r\nconst files = defineModel(/* key */ 'file-list')\r\nconst other = defineModel('fileList')\r\n</script>`,
@@ -113,18 +233,20 @@ await run<DefineModelNameCasingOptions, DefineModelNameCasingMessageId>({
       ],
       output: null,
     },
-    ...[undefined, {}, { casing: 'camelCase' as const }].map(options => ({
-      description: 'uses camelCase by default',
-      code: sfc(mismatch),
-      options,
-      errors: [
-        {
-          messageId: 'unexpectedNameCasing' as const,
-          data: { name: 'file-list', casing: 'camelCase' },
-        },
-      ],
-      output: null,
-    })),
+    ...[undefined, {}, { casing: 'camelCase' as const }, { fix: false }].map(
+      options => ({
+        description: 'uses camelCase by default',
+        code: sfc(mismatch),
+        options,
+        errors: [
+          {
+            messageId: 'unexpectedNameCasing' as const,
+            data: { name: 'file-list', casing: 'camelCase' },
+          },
+        ],
+        output: null,
+      }),
+    ),
     ...casings.flatMap(casing =>
       casings
         .filter(other => other !== casing)
@@ -247,7 +369,10 @@ it.each([
   { casing: true },
   { casing: ['camelCase'] },
   { unknown: true },
-  { fix: true },
+  { fix: 'true' },
+  { fix: null },
+  { fix: 1 },
+  { fix: [] },
   'camelCase',
 ])('rejects invalid options: %j', async options => {
   await expect(
@@ -255,7 +380,7 @@ it.each([
   ).rejects.toThrow()
 })
 
-it('keeps public prop, event, and modifier contracts unchanged by avoiding automatic renames', () => {
+it('documents how opted-in renames change public prop, event, and modifier contracts', () => {
   const compile = (name: string) => {
     const { descriptor } = parse(sfc(`const files = defineModel('${name}')`))
     return compileScript(descriptor, { id: 'model-casing' }).content

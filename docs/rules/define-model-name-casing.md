@@ -9,6 +9,9 @@ description: Enforce casing for explicit defineModel names.
 
 > Enforce casing for explicit defineModel names.
 
+:wrench: Automatic fixes are available only with `fix: true`. They change the
+component's public contract; fixing is disabled by default.
+
 ## Usage
 
 Enable the rule alongside your existing `vue-eslint-parser` configuration.
@@ -85,7 +88,7 @@ The default configuration is:
 {
   "vue-perfectionist/define-model-name-casing": [
     "error",
-    { "casing": "camelCase" }
+    { "casing": "camelCase", "fix": false }
   ]
 }
 ```
@@ -119,6 +122,36 @@ even when the configured casing differs from `modelValue`. An explicitly passed
 `'modelValue'` is checked like any other name. Unknown fields and casing names,
 including converter aliases such as `'pascalCase'`, are rejected.
 
+### fix
+
+- **Type**: `boolean`
+- **Default**: `false`
+
+Set `fix: true` to allow ESLint's `--fix` to rename explicit model names using
+the configured casing:
+
+```json
+{
+  "vue-perfectionist/define-model-name-casing": [
+    "error",
+    { "casing": "camelCase", "fix": true }
+  ]
+}
+```
+
+With these options, `defineModel('file-list')` becomes
+`defineModel('fileList')`. With the default `fix: false`, mismatches are reported
+without fixes. No editor suggestions are provided.
+
+::: warning Component contract changes
+
+Enabling this option opts into changes to the component's public prop,
+`update:` event, and modifiers prop names. The fixer cannot update consumers in
+other files. Review and update parent bindings, event listeners, explicit prop
+accesses, and tests together with the component.
+
+:::
+
 ## Scope
 
 Only unshadowed, unimported `defineModel` calls in top-level variable initializers
@@ -140,14 +173,20 @@ and event declarations for manual migration.
 
 ## Automatic fixes and formatting
 
-There are no automatic fixes or suggestions. A model name is part of the public
-component contract. Even changing `'file-list'` to `'fileList'` changes the
-generated prop name, `update:` event, and modifiers prop. Single-file analysis
-cannot establish that every consumer, event listener, or explicit prop access
-remains compatible. Review and update those uses together when renaming manually.
+Automatic fixes require `fix: true` and replace only the explicit name literal.
+They preserve its quote delimiter, surrounding comments, parentheses, TypeScript
+wrappers, options, receiving variable names, template arguments, and line endings.
+Escapes within the replaced name are normalized to the converted value.
 
-The rule preserves comments, quoting, escapes, and line endings. The accepted
-and reported examples show conventions, not automatic conversions.
+For example, changing `'file-list'` to `'fileList'` changes the generated names
+from `file-list`, `update:file-list`, and `file-listModifiers` to `fileList`,
+`update:fileList`, and `fileListModifiers`. Consumer compatibility is not proven.
+
+Empty conversion results and model or modifiers prop names that conflict with
+another model's existing or converted names in the same setup script are
+reported without fixes even with `fix: true`. This includes conflicts with an
+implicit `modelValue` model.
+These checks do not establish compatibility with other props or consumers.
 
 See Vue's [defineModel documentation](https://vuejs.org/api/sfc-script-setup.html#definemodel)
 for the generated prop and event contract.

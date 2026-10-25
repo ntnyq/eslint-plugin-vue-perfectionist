@@ -4,6 +4,27 @@ import plugin, * as pluginExports from '../src'
 import { vueLanguageOptions } from './internal'
 
 describe('plugin contract', () => {
+  it('renames model contracts through an aliased plugin only when opted in', () => {
+    const linter = new Linter()
+    const source =
+      '<script setup>const files = defineModel("file-list")</script>'
+    const configuration: Linter.Config = {
+      files: ['**/*.vue'],
+      languageOptions: vueLanguageOptions,
+      plugins: { vp: plugin },
+      rules: { 'vp/define-model-name-casing': ['error', { fix: true }] },
+    }
+    const result = linter.verifyAndFix(source, configuration, 'Test.vue')
+    expect(result).toEqual({
+      fixed: true,
+      messages: [],
+      output: '<script setup>const files = defineModel("fileList")</script>',
+    })
+    expect(
+      linter.verifyAndFix(result.output, configuration, 'Test.vue'),
+    ).toEqual({ ...result, fixed: false })
+  })
+
   it('checks model conventions together through an aliased plugin without renaming contracts', () => {
     const linter = new Linter()
     const source = `<script setup lang="ts">

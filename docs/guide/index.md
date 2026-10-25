@@ -132,9 +132,11 @@ for supported rules, rule-level overrides, local shadowing, and ESLint globals.
 
 ## Automatic Fixes
 
-Five rules offer automatic fixes for supported cases: callback body style,
+Six rules offer automatic fixes for supported cases: callback body style,
 macro line breaks, template tag padding, mixed text interpolation, and setup
-statement ordering. Remaining diagnostics need manual changes.
+statement ordering, plus model-name casing when explicitly enabled with
+`fix: true`. Model renames change the component contract. Remaining diagnostics
+need manual changes.
 See [fix boundaries](/guide/rule-composition#automatic-fixes) before applying
 fixes across a project.
 
