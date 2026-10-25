@@ -219,7 +219,7 @@ Type: `'ignore' | 'report'`. Default: `'ignore'`.
 
 ## Scope
 
-Component matching, prop normalization, native-tag exclusions, `v-pre`, static dynamic components, directive support, and reserved prop restrictions are shared with [require-component-props](./require-component-props.md#scope). This rule checks SFC templates, not script declarations or render functions.
+Component matching, prop normalization, native-tag and slot-outlet exclusions, `v-pre`, static dynamic components, directive support, and reserved prop restrictions are shared with [require-component-props](./require-component-props.md#scope). This rule checks SFC templates, not script declarations or render functions.
 
 | Expression shape                                   | Inferred category                                                   |
 | -------------------------------------------------- | ------------------------------------------------------------------- |

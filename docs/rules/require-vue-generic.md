@@ -265,6 +265,8 @@ partial matches from different conditions. With no exemption conditions,
 - Checks Vue SFC templates, including template-only files and files with
   ordinary scripts, setup scripts, or both. Skips native tags and `v-pre`
   subtrees. Standalone scripts, render functions, and TSX are outside its scope.
+- Skips lowercase `<slot>` outlets even when `Slot` is configured. Capitalized
+  `<Slot>` components and components in slot fallback content are still checked.
 - Matches explicit component spellings without resolving imports or aliases.
   Supports static `<component is="ElTableColumn">` and
   `<component :is="'ElTableColumn'">` selectors through the shared component

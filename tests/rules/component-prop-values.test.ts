@@ -41,6 +41,18 @@ await run<ComponentPropValuesOptions, ComponentPropValuesMessageId>({
     }
   },
   valid: [
+    {
+      description: 'excludes slot outlet bindings from component prop values',
+      code: createVueSFC({
+        template:
+          '<template><slot :count="25"><Slot :count="20" /></slot></template>',
+      }),
+      options: {
+        targets: [
+          { components: ['Slot'], props: { count: { multipleOf: 10 } } },
+        ],
+      },
+    },
     { code: counter(':count="25"') },
     { code: counter(':count="25"'), options: { targets: [] } },
     ...[
@@ -165,6 +177,30 @@ await run<ComponentPropValuesOptions, ComponentPropValuesMessageId>({
     },
   ],
   invalid: [
+    {
+      description: 'checks Slot component prop values in slot fallback content',
+      code: createVueSFC({
+        template:
+          '<template><slot :count="25"><Slot :count="25" /></slot></template>',
+      }),
+      options: {
+        targets: [
+          { components: ['Slot'], props: { count: { multipleOf: 10 } } },
+        ],
+      },
+      errors: [
+        {
+          messageId: 'invalidPropValue',
+          data: {
+            component: 'Slot',
+            prop: 'count',
+            expected: 'a multiple of 10',
+            actual: '25',
+          },
+        },
+      ],
+      output: null,
+    },
     ...[
       ':count="25" v-bind:count="20"',
       'count="wrong" :count="20"',

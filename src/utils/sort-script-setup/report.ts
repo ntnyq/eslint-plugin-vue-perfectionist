@@ -3,6 +3,9 @@ import type { TSESTree } from '@typescript-eslint/utils'
 import type { SortScriptSetupRuleContext } from '../../types/index.ts'
 import type { Group, ResolvedOptions, Statement } from './types.ts'
 
+/** Bound generated whitespace before allocating a replacement string. */
+const MAX_WHITESPACE_LENGTH = 65_536
+
 /**
  * Build a reorder replacement only when statement and separator safety checks
  * pass.
@@ -197,6 +200,7 @@ export function reportPartition(
     }
     const eol = context.sourceCode.text.includes('\r\n') ? '\r\n' : '\n'
     const indent = /[^\S\r\n]*$/u.exec(gap)?.[0] ?? ''
+    const replacementLength = eol.length * (expected + 1) + indent.length
     context.report({
       node: right.node,
       messageId:
@@ -205,7 +209,7 @@ export function reportPartition(
           : 'unexpectedNewlinesBetween',
       data: { count: expected },
       fix:
-        options.fix === 'safe'
+        options.fix === 'safe' && replacementLength <= MAX_WHITESPACE_LENGTH
           ? /**
              * Replace inter-statement whitespace with the required blank-line
              * count.

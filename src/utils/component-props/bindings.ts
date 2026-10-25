@@ -60,14 +60,20 @@ function resolveArgument(
 }
 
 /**
- * Resolve a component identity while excluding native tags and v-pre content.
+ * Resolve a component identity while excluding native tags, slot outlets, and
+ * v-pre content.
  *
  * @param element - The template element to inspect.
  * @returns The hyphenated component name, or undefined when the identity is
  * unsupported or ambiguous.
  */
 export function matchComponent(element: AST.VElement): string | undefined {
-  if (isInVPre(element) || COMPONENT_NATIVE_TAGS.has(element.rawName)) {
+  // Only the lowercase spelling is a slot outlet; Slot remains a component.
+  if (
+    element.rawName === 'slot' ||
+    isInVPre(element) ||
+    COMPONENT_NATIVE_TAGS.has(element.rawName)
+  ) {
     return undefined
   }
   if (element.rawName !== 'component' && element.rawName !== 'Component') {

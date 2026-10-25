@@ -28,6 +28,14 @@ await run<RequireComponentPropsOptions, RequireComponentPropsMessageId>({
   },
   valid: [
     {
+      description: 'excludes slot outlets from component prop requirements',
+      code: createVueSFC({
+        template:
+          '<template><slot /><slot name="footer"><Slot :count="1" /></slot></template>',
+      }),
+      options: { targets: [{ components: ['Slot'], props: ['count'] }] },
+    },
+    {
       description:
         'uses Vue camelization for uppercase and numeric hyphen segments',
       code: createVueSFC({
@@ -121,6 +129,20 @@ await run<RequireComponentPropsOptions, RequireComponentPropsMessageId>({
     },
   ],
   invalid: [
+    {
+      description: 'checks Slot components in slot fallback content',
+      code: createVueSFC({
+        template: '<template><slot><Slot /></slot></template>',
+      }),
+      options: { targets: [{ components: ['Slot'], props: ['count'] }] },
+      errors: [
+        {
+          messageId: 'missingProp',
+          data: { component: 'Slot', prop: 'count' },
+        },
+      ],
+      output: null,
+    },
     {
       code: createVueSFC({ template: '<template><AppCounter /></template>' }),
       options,

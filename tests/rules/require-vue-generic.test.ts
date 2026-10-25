@@ -35,6 +35,13 @@ await run<RequireVueGenericOptions, RequireVueGenericMessageId>({
     }
   },
   valid: [
+    {
+      description: 'excludes slot outlets from generic comment requirements',
+      code: template(
+        '<slot /><slot name="footer"><!-- @vue-generic {Item} --><Slot /></slot>',
+      ),
+      options: { targets: [{ components: ['Slot'] }] },
+    },
     { code: template('<ElTableColumn />') },
     { code: template('<ElTableColumn />'), options: { targets: [] } },
     ...[
@@ -164,6 +171,13 @@ await run<RequireVueGenericOptions, RequireVueGenericMessageId>({
     },
   ],
   invalid: [
+    {
+      description: 'checks Slot component generic comments in fallback content',
+      code: template('<slot><Slot /></slot>'),
+      options: { targets: [{ components: ['Slot'] }] },
+      errors: [{ messageId: 'missingVueGeneric', data: { component: 'Slot' } }],
+      output: null,
+    },
     {
       code: template('<ElTableColumn />'),
       options,

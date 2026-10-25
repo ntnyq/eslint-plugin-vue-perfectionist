@@ -146,6 +146,7 @@ Type: `'report' | 'ignore'`. Default: `'report'`.
 - Matches explicit component names: `AppCounter` and `app-counter` match, while `appcounter` and an unconfigured import alias do not. No import resolution, regular expressions, glob patterns, or cross-file analysis is performed.
 - Prop names use Vue-style camelization: `pageSize` and `page-size` match; `pagesize` and `page_size` do not.
 - Skips native HTML, SVG, and MathML tags and `v-pre` subtrees. Custom-element compiler settings are not resolved; a custom tag explicitly listed in `targets` is checked.
+- Skips lowercase `<slot>` outlets even when `Slot` is configured. Capitalized `<Slot>` components and components in slot fallback content are still checked.
 - Supports `<component is="AppCounter">` and `<component :is="'AppCounter'">`. A dynamic component identity such as `:is="current"` is skipped. The `is` selector must be explicit, not supplied through an object binding.
 - Recognizes static attributes, `v-bind:prop`, same-name `:prop`, object literal bindings, static computed string keys, and nested object literal spreads. Unknown spreads and computed names make the affected presence uncertain. Accessors and methods with known keys still provide those keys.
 - Recognizes default `v-model` as `modelValue` and named `v-model:count` as `count`. Modifiers do not change this presence check; generated modifier props and update listeners are not inferred.

@@ -286,6 +286,8 @@ Movement fixes are limited to contiguous, proven-safe fragments of independent t
 
 Safe fixes preserve original statement text, attached comments, and line endings. Potential automatic-semicolon-insertion hazards suppress movement fixes. Whitespace fixes do not rewrite statement interiors or script tag padding.
 
+Each whitespace replacement is limited to 65,536 characters, including line endings and preserved indentation. Larger configured newline counts still produce diagnostics but do not generate an automatic fix.
+
 ## Other rules
 
 Use `perfectionist/sort-imports` for imports. When this rule controls top-level declarations and macros, disable `perfectionist/sort-modules` and `vue/define-macros-order` for the same `.vue` files. Keep Vue correctness rules, including checks for lifecycle registration, watchers, and expose after await.

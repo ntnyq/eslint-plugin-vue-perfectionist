@@ -2535,6 +2535,91 @@ const a = (Vue satisfies typeof Vue).ref(0)
         `,
       }),
     },
+    ...[2 ** 32, Number.MAX_SAFE_INTEGER].flatMap(count =>
+      (
+        [
+          { newlinesInside: count },
+          { groups: [{ group: 'constant', newlinesInside: count }] },
+          {
+            groups: ['declarations'],
+            customGroups: [
+              {
+                groupName: 'declarations',
+                selector: 'constant',
+                newlinesInside: count,
+              },
+            ],
+          },
+        ] satisfies SortScriptSetupOptions[]
+      ).map(options => ({
+        description:
+          'reports huge inside-group counts without allocating fixes',
+        code: '<script setup>\nconst a = 0\nconst b = 0\n</script>',
+        options,
+        errors: [
+          {
+            messageId: 'unexpectedNewlinesInside' as const,
+            data: { count },
+          },
+        ],
+        output: null,
+      })),
+    ),
+    ...[2 ** 32, Number.MAX_SAFE_INTEGER].flatMap(count =>
+      (
+        [
+          { newlinesBetween: count },
+          { groups: ['constant', { newlinesBetween: count }, 'function'] },
+        ] satisfies SortScriptSetupOptions[]
+      ).map(options => ({
+        description:
+          'reports huge between-group counts without allocating fixes',
+        code: '<script setup>\nconst a = 0\nfunction run() {}\n</script>',
+        options,
+        errors: [
+          {
+            messageId: 'unexpectedNewlinesBetween' as const,
+            data: { count },
+          },
+        ],
+        output: null,
+      })),
+    ),
+    ...[
+      { eol: '\n', indent: '', count: 65_535 },
+      { eol: '\r\n', indent: '', count: 32_767 },
+      { eol: '\n', indent: '  ', count: 65_533 },
+      { eol: '\r\n', indent: '  ', count: 32_766 },
+    ].map(({ eol, indent, count }) => ({
+      description: 'fixes whitespace at the replacement length limit',
+      code: `<script setup>${eol}const a = 0${eol}${indent}const b = 0${eol}</script>`,
+      options: { newlinesInside: count },
+      errors: [
+        {
+          messageId: 'unexpectedNewlinesInside' as const,
+          data: { count },
+        },
+      ],
+      output: `<script setup>${eol}const a = 0${eol.repeat(count + 1)}${indent}const b = 0${eol}</script>`,
+    })),
+    ...[
+      { eol: '\n', indent: '', count: 65_536 },
+      { eol: '\r\n', indent: '', count: 32_768 },
+      { eol: '\n', indent: '  ', count: 65_535 },
+      { eol: '\r\n', indent: '  ', count: 32_767 },
+    ].map(({ eol, indent, count }) => ({
+      description:
+        'includes line endings and indentation in the whitespace fix limit',
+      code: `<script setup>${eol}const a = 0${eol}${indent}const b = 0${eol}</script>`,
+      options: { newlinesInside: count },
+      errors: [
+        {
+          messageId: 'unexpectedNewlinesInside' as const,
+          data: { count },
+        },
+      ],
+      output: null,
+    })),
     {
       description: 'resolves newline separators across absent groups',
       code: createVueSFC({

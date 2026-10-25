@@ -263,6 +263,9 @@ Combine the two rules for required props with strict value checking.
 - Native HTML/SVG/MathML tags and `v-pre` subtrees are skipped. Static dynamic
   component identities such as `<component is="AppStepCounter">` and
   `<component :is="'AppStepCounter'">` are recognized; variable identities are skipped.
+- Lowercase `<slot>` outlets are skipped even when `Slot` is configured.
+  Capitalized `<Slot>` components and components in slot fallback content are
+  still checked.
 - Static attributes, named `v-bind`, inline object spreads with known keys,
   static computed arguments, and `v-model` are supported. Default `v-model` supplies
   `modelValue`; modifiers do not imply value coercion.

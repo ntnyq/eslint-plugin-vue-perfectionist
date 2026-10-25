@@ -40,6 +40,16 @@ await run<ComponentPropTypesOptions, ComponentPropTypesMessageId>({
     }
   },
   valid: [
+    {
+      description: 'excludes slot outlet bindings from component prop types',
+      code: createVueSFC({
+        template:
+          '<template><slot count="wrong"><Slot :count="1" /></slot></template>',
+      }),
+      options: {
+        targets: [{ components: ['Slot'], props: { count: 'number' } }],
+      },
+    },
     { code: counter('count="wrong"') },
     { code: counter('count="wrong"'), options: { targets: [] } },
     ...[
@@ -178,6 +188,28 @@ await run<ComponentPropTypesOptions, ComponentPropTypesMessageId>({
     },
   ],
   invalid: [
+    {
+      description: 'checks Slot component prop types in slot fallback content',
+      code: createVueSFC({
+        template:
+          '<template><slot count="wrong"><Slot count="wrong" /></slot></template>',
+      }),
+      options: {
+        targets: [{ components: ['Slot'], props: { count: 'number' } }],
+      },
+      errors: [
+        {
+          messageId: 'invalidPropType',
+          data: {
+            component: 'Slot',
+            prop: 'count',
+            expected: 'number',
+            actual: 'string',
+          },
+        },
+      ],
+      output: null,
+    },
     {
       description: 'checks JavaScript templates without a TypeScript parser',
       code: `<script>export default {}</script>${counter('count="wrong"')}`,
