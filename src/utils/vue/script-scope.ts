@@ -64,17 +64,16 @@ export function isInScriptRange(
  * @param identifier - The runtime identifier to resolve.
  * @param sourceCode - The source code providing lexical scope and script setup
  * boundaries.
+ * @param name - The binding name to look up, defaulting to the reference name.
  * @returns The visible definitions, retaining type-only definitions when no
  * runtime definition exists.
  */
 export function getScriptVariableDefinitions(
   identifier: TSESTree.Identifier,
   sourceCode: SourceCode,
+  name = identifier.name,
 ): TSESLint.Scope.Definition[] {
-  const variable = ASTUtils.findVariable(
-    sourceCode.getScope(identifier),
-    identifier,
-  )
+  const variable = ASTUtils.findVariable(sourceCode.getScope(identifier), name)
   const definitions = variable?.defs ?? []
   const setupRange = getSetupRange(sourceCode)
   if (!setupRange) {

@@ -9,6 +9,9 @@ description: Prefer dedicated aliases for post and sync watch effects.
 
 > Prefer dedicated aliases for post and sync watch effects.
 
+:wrench: Automatically fixes calls when the target API and options can be
+changed safely. Other matching calls are reported without a fix.
+
 ## Usage
 
 Enable this rule alongside your existing parser configuration. Vue SFCs need
@@ -67,7 +70,7 @@ watchEffect(updateCache, { flush: 'sync' })
 
 Named import aliases and non-computed namespace calls are checked. The callback
 may be inline or a reference. Other options, such as debugging hooks, do not
-prevent a report and must be retained when migrating manually.
+prevent a report. Supported fixes retain those hooks and their evaluation order.
 
 ::: incorrect
 
@@ -114,7 +117,10 @@ provided by auto-import tooling. This overrides the shared setting;
 `vueGlobals: []` disables global recognition for this rule.
 Alternatively, enable `settings['vue-perfectionist'].autoImport: true`.
 Only the supported `watchEffect` name is checked; this option does not define
-custom aliases. Local declarations, parameters, type-only imports, and imports
+custom aliases. Explicitly include `watchPostEffect` or `watchSyncEffect` in
+this list to authorize fixes to those globals. Shared `autoImport: true` alone
+does not establish that the replacement global is available.
+Local declarations, parameters, type-only imports, and imports
 from unsupported modules take precedence over global recognition.
 
 Unknown option fields, non-array values, non-string elements, and duplicate
@@ -155,12 +161,105 @@ watchEffect(updateLayout, { flush: 'post', ...options })
 
 ## Automatic fixes and formatting
 
-There are no automatic fixes or suggestions. Migration may require a new import,
-resolving a local name collision, or updating auto-import configuration. Remove
-the `flush` property manually while preserving the remaining options, their
-evaluation, comments, and the existing callback. The rule leaves source text
-unchanged, including line endings. Accepted and reported examples illustrate
-the convention, not automatic conversions.
+Safe cases are fixed by default, without a separate option. The fixer changes
+the API and removes a single static `flush` property:
+
+- Namespace calls use the corresponding member of the same namespace. The
+  target export is known for `vue`, `@vue/runtime-core`, and `@vue/runtime-dom`.
+  Other configured sources require an existing runtime named import of the
+  target API from that source, since a custom module may export only
+  `watchEffect`. This also applies when adding a named import.
+- Direct calls reuse a visible runtime named import of the target API from the
+  same source, including aliases. Auto-imported calls can reuse an import from
+  any configured Vue source.
+- Otherwise, a named import is added to the original import declaration only
+  when the target name has no binding or unresolved reference anywhere in the
+  file, including template references. Textual occurrences of the target name or
+  its component tag forms in templates and styles also conservatively block
+  adding an import. Unbound `eval` references also block new imports because
+  evaluated code can access names absent from the AST. The original
+  `watchEffect` import is retained for other script or template uses; a dedicated
+  unused-import rule can clean it up afterward.
+- An auto-imported call can use a target global explicitly listed in
+  `vueGlobals`, provided that name is not shadowed or assigned to in the file.
+  Assignments to the source global also prevent fixes, including when an alias
+  import is available. Writes to local shadows do not count as global writes.
+  Unbound `eval` references prevent global fixes because evaluated code may
+  reassign these APIs.
+  Other global calls remain report-only if a suitable import cannot be reused.
+
+Fixes require an inline object without a TypeScript wrapper and with exactly one
+`flush` property. Remaining properties must be ordinary data properties named
+`onTrack` or `onTrigger`. Their values, including function calls, are kept in
+their original order. Accessors, methods, unknown options, prototype overrides,
+duplicate `flush` properties, and type-wrapped options remain report-only.
+
+Explicit casts, `satisfies` expressions, and type arguments on the callee or its
+namespace receiver also remain report-only: changing the API or removing an
+argument could violate those type constraints. Non-null assertions are preserved
+and do not prevent a fix.
+
+Comments inside the removed property make the call report-only. Surrounding
+comments are retained. If `flush` is the only property and removing the argument
+would not discard comments, the options argument is removed; otherwise an empty
+object may remain to preserve comments. Parenthesized options are supported;
+the object and its parentheses are retained even when the object becomes empty.
+Existing parentheses around callbacks and callees, trailing commas, and line
+endings are preserved. A formatter can finish indentation and whitespace after
+property removal.
+
+For example, this call can be fixed while retaining the debug hook:
+
+::: incorrect
+
+```ts
+import * as Vue from 'vue'
+
+Vue.watchEffect(updateLayout, { flush: 'post', onTrack: createDebugger() })
+```
+
+:::
+
+::: correct
+
+```ts
+import * as Vue from 'vue'
+
+Vue.watchPostEffect(updateLayout, { onTrack: createDebugger() })
+```
+
+:::
+
+This call is reported without a fix because removing the first `flush` would
+discard an evaluation:
+
+::: incorrect
+
+```ts
+import * as Vue from 'vue'
+
+Vue.watchEffect(updateLayout, { flush: getTiming(), flush: 'post' })
+```
+
+:::
+
+Explicit receiver types can also prevent a fix. For example, this type does
+not expose `watchPostEffect`:
+
+::: incorrect
+
+```ts
+import * as Vue from 'vue'
+
+;(Vue as Pick<typeof Vue, 'watchEffect'>).watchEffect(() => {}, {
+  flush: 'post',
+})
+```
+
+:::
+
+No suggestions are offered for report-only cases. Resolve imports, name
+collisions, comments, and option semantics manually before migrating them.
 
 ## :mag: Implementation
 

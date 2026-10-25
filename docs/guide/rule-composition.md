@@ -169,6 +169,7 @@ their documented boundaries:
 | [`define-model-name-casing`](/rules/define-model-name-casing#automatic-fixes-and-formatting)                                 | Rename model contracts only with `fix: true` (default `false`); consumers require review.                |
 | [`padding-line-between-tags`](/rules/padding-line-between-tags#automatic-fixes-and-formatting)                               | Adjust blank lines between eligible tags already on separate lines.                                      |
 | [`prefer-template-literal-in-interpolation`](/rules/prefer-template-literal-in-interpolation#automatic-fixes-and-formatting) | Combine statically safe primitive expressions and adjacent text while preserving nullish display values. |
+| [`prefer-watch-effect-alias`](/rules/prefer-watch-effect-alias#automatic-fixes-and-formatting)                               | Use dedicated effect APIs when target bindings and static options can be changed safely.                 |
 | [`sort-script-setup`](/rules/sort-script-setup#partitions-and-automatic-fixes)                                               | Reorder eligible declarations within safe contiguous fragments and adjust supported spacing.             |
 
 A fixable rule can still report cases without a fix. In particular,

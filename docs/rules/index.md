@@ -67,7 +67,7 @@ also report problems that require manual changes. See
 | [prefer-simple-event-handler](./prefer-simple-event-handler.md)                           | Require simple expressions in named template event handlers.         | Template            | —               |
 | [prefer-template-literal-in-interpolation](./prefer-template-literal-in-interpolation.md) | Prefer a single template literal for mixed text and interpolation.   | Template            | Supported cases |
 | [prefer-use-template-ref-inference](./prefer-use-template-ref-inference.md)               | Prefer inferred types for static Vue template refs.                  | TS setup + template | —               |
-| [prefer-watch-effect-alias](./prefer-watch-effect-alias.md)                               | Prefer dedicated aliases for post and sync watch effects.            | Scripts             | —               |
+| [prefer-watch-effect-alias](./prefer-watch-effect-alias.md)                               | Prefer dedicated aliases for post and sync watch effects.            | Scripts             | Supported cases |
 | [require-component-props](./require-component-props.md)                                   | Require configured props at component usage sites.                   | Template            | —               |
 | [require-component-slots](./require-component-slots.md)                                   | Require configured slots at component usage sites.                   | Template            | —               |
 | [require-macro-type-name](./require-macro-type-name.md)                                   | Require exact call-site names for Vue macro types.                   | TS setup            | —               |

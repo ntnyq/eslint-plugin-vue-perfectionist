@@ -439,6 +439,37 @@ onMounted(handler)
     expect(linter.verifyAndFix(result.output, configuration)).toEqual(result)
   })
 
+  it('fixes watch effect aliases through an aliased plugin and stabilizes', () => {
+    const linter = new Linter()
+    const configuration: Linter.Config = {
+      files: ['**/*.vue'],
+      languageOptions: vueLanguageOptions,
+      plugins: { vp: plugin },
+      rules: { 'vp/prefer-watch-effect-alias': 'error' },
+    }
+    const source = `<script setup lang="ts">
+import { watchEffect } from 'vue'
+watchEffect(update, { flush: 'post' })
+watchEffect(update, { flush: 'sync', onTrack: debug })
+</script>`
+    const result = linter.verifyAndFix(source, configuration, 'Test.vue')
+    expect(result).toEqual({
+      fixed: true,
+      messages: [],
+      output: `<script setup lang="ts">
+import { watchEffect, watchPostEffect, watchSyncEffect } from 'vue'
+watchPostEffect(update)
+watchSyncEffect(update, {  onTrack: debug })
+</script>`,
+    })
+    expect(
+      linter.verifyAndFix(result.output, configuration, 'Test.vue'),
+    ).toEqual({
+      ...result,
+      fixed: false,
+    })
+  })
+
   it('exports rules without built-in configs', () => {
     expect(plugin.meta.name).toBe('eslint-plugin-vue-perfectionist')
     expect(pluginExports.plugin).toBe(plugin)
