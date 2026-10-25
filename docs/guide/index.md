@@ -117,7 +117,8 @@ document defaults, options, supported syntax, and uncertainty handling.
 
 Use [`prefer-define-model`](/rules/prefer-define-model) to identify matching
 prop and update-event declarations that can be migrated manually to Vue 3.4+
-`defineModel`.
+`defineModel`. Use [`define-model-name-casing`](/rules/define-model-name-casing)
+to enforce the casing of explicit model names independently of template arguments.
 
 ## Auto-imported Vue APIs
 

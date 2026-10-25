@@ -67,7 +67,8 @@
   "dependencies": {
     "@ntnyq/utils": "^0.23.0",
     "@typescript-eslint/utils": "^8.72.0",
-    "natural-orderby": "^5.0.0"
+    "natural-orderby": "^5.0.0",
+    "uncase": "^0.3.0"
   },
   "devDependencies": {
     "@ntnyq/eslint-config": "^7.0.0-beta.27",

@@ -21,6 +21,8 @@ export type {
   DefineMacrosTypeStyle,
   DefineMacrosTypeStyleMacro,
   DefineMacrosTypeStyleOptions,
+  DefineModelNameCasing,
+  DefineModelNameCasingOptions,
   GroupEntry,
   MaxLinesPerCallbackOptions,
   NoComplexVForSourceOptions,

@@ -94,6 +94,7 @@ type, and component contract diagnostics require manual changes.
 | [consistent-template-ref-name](https://vue-perfectionist.vercel.app/rules/consistent-template-ref-name)                         | Require template ref variable names to match their keys.             |
 | [define-macros-newline](https://vue-perfectionist.vercel.app/rules/define-macros-newline)                                       | Require multiline inline Vue macro declarations.                     |
 | [define-macros-type-style](https://vue-perfectionist.vercel.app/rules/define-macros-type-style)                                 | Enforce declaration styles for Vue macro types.                      |
+| [define-model-name-casing](https://vue-perfectionist.vercel.app/rules/define-model-name-casing)                                 | Enforce casing for explicit defineModel names.                       |
 | [max-lines-per-callback](https://vue-perfectionist.vercel.app/rules/max-lines-per-callback)                                     | Limit the length of inline callbacks for Vue APIs.                   |
 | [no-complex-v-for-source](https://vue-perfectionist.vercel.app/rules/no-complex-v-for-source)                                   | Disallow complex expressions in Vue v-for sources.                   |
 | [padding-line-between-tags](https://vue-perfectionist.vercel.app/rules/padding-line-between-tags)                               | Enforce blank-line counts between consecutive template tags.         |

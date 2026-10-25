@@ -5,6 +5,7 @@ import { componentPropValues } from './rules/component-prop-values.ts'
 import { consistentTemplateRefName } from './rules/consistent-template-ref-name.ts'
 import { defineMacrosNewline } from './rules/define-macros-newline.ts'
 import { defineMacrosTypeStyle } from './rules/define-macros-type-style.ts'
+import { defineModelNameCasing } from './rules/define-model-name-casing.ts'
 import { maxLinesPerCallback } from './rules/max-lines-per-callback.ts'
 import { noComplexVForSource } from './rules/no-complex-v-for-source.ts'
 import { paddingLineBetweenTags } from './rules/padding-line-between-tags.ts'
@@ -35,6 +36,7 @@ export const plugin: VuePerfectionistPlugin = {
     'consistent-template-ref-name': consistentTemplateRefName,
     'define-macros-newline': defineMacrosNewline,
     'define-macros-type-style': defineMacrosTypeStyle,
+    'define-model-name-casing': defineModelNameCasing,
     'max-lines-per-callback': maxLinesPerCallback,
     'no-complex-v-for-source': noComplexVForSource,
     'padding-line-between-tags': paddingLineBetweenTags,

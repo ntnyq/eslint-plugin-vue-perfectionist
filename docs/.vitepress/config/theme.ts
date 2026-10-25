@@ -75,6 +75,10 @@ export function getThemeConfig(): DefaultTheme.Config {
             text: 'define-macros-type-style',
           },
           {
+            link: '/rules/define-model-name-casing',
+            text: 'define-model-name-casing',
+          },
+          {
             link: '/rules/max-lines-per-callback',
             text: 'max-lines-per-callback',
           },

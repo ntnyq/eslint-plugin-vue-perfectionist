@@ -14,7 +14,7 @@ registration and parser setup.
 | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | Callbacks and composables | `callback-style`, `max-lines-per-callback`, `prefer-composable-options`, `prefer-function-declaration`                            |
 | Macro layout and types    | `define-macros-newline`, `define-macros-type-style`, `require-macro-type-name`                                                    |
-| Component models          | `prefer-define-model`                                                                                                             |
+| Component models          | `define-model-name-casing`, `prefer-define-model`                                                                                 |
 | Ref and result naming     | `consistent-template-ref-name`, `prefer-ref-pattern`, `prefer-function-result-pattern`                                            |
 | Template ref types        | `prefer-use-template-ref-inference`                                                                                               |
 | Component usage contracts | `require-component-props`, `component-prop-types`, `component-prop-values`, `require-component-slots`, `require-vue-generic`      |
@@ -55,6 +55,7 @@ also report problems that require manual changes. See
 | [consistent-template-ref-name](./consistent-template-ref-name.md)                         | Require template ref variable names to match their keys.             | Scripts             | —               |
 | [define-macros-newline](./define-macros-newline.md)                                       | Require multiline inline Vue macro declarations.                     | Setup               | Supported cases |
 | [define-macros-type-style](./define-macros-type-style.md)                                 | Enforce declaration styles for Vue macro types.                      | TS setup            | —               |
+| [define-model-name-casing](./define-model-name-casing.md)                                 | Enforce casing for explicit defineModel names.                       | Setup               | —               |
 | [max-lines-per-callback](./max-lines-per-callback.md)                                     | Limit the length of inline callbacks for Vue APIs.                   | Scripts             | —               |
 | [no-complex-v-for-source](./no-complex-v-for-source.md)                                   | Disallow complex expressions in Vue v-for sources.                   | Template            | —               |
 | [padding-line-between-tags](./padding-line-between-tags.md)                               | Enforce blank-line counts between consecutive template tags.         | Template            | Supported cases |

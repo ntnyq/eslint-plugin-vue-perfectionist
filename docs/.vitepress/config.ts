@@ -46,6 +46,7 @@ const exampleRules = {
   'vue-perfectionist/consistent-template-ref-name': 'error',
   'vue-perfectionist/define-macros-newline': 'error',
   'vue-perfectionist/define-macros-type-style': 'error',
+  'vue-perfectionist/define-model-name-casing': 'error',
   'vue-perfectionist/max-lines-per-callback': 'error',
   'vue-perfectionist/no-complex-v-for-source': 'error',
   'vue-perfectionist/padding-line-between-tags': 'error',

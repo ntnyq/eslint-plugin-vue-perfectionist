@@ -4,6 +4,40 @@ import plugin, * as pluginExports from '../src'
 import { vueLanguageOptions } from './internal'
 
 describe('plugin contract', () => {
+  it('checks model conventions together through an aliased plugin without renaming contracts', () => {
+    const linter = new Linter()
+    const source = `<script setup lang="ts">
+const props = defineProps<{ title: string }>()
+const emit = defineEmits<{ 'update:title': [string] }>()
+const files = defineModel('file-list')
+</script>`
+    const configuration: Linter.Config = {
+      files: ['**/*.vue'],
+      languageOptions: vueLanguageOptions,
+      plugins: { vp: plugin },
+      rules: {
+        'vp/prefer-define-model': 'error',
+        'vp/define-model-name-casing': 'error',
+      },
+    }
+    const result = linter.verifyAndFix(source, configuration, 'Test.vue')
+    expect(
+      result.messages.map(message => [message.ruleId, message.messageId]),
+    ).toEqual([
+      ['vp/prefer-define-model', 'preferDefineModel'],
+      ['vp/define-model-name-casing', 'unexpectedNameCasing'],
+    ])
+    expect(result.fixed).toBe(false)
+    expect(result.output).toBe(source)
+    for (const message of result.messages) {
+      expect(message.fix).toBeUndefined()
+      expect(message.suggestions).toBeUndefined()
+    }
+    expect(
+      linter.verifyAndFix(result.output, configuration, 'Test.vue'),
+    ).toEqual(result)
+  })
+
   it('reports function expressions through an aliased plugin without fixes', () => {
     const linter = new Linter()
     const source = `<script setup>
@@ -375,6 +409,7 @@ onMounted(handler)
       'consistent-template-ref-name',
       'define-macros-newline',
       'define-macros-type-style',
+      'define-model-name-casing',
       'max-lines-per-callback',
       'no-complex-v-for-source',
       'padding-line-between-tags',

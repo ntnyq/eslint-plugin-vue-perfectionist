@@ -181,6 +181,9 @@ importers:
       natural-orderby:
         specifier: ^5.0.0
         version: 5.0.0
+      uncase:
+        specifier: ^0.3.0
+        version: 0.3.0
     devDependencies:
       '@ntnyq/eslint-config':
         specifier: ^7.0.0-beta.27
