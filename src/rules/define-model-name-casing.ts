@@ -194,7 +194,7 @@ export const defineModelNameCasing = createRule<
                 return null
               }
               const quote = context.sourceCode.text[node.range[0]]
-              if (quote !== "'" && quote !== '"' && quote !== '`') {
+              if (!quote || !["'", '"', '`'].includes(quote)) {
                 return null
               }
               let text = JSON.stringify(replacement)

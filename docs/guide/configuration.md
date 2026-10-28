@@ -70,6 +70,12 @@ files; enabling it does not require every module-level function binding to use
 a declaration. Template-only and setup-only rules need the corresponding Vue
 SFC context.
 
+When a TypeScript type alias or interface shares a runtime API import's name in
+the same scope, API recognition uses the runtime import regardless of declaration
+order. This applies to standalone TypeScript, ordinary SFC scripts, and setup
+scripts. A type-only binding without a runtime definition does not establish an
+auto-imported API.
+
 ## Auto-imported Vue APIs
 
 When using `unplugin-auto-import` with Vue APIs, enable the shared opt-in in

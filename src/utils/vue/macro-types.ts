@@ -62,12 +62,13 @@ export function createMacroTypeVisitor(
       }
       return
     }
-    if (
-      macro !== 'defineProps' &&
-      macro !== 'defineEmits' &&
-      macro !== 'defineSlots'
-    ) {
-      return
+    switch (macro) {
+      case 'defineProps':
+      case 'defineEmits':
+      case 'defineSlots':
+        break
+      default:
+        return
     }
     const types = call.typeArguments?.params
     if (call.arguments.length === 0 && types?.length === 1 && types[0]) {

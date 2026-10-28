@@ -26,10 +26,11 @@ const imports =
  * Only the canonical key declaration changes; normal module resolution remains.
  *
  * @param code - Source code for the parser's project file.
+ * @param filename - Project filename, including platform-specific separators.
  * @returns A real compiler program using the earlier InjectionKey declaration.
  */
-function createLegacyKeyProgram(code: string): ts.Program {
-  const filename = `${root}case.ts`
+function createLegacyKeyProgram(code: string, filename: string): ts.Program {
+  const normalizedFilename = filename.replaceAll('\\', '/')
   const options: ts.CompilerOptions = {
     target: ts.ScriptTarget.ESNext,
     module: ts.ModuleKind.ESNext,
@@ -40,15 +41,12 @@ function createLegacyKeyProgram(code: string): ts.Program {
   const host = ts.createCompilerHost(options)
   const readFile = host.readFile
   host.readFile = path => {
-    if (path === filename) {
+    const normalizedPath = path.replaceAll('\\', '/')
+    if (normalizedPath === normalizedFilename) {
       return code
     }
     const source = readFile(path)
-    if (
-      path
-        .replaceAll('\\', '/')
-        .endsWith('/@vue/runtime-core/dist/runtime-core.d.ts')
-    ) {
+    if (normalizedPath.endsWith('/@vue/runtime-core/dist/runtime-core.d.ts')) {
       const declaration =
         'type InjectionKey<T> = symbol & InjectionConstraint<T>;'
       if (!source?.includes(declaration)) {
@@ -63,7 +61,7 @@ function createLegacyKeyProgram(code: string): ts.Program {
     }
     return source
   }
-  return ts.createProgram([filename], options, host)
+  return ts.createProgram([normalizedFilename], options, host)
 }
 
 const legacyCode = `${imports}
@@ -72,7 +70,6 @@ inject(key)
 inject(Symbol())
 const plainKey: Symbol = Symbol()
 inject(plainKey)`
-const legacyProgram = createLegacyKeyProgram(legacyCode)
 
 await run<RequireInjectionKeyOptions, RequireInjectionKeyMessageId>({
   name: 'require-injection-key',
@@ -201,20 +198,26 @@ inject(key)`,
     },
   ],
   invalid: [
-    {
+    ...[
+      `${root}case.ts`.replaceAll('\\', '/'),
+      `${root}case.ts`.replaceAll('/', '\\'),
+    ].map(filename => ({
       description:
         'preserves legacy Vue key interfaces while rejecting untyped symbols',
       code: legacyCode,
       languageOptions: {
-        parserOptions: { project: false, programs: [legacyProgram] },
+        parserOptions: {
+          project: false,
+          programs: [createLegacyKeyProgram(legacyCode, filename)],
+        },
       },
       options: { strict: true },
       errors: [
-        { messageId: 'expectedInjectionKey', line: 4 },
-        { messageId: 'expectedInjectionKey', line: 6 },
+        { messageId: 'expectedInjectionKey' as const, line: 4 },
+        { messageId: 'expectedInjectionKey' as const, line: 6 },
       ],
       output: null,
-    },
+    })),
 
     ...[
       "function read<T extends { key: InjectionKey<string> | undefined }>(key: T['key']) { inject(key) }",

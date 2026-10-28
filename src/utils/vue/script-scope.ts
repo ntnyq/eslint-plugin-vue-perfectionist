@@ -75,17 +75,6 @@ export function getScriptVariableDefinitions(
 ): TSESLint.Scope.Definition[] {
   const variable = ASTUtils.findVariable(sourceCode.getScope(identifier), name)
   const definitions = variable?.defs ?? []
-  const setupRange = getSetupRange(sourceCode)
-  if (!setupRange) {
-    return definitions
-  }
-  /**
-   * Check whether a node belongs to the current script setup block.
-   *
-   * @param node - The declaration or reference node.
-   * @returns Whether the node is contained in the script setup range.
-   */
-  const isSetup = (node: TSESTree.Node) => isInScriptRange(node, setupRange)
   const runtimeDefinitions = definitions.filter(
     /**
      * Keep scope definitions that may introduce runtime variables.
@@ -100,6 +89,17 @@ export function getScriptVariableDefinitions(
   const candidates = runtimeDefinitions.length
     ? runtimeDefinitions
     : definitions
+  const setupRange = getSetupRange(sourceCode)
+  if (!setupRange) {
+    return candidates
+  }
+  /**
+   * Check whether a node belongs to the current script setup block.
+   *
+   * @param node - The declaration or reference node.
+   * @returns Whether the node is contained in the script setup range.
+   */
+  const isSetup = (node: TSESTree.Node) => isInScriptRange(node, setupRange)
   if (isSetup(identifier)) {
     const local = candidates.filter(
       /**

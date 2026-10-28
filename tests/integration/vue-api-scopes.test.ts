@@ -1,3 +1,4 @@
+import * as tsParser from '@typescript-eslint/parser'
 import { Linter } from 'eslint'
 import { expect, it } from 'vitest'
 import { compileScript, parse } from 'vue/compiler-sfc'
@@ -24,6 +25,123 @@ const variants = ['', ' lang="ts"'].flatMap(language =>
       namespace,
     })),
   ),
+)
+
+const scriptContexts = [
+  {
+    name: 'standalone TypeScript',
+    filename: 'Test.ts',
+    languageOptions: { parser: tsParser },
+    open: '',
+    close: '',
+  },
+  {
+    name: 'ordinary script',
+    filename: 'Test.vue',
+    languageOptions: vueLanguageOptions,
+    open: '<script lang="ts">\n',
+    close: '\n</script>',
+  },
+  {
+    name: 'setup script',
+    filename: 'Test.vue',
+    languageOptions: vueLanguageOptions,
+    open: '<script setup lang="ts">\n',
+    close: '\n</script>',
+  },
+]
+
+it.each(
+  scriptContexts.flatMap(context =>
+    ['type', 'interface'].flatMap(declarationKind =>
+      [false, true].map(typesFirst => ({
+        ...context,
+        declarationKind,
+        typesFirst,
+      })),
+    ),
+  ),
+)(
+  'resolves runtime imports alongside $declarationKind declarations ($name, types first: $typesFirst)',
+  ({ filename, languageOptions, open, close, declarationKind, typesFirst }) => {
+    const types =
+      declarationKind === 'type'
+        ? 'type Effect = string\ntype PostEffect = string'
+        : 'interface Effect {}\ninterface PostEffect {}'
+    const imports =
+      "import { watchEffect as Effect, watchPostEffect as PostEffect } from 'vue'"
+    const declarations = typesFirst
+      ? `${types}\n${imports}`
+      : `${imports}\n${types}`
+    const source = `${open}${declarations}\nEffect(() => 1, { flush: 'post' })${close}`
+    const expected = `${open}${declarations}\nPostEffect(() => { return (1) })${close}`
+    const composedConfig: Linter.Config = {
+      files: ['**/*.{ts,vue}'],
+      languageOptions,
+      plugins: { vp: plugin },
+      rules: {
+        'vp/callback-style': 'error',
+        'vp/prefer-watch-effect-alias': 'error',
+      },
+    }
+    const linter = new Linter()
+
+    expect(
+      linter
+        .verify(source, composedConfig, filename)
+        .map(message => [message.ruleId, message.messageId]),
+    ).toEqual([
+      ['vp/prefer-watch-effect-alias', 'preferredAlias'],
+      ['vp/callback-style', 'expectedBlockBody'],
+    ])
+    expect(linter.verifyAndFix(source, composedConfig, filename)).toEqual({
+      fixed: true,
+      messages: [],
+      output: expected,
+    })
+    expect(linter.verifyAndFix(expected, composedConfig, filename)).toEqual({
+      fixed: false,
+      messages: [],
+      output: expected,
+    })
+  },
+)
+
+it.each(
+  scriptContexts.flatMap(context =>
+    [
+      'type watchEffect = string',
+      'interface watchEffect {}',
+      "import type { watchEffect } from 'vue'",
+      "import { type watchEffect } from 'vue'",
+    ].map(declaration => ({
+      ...context,
+      declaration,
+    })),
+  ),
+)(
+  'does not treat a pure type binding as an auto-import ($name, $declaration)',
+  ({ filename, languageOptions, open, close, declaration }) => {
+    const source = `${open}${declaration}\nwatchEffect(() => 1, { flush: 'post' })${close}`
+    const result = new Linter().verifyAndFix(
+      source,
+      {
+        files: ['**/*.{ts,vue}'],
+        languageOptions,
+        plugins: { vp: plugin },
+        settings: { 'vue-perfectionist': { autoImport: true } },
+        rules: {
+          'vp/callback-style': 'error',
+          'vp/prefer-watch-effect-alias': [
+            'error',
+            { vueGlobals: ['watchEffect', 'watchPostEffect'] },
+          ],
+        },
+      },
+      filename,
+    )
+    expect(result).toEqual({ fixed: false, messages: [], output: source })
+  },
 )
 
 it.each([false, true])(
