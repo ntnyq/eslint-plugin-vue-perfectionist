@@ -10,17 +10,17 @@ registration and parser setup.
 
 ## Choose by Goal
 
-| Goal                      | Rules                                                                                                                               |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Callbacks and composables | `callback-style`, `max-lines-per-callback`, `prefer-composable-options`, `prefer-function-declaration`, `prefer-watch-effect-alias` |
-| Macro layout and types    | `define-macros-newline`, `define-macros-type-style`, `require-macro-type-name`                                                      |
-| Component models          | `define-model-name-casing`, `prefer-define-model`                                                                                   |
-| Ref and result naming     | `consistent-template-ref-name`, `prefer-ref-pattern`, `prefer-function-result-pattern`                                              |
-| Template ref types        | `prefer-use-template-ref-inference`                                                                                                 |
-| Component usage contracts | `require-component-props`, `component-prop-types`, `component-prop-values`, `require-component-slots`, `require-vue-generic`        |
-| Template readability      | `no-complex-v-for-source`, `padding-line-between-tags`, `prefer-simple-event-handler`, `prefer-template-literal-in-interpolation`   |
-| Dependency injection      | `require-injection-key`                                                                                                             |
-| Setup declaration order   | `sort-script-setup`                                                                                                                 |
+| Goal                      | Rules                                                                                                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Callbacks and composables | `callback-style`, `max-lines-per-callback`, `prefer-composable-options`, `prefer-function-declaration`, `prefer-watch-effect-alias`                                 |
+| Macro layout and types    | `define-macros-newline`, `define-macros-type-style`, `require-macro-type-name`                                                                                      |
+| Component models          | `define-model-name-casing`, `prefer-define-model`                                                                                                                   |
+| Ref and result naming     | `consistent-template-ref-name`, `prefer-ref-pattern`, `prefer-function-result-pattern`                                                                              |
+| Template ref types        | `prefer-use-template-ref-inference`                                                                                                                                 |
+| Component usage contracts | `require-component-props`, `component-prop-types`, `component-prop-values`, `require-component-slots`, `require-vue-generic`                                        |
+| Template readability      | `no-complex-template-expression`, `no-complex-v-for-source`, `padding-line-between-tags`, `prefer-simple-event-handler`, `prefer-template-literal-in-interpolation` |
+| Dependency injection      | `require-injection-key`                                                                                                                                             |
+| Setup declaration order   | `sort-script-setup`                                                                                                                                                 |
 
 See [Rule Composition](/guide/rule-composition) for complementary checks,
 configuration examples, and interactions with other plugins.
@@ -58,6 +58,7 @@ also report problems that require manual changes. See
 | [define-macros-type-style](./define-macros-type-style.md)                                 | Enforce declaration styles for Vue macro types.                      | TS setup            | —               |
 | [define-model-name-casing](./define-model-name-casing.md)                                 | Enforce casing for explicit defineModel names.                       | Setup               | Opt-in          |
 | [max-lines-per-callback](./max-lines-per-callback.md)                                     | Limit the length of inline callbacks for Vue APIs.                   | Scripts             | —               |
+| [no-complex-template-expression](./no-complex-template-expression.md)                     | Limit logical operators and conditional nesting in Vue templates.    | Template            | —               |
 | [no-complex-v-for-source](./no-complex-v-for-source.md)                                   | Disallow complex expressions in Vue v-for sources.                   | Template            | —               |
 | [padding-line-between-tags](./padding-line-between-tags.md)                               | Enforce blank-line counts between consecutive template tags.         | Template            | Supported cases |
 | [prefer-composable-options](./prefer-composable-options.md)                               | Prefer a final options object for composable parameters.             | Scripts             | —               |

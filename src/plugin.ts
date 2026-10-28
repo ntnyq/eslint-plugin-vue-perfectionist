@@ -7,6 +7,7 @@ import { defineMacrosNewline } from './rules/define-macros-newline.ts'
 import { defineMacrosTypeStyle } from './rules/define-macros-type-style.ts'
 import { defineModelNameCasing } from './rules/define-model-name-casing.ts'
 import { maxLinesPerCallback } from './rules/max-lines-per-callback.ts'
+import { noComplexTemplateExpression } from './rules/no-complex-template-expression.ts'
 import { noComplexVForSource } from './rules/no-complex-v-for-source.ts'
 import { paddingLineBetweenTags } from './rules/padding-line-between-tags.ts'
 import { preferComposableOptions } from './rules/prefer-composable-options.ts'
@@ -40,6 +41,7 @@ export const plugin: VuePerfectionistPlugin = {
     'define-macros-type-style': defineMacrosTypeStyle,
     'define-model-name-casing': defineModelNameCasing,
     'max-lines-per-callback': maxLinesPerCallback,
+    'no-complex-template-expression': noComplexTemplateExpression,
     'no-complex-v-for-source': noComplexVForSource,
     'padding-line-between-tags': paddingLineBetweenTags,
     'prefer-composable-options': preferComposableOptions,

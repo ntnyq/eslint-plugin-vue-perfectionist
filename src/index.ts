@@ -25,6 +25,8 @@ export type {
   DefineModelNameCasingOptions,
   GroupEntry,
   MaxLinesPerCallbackOptions,
+  NoComplexTemplateExpressionDirective,
+  NoComplexTemplateExpressionOptions,
   NoComplexVForSourceOptions,
   PaddingLineBetweenTagsBlankLine,
   PaddingLineBetweenTagsEntry,

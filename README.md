@@ -96,6 +96,7 @@ type, and component contract diagnostics require manual changes.
 | [define-macros-type-style](https://vue-perfectionist.vercel.app/rules/define-macros-type-style)                                 | Enforce declaration styles for Vue macro types.                      |
 | [define-model-name-casing](https://vue-perfectionist.vercel.app/rules/define-model-name-casing)                                 | Enforce casing for explicit defineModel names.                       |
 | [max-lines-per-callback](https://vue-perfectionist.vercel.app/rules/max-lines-per-callback)                                     | Limit the length of inline callbacks for Vue APIs.                   |
+| [no-complex-template-expression](https://vue-perfectionist.vercel.app/rules/no-complex-template-expression)                     | Limit logical operators and conditional nesting in Vue templates.    |
 | [no-complex-v-for-source](https://vue-perfectionist.vercel.app/rules/no-complex-v-for-source)                                   | Disallow complex expressions in Vue v-for sources.                   |
 | [padding-line-between-tags](https://vue-perfectionist.vercel.app/rules/padding-line-between-tags)                               | Enforce blank-line counts between consecutive template tags.         |
 | [prefer-composable-options](https://vue-perfectionist.vercel.app/rules/prefer-composable-options)                               | Prefer a final options object for composable parameters.             |

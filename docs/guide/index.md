@@ -125,6 +125,8 @@ Use [`prefer-watch-effect-alias`](/rules/prefer-watch-effect-alias) to prefer
 
 Use [`require-injection-key`](/rules/require-injection-key) to disallow string keys in Vue provide and inject calls.
 
+Use [`no-complex-template-expression`](/rules/no-complex-template-expression) to limit logical operators and conditional nesting in Vue templates.
+
 ## Auto-imported Vue APIs
 
 For auto-import tooling, opt into

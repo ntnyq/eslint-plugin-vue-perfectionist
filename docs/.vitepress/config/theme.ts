@@ -83,6 +83,10 @@ export function getThemeConfig(): DefaultTheme.Config {
             text: 'max-lines-per-callback',
           },
           {
+            link: '/rules/no-complex-template-expression',
+            text: 'no-complex-template-expression',
+          },
+          {
             link: '/rules/no-complex-v-for-source',
             text: 'no-complex-v-for-source',
           },

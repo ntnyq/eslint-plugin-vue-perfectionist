@@ -415,6 +415,7 @@ watchSyncEffect(update, {  onTrack: debug })
       'define-macros-type-style',
       'define-model-name-casing',
       'max-lines-per-callback',
+      'no-complex-template-expression',
       'no-complex-v-for-source',
       'padding-line-between-tags',
       'prefer-composable-options',
