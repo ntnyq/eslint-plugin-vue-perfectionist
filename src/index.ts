@@ -36,6 +36,8 @@ export type {
   PreferFunctionDeclarationScope,
   PreferFunctionResultPatternOptions,
   PreferFunctionResultPatternTarget,
+  PreferOnScopeDisposeHook,
+  PreferOnScopeDisposeOptions,
   PreferRefPatternOptions,
   PreferSimpleEventHandlerOptions,
   PreferTemplateLiteralInInterpolationOptions,

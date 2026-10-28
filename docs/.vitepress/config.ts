@@ -55,6 +55,7 @@ const exampleRules = {
   'vue-perfectionist/prefer-define-model': 'error',
   'vue-perfectionist/prefer-function-declaration': 'error',
   'vue-perfectionist/prefer-function-result-pattern': 'error',
+  'vue-perfectionist/prefer-on-scope-dispose': 'error',
   'vue-perfectionist/prefer-ref-pattern': 'error',
   'vue-perfectionist/prefer-simple-event-handler': 'error',
   'vue-perfectionist/prefer-template-literal-in-interpolation': 'error',

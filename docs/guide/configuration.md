@@ -92,8 +92,8 @@ export default defineConfig([
 `autoImport` is a boolean and defaults to `false`. It enables recognition of
 unbound, same-name Vue APIs already supported by `sort-script-setup`,
 `callback-style`, `max-lines-per-callback`, `consistent-template-ref-name`,
-`prefer-ref-pattern`, `prefer-use-template-ref-inference`, and
-`prefer-watch-effect-alias`, and `require-injection-key`.
+`prefer-ref-pattern`, `prefer-use-template-ref-inference`,
+`prefer-watch-effect-alias`, `require-injection-key`, and `prefer-on-scope-dispose`.
 `callback-style` and `max-lines-per-callback` also recognize configured `customCallbacks` names.
 `prefer-function-result-pattern` recognizes all configured target names under this
 setting, including `ref`, `shallowRef`, `computed`, and VueUse's `useToggle` by default.
@@ -102,8 +102,8 @@ but declaring globals alone does not enable API recognition.
 Local declarations, parameters, imports from other modules, and type-only
 imports still take precedence and are not treated as auto-imports.
 
-For `sort-script-setup`, `callback-style`, `max-lines-per-callback`, and
-`prefer-watch-effect-alias`, and `require-injection-key`, an explicit `vueGlobals` option
+For `sort-script-setup`, `callback-style`, `max-lines-per-callback`,
+`prefer-watch-effect-alias`, `require-injection-key`, and `prefer-on-scope-dispose`, an explicit `vueGlobals` option
 replaces the shared selection of built-in Vue APIs, including `vueGlobals: []`
 to disable it for one rule. Callback `groups` and `exclude` continue to control
 which built-in APIs are checked. Each `customCallbacks` entry in either callback rule has an

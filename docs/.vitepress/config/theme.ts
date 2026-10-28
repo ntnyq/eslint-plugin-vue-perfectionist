@@ -110,6 +110,10 @@ export function getThemeConfig(): DefaultTheme.Config {
             link: '/rules/prefer-function-result-pattern',
             text: 'prefer-function-result-pattern',
           },
+          {
+            link: '/rules/prefer-on-scope-dispose',
+            text: 'prefer-on-scope-dispose',
+          },
           { link: '/rules/prefer-ref-pattern', text: 'prefer-ref-pattern' },
           {
             link: '/rules/prefer-simple-event-handler',

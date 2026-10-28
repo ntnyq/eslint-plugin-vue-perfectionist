@@ -14,6 +14,7 @@ import { preferComposableOptions } from './rules/prefer-composable-options.ts'
 import { preferDefineModel } from './rules/prefer-define-model.ts'
 import { preferFunctionDeclaration } from './rules/prefer-function-declaration.ts'
 import { preferFunctionResultPattern } from './rules/prefer-function-result-pattern.ts'
+import { preferOnScopeDispose } from './rules/prefer-on-scope-dispose.ts'
 import { preferRefPattern } from './rules/prefer-ref-pattern.ts'
 import { preferSimpleEventHandler } from './rules/prefer-simple-event-handler.ts'
 import { preferTemplateLiteralInInterpolation } from './rules/prefer-template-literal-in-interpolation.ts'
@@ -48,6 +49,7 @@ export const plugin: VuePerfectionistPlugin = {
     'prefer-define-model': preferDefineModel,
     'prefer-function-declaration': preferFunctionDeclaration,
     'prefer-function-result-pattern': preferFunctionResultPattern,
+    'prefer-on-scope-dispose': preferOnScopeDispose,
     'prefer-ref-pattern': preferRefPattern,
     'prefer-simple-event-handler': preferSimpleEventHandler,
     'prefer-template-literal-in-interpolation':

@@ -103,6 +103,7 @@ type, and component contract diagnostics require manual changes.
 | [prefer-define-model](https://vue-perfectionist.vercel.app/rules/prefer-define-model)                                           | Prefer defineModel over matching prop and update event declarations. |
 | [prefer-function-declaration](https://vue-perfectionist.vercel.app/rules/prefer-function-declaration)                           | Require function declarations in SFCs and composables.               |
 | [prefer-function-result-pattern](https://vue-perfectionist.vercel.app/rules/prefer-function-result-pattern)                     | Enforce naming patterns for function result bindings.                |
+| [prefer-on-scope-dispose](https://vue-perfectionist.vercel.app/rules/prefer-on-scope-dispose)                                   | Prefer scope-based cleanup in named Vue composables.                 |
 | [prefer-ref-pattern](https://vue-perfectionist.vercel.app/rules/prefer-ref-pattern)                                             | Enforce naming patterns for template refs.                           |
 | [prefer-simple-event-handler](https://vue-perfectionist.vercel.app/rules/prefer-simple-event-handler)                           | Require simple expressions in named template event handlers.         |
 | [prefer-template-literal-in-interpolation](https://vue-perfectionist.vercel.app/rules/prefer-template-literal-in-interpolation) | Prefer a single template literal for mixed text and interpolation.   |

@@ -4,6 +4,46 @@ import plugin, * as pluginExports from '../../src'
 import { vueLanguageOptions } from '../helpers/rule-tester.ts'
 
 describe('plugin contract', () => {
+  it('composes injection, template complexity, and composable cleanup checks without fixes', () => {
+    const linter = new Linter()
+    const source = `<script setup lang="ts">
+import { inject, onUnmounted } from 'vue'
+function usePolling() {
+  const value = inject('form')
+  onUnmounted(cleanup)
+  return value
+}
+</script>
+<template><div v-if="a || b || c || d" /></template>`
+    const configuration: Linter.Config = {
+      files: ['**/*.vue'],
+      languageOptions: vueLanguageOptions,
+      plugins: { vp: plugin },
+      rules: {
+        'vp/require-injection-key': 'error',
+        'vp/no-complex-template-expression': 'error',
+        'vp/prefer-on-scope-dispose': 'error',
+      },
+    }
+    const result = linter.verifyAndFix(source, configuration, 'Test.vue')
+    expect(
+      result.messages.map(message => [message.ruleId, message.messageId]),
+    ).toEqual([
+      ['vp/require-injection-key', 'unexpectedStringKey'],
+      ['vp/prefer-on-scope-dispose', 'preferScopeDispose'],
+      ['vp/no-complex-template-expression', 'tooManyLogicalExpressions'],
+    ])
+    expect(result.fixed).toBe(false)
+    expect(result.output).toBe(source)
+    for (const message of result.messages) {
+      expect(message.fix).toBeUndefined()
+      expect(message.suggestions).toBeUndefined()
+    }
+    expect(
+      linter.verifyAndFix(result.output, configuration, 'Test.vue'),
+    ).toEqual(result)
+  })
+
   it('renames model contracts through an aliased plugin only when opted in', () => {
     const linter = new Linter()
     const source =
@@ -422,6 +462,7 @@ watchSyncEffect(update, {  onTrack: debug })
       'prefer-define-model',
       'prefer-function-declaration',
       'prefer-function-result-pattern',
+      'prefer-on-scope-dispose',
       'prefer-ref-pattern',
       'prefer-simple-event-handler',
       'prefer-template-literal-in-interpolation',

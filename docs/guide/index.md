@@ -127,6 +127,9 @@ Use [`require-injection-key`](/rules/require-injection-key) to disallow string k
 
 Use [`no-complex-template-expression`](/rules/no-complex-template-expression) to limit logical operators and conditional nesting in Vue templates.
 
+Use [`prefer-on-scope-dispose`](/rules/prefer-on-scope-dispose) to prefer scope-based
+cleanup in named composables, with explicit exceptions for component lifetime.
+
 ## Auto-imported Vue APIs
 
 For auto-import tooling, opt into

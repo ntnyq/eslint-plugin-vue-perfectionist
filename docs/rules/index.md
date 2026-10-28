@@ -12,7 +12,7 @@ registration and parser setup.
 
 | Goal                      | Rules                                                                                                                                                               |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Callbacks and composables | `callback-style`, `max-lines-per-callback`, `prefer-composable-options`, `prefer-function-declaration`, `prefer-watch-effect-alias`                                 |
+| Callbacks and composables | `callback-style`, `max-lines-per-callback`, `prefer-composable-options`, `prefer-function-declaration`, `prefer-watch-effect-alias`, `prefer-on-scope-dispose`      |
 | Macro layout and types    | `define-macros-newline`, `define-macros-type-style`, `require-macro-type-name`                                                                                      |
 | Component models          | `define-model-name-casing`, `prefer-define-model`                                                                                                                   |
 | Ref and result naming     | `consistent-template-ref-name`, `prefer-ref-pattern`, `prefer-function-result-pattern`                                                                              |
@@ -65,6 +65,7 @@ also report problems that require manual changes. See
 | [prefer-define-model](./prefer-define-model.md)                                           | Prefer defineModel over matching prop and update event declarations. | Setup               | —               |
 | [prefer-function-declaration](./prefer-function-declaration.md)                           | Require function declarations in SFCs and composables.               | Scripts             | —               |
 | [prefer-function-result-pattern](./prefer-function-result-pattern.md)                     | Enforce naming patterns for function result bindings.                | Scripts             | —               |
+| [prefer-on-scope-dispose](./prefer-on-scope-dispose.md)                                   | Prefer scope-based cleanup in named Vue composables.                 | Scripts             | —               |
 | [prefer-ref-pattern](./prefer-ref-pattern.md)                                             | Enforce naming patterns for template refs.                           | Template + scripts  | —               |
 | [prefer-simple-event-handler](./prefer-simple-event-handler.md)                           | Require simple expressions in named template event handlers.         | Template            | —               |
 | [prefer-template-literal-in-interpolation](./prefer-template-literal-in-interpolation.md) | Prefer a single template literal for mixed text and interpolation.   | Template            | Supported cases |
