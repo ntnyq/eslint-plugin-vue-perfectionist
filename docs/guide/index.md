@@ -123,6 +123,8 @@ to enforce the casing of explicit model names independently of template argument
 Use [`prefer-watch-effect-alias`](/rules/prefer-watch-effect-alias) to prefer
 `watchPostEffect` and `watchSyncEffect` over static `watchEffect` flush options.
 
+Use [`require-injection-key`](/rules/require-injection-key) to disallow string keys in Vue provide and inject calls.
+
 ## Auto-imported Vue APIs
 
 For auto-import tooling, opt into

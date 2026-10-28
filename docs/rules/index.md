@@ -19,6 +19,7 @@ registration and parser setup.
 | Template ref types        | `prefer-use-template-ref-inference`                                                                                                 |
 | Component usage contracts | `require-component-props`, `component-prop-types`, `component-prop-values`, `require-component-slots`, `require-vue-generic`        |
 | Template readability      | `no-complex-v-for-source`, `padding-line-between-tags`, `prefer-simple-event-handler`, `prefer-template-literal-in-interpolation`   |
+| Dependency injection      | `require-injection-key`                                                                                                             |
 | Setup declaration order   | `sort-script-setup`                                                                                                                 |
 
 See [Rule Composition](/guide/rule-composition) for complementary checks,
@@ -70,6 +71,7 @@ also report problems that require manual changes. See
 | [prefer-watch-effect-alias](./prefer-watch-effect-alias.md)                               | Prefer dedicated aliases for post and sync watch effects.            | Scripts             | Supported cases |
 | [require-component-props](./require-component-props.md)                                   | Require configured props at component usage sites.                   | Template            | —               |
 | [require-component-slots](./require-component-slots.md)                                   | Require configured slots at component usage sites.                   | Template            | —               |
+| [require-injection-key](./require-injection-key.md)                                       | Disallow string keys in Vue provide and inject calls.                | Scripts             | —               |
 | [require-macro-type-name](./require-macro-type-name.md)                                   | Require exact call-site names for Vue macro types.                   | TS setup            | —               |
 | [require-vue-generic](./require-vue-generic.md)                                           | Require explicit generic comments on configured components.          | Template            | —               |
 | [sort-script-setup](./sort-script-setup.md)                                               | Group and order top-level statements in `<script setup>`.            | Setup               | Supported cases |

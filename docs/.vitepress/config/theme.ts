@@ -132,6 +132,10 @@ export function getThemeConfig(): DefaultTheme.Config {
             text: 'require-component-slots',
           },
           {
+            link: '/rules/require-injection-key',
+            text: 'require-injection-key',
+          },
+          {
             link: '/rules/require-macro-type-name',
             text: 'require-macro-type-name',
           },

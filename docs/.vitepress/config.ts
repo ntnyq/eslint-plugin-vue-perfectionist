@@ -74,6 +74,7 @@ const exampleRules = {
       ],
     },
   ],
+  'vue-perfectionist/require-injection-key': 'error',
   'vue-perfectionist/require-macro-type-name': 'error',
   'vue-perfectionist/require-vue-generic': [
     'error',

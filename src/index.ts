@@ -44,6 +44,7 @@ export type {
   RequireComponentPropsTarget,
   RequireComponentSlotsOptions,
   RequireComponentSlotsTarget,
+  RequireInjectionKeyOptions,
   RequireMacroTypeNameMacro,
   RequireMacroTypeNameOptions,
   RequireVueGenericIgnoreCondition,

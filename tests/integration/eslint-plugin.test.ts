@@ -428,6 +428,7 @@ watchSyncEffect(update, {  onTrack: debug })
       'prefer-watch-effect-alias',
       'require-component-props',
       'require-component-slots',
+      'require-injection-key',
       'require-macro-type-name',
       'require-vue-generic',
       'sort-script-setup',

@@ -109,6 +109,7 @@ type, and component contract diagnostics require manual changes.
 | [prefer-watch-effect-alias](https://vue-perfectionist.vercel.app/rules/prefer-watch-effect-alias)                               | Prefer dedicated aliases for post and sync watch effects.            |
 | [require-component-props](https://vue-perfectionist.vercel.app/rules/require-component-props)                                   | Require configured props at component usage sites.                   |
 | [require-component-slots](https://vue-perfectionist.vercel.app/rules/require-component-slots)                                   | Require configured slots at component usage sites.                   |
+| [require-injection-key](https://vue-perfectionist.vercel.app/rules/require-injection-key)                                       | Disallow string keys in Vue provide and inject calls.                |
 | [require-macro-type-name](https://vue-perfectionist.vercel.app/rules/require-macro-type-name)                                   | Require exact call-site names for Vue macro types.                   |
 | [require-vue-generic](https://vue-perfectionist.vercel.app/rules/require-vue-generic)                                           | Require explicit generic comments on configured components.          |
 | [sort-script-setup](https://vue-perfectionist.vercel.app/rules/sort-script-setup)                                               | Group and order top-level statements in `<script setup>`.            |

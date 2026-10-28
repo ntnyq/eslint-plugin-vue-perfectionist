@@ -20,6 +20,7 @@ import { preferUseTemplateRefInference } from './rules/prefer-use-template-ref-i
 import { preferWatchEffectAlias } from './rules/prefer-watch-effect-alias.ts'
 import { requireComponentProps } from './rules/require-component-props.ts'
 import { requireComponentSlots } from './rules/require-component-slots.ts'
+import { requireInjectionKey } from './rules/require-injection-key.ts'
 import { requireMacroTypeName } from './rules/require-macro-type-name.ts'
 import { requireVueGeneric } from './rules/require-vue-generic.ts'
 import { sortScriptSetup } from './rules/sort-script-setup.ts'
@@ -53,6 +54,7 @@ export const plugin: VuePerfectionistPlugin = {
     'prefer-watch-effect-alias': preferWatchEffectAlias,
     'require-component-props': requireComponentProps,
     'require-component-slots': requireComponentSlots,
+    'require-injection-key': requireInjectionKey,
     'require-macro-type-name': requireMacroTypeName,
     'require-vue-generic': requireVueGeneric,
     'sort-script-setup': sortScriptSetup,
