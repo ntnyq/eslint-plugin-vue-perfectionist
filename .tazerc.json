@@ -1,7 +1,3 @@
 {
-  "exclude": [
-    "typescript",
-    "@shikijs/magic-move",
-    "@shikijs/vitepress-twoslash>floating-vue"
-  ]
+  "exclude": ["typescript", "@shikijs/magic-move"]
 }
