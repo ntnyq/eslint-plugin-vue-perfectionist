@@ -73,6 +73,10 @@ await run<RequireVueGenericOptions, RequireVueGenericMessageId>({
       '<!-- @vue-generic {Course} --><component :is="\'ElTableColumn\'" />',
       '<ElTableColumn type="index"><!-- @vue-generic {Course} --><ElTableColumn /></ElTableColumn>',
       '<!-- @vue-generic {Course} --><ElTableColumn v-for="item in items" v-if="ok" />',
+      '<svg><pre><!-- @vue-generic {Course} --> <ElTableColumn /></pre></svg>',
+      '<math><pre><!-- @vue-generic {Course} --> <ElTableColumn /></pre></math>',
+      '<pre><!-- @vue-generic {Course} --><ElTableColumn /></pre>',
+      '<!-- @vue-generic {Course} -->&#32;\n<!-- note --><ElTableColumn />',
     ].map(content => ({
       code: template(content),
       options,
@@ -136,6 +140,26 @@ await run<RequireVueGenericOptions, RequireVueGenericMessageId>({
         ],
       },
     },
+    ...[
+      'modelModifiers="index" v-model.trim="value"',
+      'typeModifiers="index" v-model:type.trim="value"',
+      'v-model:type.trim="value" v-bind="{}" typeModifiers="index"',
+      'v-model:type.trim="value" :[\'typeModifiers\']="\'index\'"',
+    ].map(attributes => ({
+      description: 'respects writes that precede or override model modifiers',
+      code: template(`<ElTableColumn ${attributes} />`),
+      options: {
+        targets: [
+          {
+            components: ['ElTableColumn'],
+            ignoreWhen: [
+              { props: { modelModifiers: { enum: ['index'] } } },
+              { props: { typeModifiers: { enum: ['index'] } } },
+            ],
+          },
+        ],
+      },
+    })),
     { code: '<script setup>const value = 1</script>', options },
     { code: 'const value = 1', filename: 'test.js', options },
     { code: 'const value: number = 1', filename: 'test.ts', options },
@@ -241,6 +265,65 @@ await run<RequireVueGenericOptions, RequireVueGenericMessageId>({
       errors: ['missingVueGeneric'],
       output: null,
     },
+    ...[
+      '<svg><foreignObject><pre><!-- @vue-generic {Course} --> <ElTableColumn /></pre></foreignObject></svg>',
+      '<pre><div><!-- @vue-generic {Course} -->\r\n<ElTableColumn /></div></pre>',
+      '<!-- @vue-generic {Course} -->&nbsp;<ElTableColumn />',
+      '<!-- @vue-generic {Course} -->\u{3000}<ElTableColumn />',
+      '<!-- @vue-generic {Course} --><Other /><!-- note --><ElTableColumn />',
+    ].map(content => ({
+      description: 'does not associate comments across preserved text or nodes',
+      code: template(content),
+      options,
+      errors: ['missingVueGeneric' as const],
+      output: null,
+    })),
+    ...[
+      { expression: '!value', values: ['index'] },
+      { expression: 'typeof value', values: [true, null, 1] },
+      { expression: `\`prefix\${value}\``, values: [true, null, 1] },
+      { expression: "ok ? !value : 'selection'", values: ['index'] },
+    ].map(({ expression, values }) => ({
+      description: 'does not exempt values with incompatible enum types',
+      code: template(`<ElTableColumn :type="${expression}" />`),
+      options: {
+        targets: [
+          {
+            components: ['ElTableColumn'],
+            ignoreWhen: [{ props: { type: { enum: values } } }],
+          },
+        ],
+        unknownValues: 'ignore' as const,
+      },
+      errors: ['missingVueGeneric' as const],
+      output: null,
+    })),
+    ...[
+      'v-model.trim="value" modelModifiers="index"',
+      'v-model:type.trim="value" typeModifiers="index"',
+      'typeModifiers="index" v-model:[\'type\'].trim="value"',
+      'v-bind="{ typeModifiers: \'index\' }" v-model:type.trim="value"',
+    ].flatMap(attributes =>
+      (['report', 'ignore'] as const).map(unknownValues => ({
+        description:
+          'does not exempt overwritten or deduplicated modifier props',
+        code: template(`<ElTableColumn ${attributes} />`),
+        options: {
+          targets: [
+            {
+              components: ['ElTableColumn'],
+              ignoreWhen: [
+                { props: { modelModifiers: { enum: ['index'] } } },
+                { props: { typeModifiers: { enum: ['index'] } } },
+              ],
+            },
+          ],
+          unknownValues,
+        },
+        errors: ['missingVueGeneric' as const],
+        output: null,
+      })),
+    ),
     ...[
       '<ElTableColumn />',
       '<ElTableColumn type="selection" />',

@@ -12,9 +12,20 @@ function resolveRuntimeProps(
   template: string,
   state: Record<string, unknown> = {},
 ) {
-  let received: Partial<Record<'count' | 'disabled' | 'isReady', unknown>> = {}
+  let received: Partial<
+    Record<
+      'count' | 'countModifiers' | 'modelModifiers' | 'disabled' | 'isReady',
+      unknown
+    >
+  > = {}
   const AppCounter = defineComponent({
-    props: { count: null, disabled: Boolean, isReady: Boolean },
+    props: {
+      count: null,
+      countModifiers: null,
+      modelModifiers: null,
+      disabled: Boolean,
+      isReady: Boolean,
+    },
     setup(props) {
       received = { ...props }
       return () => null
@@ -195,6 +206,115 @@ describe('component prop contracts with Vue compilation and runtime', () => {
       )
       expect(result.fixed).toBe(false)
       expect(result.output).toBe(code)
+    },
+  )
+
+  it.each([
+    [
+      'v-model.trim="model" modelModifiers="index"',
+      'modelModifiers',
+      { trim: true },
+    ],
+    ['modelModifiers="index" v-model.trim="model"', 'modelModifiers', 'index'],
+    [
+      'v-model:count.trim="model" countModifiers="index"',
+      'countModifiers',
+      { trim: true },
+    ],
+    [
+      'countModifiers="index" v-model:count.trim="model"',
+      'countModifiers',
+      'index',
+    ],
+    [
+      'v-bind="{ countModifiers: \'index\' }" v-model:count.trim="model"',
+      'countModifiers',
+      { trim: true },
+    ],
+    [
+      'v-model:count.trim="model" v-bind="{ countModifiers: \'index\' }"',
+      'countModifiers',
+      'index',
+    ],
+    [
+      'countModifiers="index" v-model:[\'count\'].trim="model"',
+      'countModifiers',
+      { trim: true },
+    ],
+    [
+      'v-model:[\'count\'].trim="model" countModifiers="index"',
+      'countModifiers',
+      'index',
+    ],
+    [
+      'v-model:count.prop.attr.camel="model" countModifiers="index"',
+      'countModifiers',
+      { prop: true, attr: true, camel: true },
+    ],
+    ['v-model:count="model" countModifiers="index"', 'countModifiers', 'index'],
+  ] as const)(
+    'matches generated modifier props and generic exemptions for %s',
+    (attributes, prop, expected) => {
+      expect(
+        resolveRuntimeProps(`<AppCounter ${attributes} />`, { model: 1 })[prop],
+      ).toEqual(expected)
+      const code = `<template><AppCounter ${attributes} /></template>`
+      const result = new Linter().verifyAndFix(
+        code,
+        {
+          files: ['**/*.vue'],
+          languageOptions: vueLanguageOptions,
+          plugins: { vp: plugin },
+          rules: {
+            'vp/require-component-props': [
+              'error',
+              { targets: [{ components: ['AppCounter'], props: [prop] }] },
+            ],
+            'vp/component-prop-types': [
+              'error',
+              {
+                targets: [
+                  { components: ['AppCounter'], props: { [prop]: 'string' } },
+                ],
+              },
+            ],
+            'vp/component-prop-values': [
+              'error',
+              {
+                targets: [
+                  {
+                    components: ['AppCounter'],
+                    props: { [prop]: { enum: ['index'] } },
+                  },
+                ],
+              },
+            ],
+            'vp/require-vue-generic': [
+              'error',
+              {
+                targets: [
+                  {
+                    components: ['AppCounter'],
+                    ignoreWhen: [{ props: { [prop]: { enum: ['index'] } } }],
+                  },
+                ],
+                unknownValues: 'ignore',
+              },
+            ],
+          },
+        },
+        'Test.vue',
+      )
+      expect(result.messages.map(message => message.messageId).sort()).toEqual(
+        expected === 'index'
+          ? []
+          : ['invalidPropType', 'invalidPropValue', 'missingVueGeneric'],
+      )
+      expect(result.fixed).toBe(false)
+      expect(result.output).toBe(code)
+      expect(
+        result.messages.every(message => !message.fix && !message.suggestions),
+      ).toBe(true)
     },
   )
 

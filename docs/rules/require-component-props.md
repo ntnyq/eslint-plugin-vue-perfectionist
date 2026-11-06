@@ -149,8 +149,8 @@ Type: `'report' | 'ignore'`. Default: `'report'`.
 - Skips lowercase `<slot>` outlets even when `Slot` is configured. Capitalized `<Slot>` components and components in slot fallback content are still checked.
 - Supports `<component is="AppCounter">` and `<component :is="'AppCounter'">`. A dynamic component identity such as `:is="current"` is skipped. The `is` selector must be explicit, not supplied through an object binding.
 - Recognizes static attributes, `v-bind:prop`, same-name `:prop`, object literal bindings, static computed string keys, and nested object literal spreads. Unknown spreads and computed names make the affected presence uncertain. Accessors and methods with known keys still provide those keys.
-- Recognizes default `v-model` as `modelValue` and named `v-model:count` as `count`. Modifiers do not change this presence check; generated modifier props and update listeners are not inferred.
-- Resolves string-valued dynamic arguments such as `:['count']`, and supports `.camel`. `.prop` and `.attr` bindings are uncertain for the named prop rather than assumed to supply ordinary component props.
+- Recognizes default `v-model` as `modelValue` and named `v-model:count` as `count`. With modifiers, also recognizes the generated `modelModifiers` or `<argument>Modifiers` prop. Update listeners are not inferred.
+- Resolves string-valued dynamic arguments such as `:['count']`, and supports `v-bind`'s `.camel`. `v-bind`'s `.prop` and `.attr` bindings are uncertain for the named prop rather than assumed to supply ordinary component props.
 - Rejects contracts for `class`, `style`, `key`, `ref`, `refFor`, `refKey`, `ref_for`, `ref_key`, `is`, and event listener keys such as `onClick`. Their merge or framework semantics are outside these contracts.
 - Duplicate attributes and malformed directives remain the responsibility of Vue syntax rules. This rule does not add syntax diagnostics.
 

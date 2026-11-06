@@ -149,8 +149,8 @@ export default defineConfig([
 - 跳过小写 `<slot>` 出口，即使配置了 `Slot`；大写 `<Slot>` 及插槽后备内容中的组件仍检查。
 - 支持 `<component is="AppCounter">` 和 `<component :is="'AppCounter'">`，跳过 `:is="current"` 等动态身份。`is` 选择器必须显式提供，不能来自对象绑定。
 - 识别静态属性、`v-bind:prop`、同名简写 `:prop`、对象字面量绑定、静态计算字符串键及嵌套字面量展开。未知展开和计算名使相关存在性无法确定。已知键的访问器和方法仍提供该键。
-- 默认 `v-model` 识别为 `modelValue`，具名 `v-model:count` 识别为 `count`。修饰符不改变存在检查，不推断生成的修饰符 prop 和更新监听器。
-- 解析 `:['count']` 等字符串动态参数，支持 `.camel`。`.prop` 和 `.attr` 对具名 prop 视为不确定，不假定其提供普通组件 prop。
+- 默认 `v-model` 识别为 `modelValue`，具名 `v-model:count` 识别为 `count`。带修饰符时，也识别生成的 `modelModifiers` 或 `<参数名>Modifiers` prop。不推断更新监听器。
+- 解析 `:['count']` 等字符串动态参数，支持 `v-bind` 的 `.camel`。`v-bind` 的 `.prop` 和 `.attr` 对具名 prop 视为不确定，不假定其提供普通组件 prop。
 - 拒绝配置 `class`、`style`、`key`、`ref`、`refFor`、`refKey`、`ref_for`、`ref_key`、`is` 和 `onClick` 等事件监听器键，其合并或框架语义不在约定范围内。
 - 重复属性及无效指令交由 Vue 语法规则，本规则不添加语法诊断。
 

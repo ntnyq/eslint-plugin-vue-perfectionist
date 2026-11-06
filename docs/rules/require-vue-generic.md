@@ -116,7 +116,10 @@ import type { IAiCourse } from '#types'
 The comment must precede the usage within the same parent. Other elements,
 non-whitespace text, and interpolations interrupt association. A parent
 component's generic does not satisfy its children, and a comment is not reused
-for the next sibling. Whitespace within `<pre>` also interrupts association.
+for the next sibling. Whitespace within an HTML `<pre>` also interrupts
+association; a `<pre>` in the SVG or MathML namespace does not preserve whitespace.
+Nonbreaking spaces and other non-ASCII whitespace remain text and interrupt
+association outside `<pre>` too.
 
 ::: incorrect
 
@@ -244,7 +247,10 @@ object literal bindings with nested spreads. It does not execute code, follow
 script variables, trust asserted types, or apply child prop defaults.
 Binding order matters: a known write after an unknown spread can establish a
 value; a later unknown spread can invalidate it. Dynamic argument names and
-`.prop` / `.attr` bindings introduce uncertainty for affected props.
+`v-bind` `.prop` / `.attr` bindings introduce uncertainty for affected props.
+`v-model` modifiers generate object-valued `modelModifiers` or
+`<argument>Modifiers` props. These writes follow the same deduplication and
+override order as explicit bindings and cannot satisfy scalar exemptions.
 
 ### `unknownValues`
 
@@ -253,6 +259,10 @@ Type: `'report' | 'ignore'`. Default: `'report'`.
 - `report`: require a comment unless an exemption is definitely satisfied.
 - `ignore`: also skip usages that might satisfy an exemption. A definite
   mismatch in any prop defeats that condition, even if another prop is unknown.
+
+A known type incompatible with every enum member is a definite mismatch even
+when its exact value is unknown. For example, `:type="!value"` cannot satisfy
+`enum: ['index']`, so `ignore` still requires a generic comment.
 
 If a conditional expression has both matching and failing variants, its
 condition is uncertain. Alternative conditions are evaluated independently;

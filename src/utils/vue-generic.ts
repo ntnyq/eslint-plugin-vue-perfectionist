@@ -128,7 +128,10 @@ export function hasVueGenericComment(
   let ancestor: AST.VElement | AST.VDocumentFragment = node.parent
   let preservesWhitespace = false
   while (ancestor.type === 'VElement') {
-    if (ancestor.rawName === 'pre') {
+    if (
+      ancestor.rawName === 'pre' &&
+      ancestor.namespace === 'http://www.w3.org/1999/xhtml'
+    ) {
       preservesWhitespace = true
       break
     }

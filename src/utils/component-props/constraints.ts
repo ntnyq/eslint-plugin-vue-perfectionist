@@ -9,6 +9,7 @@ import type { PropValueVariant } from './value.ts'
 interface ValueCheck {
   expected: string
   accepts: (value: ComponentPropScalar) => boolean
+  acceptedTypes?: Set<string>
 }
 
 export interface CompiledValueConstraint {
@@ -102,6 +103,18 @@ export function compileConstraint(
           value => JSON.stringify(value),
         )
         .join(', ')}`,
+      acceptedTypes: new Set(
+        values.map(
+          /**
+           * Retain enum types to reject incompatible values even when their
+           * exact scalar is unknown.
+           *
+           * @param value - The allowed enum member.
+           * @returns Its scalar type, treating null separately from objects.
+           */
+          value => (value === null ? 'null' : typeof value),
+        ),
+      ),
       /**
        * Check membership in the configured scalar enum.
        *
@@ -320,7 +333,20 @@ export function getValueFailures(
   // Null is a known enum candidate, not an unresolved value.
   const scalar = variant.type === 'null' ? null : value
   if (scalar === undefined) {
-    return undefined
+    const failures = checks.flatMap(
+      /**
+       * Report only constraints whose accepted types exclude this variant.
+       * Other constraints remain unknown without its concrete scalar value.
+       *
+       * @param check - The compiled scalar check.
+       * @returns The expectation if the variant's type proves a mismatch.
+       */
+      check =>
+        check.acceptedTypes && !check.acceptedTypes.has(variant.type)
+          ? [check.expected]
+          : [],
+    )
+    return failures.length ? failures : undefined
   }
   if (typeof scalar === 'number' && !Number.isFinite(scalar)) {
     return ['a finite number']

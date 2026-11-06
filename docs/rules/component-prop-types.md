@@ -239,7 +239,7 @@ Component matching, prop normalization, native-tag and slot-outlet exclusions, `
 
 TypeScript assertions, `satisfies`, and non-null assertions are unwrapped rather than trusted as runtime evidence. No script initializer tracking, ref unwrapping, TypeScript type services, imported definitions, or function execution is used. Component defaults and custom transformations are not simulated. Use `vue-tsc` for full SFC type checking.
 
-Default and named `v-model` supply their corresponding props, but `.number` and `.trim` do not establish the current parent expression's type. Object getter/setter values are unknown. Unsupported `.prop` and `.attr` bindings introduce uncertainty for the named prop.
+Default and named `v-model` supply their corresponding props, but `.number` and `.trim` do not establish the current parent expression's type. Modifiers also supply an object-valued `modelModifiers` or `<argument>Modifiers` prop, subject to Vue's normal deduplication and merge order. Object getter/setter values are unknown. Unsupported `v-bind` `.prop` and `.attr` bindings introduce uncertainty for the named prop.
 
 ### Diagnostics and fixes
 

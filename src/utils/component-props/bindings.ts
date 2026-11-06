@@ -342,6 +342,7 @@ export function analyzeComponentBindings(
         ? 'modelValue'
         : undefined
     if (
+      directive === 'bind' &&
       attribute.key.modifiers.some(
         /**
          * Detect binding modifiers whose prop behavior is not modeled.
@@ -370,6 +371,7 @@ export function analyzeComponentBindings(
       continue
     }
     if (
+      directive === 'bind' &&
       attribute.key.modifiers.some(
         /**
          * Detect explicit camel-case normalization of a binding argument.
@@ -389,6 +391,18 @@ export function analyzeComponentBindings(
         : unknownPropValue(attribute),
       !argument || argument.type === 'VIdentifier',
     )
+    if (directive === 'model' && attribute.key.modifiers.length) {
+      // Vue emits this object beside the model value in the same prop group.
+      writeExplicit(
+        argument ? `${name}Modifiers` : 'modelModifiers',
+        {
+          variants: [{ type: 'object' }],
+          unknown: false,
+          node: attribute,
+        },
+        !argument || argument.type === 'VIdentifier',
+      )
+    }
   }
   return bindings
 }

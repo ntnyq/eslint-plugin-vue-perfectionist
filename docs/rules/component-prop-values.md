@@ -268,8 +268,10 @@ Combine the two rules for required props with strict value checking.
   still checked.
 - Static attributes, named `v-bind`, inline object spreads with known keys,
   static computed arguments, and `v-model` are supported. Default `v-model` supplies
-  `modelValue`; modifiers do not imply value coercion.
-- Unknown spreads, computed keys, `.prop`/`.attr`, or mixed raw spellings for one
+  `modelValue`; modifiers do not imply value coercion. They also generate
+  object-valued `modelModifiers` or `<argument>Modifiers` props, subject to the
+  same deduplication and merge order as explicit bindings.
+- Unknown spreads, computed keys, `v-bind` `.prop`/`.attr`, or mixed raw spellings for one
   normalized prop leave affected values uncertain. Raw keys follow Vue's
   deduplication and merge order; getters are never executed. Reserved attributes
   and event listener names cannot be configured as prop contracts.
@@ -279,7 +281,8 @@ Combine the two rules for required props with strict value checking.
   non-null assertions, and `satisfies` preserve the underlying expression.
 - Does not evaluate script constants, identifiers, member access, function calls,
   interpolated strings, logical expressions, or coercing arithmetic. Known types
-  may still establish a mismatch when the exact value is unavailable. Expression
+  may still establish a mismatch when the exact value is unavailable, including
+  types incompatible with every configured enum member. Expression
   analysis is bounded to 32 recursive levels and 64 candidates; expressions beyond
   these limits are treated as unknown.
 

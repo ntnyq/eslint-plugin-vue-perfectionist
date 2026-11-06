@@ -234,7 +234,7 @@ export default defineConfig([
 
 TypeScript 断言、`satisfies` 和非空断言仅被移除包装，不作为运行时证据。不跟踪脚本初始化器，不解包 ref，不使用 TypeScript 类型服务、导入定义或函数执行结果，也不模拟组件默认值和自定义转换。完整的 SFC 类型检查请使用 `vue-tsc`。
 
-默认和具名 `v-model` 会提供相应 prop，但 `.number` 和 `.trim` 不能确定父级当前表达式的类型。对象 getter/setter 的值无法确定。不支持的 `.prop` 和 `.attr` 绑定会使对应 prop 的值无法确定。
+默认和具名 `v-model` 会提供相应 prop，但 `.number` 和 `.trim` 不能确定父级当前表达式的类型。修饰符还会提供对象类型的 `modelModifiers` 或 `<参数名>Modifiers` prop，遵循 Vue 的正常去重和合并顺序。对象 getter/setter 的值无法确定。不支持的 `v-bind` `.prop` 和 `.attr` 绑定会使对应 prop 的值无法确定。
 
 ### 诊断与修复 {#diagnostics-and-fixes}
 

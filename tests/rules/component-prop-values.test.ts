@@ -342,6 +342,15 @@ await run<ComponentPropValuesOptions, ComponentPropValuesMessageId>({
       { code: counter(':count="null"'), constraint: { enum: [false] } },
       { code: counter(':count="{}"'), constraint: { enum: [null] } },
       { code: counter(':count="undefined"'), constraint: { enum: [null] } },
+      { code: counter(':count="!value"'), constraint: { enum: [1, null] } },
+      {
+        code: counter(':count="typeof value"'),
+        constraint: { enum: [true, null, 1] },
+      },
+      {
+        code: counter(`:count="\`prefix\${value}\`"`),
+        constraint: { enum: [true, null, 1] },
+      },
     ].map(({ code, constraint }) => ({
       code,
       options: optionsFor(constraint),
@@ -356,6 +365,34 @@ await run<ComponentPropValuesOptions, ComponentPropValuesMessageId>({
       code: counter(`:count="${expression}"`),
       options: optionsFor(constraint, 'report'),
       errors: ['unverifiablePropValue' as const],
+      output: null,
+    })),
+    ...[
+      {
+        expression: '2',
+        actual: '2',
+        constraint: { enum: [true], minimum: 0 },
+      },
+      {
+        expression: 'typeof value',
+        actual: 'string',
+        constraint: { enum: [true], minLength: 1 },
+      },
+    ].map(({ expression, actual, constraint }) => ({
+      description: 'reports only the definitely failing enum constraint',
+      code: counter(`:count="${expression}"`),
+      options: optionsFor(constraint),
+      errors: [
+        {
+          messageId: 'invalidPropValue' as const,
+          data: {
+            component: 'AppCounter',
+            prop: 'count',
+            expected: 'one of true',
+            actual,
+          },
+        },
+      ],
       output: null,
     })),
     {
