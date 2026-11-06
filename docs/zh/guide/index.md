@@ -91,6 +91,10 @@ pnpm exec eslint .
 pnpm exec eslint . --fix
 ```
 
+组合式函数的返回对象可以启用
+[sort-composable-return](/zh/rules/sort-composable-return)。
+默认状态在前、方法在后，保留组内顺序，只自动修复空行。
+
 ## 后续步骤 {#next-steps}
 
 - [选择规则](/zh/rules/)：按用途浏览规则，查看适用文件范围、默认行为和自动修复支持情况。

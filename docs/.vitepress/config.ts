@@ -98,6 +98,7 @@ const exampleRules = {
       ],
     },
   ],
+  'vue-perfectionist/sort-composable-return': 'error',
   'vue-perfectionist/sort-script-setup': 'error',
 } satisfies Record<string, Linter.RuleEntry>
 

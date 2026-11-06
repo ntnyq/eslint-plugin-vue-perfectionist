@@ -26,6 +26,7 @@ import { requireComponentSlots } from './rules/require-component-slots.ts'
 import { requireInjectionKey } from './rules/require-injection-key.ts'
 import { requireMacroTypeName } from './rules/require-macro-type-name.ts'
 import { requireVueGeneric } from './rules/require-vue-generic.ts'
+import { sortComposableReturn } from './rules/sort-composable-return.ts'
 import { sortScriptSetup } from './rules/sort-script-setup.ts'
 import type { ESLint } from 'eslint'
 import type { VuePerfectionistPlugin } from './types/index.ts'
@@ -63,6 +64,7 @@ export const plugin: VuePerfectionistPlugin = {
     'require-injection-key': requireInjectionKey,
     'require-macro-type-name': requireMacroTypeName,
     'require-vue-generic': requireVueGeneric,
+    'sort-composable-return': sortComposableReturn,
     'sort-script-setup': sortScriptSetup,
   } as unknown as NonNullable<ESLint.Plugin['rules']>,
 }

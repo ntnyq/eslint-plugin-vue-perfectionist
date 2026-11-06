@@ -133,9 +133,10 @@ and automatic fix support, and individual rule pages for options and defaults.
 
 ### Statement Ordering
 
-| Rule                                                                              | Description                                               |
-| --------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| [sort-script-setup](https://vue-perfectionist.vercel.app/rules/sort-script-setup) | Group and order top-level statements in `<script setup>`. |
+| Rule                                                                                        | Description                                               |
+| ------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| [sort-composable-return](https://vue-perfectionist.vercel.app/rules/sort-composable-return) | Group composable return members by state and method.      |
+| [sort-script-setup](https://vue-perfectionist.vercel.app/rules/sort-script-setup)           | Group and order top-level statements in `<script setup>`. |
 
 ## Development
 

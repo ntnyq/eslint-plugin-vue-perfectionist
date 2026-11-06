@@ -289,6 +289,10 @@ export function getThemeConfig(
             collapsed: true,
             items: [
               {
+                link: `${base}/rules/sort-composable-return`,
+                text: 'sort-composable-return',
+              },
+              {
                 link: `${base}/rules/sort-script-setup`,
                 text: 'sort-script-setup',
               },

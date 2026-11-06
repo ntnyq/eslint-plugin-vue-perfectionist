@@ -99,6 +99,10 @@ pnpm exec eslint .
 pnpm exec eslint . --fix
 ```
 
+For composable return objects, enable
+[sort-composable-return](/rules/sort-composable-return). It defaults to state
+before methods, preserves within-group order, and fixes only whitespace.
+
 ## Next Steps
 
 - [Choose rules](/rules/): browse by purpose and check file scopes, defaults, and automatic fix support.

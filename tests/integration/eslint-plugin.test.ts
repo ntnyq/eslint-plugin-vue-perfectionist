@@ -513,6 +513,7 @@ watchSyncEffect(update, {  onTrack: debug })
       'require-injection-key',
       'require-macro-type-name',
       'require-vue-generic',
+      'sort-composable-return',
       'sort-script-setup',
     ])
   })
