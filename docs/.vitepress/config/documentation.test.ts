@@ -45,11 +45,21 @@ describe('documentation contracts', () => {
     },
   )
 
-  it.each(['README.md', 'README.zh-CN.md'])(
-    'checks the introductory examples in %s',
-    async file => {
-      const source = await readFile(new URL(file, root), 'utf8')
-      const examples = [...source.matchAll(/```ts\n([\s\S]*?)\n```/gu)]
+  it.each(
+    ['README.md', 'README.zh-CN.md'].flatMap(file =>
+      ['LF', 'CRLF'].map(lineEnding => ({
+        file,
+        lineEnding,
+      })),
+    ),
+  )(
+    'checks the introductory examples in $file with $lineEnding line endings',
+    async ({ file, lineEnding }) => {
+      const source = (await readFile(new URL(file, root), 'utf8')).replace(
+        /\r?\n/gu,
+        () => (lineEnding === 'CRLF' ? '\r\n' : '\n'),
+      )
+      const examples = [...source.matchAll(/```ts\r?\n([\s\S]*?)\r?\n```/gu)]
       expect(examples).toHaveLength(2)
       for (const [index, example] of examples.entries()) {
         const kind = index === 0 ? 'incorrect' : 'correct'
