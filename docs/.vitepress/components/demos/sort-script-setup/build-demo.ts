@@ -6,6 +6,7 @@ import * as vueParser from 'vue-eslint-parser'
 import plugin from '../../../../../src/index.ts'
 import { EXAMPLES, SORT_MODES, SORT_ORDERS } from './examples.ts'
 import type { SortScriptSetupOptions } from '../../../../../src/index.ts'
+import type { SortMode } from './examples.ts'
 
 const linter = new Linter()
 
@@ -30,7 +31,9 @@ export function createDemoConfig(
 /**
  * Runs the actual rule and precompiles highlighting exclusively at build time.
  */
-export async function buildDemo() {
+export async function buildDemo(
+  modes: readonly SortMode[] = SORT_MODES.map(mode => mode.type),
+) {
   const highlighter = await createHighlighter({
     langs: ['vue'],
     themes: ['github-light', 'github-dark'],
@@ -53,6 +56,8 @@ export async function buildDemo() {
       tokens: codeToKeyedTokens(highlighter, code, {
         lang: 'vue',
         themes: { light: 'github-light', dark: 'github-dark' },
+        // Complete trusted build-time samples even when CI scheduling is slow.
+        tokenizeTimeLimit: 0,
       }),
     }
   }
@@ -64,7 +69,7 @@ export async function buildDemo() {
         example.code,
         linter.verify(example.code, createDemoConfig({}), 'Demo.vue'),
       ),
-      variants: SORT_MODES.flatMap(({ type }) =>
+      variants: modes.flatMap(type =>
         SORT_ORDERS.map(order => {
           const options = {
             type,
@@ -94,3 +99,4 @@ export async function buildDemo() {
 
 export type DemoData = Awaited<ReturnType<typeof buildDemo>>
 export type DemoResult = DemoData[number]['initial']
+export type DemoModeData = Pick<DemoData[number], 'id' | 'variants'>[]

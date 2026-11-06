@@ -3,6 +3,7 @@ import { beforeAll, describe, expect, it, vi } from 'vitest'
 import * as classification from '../../../../../src/utils/sort-script-setup/classify'
 import { DEFAULT_OPTIONS } from '../../../../../src/utils/sort-script-setup/constants'
 import { buildDemo, createDemoConfig } from './build-demo'
+import { SORT_MODES } from './examples'
 import type { DemoData } from './build-demo'
 
 let data: DemoData
@@ -20,6 +21,54 @@ function getExample(id: string) {
 }
 
 describe('sort-script-setup demo', () => {
+  it('ships original previews without sorting variants in the initial payload', async () => {
+    const initial = await buildDemo([])
+
+    expect(initial).toEqual(
+      data.map(example => ({
+        ...example,
+        variants: [],
+      })),
+    )
+  })
+
+  it('preserves highlighting when tokenization exceeds the default time budget', async () => {
+    let timestamp = Date.now()
+    const clock = vi.spyOn(Date, 'now').mockImplementation(() => {
+      timestamp += 1000
+      return timestamp
+    })
+
+    try {
+      const slow = await buildDemo([])
+      for (const [index, example] of slow.entries()) {
+        expect(example.initial.tokens).toEqual(data[index]?.initial.tokens)
+      }
+    } finally {
+      clock.mockRestore()
+    }
+  })
+
+  it.each(SORT_MODES)(
+    'builds only $type results while retaining both orders',
+    async ({ type }) => {
+      const mode = await buildDemo([type])
+
+      expect(mode).toEqual(
+        data.map(example => ({
+          ...example,
+          variants: example.variants.filter(variant => variant.type === type),
+        })),
+      )
+      for (const example of mode) {
+        expect(example.variants.map(variant => variant.order)).toEqual([
+          'asc',
+          'desc',
+        ])
+      }
+    },
+  )
+
   it('classifies every default group type in the complete component example', () => {
     const classify = vi.spyOn(classification, 'classifyStatement')
 

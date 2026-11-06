@@ -112,8 +112,16 @@ bilingual coverage, every rule example, and diagnostic rendering; the latter
 also validates examples and checks page links. Inspect the actual page when
 changing the container presentation.
 
-The sorting demo reads source rules at build time, with supporting tests beside
-its data loader in `docs/.vitepress/components/demos/sort-script-setup/`.
+The sorting demo reads source rules and precompiles highlighting at build time,
+with supporting tests in `docs/.vitepress/components/demos/sort-script-setup/`.
+`demo.data.ts` supplies original previews for server rendering. Each loader in
+`modes/` supplies one sorting mode's results for both orders; the browser imports
+it when that mode is selected and caches successful loads. Keep these import
+boundaries when adding examples so unused results do not enter the initial
+page chunk. ESLint and the Shiki highlighter must stay in build-time modules.
+The component handles loading, retries, and stale requests after reset or a
+new selection. Check both language pages and their network requests when
+changing this loading flow. Keep Vite's default chunk-size warning enabled.
 Documentation dependency patches and overrides are explained in
 [patches/README.md](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/patches/README.md);
 review that file when upgrading affected rendering dependencies.

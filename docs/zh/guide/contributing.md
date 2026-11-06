@@ -81,7 +81,11 @@ README 规则表、规则概览、首页功能卡片及规则侧栏使用相同�
 运行 `pnpm docs:check` 和 `pnpm docs:build`。前者检查目录同步、双语页面覆盖、全部规则示例及诊断渲染；
 后者也会验证示例并检查页面链接。修改容器展示时仍需检查实际页面。
 
-排序演示在构建时读取源码规则，配套测试位于 `docs/.vitepress/components/demos/sort-script-setup/` 的数据加载器旁。文档依赖补丁及覆盖配置见 [patches/README.md](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/patches/README.md)；升级相关渲染依赖时请查阅该文件。
+排序演示在构建时读取源码规则并预编译高亮，配套测试位于 `docs/.vitepress/components/demos/sort-script-setup/`。
+`demo.data.ts` 为服务端渲染提供原始预览；`modes/` 下每个加载器提供一种排序模式的升降序结果，
+浏览器在选择该模式时导入并缓存成功的请求。新增示例时应保留这些导入边界，避免未使用的结果进入初始页面 chunk。
+ESLint 和 Shiki 高亮引擎应始终只在构建阶段使用。组件负责加载提示、重试，以及重置或重新选择后的过期请求处理。
+修改加载流程时，请检查两种语言的页面及其网络请求，并保留 Vite 默认的 chunk 体积警告。文档依赖补丁及覆盖配置见 [patches/README.md](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/patches/README.md)；升级相关渲染依赖时请查阅该文件。
 
 ## 提交 Pull Request 前 {#before-opening-a-pull-request}
 
@@ -99,4 +103,4 @@ pnpm docs:build
 
 描述行为变化、关联相关 issue，并说明验证结果。选项或行为变化时，同步更新规则文档。使用简洁的 Conventional Commit 前缀，例如 `fix:` 或 `docs:`。
 
-CI 在 Linux、Windows 和 macOS 上，使用 Node 22、24 和 26 检查格式、代码及类型，并构建和测试包。独立的文档 CI 任务运行 `pnpm docs:check` 和 `pnpm docs:build`。
+CI 先检查格式、代码及类型，再在 Linux、Windows 和 macOS 上使用 Node 22、24 和 26 构建和测试包。独立的文档 CI 任务运行 `pnpm docs:check` 和 `pnpm docs:build`。
