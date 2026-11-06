@@ -103,7 +103,7 @@ This rule has no options.
   imports from other modules, and aliases assigned to variables.
 - Unimported `useTemplateRef()` is recognized only when
   `settings['vue-perfectionist'].autoImport` is `true`; see the
-  [auto-import setup](../guide/index.md#auto-imported-vue-apis). The setting
+  [auto-import setup](../guide/configuration.md#auto-imported-vue-apis). The setting
   defaults to `false` and does not override local bindings.
 - Does not inspect template attributes, ordinary `ref()` / `shallowRef()` state,
   or relationships between a key and a template element.

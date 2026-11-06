@@ -157,7 +157,7 @@ Vue.onMounted(handler)
 
 双脚本 SFC 中，`<script setup>` 内的局部声明仅在 setup 内遮蔽同名导入。两个脚本块的导入在模块作用域中均可用，与 Vue 的导入提升行为一致。
 
-自动导入可通过 `settings['vue-perfectionist'].autoImport: true` 启用（见[共享配置](../guide/index.md#auto-imported-vue-apis)），也可以单独为本规则设置 `vueGlobals: ['onMounted', 'watch', 'watchEffect']`。显式 `vueGlobals` 会覆盖内置 Vue API 的共享设置；`[]` 禁用全局识别。自定义回调使用各自的 `autoImport`。这些名称仅在没有局部绑定时匹配，包括 ESLint 全局变量声明的名称。重新导出模块可配置为 `vueImportSources: ['vue', '#imports']`。
+自动导入可通过 `settings['vue-perfectionist'].autoImport: true` 启用（见[共享配置](../guide/configuration.md#auto-imported-vue-apis)），也可以单独为本规则设置 `vueGlobals: ['onMounted', 'watch', 'watchEffect']`。显式 `vueGlobals` 会覆盖内置 Vue API 的共享设置；`[]` 禁用全局识别。自定义回调使用各自的 `autoImport`。这些名称仅在没有局部绑定时匹配，包括 ESLint 全局变量声明的名称。重新导出模块可配置为 `vueImportSources: ['vue', '#imports']`。
 
 不根据前缀猜测，也不进行跨文件分析。跳过计算成员访问、可选调用及可选成员访问。
 

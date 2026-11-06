@@ -57,6 +57,9 @@ Keep these surfaces synchronized:
 - The English and Chinese README rule tables, [rules overview](/rules/), and Rules sidebar.
 - The rule's English and Chinese pages, examples, and any affected composition or design guidance.
 
+Use the same purpose groups in the README tables, rules overview, homepage
+feature cards, and Rules sidebar. Keep rule names alphabetical within each group.
+
 Rule behavior tests use `eslint-vitest-rule-tester` through `run` in
 `tests/helpers/rule-tester.ts`. Assert diagnostics and expected output, using `output: null`
 for reports without fixes. The shared runner checks repeated-fix stability and

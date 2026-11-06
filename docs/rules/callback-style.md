@@ -164,7 +164,7 @@ a same-name import only inside setup. Imports from either script block remain
 available in module scope, matching Vue's import hoisting.
 
 For auto-imports, enable `settings['vue-perfectionist'].autoImport: true`
-(see the [shared setup](../guide/index.md#auto-imported-vue-apis)), or configure
+(see the [shared setup](../guide/configuration.md#auto-imported-vue-apis)), or configure
 `vueGlobals: ['onMounted', 'watch', 'watchEffect']` for this rule alone. An explicit
 `vueGlobals` list overrides the shared setting for built-in Vue APIs; `[]` disables
 their global recognition. Custom callbacks use their own `autoImport` option.

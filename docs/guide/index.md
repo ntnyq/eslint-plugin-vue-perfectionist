@@ -5,13 +5,8 @@ description: Install Vue Perfectionist and enable your first rules in an ESLint 
 # Getting Started
 
 `eslint-plugin-vue-perfectionist` provides configurable ESLint rules for Vue 3
-scripts and templates. It covers callbacks, composable definitions, macro types
-and layout, naming, component usage contracts, template expressions, and
-statement ordering.
-
-Each rule defines its own scope. Some require `<script setup>`, some inspect
-templates, and others also work in ordinary scripts and standalone JavaScript
-or TypeScript files. The [rules overview](/rules/) lists these scopes.
+scripts and templates. Follow these steps to register the plugin, enable rules,
+and run your first checks.
 
 ::: warning Development status
 The API may change before the first stable release. Review
@@ -84,10 +79,8 @@ export default defineConfig([
     },
     rules: {
       'vue-perfectionist/callback-style': 'error',
-      'vue-perfectionist/consistent-template-ref-name': 'error',
       'vue-perfectionist/define-macros-newline': 'error',
-      'vue-perfectionist/prefer-ref-pattern': 'error',
-      'vue-perfectionist/sort-script-setup': 'error',
+      'vue-perfectionist/no-complex-template-expression': 'error',
     },
   },
 ])
@@ -95,8 +88,9 @@ export default defineConfig([
 
 For JavaScript-only SFCs, omit the TypeScript parser import and
 `parserOptions.parser`. If your Vue configuration already supplies the parsers,
-add the plugin and your chosen rules to it. See
-[Configuration](/guide/configuration) for standalone JS/TS files and public types.
+add the plugin and your chosen rules to it.
+
+## Run ESLint
 
 Run ESLint against your source files, adding `--fix` to apply supported fixes:
 
@@ -105,55 +99,8 @@ pnpm exec eslint .
 pnpm exec eslint . --fix
 ```
 
-## Choosing Rules
+## Next Steps
 
-Start with the [rules overview](/rules/) to find checks for your code. Rules are
-independent and can be combined to enforce complementary conventions; see
-[Rule Composition](/guide/rule-composition) for examples.
-
-Component prop, slot, and generic-comment rules have no built-in component
-targets. Configure their `targets` before expecting diagnostics. Rule pages
-document defaults, options, supported syntax, and uncertainty handling.
-
-Use [`prefer-define-model`](/rules/prefer-define-model) to identify matching
-prop and update-event declarations that can be migrated manually to Vue 3.4+
-`defineModel`. Use [`define-model-name-casing`](/rules/define-model-name-casing)
-to enforce the casing of explicit model names independently of template arguments.
-
-Use [`prefer-watch-effect-alias`](/rules/prefer-watch-effect-alias) to prefer
-`watchPostEffect` and `watchSyncEffect` over static `watchEffect` flush options.
-
-Use [`require-injection-key`](/rules/require-injection-key) to disallow string keys in Vue provide and inject calls.
-
-Use [`no-restricted-html-elements`](/rules/no-restricted-html-elements) to disallow
-configured native HTML tags with exact lowercase matching. Its `elements` list
-is empty by default.
-
-Use [`no-complex-template-expression`](/rules/no-complex-template-expression) to limit logical operators and conditional nesting in Vue templates.
-
-Use [`prefer-on-scope-dispose`](/rules/prefer-on-scope-dispose) to prefer scope-based
-cleanup in named composables, with explicit exceptions for component lifetime.
-
-## Auto-imported Vue APIs
-
-For auto-import tooling, opt into
-`settings['vue-perfectionist'].autoImport: true`. It defaults to `false`.
-See [auto-import configuration](/guide/configuration#auto-imported-vue-apis)
-for supported rules, rule-level overrides, local shadowing, and ESLint globals.
-
-## Automatic Fixes
-
-Seven rules offer automatic fixes for supported cases: callback body style,
-macro line breaks, template tag padding, mixed text interpolation, watch effect
-aliases, and setup statement ordering, plus model-name casing when explicitly enabled with
-`fix: true`. Model renames change the component contract. Remaining diagnostics
-need manual changes.
-See [fix boundaries](/guide/rule-composition#automatic-fixes) before applying
-fixes across a project.
-
-## Using Other Sorting Rules
-
-When `sort-script-setup` owns declaration and macro order, disable overlapping
-sorting rules for the same `.vue` files. Continue using dedicated import and
-Vue correctness rules. See
-[statement ordering](/guide/rule-composition#statement-ordering) for an override.
+- [Choose rules](/rules/): browse by purpose and check file scopes, defaults, and automatic fix support.
+- [Configuration](/guide/configuration): configure standalone JS/TS files, auto-imported Vue APIs, and public types.
+- [Rule Composition](/guide/rule-composition): combine related checks and understand fix boundaries and interactions with other plugins.

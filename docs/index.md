@@ -5,7 +5,7 @@ description: Configurable ESLint rules for Vue 3 callbacks, composables, macros,
 hero:
   name: Vue Perfectionist
   text: Consistent conventions for Vue.
-  tagline: Choose the rules that fit your Vue 3 project, from callbacks and macro types to component contracts, template readability, and setup ordering.
+  tagline: Configurable ESLint rules for readable, maintainable Vue 3 scripts and templates.
   image:
     light: /logo-light.svg
     dark: /logo-dark.svg
@@ -24,34 +24,34 @@ hero:
 features:
   - icon: 🧩
     title: Callbacks and Composables
-    details: Configure callback style and length, composable parameter shape, and function declarations in supported Vue and standalone scripts.
-    link: /guide/rule-composition#callbacks-and-composables
-    linkText: Organize script conventions
+    details: Keep callbacks focused and establish conventions for composable definitions and API usage.
+    link: /rules/#callbacks-and-composables
+    linkText: Browse related rules
   - icon: 📝
-    title: Macro Layout and Types
-    details: Choose inline, local, or imported macro types, require call-site type names, and format inline macro declarations.
-    link: /guide/rule-composition#macro-types-and-layout
-    linkText: Compose macro rules
+    title: Macros and Component Models
+    details: Standardize props, emits, slots, and model declarations with consistent types and layout.
+    link: /rules/#macros-and-component-models
+    linkText: Browse related rules
   - icon: 🏷️
     title: Refs and Result Names
-    details: Align template ref variables and keys, enforce naming patterns, and prefer inferred template ref types where supported.
-    link: /guide/rule-composition#template-refs
-    linkText: Configure ref conventions
+    details: Give template refs and function results consistent names, and use template ref type inference.
+    link: /rules/#refs-and-result-names
+    linkText: Browse related rules
   - icon: 📦
     title: Component Usage Contracts
-    details: Declare required props and slots, constrain supplied prop types and values, and require generic comments for selected components.
-    link: /guide/rule-composition#component-usage-contracts
-    linkText: Define component contracts
+    details: Check component usage against your project's requirements for props, slots, and generics.
+    link: /rules/#component-usage-contracts
+    linkText: Browse related rules
   - icon: 📐
-    title: Template Readability
-    details: Keep iteration sources and event handlers simple, combine mixed text interpolation, and configure exact blank-line counts between tags.
-    link: /guide/rule-composition#template-readability
-    linkText: Refine template conventions
+    title: Template Conventions
+    details: Keep template expressions simple and standardize HTML element usage, text interpolation, and spacing.
+    link: /rules/#template-conventions
+    linkText: Browse related rules
   - icon: 🎛️
-    title: Setup Statement Ordering
-    details: Group setup statements by their Vue roles and choose a sorting style. Automatic movement is limited to declarations proven safe to reorder.
-    link: /rules/sort-script-setup
-    linkText: Explore statement ordering
+    title: Statement Ordering
+    details: Organize setup statements by their Vue roles, with configurable grouping and sorting.
+    link: /rules/#statement-ordering
+    linkText: Browse related rules
 ---
 
 ## Start with your project conventions
@@ -67,6 +67,5 @@ JS/TS files, auto-import recognition, and public option types, or browse the
 
 ## Work on the plugin
 
-See [Contributing](/guide/contributing) for local setup, tests, package builds,
-and documentation maintenance. [Architecture and Design](/design/) explains
-source ownership and the analysis and fix contracts behind the rules.
+See [Contributing](/guide/contributing) for local setup, tests, and documentation
+maintenance.

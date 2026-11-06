@@ -49,6 +49,9 @@ pnpm install --frozen-lockfile
 - 中英文 README 的规则列表、[规则概览](/zh/rules/)及规则侧栏。
 - 中英文规则页面、示例及受影响的规则组合或设计文档。
 
+README 规则表、规则概览、首页功能卡片及规则侧栏使用相同的用途分组。
+每组内的规则名称按字母顺序排列。
+
 规则行为测试通过 `tests/helpers/rule-tester.ts` 的 `run` 使用 `eslint-vitest-rule-tester`。断言报告的问题和期望输出；对于不提供修复的问题，使用 `output: null`。共享测试运行器会验证重复修复的稳定性和修复后的代码。无效选项使用 `createRuleTester<unknown>` 测试，ESLint 的 `Linter` 仅用于插件集成测试。
 
 按需覆盖规则的实际文件范围、解析器变体、选项组合、导入身份和局部遮蔽。自动修复必须保持程序行为；修复安全边界发生变化时，需补充回归测试。

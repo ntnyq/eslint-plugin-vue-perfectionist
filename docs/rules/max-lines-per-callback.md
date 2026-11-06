@@ -197,7 +197,7 @@ For re-export modules, configure `vueImportSources: ['vue', '#imports']`.
 To recognize unbound Vue API names, enable
 `settings['vue-perfectionist'].autoImport: true`, or configure this rule's
 `vueGlobals` list. Names declared in ESLint globals are also eligible, but
-globals alone do not enable recognition. See the [shared setup](../guide/index.md#auto-imported-vue-apis).
+globals alone do not enable recognition. See the [shared setup](../guide/configuration.md#auto-imported-vue-apis).
 An explicit `vueGlobals` list overrides the shared setting only for built-ins.
 
 ### Custom callbacks

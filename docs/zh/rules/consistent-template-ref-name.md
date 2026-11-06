@@ -81,7 +81,7 @@ const input = useTemplateRef('input')
 - 按解码后的值比较字符串字面量及无插值模板字面量。支持括号、TypeScript 类型参数、断言、非空断言及 `satisfies` 包装。
 - 跳过动态键、含插值字符串、保存键的常量、展开参数、解构、声明后赋值，以及嵌套在其他表达式或自定义包装中的调用。跳过可选链。
 - 跳过局部函数、被遮蔽绑定、默认导入、仅类型导入、其他模块的导入及赋值给变量的别名。
-- 仅当 `settings['vue-perfectionist'].autoImport` 为 `true` 时识别未导入的 `useTemplateRef()`，见[自动导入配置](../guide/index.md#auto-imported-vue-apis)。该设置默认为 `false`，不覆盖局部绑定。
+- 仅当 `settings['vue-perfectionist'].autoImport` 为 `true` 时识别未导入的 `useTemplateRef()`，见[自动导入配置](../guide/configuration.md#auto-imported-vue-apis)。该设置默认为 `false`，不覆盖局部绑定。
 - 不检查模板属性、普通 `ref()` / `shallowRef()` 状态，也不检查键与模板元素之间的对应关系。
 
 ## 自动修复 {#automatic-fixes}

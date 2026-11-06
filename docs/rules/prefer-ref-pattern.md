@@ -173,7 +173,7 @@ Targets replace the default list. They must be unique and use the names above.
   aliases and namespace imports are supported, including static namespace access.
   Enable `settings['vue-perfectionist'].autoImport: true` to also recognize
   unbound `ref`, `shallowRef`, `useTemplateRef`, and `h` calls; see the
-  [auto-import setup](../guide/index.md#auto-imported-vue-apis). This applies to
+  [auto-import setup](../guide/configuration.md#auto-imported-vue-apis). This applies to
   template ref bindings, `useTemplateRef()` keys, and render refs. Local functions,
   shadowed bindings, type-only imports, and imports from other modules are skipped.
 - A confirmed ref identifier has a direct `ref()`, `shallowRef()`, or

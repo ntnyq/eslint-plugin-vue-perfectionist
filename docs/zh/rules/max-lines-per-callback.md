@@ -165,7 +165,7 @@ onMounted(() => {
 
 具名导入别名及命名空间导入按原始导出名称匹配。命名空间接收者外的 TypeScript 包装（如 `(Vue as typeof Vue).onMounted(...)`）保留导入和遮蔽检查。局部声明、遮蔽参数、其他模块导入及仅类型导入不匹配。默认导入不视为内置 Vue API。重新导出模块可设置 `vueImportSources: ['vue', '#imports']`。
 
-启用 `settings['vue-perfectionist'].autoImport: true`，或配置本规则的 `vueGlobals`，可识别未绑定 Vue API。ESLint 全局变量声明的名称也符合条件，但仅声明全局变量不会启用识别，见[共享配置](../guide/index.md#auto-imported-vue-apis)。显式 `vueGlobals` 仅对内置目标覆盖共享设置。
+启用 `settings['vue-perfectionist'].autoImport: true`，或配置本规则的 `vueGlobals`，可识别未绑定 Vue API。ESLint 全局变量声明的名称也符合条件，但仅声明全局变量不会启用识别，见[共享配置](../guide/configuration.md#auto-imported-vue-apis)。显式 `vueGlobals` 仅对内置目标覆盖共享设置。
 
 ### 自定义回调 {#custom-callbacks}
 

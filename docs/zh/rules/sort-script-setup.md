@@ -249,7 +249,7 @@ export default defineConfig([
 
 排序偏好直接配置在规则选项中，显式选项覆盖默认值；共享设置中的排序偏好忽略。
 
-自动导入 Vue API 可启用共享 `autoImport: true`，见[共享配置](../guide/index.md#auto-imported-vue-apis)。识别本规则内置 Vue API 表中的未绑定名称（含 ESLint 全局变量），不覆盖局部绑定或改变修复安全性。显式 `vueGlobals` 替换选择；`vueGlobals: []` 对本规则禁用。
+自动导入 Vue API 可启用共享 `autoImport: true`，见[共享配置](../guide/configuration.md#auto-imported-vue-apis)。识别本规则内置 Vue API 表中的未绑定名称（含 ESLint 全局变量），不覆盖局部绑定或改变修复安全性。显式 `vueGlobals` 替换选择；`vueGlobals: []` 对本规则禁用。
 
 数组及 `fallbackSort` 替换默认值。分组覆盖会合并后备字段；未指定后备顺序时继承该组顺序。
 

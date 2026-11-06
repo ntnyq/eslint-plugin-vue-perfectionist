@@ -264,7 +264,7 @@ Configure sorting preferences directly in the rule options. Explicit options
 override the rule defaults; sorting preferences in shared settings are ignored.
 
 For auto-imported Vue APIs, enable `settings['vue-perfectionist'].autoImport: true`
-(see the [shared setup](../guide/index.md#auto-imported-vue-apis)). It recognizes
+(see the [shared setup](../guide/configuration.md#auto-imported-vue-apis)). It recognizes
 unbound names from this rule's built-in Vue API table, including ESLint globals,
 without overriding local bindings or changing fix safety. An explicit `vueGlobals`
 list replaces this selection; `vueGlobals: []` disables it for this rule.
