@@ -18,6 +18,7 @@ registration and parser setup.
 | Ref and result naming     | `consistent-template-ref-name`, `prefer-ref-pattern`, `prefer-function-result-pattern`                                                                              |
 | Template ref types        | `prefer-use-template-ref-inference`                                                                                                                                 |
 | Component usage contracts | `require-component-props`, `component-prop-types`, `component-prop-values`, `require-component-slots`, `require-vue-generic`                                        |
+| Native HTML restrictions  | `no-restricted-html-elements`                                                                                                                                       |
 | Template readability      | `no-complex-template-expression`, `no-complex-v-for-source`, `padding-line-between-tags`, `prefer-simple-event-handler`, `prefer-template-literal-in-interpolation` |
 | Dependency injection      | `require-injection-key`                                                                                                                                             |
 | Setup declaration order   | `sort-script-setup`                                                                                                                                                 |
@@ -34,7 +35,8 @@ configuration examples, and interactions with other plugins.
   files. Individual rules still restrict which definitions or API calls they check.
 
 Component prop, slot, and generic-comment rules need explicit `targets` and do
-nothing with their default empty target lists. Other target-based rules may
+nothing with their default empty target lists. `no-restricted-html-elements`
+also needs an explicit `elements` list. Other target-based rules may
 have built-in targets; consult their option documentation before replacing them.
 
 `sort-script-setup` orders groups by default while preserving name order inside
@@ -60,6 +62,7 @@ also report problems that require manual changes. See
 | [max-lines-per-callback](./max-lines-per-callback.md)                                     | Limit the length of inline callbacks for Vue APIs.                   | Scripts             | —               |
 | [no-complex-template-expression](./no-complex-template-expression.md)                     | Limit logical operators and conditional nesting in Vue templates.    | Template            | —               |
 | [no-complex-v-for-source](./no-complex-v-for-source.md)                                   | Disallow complex expressions in Vue v-for sources.                   | Template            | —               |
+| [no-restricted-html-elements](./no-restricted-html-elements.md)                           | Disallow specified native HTML elements in Vue templates.            | Template            | —               |
 | [padding-line-between-tags](./padding-line-between-tags.md)                               | Enforce blank-line counts between consecutive template tags.         | Template            | Supported cases |
 | [prefer-composable-options](./prefer-composable-options.md)                               | Prefer a final options object for composable parameters.             | Scripts             | —               |
 | [prefer-define-model](./prefer-define-model.md)                                           | Prefer defineModel over matching prop and update event declarations. | Setup               | —               |

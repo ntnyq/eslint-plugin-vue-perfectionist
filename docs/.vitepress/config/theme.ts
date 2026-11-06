@@ -91,6 +91,10 @@ export function getThemeConfig(): DefaultTheme.Config {
             text: 'no-complex-v-for-source',
           },
           {
+            link: '/rules/no-restricted-html-elements',
+            text: 'no-restricted-html-elements',
+          },
+          {
             link: '/rules/padding-line-between-tags',
             text: 'padding-line-between-tags',
           },

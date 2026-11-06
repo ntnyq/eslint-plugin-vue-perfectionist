@@ -50,6 +50,15 @@ const exampleRules = {
   'vue-perfectionist/max-lines-per-callback': 'error',
   'vue-perfectionist/no-complex-template-expression': 'error',
   'vue-perfectionist/no-complex-v-for-source': 'error',
+  'vue-perfectionist/no-restricted-html-elements': [
+    'error',
+    {
+      elements: [
+        'button',
+        { name: 'input', message: 'Use <AppInput> instead.' },
+      ],
+    },
+  ],
   'vue-perfectionist/padding-line-between-tags': 'error',
   'vue-perfectionist/prefer-composable-options': 'error',
   'vue-perfectionist/prefer-define-model': 'error',

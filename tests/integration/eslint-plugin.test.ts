@@ -4,6 +4,45 @@ import plugin, * as pluginExports from '../../src'
 import { vueLanguageOptions } from '../helpers/rule-tester.ts'
 
 describe('plugin contract', () => {
+  it('checks exact native HTML names through an aliased plugin without fixes', () => {
+    const linter = new Linter()
+    const source = '<template><button /><Button /><input /></template>'
+    const configuration: Linter.Config = {
+      files: ['**/*.vue'],
+      languageOptions: vueLanguageOptions,
+      plugins: { vp: plugin },
+      rules: {
+        'vp/no-restricted-html-elements': [
+          'error',
+          {
+            elements: [
+              'button',
+              { name: 'input', message: 'Use <AppInput> instead.' },
+            ],
+          },
+        ],
+      },
+    }
+    const result = linter.verifyAndFix(source, configuration, 'Test.vue')
+    expect(result.messages.map(message => message.message)).toEqual([
+      'Native HTML element <button> is not allowed.',
+      'Native HTML element <input> is not allowed. Use <AppInput> instead.',
+    ])
+    expect(result.messages.map(message => message.ruleId)).toEqual([
+      'vp/no-restricted-html-elements',
+      'vp/no-restricted-html-elements',
+    ])
+    expect(result.fixed).toBe(false)
+    expect(result.output).toBe(source)
+    for (const message of result.messages) {
+      expect(message.fix).toBeUndefined()
+      expect(message.suggestions).toBeUndefined()
+    }
+    expect(
+      linter.verifyAndFix(result.output, configuration, 'Test.vue'),
+    ).toEqual(result)
+  })
+
   it('composes injection, template complexity, and composable cleanup checks without fixes', () => {
     const linter = new Linter()
     const source = `<script setup lang="ts">
@@ -457,6 +496,7 @@ watchSyncEffect(update, {  onTrack: debug })
       'max-lines-per-callback',
       'no-complex-template-expression',
       'no-complex-v-for-source',
+      'no-restricted-html-elements',
       'padding-line-between-tags',
       'prefer-composable-options',
       'prefer-define-model',

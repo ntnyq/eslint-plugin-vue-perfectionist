@@ -125,6 +125,10 @@ Use [`prefer-watch-effect-alias`](/rules/prefer-watch-effect-alias) to prefer
 
 Use [`require-injection-key`](/rules/require-injection-key) to disallow string keys in Vue provide and inject calls.
 
+Use [`no-restricted-html-elements`](/rules/no-restricted-html-elements) to disallow
+configured native HTML tags with exact lowercase matching. Its `elements` list
+is empty by default.
+
 Use [`no-complex-template-expression`](/rules/no-complex-template-expression) to limit logical operators and conditional nesting in Vue templates.
 
 Use [`prefer-on-scope-dispose`](/rules/prefer-on-scope-dispose) to prefer scope-based

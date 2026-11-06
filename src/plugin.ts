@@ -9,6 +9,7 @@ import { defineModelNameCasing } from './rules/define-model-name-casing.ts'
 import { maxLinesPerCallback } from './rules/max-lines-per-callback.ts'
 import { noComplexTemplateExpression } from './rules/no-complex-template-expression.ts'
 import { noComplexVForSource } from './rules/no-complex-v-for-source.ts'
+import { noRestrictedHtmlElements } from './rules/no-restricted-html-elements.ts'
 import { paddingLineBetweenTags } from './rules/padding-line-between-tags.ts'
 import { preferComposableOptions } from './rules/prefer-composable-options.ts'
 import { preferDefineModel } from './rules/prefer-define-model.ts'
@@ -44,6 +45,7 @@ export const plugin: VuePerfectionistPlugin = {
     'max-lines-per-callback': maxLinesPerCallback,
     'no-complex-template-expression': noComplexTemplateExpression,
     'no-complex-v-for-source': noComplexVForSource,
+    'no-restricted-html-elements': noRestrictedHtmlElements,
     'padding-line-between-tags': paddingLineBetweenTags,
     'prefer-composable-options': preferComposableOptions,
     'prefer-define-model': preferDefineModel,

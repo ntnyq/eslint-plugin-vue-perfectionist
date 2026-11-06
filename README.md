@@ -98,6 +98,7 @@ type, and component contract diagnostics require manual changes.
 | [max-lines-per-callback](https://vue-perfectionist.vercel.app/rules/max-lines-per-callback)                                     | Limit the length of inline callbacks for Vue APIs.                   |
 | [no-complex-template-expression](https://vue-perfectionist.vercel.app/rules/no-complex-template-expression)                     | Limit logical operators and conditional nesting in Vue templates.    |
 | [no-complex-v-for-source](https://vue-perfectionist.vercel.app/rules/no-complex-v-for-source)                                   | Disallow complex expressions in Vue v-for sources.                   |
+| [no-restricted-html-elements](https://vue-perfectionist.vercel.app/rules/no-restricted-html-elements)                           | Disallow specified native HTML elements in Vue templates.            |
 | [padding-line-between-tags](https://vue-perfectionist.vercel.app/rules/padding-line-between-tags)                               | Enforce blank-line counts between consecutive template tags.         |
 | [prefer-composable-options](https://vue-perfectionist.vercel.app/rules/prefer-composable-options)                               | Prefer a final options object for composable parameters.             |
 | [prefer-define-model](https://vue-perfectionist.vercel.app/rules/prefer-define-model)                                           | Prefer defineModel over matching prop and update event declarations. |
