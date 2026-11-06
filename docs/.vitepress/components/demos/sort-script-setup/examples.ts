@@ -1,11 +1,15 @@
 import type { SortScriptSetupOptions } from '../../../../../src/index.ts'
 
 export const SORT_MODES = [
-  { type: 'unsorted', label: 'Group only' },
-  { type: 'alphabetical', label: 'Alphabetical' },
-  { type: 'natural', label: 'Natural' },
-  { type: 'line-length', label: 'Line length' },
-] as const satisfies { type: SortScriptSetupOptions['type']; label: string }[]
+  { type: 'unsorted', label: 'Group only', labelZh: '仅分组' },
+  { type: 'alphabetical', label: 'Alphabetical', labelZh: '字母顺序' },
+  { type: 'natural', label: 'Natural', labelZh: '自然排序' },
+  { type: 'line-length', label: 'Line length', labelZh: '语句长度' },
+] as const satisfies {
+  type: SortScriptSetupOptions['type']
+  label: string
+  labelZh: string
+}[]
 
 export type SortMode = (typeof SORT_MODES)[number]['type']
 
@@ -15,6 +19,9 @@ export const EXAMPLES = [
   {
     id: 'all-groups',
     label: 'All default groups',
+    labelZh: '全部默认分组',
+    descriptionZh:
+      '示例包含全部 19 个默认分组及其 22 种语句类型，注释标明所属分组。可对字面量常量和函数排序，并查看 computed/ref 运行时调用为何保留原位。',
     description:
       'A component covering all 19 default groups and their 22 statement types. Comments identify each group. Sort the literal constants and functions, and inspect why computed/ref runtime calls stay in place.',
     code: `<script setup lang="ts">
@@ -130,6 +137,9 @@ defineExpose({ reset, submit })
   {
     id: 'grouping',
     label: 'Groups & sorting',
+    labelZh: '分组与排序',
+    descriptionZh:
+      '类型、字面量常量、函数依次排列。自然排序将 item2 放在 item10 之前，仅分组则保留原顺序。',
     description:
       'Types, literal constants, then functions. Natural sorting places item2 before item10; group-only sorting preserves their original order.',
     code: `<script setup lang="ts">
@@ -145,6 +155,9 @@ const active = true
   {
     id: 'runtime',
     label: 'Runtime safety',
+    labelZh: '运行时安全性',
+    descriptionZh:
+      'ref 分组应位于 computed 之前，但移动这些运行时调用可能改变行为。规则报告问题，并保留执行顺序。',
     description:
       'The ref group belongs before computed, but moving these runtime calls could change behavior. Sorting reports the issue and preserves their execution order.',
     code: `<script setup lang="ts">
@@ -157,6 +170,9 @@ const count = ref(0)
   {
     id: 'dependencies',
     label: 'Dependencies',
+    labelZh: '依赖关系',
+    descriptionZh:
+      '初始化依赖优先于排序。即使分组偏好常量在前，函数也必须保留在使用它的调用之前。',
     description:
       'Initialization dependencies take precedence over sorting. The function must stay before the call that uses it, even when groups prefer constants first.',
     code: `<script setup>

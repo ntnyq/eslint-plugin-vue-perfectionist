@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { useData } from 'vitepress'
 import { computed, shallowRef, useId } from 'vue'
 import CodePreview from './code-preview.vue'
 import { data } from './demo.data'
 import { SORT_MODES } from './examples'
 import type { SortMode } from './examples'
 
+const { lang } = useData()
+const isChinese = computed(() => lang.value === 'zh-CN')
 const id = useId()
 const exampleId = shallowRef('all-groups')
 const selectedMode = shallowRef<SortMode>()
@@ -35,15 +38,19 @@ function reset() {
 
 <template>
   <section
+    :aria-label="
+      isChinese
+        ? 'sort-script-setup 交互演示'
+        : 'Interactive sort-script-setup demo'
+    "
     class="my-6 min-w-0"
-    aria-label="Interactive sort-script-setup demo"
   >
     <div class="mb-4 flex flex-wrap items-end gap-4">
       <label
         :for="`${id}-example`"
         class="flex min-w-0 flex-1 flex-col gap-1.5 text-sm font-medium"
       >
-        Example
+        {{ isChinese ? '示例' : 'Example' }}
         <select
           @change="reset"
           v-model="exampleId"
@@ -55,7 +62,7 @@ function reset() {
             :key="item.id"
             :value="item.id"
           >
-            {{ item.label }}
+            {{ isChinese ? item.labelZh : item.label }}
           </option>
         </select>
       </label>
@@ -63,24 +70,24 @@ function reset() {
         :for="`${id}-order`"
         class="flex flex-col gap-1.5 text-sm font-medium"
       >
-        Within groups
+        {{ isChinese ? '组内顺序' : 'Within groups' }}
         <select
           v-model="order"
           :id="`${id}-order`"
           class="min-h-10 rounded-lg border border-[var(--vp-c-divider)] bg-[var(--vp-c-bg)] px-3 text-[var(--vp-c-text-1)]"
         >
-          <option value="asc">Ascending</option>
-          <option value="desc">Descending</option>
+          <option value="asc">{{ isChinese ? '升序' : 'Ascending' }}</option>
+          <option value="desc">{{ isChinese ? '降序' : 'Descending' }}</option>
         </select>
       </label>
     </div>
     <p class="my-3! text-sm text-[var(--vp-c-text-2)]">
-      {{ example.description }}
+      {{ isChinese ? example.descriptionZh : example.description }}
     </p>
     <div
+      :aria-label="isChinese ? '排序方式' : 'Sorting modes'"
       class="mb-4 flex flex-wrap gap-2"
       role="group"
-      aria-label="Sorting modes"
     >
       <button
         @click="selectedMode = mode.type"
@@ -95,14 +102,14 @@ function reset() {
         type="button"
         class="min-h-10 rounded-lg border border-[var(--vp-c-divider)] px-3 py-2 text-sm font-medium transition-colors hover:border-[var(--vp-c-brand-1)] focus-visible:outline-2 focus-visible:outline-[var(--vp-c-brand-1)]"
       >
-        {{ mode.label }}
+        {{ isChinese ? mode.labelZh : mode.label }}
       </button>
       <button
         @click="reset"
         type="button"
         class="min-h-10 rounded-lg border border-[var(--vp-c-divider)] px-3 py-2 text-sm hover:bg-[var(--vp-c-bg-soft)] focus-visible:outline-2 focus-visible:outline-[var(--vp-c-brand-1)]"
       >
-        Reset
+        {{ isChinese ? '重置' : 'Reset' }}
       </button>
     </div>
     <CodePreview
@@ -114,7 +121,7 @@ function reset() {
       class="mt-4 text-sm"
     >
       <summary class="cursor-pointer text-[var(--vp-c-text-2)]">
-        Rule options
+        {{ isChinese ? '规则选项' : 'Rule options' }}
       </summary>
       <pre
         class="mt-2! overflow-x-auto rounded-lg bg-[var(--vp-c-bg-soft)] p-4"

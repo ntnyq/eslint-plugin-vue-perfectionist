@@ -54,8 +54,8 @@ Keep these surfaces synchronized:
 - Implementation in `src/rules/` and configuration types in `src/types/rules/`.
 - Registration in `src/plugin.ts` and public exports in `src/index.ts`.
 - Rule behavior tests in `tests/rules/` and plugin contract tests.
-- The README rule table, [rules overview](/rules/), and Rules sidebar.
-- The rule's page, examples, and any affected composition or design guidance.
+- The English and Chinese README rule tables, [rules overview](/rules/), and Rules sidebar.
+- The rule's English and Chinese pages, examples, and any affected composition or design guidance.
 
 Rule behavior tests use `eslint-vitest-rule-tester` through `run` in
 `tests/helpers/rule-tester.ts`. Assert diagnostics and expected output, using `output: null`
@@ -69,8 +69,8 @@ behavior; add regressions whenever its safety boundary changes.
 
 ## Documentation Changes
 
-Keep public documentation in English. Separate setup and shared configuration
-from per-rule options. Use [design documents](/design/) to record implementation
+Keep English documentation in `docs/` and Simplified Chinese translations in
+`docs/zh/` synchronized. Separate setup and shared configuration from per-rule options. Use [design documents](/design/) to record implementation
 contracts and tradeoffs.
 
 Rule pages use `::: correct` for accepted code and `::: incorrect` for reported

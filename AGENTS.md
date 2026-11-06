@@ -40,7 +40,7 @@ Preserve program behavior in automatic fixes. For sorting rules, unsafe runtime 
 
 ## Rule Documentation Guidelines
 
-Use the repository's [add-eslint-rule skill](.agents/skills/add-eslint-rule/SKILL.md) when adding rules, including its test format, documentation format, and final checklist. Write rule pages in English and follow `docs/rules/sort-script-setup.md` for example presentation: accepted code belongs in `::: correct`, and reported code belongs in `::: incorrect`, including reports without fixes. Keep positive and negative examples separate, omit duplicate Valid / Invalid labels, and leave configuration/reference snippets in ordinary code fences. Match examples to tested behavior and preserve diagnostic-triggering formatting. Check container rendering and run `pnpm docs:build` when rule documentation changes.
+Use the repository's [add-eslint-rule skill](.agents/skills/add-eslint-rule/SKILL.md) when adding rules, including its test format, documentation format, and final checklist. Keep English rule pages in `docs/rules/` and Simplified Chinese translations in `docs/zh/rules/` synchronized. Follow `docs/rules/sort-script-setup.md` for example presentation: accepted code belongs in `::: correct`, and reported code belongs in `::: incorrect`, including reports without fixes. Keep positive and negative examples separate, omit duplicate Valid / Invalid labels, and leave configuration/reference snippets in ordinary code fences. Match examples to tested behavior and preserve diagnostic-triggering formatting. Check container rendering and run `pnpm docs:build` when rule documentation changes.
 
 ## Commit & Pull Request Guidelines
 

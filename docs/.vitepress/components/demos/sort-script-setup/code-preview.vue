@@ -2,6 +2,7 @@
 import '@shikijs/magic-move/style.css'
 import { ShikiMagicMovePrecompiled } from '@shikijs/magic-move/vue'
 import { usePreferredReducedMotion } from '@vueuse/core'
+import { useData } from 'vitepress'
 import { computed, onMounted, shallowRef } from 'vue'
 import type { DemoResult } from './build-demo'
 
@@ -10,6 +11,8 @@ const props = defineProps<{
   isOriginal: boolean
 }>()
 
+const { lang } = useData()
+const isChinese = computed(() => lang.value === 'zh-CN')
 const isMounted = shallowRef(false)
 const reducedMotion = usePreferredReducedMotion()
 const steps = computed(() => [props.result.tokens])
@@ -28,12 +31,22 @@ onMounted(() => {
       class="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--vp-c-divider)] bg-[var(--vp-c-bg-soft)] px-4 py-3 text-xs text-[var(--vp-c-text-2)]"
     >
       <span class="font-mono">Demo.vue</span>
-      <span>{{ isOriginal ? 'Original source' : 'After ESLint --fix' }}</span>
+      <span>{{
+        isOriginal
+          ? isChinese
+            ? '原始代码'
+            : 'Original source'
+          : isChinese
+            ? 'ESLint --fix 修复后'
+            : 'After ESLint --fix'
+      }}</span>
     </div>
     <div
+      :aria-label="
+        isChinese ? 'Vue script setup 代码' : 'Vue script setup code'
+      "
       class="demo-code max-h-128 overflow-auto bg-[var(--vp-code-block-bg)] p-4"
       role="region"
-      aria-label="Vue script setup code"
       tabindex="0"
     >
       <ShikiMagicMovePrecompiled
@@ -49,26 +62,40 @@ onMounted(() => {
       aria-atomic="true"
     >
       <template v-if="isOriginal">
-        Choose a sorting mode to apply safe fixes.
+        {{
+          isChinese
+            ? '选择排序方式，应用安全修复。'
+            : 'Choose a sorting mode to apply safe fixes.'
+        }}
       </template>
       <template v-else-if="result.messages.length">
-        {{ result.messages.length }} remaining diagnostic(s). These moves need
-        manual review.
+        {{
+          isChinese
+            ? `仍有 ${result.messages.length} 项诊断，这些移动需要手动检查。`
+            : `${result.messages.length} remaining diagnostic(s). These moves need manual review.`
+        }}
       </template>
-      <template v-else>All ordering diagnostics resolved.</template>
+      <template v-else>{{
+        isChinese
+          ? '所有排序问题均已解决。'
+          : 'All ordering diagnostics resolved.'
+      }}</template>
     </div>
   </div>
   <ul
     v-if="!isOriginal && result.messages.length"
+    :aria-label="
+      isChinese ? '剩余 ESLint 诊断' : 'Remaining ESLint diagnostics'
+    "
     class="mt-3! list-none! space-y-2 pl-0! text-sm text-[var(--vp-c-warning-1)]"
-    aria-label="Remaining ESLint diagnostics"
   >
     <li
       v-for="message in result.messages"
       :key="`${message.line}:${message.column}:${message.messageId}`"
       class="rounded-lg bg-[var(--vp-c-warning-soft)] px-3 py-2"
     >
-      Line {{ message.line }}: {{ message.message }}
+      {{ isChinese ? `第 ${message.line} 行` : `Line ${message.line}` }}:
+      {{ message.message }}
     </li>
   </ul>
 </template>
