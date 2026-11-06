@@ -41,6 +41,11 @@ export type PaddingLineBetweenTagsEntry = {
 
 export interface PaddingLineBetweenTagsOptions {
   /**
+   * Check tag pairs across HTML comments, counting only blank lines outside
+   * comments. Defaults to false.
+   */
+  ignoreComments?: boolean
+  /**
    * Ordered matching entries; the last match wins. Defaults to a wildcard entry
    * requiring exactly one blank line. An explicit array replaces the default;
    * an empty array disables checks.

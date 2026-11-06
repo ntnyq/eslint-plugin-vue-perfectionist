@@ -101,11 +101,12 @@ Multiple blank lines also violate the default exact count:
 
 ## :wrench: Options
 
-The single rule option is an object with an optional `targets` array. The
-effective default is:
+The single rule option is an object with optional `ignoreComments` and `targets`
+properties. The effective default is:
 
 ```json
 {
+  "ignoreComments": false,
   "targets": [
     {
       "prev": "*",
@@ -116,7 +117,8 @@ effective default is:
 }
 ```
 
-Omitting the option, passing `{}`, or omitting `targets` keeps the default.
+Omitting the option or passing `{}` keeps these defaults. Omitting `targets`
+keeps the default wildcard policy.
 An explicit `targets` array replaces the default; `{ targets: [] }` disables all
 checks. Unmatched pairs are ignored. When several entries match, the **last
 matching entry wins**, regardless of whether it uses shorthand or the full form.
@@ -124,6 +126,63 @@ Unknown option properties are rejected.
 
 The former direct-array option is no longer accepted. To migrate, change
 `['error', entries]` to `['error', { targets: entries }]`.
+
+### ignoreComments
+
+- Type: `boolean`
+- Default: `false`
+
+By default, an HTML comment interrupts a tag pair. Set `ignoreComments: true`
+to check matching sibling tags across one or more HTML comments, including
+`@vue-generic` directives:
+
+```js
+{
+  'vue-perfectionist/padding-line-between-tags': [
+    'error',
+    {
+      ignoreComments: true,
+      targets: [{ tag: 'ElTableColumn' }],
+    },
+  ],
+}
+```
+
+With this configuration, the fix inserts a blank line before the comment,
+keeping it next to the following component:
+
+::: correct
+
+<!-- prettier-ignore -->
+```vue
+<template>
+  <ElTableColumn />
+
+  <!-- @vue-generic {import('#types').IExperimentReportTemplate} -->
+  <ElTableColumn />
+</template>
+```
+
+:::
+
+::: incorrect
+
+<!-- prettier-ignore -->
+```vue
+<template>
+  <ElTableColumn />
+  <!-- @vue-generic {import('#types').IExperimentReportTemplate} -->
+  <ElTableColumn />
+</template>
+```
+
+:::
+
+Only blank lines outside comments count toward the policy. Blank lines before,
+between, and after comments are added together; comment lines and blank lines
+inside multiline comments do not count. All `blankLine` policies and target
+matching rules still apply. Text, interpolations, and whitespace entities still
+interrupt tag pairs.
 
 ### targets
 
@@ -195,8 +254,9 @@ Use a later exception to override a general policy:
 ## Scope
 
 Only consecutive direct sibling elements in Vue SFC templates are checked.
-The gap must contain only literal spaces, tabs, or line breaks. Comments, text,
-interpolations, and whitespace entities interrupt a pair. Other elements also
+The gap must contain only literal spaces, tabs, or line breaks, plus HTML
+comments when `ignoreComments: true`. By default, comments interrupt a pair.
+Text, interpolations, and whitespace entities always interrupt a pair. Other elements also
 interrupt same-tag runs: `<Item /><div /><Item />` does not form an `Item` pair.
 Each adjacent pair in a longer run is checked independently.
 
@@ -231,6 +291,13 @@ They preserve tag order, attributes, comments, leading indentation before the
 next tag, trailing spaces after the previous tag, and the gap's first line-ending
 style (LF, CRLF, or CR). Removing blank lines retains one line break. This also
 preserves the order of `v-if`, `v-else-if`, and `v-else` branches.
+
+With `ignoreComments: true`, fixes adjust whitespace outside comments without
+changing their contents or order. Missing blank lines are added at the first
+existing line break outside comments, usually before the first comment. Excess
+blank lines are removed from left to right, preserving at least one line break
+in every whitespace segment that already has one. If all line breaks are inside
+comments, the rule reports missing padding without a fix.
 
 To keep linting responsive, each replacement gap is limited to 65,536 UTF-16 code
 units, including line endings and preserved whitespace. Larger replacements are

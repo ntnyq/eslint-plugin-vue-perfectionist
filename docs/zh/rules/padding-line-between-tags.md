@@ -87,10 +87,11 @@ export default defineConfig([
 
 ## :wrench: 选项 {#options}
 
-唯一选项是含可选 `targets` 数组的对象。实际默认值为：
+唯一选项是含可选 `ignoreComments` 和 `targets` 字段的对象。实际默认值为：
 
 ```json
 {
+  "ignoreComments": false,
   "targets": [
     {
       "prev": "*",
@@ -101,9 +102,59 @@ export default defineConfig([
 }
 ```
 
-省略选项、传入 `{}` 或省略 `targets` 均保留默认值。显式 `targets` 数组替换默认值；`{ targets: [] }` 禁用全部检查。不匹配的标签对忽略。多个条目匹配时，无论简写或完整形式，**最后匹配的条目优先**。未知选项字段会被拒绝。
+省略选项或传入 `{}` 均保留这些默认值。省略 `targets` 时保留默认通配策略。显式 `targets` 数组替换默认值；`{ targets: [] }` 禁用全部检查。不匹配的标签对忽略。多个条目匹配时，无论简写或完整形式，**最后匹配的条目优先**。未知选项字段会被拒绝。
 
 不再接受直接数组选项。迁移时，将 `['error', entries]` 改为 `['error', { targets: entries }]`。
+
+### ignoreComments
+
+- 类型：`boolean`
+- 默认值：`false`
+
+默认情况下，HTML 注释会中断标签对。设置 `ignoreComments: true` 后，会跨过一条或多条 HTML 注释检查匹配的同级标签，包括 `@vue-generic` 指令注释：
+
+```js
+{
+  'vue-perfectionist/padding-line-between-tags': [
+    'error',
+    {
+      ignoreComments: true,
+      targets: [{ tag: 'ElTableColumn' }],
+    },
+  ],
+}
+```
+
+使用此配置时，修复会在注释前插入空行，让注释仍紧邻后面的组件：
+
+::: correct
+
+<!-- prettier-ignore -->
+```vue
+<template>
+  <ElTableColumn />
+
+  <!-- @vue-generic {import('#types').IExperimentReportTemplate} -->
+  <ElTableColumn />
+</template>
+```
+
+:::
+
+::: incorrect
+
+<!-- prettier-ignore -->
+```vue
+<template>
+  <ElTableColumn />
+  <!-- @vue-generic {import('#types').IExperimentReportTemplate} -->
+  <ElTableColumn />
+</template>
+```
+
+:::
+
+仅统计注释外的空行：注释前、多条注释之间和注释后的空行数会累加，注释行及多行注释内部的空行均不计入。所有 `blankLine` 策略和标签匹配规则仍然适用。文本、插值和空白实体仍会中断标签对。
 
 ### targets
 
@@ -165,7 +216,7 @@ export default defineConfig([
 
 ## 适用范围 {#scope}
 
-仅检查 Vue SFC 模板中相邻的直接同级元素。间隔只能包含字面空格、制表符或换行；注释、文本、插值和空白实体会中断标签对。其他元素也会中断同名标签序列：`<Item /><div /><Item />` 不构成 `Item` 标签对。较长序列中的每对相邻标签独立检查。
+仅检查 Vue SFC 模板中相邻的直接同级元素。间隔只能包含字面空格、制表符或换行；设置 `ignoreComments: true` 时也允许 HTML 注释。默认情况下，注释会中断标签对；文本、插值和空白实体始终会中断标签对。其他元素也会中断同名标签序列：`<Item /><div /><Item />` 不构成 `Item` 标签对。较长序列中的每对相邻标签独立检查。
 
 不检查脚本、独立 JS/TS 或样式。跳过 `<pre>`、`<textarea>`、`<script>`、`<style>`、`<xmp>`、`<listing>`、`<plaintext>` 及带 `v-pre` 元素的后代，也跳过 SVG、MathML 等非 HTML 命名空间。
 
@@ -190,6 +241,8 @@ export default defineConfig([
 ## 自动修复与格式化 {#automatic-fixes-and-formatting}
 
 已分行标签的修复仅调整间隔空白，保留标签顺序、属性、注释、下一标签前缩进、上一标签后尾随空格，以及间隔中首个换行符的风格（LF、CRLF 或 CR）。移除空行时保留一个换行。这也保留 `v-if`、`v-else-if`、`v-else` 分支顺序。
+
+设置 `ignoreComments: true` 时，修复仅调整注释外的空白，保留注释内容和顺序。缺少的空行会加在注释外的第一个已有换行处，通常位于第一条注释前。多余空行从左到右移除，每段原本含换行的空白都会保留至少一个换行。如果所有换行都在注释内部，则仅报告缺少空行，不自动修复。
 
 为保持检查响应速度，每个替换间隔最多 65,536 个 UTF-16 码元，包括换行及保留空白。更大替换仅报告，不提供修复或建议。诊断仍使用配置的数量，不插入部分空行。
 
