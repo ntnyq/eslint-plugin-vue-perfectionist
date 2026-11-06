@@ -96,7 +96,8 @@ also report problems that require manual changes. See
 
 ### Statement Ordering
 
-| Rule                                                  | Description                                               | Scope   | Automatic fix   |
-| ----------------------------------------------------- | --------------------------------------------------------- | ------- | --------------- |
-| [sort-composable-return](./sort-composable-return.md) | Group composable return members by state and method.      | Scripts | Whitespace only |
-| [sort-script-setup](./sort-script-setup.md)           | Group and order top-level statements in `<script setup>`. | Setup   | Supported cases |
+| Rule                                                            | Description                                                | Scope   | Automatic fix   |
+| --------------------------------------------------------------- | ---------------------------------------------------------- | ------- | --------------- |
+| [sort-composable-destructure](./sort-composable-destructure.md) | Group destructured composable members by state and method. | Scripts | Whitespace only |
+| [sort-composable-return](./sort-composable-return.md)           | Group composable return members by state and method.       | Scripts | Whitespace only |
+| [sort-script-setup](./sort-script-setup.md)                     | Group and order top-level statements in `<script setup>`.  | Setup   | Supported cases |

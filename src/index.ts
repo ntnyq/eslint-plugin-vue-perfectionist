@@ -63,6 +63,7 @@ export type {
   RequireVueGenericOptions,
   RequireVueGenericTarget,
   RestrictedHtmlElement,
+  SortComposableDestructureOptions,
   SortComposableOptions,
   SortComposableReturnOptions,
   SortScriptSetupOptions,

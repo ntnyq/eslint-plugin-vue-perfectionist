@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import { expect } from 'vitest'
+import { sortComposableDestructure } from '../../src/rules/sort-composable-destructure.ts'
 import { sortComposableReturn } from '../../src/rules/sort-composable-return.ts'
 import { run } from '../helpers/rule-tester.ts'
 import type {
@@ -18,6 +19,7 @@ const parserOptions = {
 
 for (const [name, rule, consume] of [
   ['sort-composable-return', sortComposableReturn, false],
+  ['sort-composable-destructure', sortComposableDestructure, true],
 ] as const) {
   await run<SortComposableOptions, SortComposableMessageId>({
     name,
@@ -63,6 +65,11 @@ for (const [name, rule, wrap] of [
     'sort-composable-return',
     sortComposableReturn,
     (members: string) => `function useLocal() { return { ${members} } }`,
+  ],
+  [
+    'sort-composable-destructure',
+    sortComposableDestructure,
+    (members: string) => `const { ${members} } = usePage()`,
   ],
 ] as const) {
   const imports = "import { usePage, state, submit } from './composables';\n"
@@ -151,6 +158,56 @@ await run<SortComposableOptions, SortComposableMessageId>({
     },
     {
       code: 'function usePage<T>(value: T extends true ? string : (() => void)) { return { value } }',
+      options: { typeInformation: true, unknownMembers: 'report' },
+      errors: ['unknownMember'],
+      output: null,
+    },
+  ],
+})
+
+await run<SortComposableOptions, SortComposableMessageId>({
+  name: 'sort-composable-destructure',
+  rule: sortComposableDestructure,
+  defaultFilenames: { js: `${root}case.ts` },
+  languageOptions: { parserOptions },
+  invalid: [
+    {
+      description:
+        'unresolved awaited types never fall back to outer thenable properties',
+      code: 'function usePage() { return { then() {}, state: 1, submit() {} } }; const { state, submit } = await usePage()',
+      options: { typeInformation: true, unknownMembers: 'report' },
+      errors: ['unknownMember', 'unknownMember'],
+      output: null,
+    },
+    ...['', 'async '].map(prefix => ({
+      description:
+        'uses the awaited type of thenables instead of their outer property types',
+      code: `${prefix}function usePage() { return { then(resolve: (value: { state(): void; submit: number }) => void) { resolve({ state() {}, submit: 1 }) }, state: 1, submit() {} } }; const { state, submit } = await usePage()`,
+      options: { typeInformation: true },
+      errors: ['unexpectedGroupOrder' as const],
+      output: null,
+    })),
+    ...[
+      "import { usePage as create } from './composables'; const { submit, state } = create()",
+      "import * as api from './composables'; const { submit, state } = api.usePage()",
+      "import usePage from './composables'; const { submit, state } = usePage()",
+      "import { useAsyncPage } from './composables'; const { submit, state } = await useAsyncPage()",
+      "import { useGenericPage } from './composables'; const { submit, value } = useGenericPage(1)",
+      "import { usePage } from './composables'; const { submit: save = 1, state: local = () => {} } = usePage()",
+    ].map(code => ({
+      code,
+      options: { typeInformation: true },
+      errors: ['unexpectedGroupOrder' as const],
+      output: null,
+    })),
+    {
+      code: "import { usePage } from './composables'; const { mixed, uncertain, untyped } = usePage()",
+      options: { typeInformation: true, unknownMembers: 'report' },
+      errors: ['unknownMember', 'unknownMember', 'unknownMember'],
+      output: null,
+    },
+    {
+      code: "import { usePage } from './composables'; const { mixed = () => {} } = usePage()",
       options: { typeInformation: true, unknownMembers: 'report' },
       errors: ['unknownMember'],
       output: null,

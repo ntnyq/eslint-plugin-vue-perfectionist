@@ -289,6 +289,10 @@ export function getThemeConfig(
             collapsed: true,
             items: [
               {
+                link: `${base}/rules/sort-composable-destructure`,
+                text: 'sort-composable-destructure',
+              },
+              {
                 link: `${base}/rules/sort-composable-return`,
                 text: 'sort-composable-return',
               },
