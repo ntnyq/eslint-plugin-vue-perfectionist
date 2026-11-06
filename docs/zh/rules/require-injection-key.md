@@ -9,6 +9,22 @@ description: 禁止在 Vue 的 provide 和 inject 调用中使用字符串键。
 
 > 禁止在 Vue 的 provide 和 inject 调用中使用字符串键。
 
+<!-- summary:start -->
+
+::: info 规则速览
+
+| 项目     | 说明                                   |
+| -------- | -------------------------------------- |
+| 适用范围 | Vue 脚本及独立 JS/TS 文件              |
+| 默认行为 | 禁止字符串键；严格类型检查需显式启用。 |
+| 必需选项 | 无；启用后即使用默认选项。             |
+| 自动修复 | —                                      |
+| 类型信息 | 仅在 `strict: true` 时需要。           |
+
+:::
+
+<!-- summary:end -->
+
 ## 用法 {#usage}
 
 为文件配置合适的解析器，见[快速开始](/zh/guide/)。
@@ -112,7 +128,7 @@ export default [
 
 也支持 `parserOptions.project`。将文件纳入 TS 项目，并在 `tsconfig.json` 中启用 `strict: true`，保证可靠的可空性信息。缺少 program 或节点映射会产生配置错误，即使文件没有相关调用。严格模式不会静默回退到语法检查。JavaScript 请使用 `@typescript-eslint/parser`、`allowJs` 及 JSDoc 键类型。参阅[带类型信息的代码检查配置](https://typescript-eslint.io/getting-started/typed-linting/)。
 
-::: correct
+::: correct strict-injection-key
 
 启用 `strict: true` 且提供类型信息时：
 
@@ -126,7 +142,7 @@ const form = inject(formKey)
 
 :::
 
-::: incorrect
+::: incorrect strict-injection-key
 
 启用 `strict: true` 后，普通 symbol 会报告：
 
@@ -166,5 +182,5 @@ const form = inject(formKey)
 ## :mag: 实现 {#implementation}
 
 - [规则源码](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/src/rules/require-injection-key.ts)
-- [测试源码](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/tests/rules/require-injection-key.test.ts)
-- [严格模式测试](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/tests/rules/require-injection-key-strict.test.ts)
+- [测试源码](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/tests/rules/require-injection-key/syntax.test.ts)
+- [严格模式测试](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/tests/rules/require-injection-key/strict.test.ts)

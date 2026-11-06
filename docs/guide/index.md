@@ -110,3 +110,4 @@ whitespace.
 - [Choose rules](/rules/): browse by purpose and check file scopes, defaults, and automatic fix support.
 - [Configuration](/guide/configuration): configure standalone JS/TS files, auto-imported Vue APIs, and public types.
 - [Rule Composition](/guide/rule-composition): combine related checks and understand fix boundaries and interactions with other plugins.
+- [Troubleshooting](/guide/troubleshooting): diagnose inactive rules, missing fixes, and type-service configuration.

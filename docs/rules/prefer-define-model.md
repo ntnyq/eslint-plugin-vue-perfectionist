@@ -9,6 +9,22 @@ description: Prefer defineModel over matching prop and update event declarations
 
 > Prefer defineModel over matching prop and update event declarations.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                                  |
+| ---------------- | --------------------------------------------------------- |
+| Scope            | Setup                                                     |
+| Defaults         | Report matching model prop and update event declarations. |
+| Required options | None; enabling the rule uses its defaults.                |
+| Automatic fixes  | —                                                         |
+| Type information | No TypeScript type services required.                     |
+
+:::
+
+<!-- summary:end -->
+
 ## Usage
 
 Enable this rule for Vue 3.4+ components alongside your existing

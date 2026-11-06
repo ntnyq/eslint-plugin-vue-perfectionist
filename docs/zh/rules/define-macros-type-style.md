@@ -9,6 +9,22 @@ description: 强制 Vue 编译器宏的类型参数使用内联、本地声明�
 
 > 强制 Vue 编译器宏的类型参数使用内联、本地声明或导入风格。
 
+<!-- summary:start -->
+
+::: info 规则速览
+
+| 项目     | 说明                                                   |
+| -------- | ------------------------------------------------------ |
+| 适用范围 | TS setup                                               |
+| 默认行为 | defineProps、defineEmits 和 defineSlots 使用本地类型。 |
+| 必需选项 | 无；启用后即使用默认选项。                             |
+| 自动修复 | —                                                      |
+| 类型信息 | 不需要 TypeScript 类型服务。                           |
+
+:::
+
+<!-- summary:end -->
+
 ## 用法 {#usage}
 
 在现有的 `vue-eslint-parser` 配置中启用规则，并使用 `@typescript-eslint/parser` 作为脚本解析器：

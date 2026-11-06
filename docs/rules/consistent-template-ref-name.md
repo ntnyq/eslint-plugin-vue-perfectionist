@@ -9,6 +9,22 @@ description: Require template ref variable names to match their keys.
 
 > Require template ref variable names to match their keys.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                         |
+| ---------------- | ------------------------------------------------ |
+| Scope            | Vue scripts and standalone JS/TS files           |
+| Defaults         | The useTemplateRef binding name matches its key. |
+| Required options | None; enabling the rule uses its defaults.       |
+| Automatic fixes  | —                                                |
+| Type information | No TypeScript type services required.            |
+
+:::
+
+<!-- summary:end -->
+
 The rule compares the receiving variable name with the static key passed to
 Vue's `useTemplateRef()`. Mismatches are reported on the variable identifier,
 without automatic fixes or suggestions.

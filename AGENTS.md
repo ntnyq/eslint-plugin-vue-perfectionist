@@ -6,11 +6,12 @@ This package provides ESLint rules for consistent, readable, and maintainable Vu
 
 - `src/index.ts` and `src/plugin.ts` expose the plugin and its rules. The plugin does not provide built-in configurations; users compose their own.
 - `src/rules/` contains flat rule entry files. `src/utils/ast/` holds parser-independent AST helpers, `src/utils/vue/` holds Vue parser and scope integration, and `src/utils/component-props/` holds component prop analysis.
-- `src/utils/sort-script-setup/` owns sorting internals, including its internal models, group matching, option resolution, and validation. Public rule options stay in `src/types/rules/`; shared ESLint source types live in `src/types/eslint.ts`.
+- `src/utils/sort-script-setup/` owns statement sorting internals, including its constants, schema, internal models, group matching, option resolution, and validation. `src/utils/sort-composable/` owns composable member analysis, reporting, and its shared schema. Public rule options stay in `src/types/rules/`; shared ESLint source types live in `src/types/eslint.ts`.
 - Use explicit utility imports rather than a root barrel. Keep single-purpose helpers such as `composable-options.ts` and `template-interpolation.ts` at `src/utils/` until a real multi-file domain emerges. See `docs/design/source-structure.md` for ownership and behavior boundaries.
-- `tests/rules/` contains single-rule behavior suites; large rules may use a dedicated subdirectory.
-- `tests/integration/` contains plugin contracts, rule composition, and Vue compiler/runtime comparisons. `tests/helpers/` owns shared test facilities, `tests/utils/` covers algorithm contracts, and `tests/fixtures/` holds compatibility environments and static samples.
-- `docs/rules/` documents public options; `docs/design/` records design decisions. VitePress configuration lives in `docs/.vitepress/`.
+- `tests/rules/` contains rule behavior suites; large rules and closely related rules may use a dedicated subdirectory. `sort-composable/` keeps return, destructuring, type-aware tests, and shared policy cases together; `require-injection-key/` separates syntax and strict mode.
+- `tests/integration/` contains plugin contracts, rule composition, and Vue compiler/runtime comparisons, organized by the behavior being verified. Keep `eslint-plugin.test.ts` focused on package exports and user-composed configuration; compiler, runtime, and type-semantic model checks belong in `model-name-casing.test.ts`.
+- `tests/helpers/` owns shared runners, builders, and assertions; shared behavior cases stay with their rule suites. `tests/utils/` covers algorithm contracts, and `tests/fixtures/` holds compatibility environments and static samples, including macro type cases.
+- `docs/rules/` documents public options; `docs/design/` records design decisions. VitePress configuration lives in `docs/.vitepress/`; keep example rule configuration separate from Markdown diagnostic rendering. Demo tests stay beside their implementation.
 - `dist/` is generated build output; do not edit it directly.
 
 ## Build, Test, and Development Commands
@@ -25,6 +26,7 @@ Use the pnpm version pinned in `package.json` and the Node version selected by `
 - `pnpm lint`: run ESLint.
 - `pnpm format` / `pnpm format:check`: apply or verify Oxfmt formatting.
 - `pnpm docs:dev` / `pnpm docs:build`: serve or build the documentation.
+- `pnpm docs:sync` / `pnpm docs:check`: regenerate rule catalogs and summaries, or validate documentation contracts.
 
 ## Coding Style & Naming Conventions
 
@@ -40,7 +42,7 @@ Preserve program behavior in automatic fixes. For sorting rules, unsafe runtime 
 
 ## Rule Documentation Guidelines
 
-Use the repository's [add-eslint-rule skill](.agents/skills/add-eslint-rule/SKILL.md) when adding rules, including its test format, documentation format, and final checklist. Keep English rule pages in `docs/rules/` and Simplified Chinese translations in `docs/zh/rules/` synchronized. Follow `docs/rules/sort-script-setup.md` for example presentation: accepted code belongs in `::: correct`, and reported code belongs in `::: incorrect`, including reports without fixes. Keep positive and negative examples separate, omit duplicate Valid / Invalid labels, and leave configuration/reference snippets in ordinary code fences. Match examples to tested behavior and preserve diagnostic-triggering formatting. Check container rendering and run `pnpm docs:build` when rule documentation changes.
+Use the repository's [add-eslint-rule skill](.agents/skills/add-eslint-rule/SKILL.md) when adding rules, including its test format, documentation format, and final checklist. Keep English rule pages in `docs/rules/` and Simplified Chinese translations in `docs/zh/rules/` synchronized. Follow `docs/rules/sort-script-setup.md` for example presentation: accepted code belongs in `::: correct`, and reported code belongs in `::: incorrect`, including reports without fixes. Keep positive and negative examples separate, omit duplicate Valid / Invalid labels, and leave configuration/reference snippets in ordinary code fences. Match examples to tested behavior and preserve diagnostic-triggering formatting. The shared catalog in `docs/.vitepress/rules.ts` drives the sidebar and generated README, overview, scope-list, and rule-summary sections. Update it and run `pnpm docs:sync` rather than editing generated sections by hand. Non-default examples use named profiles in `docs/.vitepress/config/examples.ts`; formatter comments do not skip validation. Check container rendering and run `pnpm docs:check` and `pnpm docs:build` when rule documentation changes.
 
 ## Commit & Pull Request Guidelines
 

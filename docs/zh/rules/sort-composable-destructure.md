@@ -9,6 +9,22 @@ description: 按状态和方法对组合式函数调用的解构成员分组。
 
 > 按状态和方法对组合式函数调用的解构成员分组。
 
+<!-- summary:start -->
+
+::: info 规则速览
+
+| 项目     | 说明                                       |
+| -------- | ------------------------------------------ |
+| 适用范围 | Vue 脚本及独立 JS/TS 文件                  |
+| 默认行为 | 状态在方法之前；保留组内顺序；仅修复空白。 |
+| 必需选项 | 无；启用后即使用默认选项。                 |
+| 自动修复 | 仅空白                                     |
+| 类型信息 | 仅在 `typeInformation: true` 时需要。      |
+
+:::
+
+<!-- summary:end -->
+
 默认状态在前、方法在后，组间恰好一个空行，组内保留原顺序。
 两条规则可以共享分组配置，但不要求消费端逐项复制返回端的顺序。
 
@@ -274,4 +290,4 @@ Vue 文件仍使用 `vue-eslint-parser` 作为外层解析器，并指定 `parse
 ## :mag: 实现 {#mag-implementation}
 
 - [规则源码](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/src/rules/sort-composable-destructure.ts)
-- [测试源码](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/tests/rules/sort-composable-destructure.test.ts)
+- [测试源码](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/tests/rules/sort-composable/destructure.test.ts)

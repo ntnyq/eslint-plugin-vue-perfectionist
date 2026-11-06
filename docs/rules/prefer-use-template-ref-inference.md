@@ -9,6 +9,22 @@ description: Prefer inferred types for static Vue template refs.
 
 > Prefer inferred types for static Vue template refs.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                                                   |
+| ---------------- | -------------------------------------------------------------------------- |
+| Scope            | TS setup + template                                                        |
+| Defaults         | Report explicit generics for eligible static template refs.                |
+| Required options | None; enabling the rule uses its defaults.                                 |
+| Automatic fixes  | —                                                                          |
+| Type information | No type services; inference requires Vue 3.5+ and Vue language tools 2.1+. |
+
+:::
+
+<!-- summary:end -->
+
 Vue 3.5+ with `@vue/language-tools` 2.1+ can infer template ref types from
 matching static refs in the same SFC, including DOM elements and component
 instances. See [Vue's template ref typing guide](https://vuejs.org/guide/typescript/composition-api.html#typing-template-refs).
@@ -162,7 +178,7 @@ way to document an isolated exception.
 
 With `{ ignoreRefs: ['editorRef'] }`, the following is accepted:
 
-::: correct
+::: correct ignore-editor-ref
 
 <!-- prettier-ignore -->
 ```vue

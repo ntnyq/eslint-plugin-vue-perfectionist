@@ -9,6 +9,22 @@ description: Require callbacks to be declared inline at known Vue API argument p
 
 > Require callbacks to be declared inline at known Vue API argument positions, with configurable function and body styles.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                                               |
+| ---------------- | ---------------------------------------------------------------------- |
+| Scope            | Vue scripts and standalone JS/TS files                                 |
+| Defaults         | Inline arrow callbacks with block bodies for lifecycle and watch APIs. |
+| Required options | None; enabling the rule uses its defaults.                             |
+| Automatic fixes  | Supported cases                                                        |
+| Type information | No TypeScript type services required.                                  |
+
+:::
+
+<!-- summary:end -->
+
 - :wrench: ESLint's `--fix` option can automatically fix some problems reported by this rule. Only arrow expression bodies can be automatically converted to block bodies.
 
 The rule checks JavaScript and TypeScript files and both ordinary and setup scripts in Vue SFCs, including calls inside composables and other functions. Template expressions are outside its scope. Enable it explicitly in your ESLint configuration.
@@ -248,7 +264,7 @@ export default defineConfig([
 
 With this configuration:
 
-::: incorrect
+::: incorrect custom-callbacks
 
 ```ts
 useResizeObserver(containerRef, resize)
@@ -258,7 +274,7 @@ tryOnUnmounted(unmount)
 
 :::
 
-::: correct
+::: correct custom-callbacks
 
 ```ts
 useResizeObserver(containerRef, () => {
@@ -298,6 +314,8 @@ For example, the automatic fix preserves the return value:
 ::: incorrect
 
 ```ts
+import { onMounted } from 'vue'
+
 onMounted(() => fetchData())
 ```
 
@@ -306,6 +324,8 @@ onMounted(() => fetchData())
 ::: correct
 
 ```ts
+import { onMounted } from 'vue'
+
 onMounted(() => {
   return fetchData()
 })

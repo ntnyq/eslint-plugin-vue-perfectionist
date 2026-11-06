@@ -1,11 +1,11 @@
 import { expect } from 'vitest'
-import { sortComposableReturn } from '../../src/rules/sort-composable-return.ts'
-import { run } from '../helpers/rule-tester.ts'
-import { runComposablePolicyTests } from '../helpers/sort-composable.ts'
+import { sortComposableReturn } from '../../../src/rules/sort-composable-return.ts'
+import { run } from '../../helpers/rule-tester.ts'
+import { runComposablePolicyTests } from './policy-cases.ts'
 import type {
   SortComposableReturnMessageId,
   SortComposableReturnOptions,
-} from '../../src/types/index.ts'
+} from '../../../src/types/index.ts'
 
 await runComposablePolicyTests(
   sortComposableReturn,

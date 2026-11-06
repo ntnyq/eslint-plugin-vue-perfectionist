@@ -9,6 +9,22 @@ description: Enforce inline, local, or imported type arguments in Vue compiler m
 
 > Enforce inline, local, or imported type arguments in Vue compiler macros.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                                   |
+| ---------------- | ---------------------------------------------------------- |
+| Scope            | TS setup                                                   |
+| Defaults         | Local types for defineProps, defineEmits, and defineSlots. |
+| Required options | None; enabling the rule uses its defaults.                 |
+| Automatic fixes  | —                                                          |
+| Type information | No TypeScript type services required.                      |
+
+:::
+
+<!-- summary:end -->
+
 ## Usage
 
 Enable the rule alongside your existing `vue-eslint-parser` configuration with

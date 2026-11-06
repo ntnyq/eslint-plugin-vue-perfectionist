@@ -9,6 +9,22 @@ description: Disallow string keys in Vue provide and inject calls.
 
 > Disallow string keys in Vue provide and inject calls.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                            |
+| ---------------- | --------------------------------------------------- |
+| Scope            | Vue scripts and standalone JS/TS files              |
+| Defaults         | Reject string keys; strict type checking is opt-in. |
+| Required options | None; enabling the rule uses its defaults.          |
+| Automatic fixes  | —                                                   |
+| Type information | Required only with `strict: true`.                  |
+
+:::
+
+<!-- summary:end -->
+
 ## Usage
 
 Configure the appropriate parser for your files; see [Getting Started](/guide/).
@@ -128,7 +144,7 @@ contains no checked calls. Strict mode never silently falls back to syntax check
 For JavaScript, use `@typescript-eslint/parser`, `allowJs`, and JSDoc key types.
 See [typed linting setup](https://typescript-eslint.io/getting-started/typed-linting/).
 
-::: correct
+::: correct strict-injection-key
 
 With `strict: true` and type information:
 
@@ -142,7 +158,7 @@ const form = inject(formKey)
 
 :::
 
-::: incorrect
+::: incorrect strict-injection-key
 
 With `strict: true`, a plain symbol is reported:
 
@@ -212,5 +228,5 @@ See [Vue's typed provide/inject guide](https://vuejs.org/guide/typescript/compos
 ## :mag: Implementation
 
 - [Rule source](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/src/rules/require-injection-key.ts)
-- [Test source](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/tests/rules/require-injection-key.test.ts)
-- [Strict-mode tests](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/tests/rules/require-injection-key-strict.test.ts)
+- [Test source](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/tests/rules/require-injection-key/syntax.test.ts)
+- [Strict-mode tests](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/tests/rules/require-injection-key/strict.test.ts)

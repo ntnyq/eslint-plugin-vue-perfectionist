@@ -9,6 +9,22 @@ description: Enforce configurable grouping and ordering of top-level statements 
 
 > Enforce configurable grouping and ordering of top-level statements in Vue 3 `<script setup>` blocks.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                                                     |
+| ---------------- | ---------------------------------------------------------------------------- |
+| Scope            | Setup                                                                        |
+| Defaults         | Order groups, preserve within-group order, and apply only proven-safe fixes. |
+| Required options | None; enabling the rule uses its defaults.                                   |
+| Automatic fixes  | Supported cases                                                              |
+| Type information | No TypeScript type services required.                                        |
+
+:::
+
+<!-- summary:end -->
+
 - :wrench: ESLint's `--fix` option can automatically fix some problems reported by this rule. Moves that may change execution behavior are reported without a fix.
 
 ## Why this rule?

@@ -9,6 +9,22 @@ description: Require a single template literal for mixed text and interpolation 
 
 > Require a single template literal for mixed text and interpolation when conversion is safe.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                                                  |
+| ---------------- | ------------------------------------------------------------------------- |
+| Scope            | Template                                                                  |
+| Defaults         | Combine eligible mixed text and interpolations into one template literal. |
+| Required options | None; enabling the rule uses its defaults.                                |
+| Automatic fixes  | Supported cases                                                           |
+| Type information | No TypeScript type services required.                                     |
+
+:::
+
+<!-- summary:end -->
+
 :wrench: Automatically fixes fragments whose expression results and text can be
 converted safely. By default, uncertain fragments produce no diagnostics.
 

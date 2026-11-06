@@ -9,6 +9,22 @@ description: Require simple expressions in named Vue template event handlers.
 
 > Require simple expressions in named Vue template event handlers.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                            |
+| ---------------- | --------------------------------------------------- |
+| Scope            | Template                                            |
+| Defaults         | Require simple expressions in named event handlers. |
+| Required options | None; enabling the rule uses its defaults.          |
+| Automatic fixes  | —                                                   |
+| Type information | No TypeScript type services required.               |
+
+:::
+
+<!-- summary:end -->
+
 Keep small operations in the template and move complex logic into script
 functions. This rule checks syntax, not cyclomatic complexity or runtime side
 effects. It reports at most once per handler, without automatic fixes or

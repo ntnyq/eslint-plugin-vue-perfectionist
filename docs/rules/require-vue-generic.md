@@ -9,6 +9,22 @@ description: Require explicit @vue-generic comments on configured components.
 
 > Require explicit `@vue-generic` comments on configured components.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                          |
+| ---------------- | ------------------------------------------------- |
+| Scope            | Template                                          |
+| Defaults         | No checks until component targets are configured. |
+| Required options | `targets`                                         |
+| Automatic fixes  | —                                                 |
+| Type information | No TypeScript type services required.             |
+
+:::
+
+<!-- summary:end -->
+
 ## Usage
 
 Configure the Vue parser and list the components to check. No components are

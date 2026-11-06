@@ -9,6 +9,22 @@ description: Enforce casing for explicit defineModel names.
 
 > Enforce casing for explicit defineModel names.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                                |
+| ---------------- | ------------------------------------------------------- |
+| Scope            | Setup                                                   |
+| Defaults         | Explicit model names use camelCase; fixes are disabled. |
+| Required options | None; enabling the rule uses its defaults.              |
+| Automatic fixes  | Opt-in                                                  |
+| Type information | No TypeScript type services required.                   |
+
+:::
+
+<!-- summary:end -->
+
 :wrench: Automatic fixes are available only with `fix: true`. They change the
 component's public contract; fixing is disabled by default.
 

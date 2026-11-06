@@ -1,4 +1,3 @@
-import { OPTIONS_SCHEMA } from '../constants/sort-script-setup-schema.ts'
 import { createRule } from '../utils/create-rule.ts'
 import { createStatementComparator } from '../utils/sort-script-setup/compare.ts'
 import {
@@ -12,6 +11,7 @@ import {
 import { resolveOptions } from '../utils/sort-script-setup/options.ts'
 import { collectPartitions } from '../utils/sort-script-setup/partitions.ts'
 import { reportPartition } from '../utils/sort-script-setup/report.ts'
+import { OPTIONS_SCHEMA } from '../utils/sort-script-setup/schema.ts'
 import { createPatternMatcher } from '../utils/sort-script-setup/validation.ts'
 import { getSetupRange } from '../utils/vue/script-scope.ts'
 import type { TSESTree } from '@typescript-eslint/utils'

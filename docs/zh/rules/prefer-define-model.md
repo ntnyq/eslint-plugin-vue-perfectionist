@@ -9,6 +9,22 @@ description: 优先使用 defineModel 替代配套的 prop 和更新事件声明
 
 > 优先使用 defineModel 替代配套的 prop 和更新事件声明。
 
+<!-- summary:start -->
+
+::: info 规则速览
+
+| 项目     | 说明                                     |
+| -------- | ---------------------------------------- |
+| 适用范围 | Setup                                    |
+| 默认行为 | 报告相互匹配的模型 prop 与更新事件声明。 |
+| 必需选项 | 无；启用后即使用默认选项。               |
+| 自动修复 | —                                        |
+| 类型信息 | 不需要 TypeScript 类型服务。             |
+
+:::
+
+<!-- summary:end -->
+
 ## 用法 {#usage}
 
 适用于 Vue 3.4+ 组件，在现有 `vue-eslint-parser` 配置中启用。TypeScript 脚本还需以 `@typescript-eslint/parser` 作为脚本解析器。

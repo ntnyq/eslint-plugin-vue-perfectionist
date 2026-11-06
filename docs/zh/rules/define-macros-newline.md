@@ -9,6 +9,22 @@ description: 要求在内联 Vue 编译器宏声明的花括号内及顶层成�
 
 > 要求在内联 Vue 编译器宏声明的花括号内及顶层成员之间换行。
 
+<!-- summary:start -->
+
+::: info 规则速览
+
+| 项目     | 说明                                                  |
+| -------- | ----------------------------------------------------- |
+| 适用范围 | Setup                                                 |
+| 默认行为 | 内联 props、emits、slots 和 expose 声明使用多行布局。 |
+| 必需选项 | 无；启用后即使用默认选项。                            |
+| 自动修复 | 支持部分情况                                          |
+| 类型信息 | 不需要 TypeScript 类型服务。                          |
+
+:::
+
+<!-- summary:end -->
+
 - :wrench: ESLint 的 `--fix` 选项可以自动修复该规则报告的问题。
 
 这是适用于含 `<script setup>` 的 `.vue` 文件、可自动修复的 `layout` 规则。请在 ESLint 配置中显式启用。
@@ -39,7 +55,10 @@ export default defineConfig([
 
 ::: correct
 
-```ts
+<!-- eslint-skip -->
+
+```vue
+<script setup lang="ts">
 defineProps<{
   name: string
 }>()
@@ -53,17 +72,22 @@ defineExpose({
   open,
   close,
 })
+</script>
 ```
 
 :::
 
 ::: incorrect
 
-```ts
+<!-- eslint-skip -->
+
+```vue
+<script setup lang="ts">
 defineProps<{ name: string }>()
 defineEmits<{ change: [value: string] }>()
 defineSlots<{ default(props: { name: string }): unknown }>()
 defineExpose({ open, close })
+</script>
 ```
 
 :::
@@ -72,22 +96,30 @@ defineExpose({ open, close })
 
 ::: correct
 
-```ts
+<!-- eslint-skip -->
+
+```vue
+<script setup lang="ts">
 defineProps<{
   name: string
   age: number
 }>()
+</script>
 ```
 
 :::
 
 ::: incorrect
 
+<!-- eslint-skip -->
+
 <!-- prettier-ignore -->
-```ts
+```vue
+<script setup lang="ts">
 defineProps<{
   name: string; age: number
 }>()
+</script>
 ```
 
 :::
@@ -133,7 +165,10 @@ defineProps<{
 
 ::: correct
 
-```ts
+<!-- eslint-skip -->
+
+```vue
+<script setup lang="ts">
 // The props type is checked; the defaults object is not.
 withDefaults(
   defineProps<{
@@ -167,6 +202,7 @@ defineEmits(['change'])
 defineProps<Props & { name: string }>()
 defineProps<Partial<{ name: string }>>()
 defineExpose({ open } satisfies Exposed)
+</script>
 ```
 
 :::

@@ -9,6 +9,22 @@ description: Disallow complex expressions in Vue v-for sources.
 
 > Disallow complex expressions in Vue `v-for` sources.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                                                 |
+| ---------------- | ------------------------------------------------------------------------ |
+| Scope            | Template                                                                 |
+| Defaults         | Require simple iteration sources; move complex expressions into scripts. |
+| Required options | None; enabling the rule uses its defaults.                               |
+| Automatic fixes  | —                                                                        |
+| Type information | No TypeScript type services required.                                    |
+
+:::
+
+<!-- summary:end -->
+
 Keep iteration sources readable by moving complex expressions into script
 variables or computed properties. This rule reports without automatic fixes or
 suggestions.

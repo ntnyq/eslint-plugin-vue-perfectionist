@@ -1,4 +1,3 @@
-import { SORT_COMPOSABLE_PROPERTIES } from '../constants/sort-composable-schema.ts'
 import { unwrapExpression } from '../utils/ast/expressions.ts'
 import { createRule } from '../utils/create-rule.ts'
 import {
@@ -10,6 +9,7 @@ import {
   createComposableReporter,
   SORT_COMPOSABLE_MESSAGES,
 } from '../utils/sort-composable/report.ts'
+import { SORT_COMPOSABLE_PROPERTIES } from '../utils/sort-composable/schema.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type {
   SortComposableReturnMessageId,

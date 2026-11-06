@@ -9,6 +9,22 @@ description: Require exact call-site type names for Vue compiler macros.
 
 > Require exact call-site type names for Vue compiler macros.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                         |
+| ---------------- | ------------------------------------------------ |
+| Scope            | TS setup                                         |
+| Defaults         | Use Props, Emits, and Slots at macro call sites. |
+| Required options | None; enabling the rule uses its defaults.       |
+| Automatic fixes  | —                                                |
+| Type information | No TypeScript type services required.            |
+
+:::
+
+<!-- summary:end -->
+
 ## Usage
 
 Enable the rule alongside your existing `vue-eslint-parser` configuration with

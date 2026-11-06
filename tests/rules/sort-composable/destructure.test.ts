@@ -1,11 +1,11 @@
 import { expect } from 'vitest'
-import { sortComposableDestructure } from '../../src/rules/sort-composable-destructure.ts'
-import { run } from '../helpers/rule-tester.ts'
-import { runComposablePolicyTests } from '../helpers/sort-composable.ts'
+import { sortComposableDestructure } from '../../../src/rules/sort-composable-destructure.ts'
+import { run } from '../../helpers/rule-tester.ts'
+import { runComposablePolicyTests } from './policy-cases.ts'
 import type {
   SortComposableDestructureMessageId,
   SortComposableDestructureOptions,
-} from '../../src/types/index.ts'
+} from '../../../src/types/index.ts'
 
 const declaration =
   'function usePage() { return { z: 1, a: [], submit() {}, reset: () => {} } }\n'

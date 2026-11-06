@@ -9,6 +9,22 @@ description: Require configured slots at Vue component usage sites.
 
 > Require configured slots at Vue component usage sites.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                          |
+| ---------------- | ------------------------------------------------- |
+| Scope            | Template                                          |
+| Defaults         | No checks until component targets are configured. |
+| Required options | `targets`                                         |
+| Automatic fixes  | —                                                 |
+| Type information | No TypeScript type services required.             |
+
+:::
+
+<!-- summary:end -->
+
 ## Usage
 
 Configure the Vue parser and list the slots each component usage must provide. No components are checked by default.

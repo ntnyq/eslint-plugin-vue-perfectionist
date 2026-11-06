@@ -9,6 +9,22 @@ description: Enforce a naming pattern for Vue template references.
 
 > Enforce a naming pattern for Vue template references.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                   |
+| ---------------- | ------------------------------------------ |
+| Scope            | Template + scripts                         |
+| Defaults         | Template ref names end in Ref.             |
+| Required options | None; enabling the rule uses its defaults. |
+| Automatic fixes  | —                                          |
+| Type information | No TypeScript type services required.      |
+
+:::
+
+<!-- summary:end -->
+
 This rule checks names where references are used: template `ref` attributes,
 `useTemplateRef()` keys, and `ref` properties passed to Vue's `h()`.
 It does not check ordinary reactive state declarations.

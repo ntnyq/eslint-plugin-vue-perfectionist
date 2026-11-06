@@ -1,6 +1,6 @@
 import * as tsParser from '@typescript-eslint/parser'
 import { Linter } from 'eslint'
-import { expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { compileScript, parse } from 'vue/compiler-sfc'
 import plugin from '../../src/index.ts'
 import { vueLanguageOptions } from '../helpers/rule-tester.ts'
@@ -453,3 +453,87 @@ const result = useSubscription(handler)
     ).toEqual(result)
   },
 )
+
+describe('auto-import settings across public rules', () => {
+  it.each([false, true])(
+    'recognizes boolean state auto-imports with an aliased plugin: %s',
+    autoImport => {
+      const linter = new Linter()
+      const source = `<script setup lang="ts">
+const loading = ref(false)
+const ready = shallowRef<boolean>()
+const [open, toggle] = useToggle()
+function local(ref: Function) { const state = ref(false) }
+</script>`
+      const result = linter.verifyAndFix(
+        source,
+        {
+          files: ['**/*.vue'],
+          languageOptions: {
+            ...vueLanguageOptions,
+            globals: {
+              ref: 'readonly',
+              shallowRef: 'readonly',
+              useToggle: 'readonly',
+            },
+          },
+          plugins: { vp: plugin },
+          settings: { 'vue-perfectionist': { autoImport } },
+          rules: { 'vp/prefer-function-result-pattern': 'error' },
+        },
+        'Test.vue',
+      )
+      expect(result.messages.map(message => message.messageId)).toEqual(
+        autoImport
+          ? Array.from({ length: 3 }, () => 'unexpectedFunctionResultPattern')
+          : [],
+      )
+      expect(result.fixed).toBe(false)
+      expect(result.output).toBe(source)
+    },
+  )
+
+  it.each(['', ' lang="ts"'])(
+    'shares auto-import settings across rules with an aliased plugin: %s',
+    language => {
+      const linter = new Linter()
+      const source = `<script setup${language}>
+const panel = useTemplateRef('field')
+const z = computed(() => 1)
+const a = ref(0)
+onMounted(handler)
+</script>`
+      const configuration: Linter.Config = {
+        files: ['**/*.vue'],
+        languageOptions: vueLanguageOptions,
+        plugins: { vp: plugin },
+        settings: { 'vue-perfectionist': { autoImport: true } },
+        rules: {
+          'vp/callback-style': 'error',
+          'vp/consistent-template-ref-name': 'error',
+          'vp/prefer-ref-pattern': 'error',
+          'vp/sort-script-setup': ['error', { groups: ['ref', 'computed'] }],
+        },
+      }
+      const result = linter.verifyAndFix(source, configuration, 'Test.vue')
+      expect(result.messages.map(message => message.messageId)).toEqual([
+        'inconsistentTemplateRefName',
+        'unexpectedRefPattern',
+        'unsafeReorder',
+        'expectedInlineCallback',
+      ])
+      expect(result.fixed).toBe(false)
+      expect(result.output).toBe(source)
+      expect(
+        linter.verify(
+          source,
+          {
+            ...configuration,
+            settings: { 'vue-perfectionist': { autoImport: false } },
+          },
+          'Test.vue',
+        ),
+      ).toEqual([])
+    },
+  )
+})

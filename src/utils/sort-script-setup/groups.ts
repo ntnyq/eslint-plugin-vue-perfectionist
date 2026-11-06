@@ -1,5 +1,5 @@
 import { isArray, isString, isUndefined } from '@ntnyq/utils'
-import { MODIFIERS, SELECTORS } from '../../constants/sort-script-setup.ts'
+import { MODIFIERS, SELECTORS } from './constants.ts'
 import { invalid } from './validation.ts'
 import type {
   GroupEntry,

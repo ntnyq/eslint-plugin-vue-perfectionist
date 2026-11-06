@@ -23,15 +23,24 @@ TypeScript project services, or ESLint globals.
 
 The following rules also work in standalone scripts:
 
-- [`prefer-watch-effect-alias`](/rules/prefer-watch-effect-alias).
-- [`callback-style`](/rules/callback-style) and
-  [`max-lines-per-callback`](/rules/max-lines-per-callback).
-- [`prefer-composable-options`](/rules/prefer-composable-options) and
-  [`prefer-function-declaration`](/rules/prefer-function-declaration).
-- [`prefer-function-result-pattern`](/rules/prefer-function-result-pattern).
-- [`consistent-template-ref-name`](/rules/consistent-template-ref-name) and the
-  `useTemplateRef` and `render` targets of
-  [`prefer-ref-pattern`](/rules/prefer-ref-pattern).
+<!-- standalone:start -->
+
+- [`callback-style`](/rules/callback-style)
+- [`max-lines-per-callback`](/rules/max-lines-per-callback)
+- [`prefer-composable-options`](/rules/prefer-composable-options)
+- [`prefer-function-declaration`](/rules/prefer-function-declaration)
+- [`prefer-on-scope-dispose`](/rules/prefer-on-scope-dispose)
+- [`prefer-watch-effect-alias`](/rules/prefer-watch-effect-alias)
+- [`require-injection-key`](/rules/require-injection-key)
+- [`consistent-template-ref-name`](/rules/consistent-template-ref-name)
+- [`prefer-function-result-pattern`](/rules/prefer-function-result-pattern)
+- [`prefer-ref-pattern`](/rules/prefer-ref-pattern)
+- [`sort-composable-destructure`](/rules/sort-composable-destructure)
+- [`sort-composable-return`](/rules/sort-composable-return)
+
+<!-- standalone:end -->
+
+For `prefer-ref-pattern`, standalone checks apply only to its `useTemplateRef` and `render` targets.
 
 Match those files in a separate configuration. Standalone scripts use ESLint's
 usual JavaScript parser or the TypeScript parser directly:

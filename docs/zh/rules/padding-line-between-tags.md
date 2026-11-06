@@ -9,6 +9,22 @@ description: 强制相邻 Vue 模板标签之间使用指定数量的空行。
 
 > 强制相邻 Vue 模板标签之间使用指定数量的空行。
 
+<!-- summary:start -->
+
+::: info 规则速览
+
+| 项目     | 说明                                     |
+| -------- | ---------------------------------------- |
+| 适用范围 | 模板                                     |
+| 默认行为 | 符合条件的相邻标签之间恰好保留一个空行。 |
+| 必需选项 | 无；启用后即使用默认选项。               |
+| 自动修复 | 支持部分情况                             |
+| 类型信息 | 不需要 TypeScript 类型服务。             |
+
+:::
+
+<!-- summary:end -->
+
 :wrench: 已位于不同行的标签可自动修复；同行相邻标签需要额外空行时，只报告不修复。
 
 官方 [`vue/padding-line-between-tags`](https://eslint.vuejs.org/rules/padding-line-between-tags.html#options) 支持 `always`、`never`、`consistent`，但不支持精确空行数。尤其 `always` 接受**一行或更多**空行，无法要求恰好一行或两行。
@@ -127,7 +143,7 @@ export default defineConfig([
 
 使用此配置时，修复会在注释前插入空行，让注释仍紧邻后面的组件：
 
-::: correct
+::: correct ignore-comments
 
 <!-- prettier-ignore -->
 ```vue
@@ -141,7 +157,7 @@ export default defineConfig([
 
 :::
 
-::: incorrect
+::: incorrect ignore-comments
 
 <!-- prettier-ignore -->
 ```vue

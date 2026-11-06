@@ -9,6 +9,22 @@ description: 强制函数返回值绑定使用指定的命名模式。
 
 > 强制函数返回值绑定使用指定的命名模式。
 
+<!-- summary:start -->
+
+::: info 规则速览
+
+| 项目     | 说明                                                                 |
+| -------- | -------------------------------------------------------------------- |
+| 适用范围 | Vue 脚本及独立 JS/TS 文件                                            |
+| 默认行为 | 布尔 Vue ref/computed 与 VueUse toggle 使用 is/has/should/can 前缀。 |
+| 必需选项 | 无；启用后即使用默认选项。                                           |
+| 自动修复 | —                                                                    |
+| 类型信息 | 不需要 TypeScript 类型服务。                                         |
+
+:::
+
+<!-- summary:end -->
+
 ## 用法 {#usage}
 
 在扁平化配置中添加规则。TypeScript 和 Vue SFC 需单独配置常规解析器，JavaScript 使用 ESLint 默认解析器。
@@ -146,7 +162,7 @@ const [open] = VueUse.useToggle(false)
 
 使用上述配置时：
 
-::: correct
+::: correct overridden-targets
 
 ```ts
 import { ref, shallowRef } from 'vue'
@@ -157,7 +173,7 @@ const isOpen = shallowRef(false)
 
 :::
 
-::: incorrect
+::: incorrect overridden-targets
 
 ```ts
 import { ref, shallowRef } from 'vue'
@@ -199,7 +215,7 @@ const hasAccess = shallowRef(false)
 
 使用上述配置时：
 
-::: correct
+::: correct custom-functions
 
 ```ts
 import { useDark, useOnline } from '@vueuse/core'
@@ -214,7 +230,7 @@ const isReady = makeFlag()
 
 :::
 
-::: incorrect
+::: incorrect custom-functions
 
 ```ts
 import { useDark, useOnline } from '@vueuse/core'

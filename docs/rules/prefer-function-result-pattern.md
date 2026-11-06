@@ -9,6 +9,22 @@ description: Enforce naming patterns for function result bindings.
 
 > Enforce naming patterns for function result bindings.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                                                     |
+| ---------------- | ---------------------------------------------------------------------------- |
+| Scope            | Vue scripts and standalone JS/TS files                                       |
+| Defaults         | Boolean Vue refs/computed and VueUse toggles use is/has/should/can prefixes. |
+| Required options | None; enabling the rule uses its defaults.                                   |
+| Automatic fixes  | —                                                                            |
+| Type information | No TypeScript type services required.                                        |
+
+:::
+
+<!-- summary:end -->
+
 ## Usage
 
 Add the rule to your flat config. Configure the usual parsers for TypeScript
@@ -157,7 +173,7 @@ This configuration gives Vue methods a shared pattern and overrides only `ref`:
 
 With the configuration above:
 
-::: correct
+::: correct overridden-targets
 
 ```ts
 import { ref, shallowRef } from 'vue'
@@ -168,7 +184,7 @@ const isOpen = shallowRef(false)
 
 :::
 
-::: incorrect
+::: incorrect overridden-targets
 
 ```ts
 import { ref, shallowRef } from 'vue'
@@ -216,7 +232,7 @@ unless `booleanOnly: true` is configured:
 
 With the configuration above:
 
-::: correct
+::: correct custom-functions
 
 ```ts
 import { useDark, useOnline } from '@vueuse/core'
@@ -231,7 +247,7 @@ const isReady = makeFlag()
 
 :::
 
-::: incorrect
+::: incorrect custom-functions
 
 ```ts
 import { useDark, useOnline } from '@vueuse/core'

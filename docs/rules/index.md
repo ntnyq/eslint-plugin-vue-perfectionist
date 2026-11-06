@@ -42,6 +42,8 @@ Automatic fixes apply only to documented supported cases. A fixable rule can
 also report problems that require manual changes. See
 [Automatic Fixes](/guide/rule-composition#automatic-fixes) for the boundaries.
 
+<!-- rules:start -->
+
 ### Callbacks and Composables
 
 | Rule                                                            | Description                                               | Scope   | Automatic fix   |
@@ -101,3 +103,5 @@ also report problems that require manual changes. See
 | [sort-composable-destructure](./sort-composable-destructure.md) | Group destructured composable members by state and method. | Scripts | Whitespace only |
 | [sort-composable-return](./sort-composable-return.md)           | Group composable return members by state and method.       | Scripts | Whitespace only |
 | [sort-script-setup](./sort-script-setup.md)                     | Group and order top-level statements in `<script setup>`.  | Setup   | Supported cases |
+
+<!-- rules:end -->

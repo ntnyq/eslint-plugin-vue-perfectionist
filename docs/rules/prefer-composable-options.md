@@ -9,6 +9,22 @@ description: Prefer a final options object for composable parameters.
 
 > Prefer a final options object for composable parameters.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                                                 |
+| ---------------- | ------------------------------------------------------------------------ |
+| Scope            | Vue scripts and standalone JS/TS files                                   |
+| Defaults         | No positional parameters; use one options object when inputs are needed. |
+| Required options | None; enabling the rule uses its defaults.                               |
+| Automatic fixes  | —                                                                        |
+| Type information | No TypeScript type services required.                                    |
+
+:::
+
+<!-- summary:end -->
+
 Keep composable inputs in named fields, with an optional allowance for leading
 positional parameters. This is an opt-in project API convention. It does not
 claim that Vue requires every composable to use an options object.

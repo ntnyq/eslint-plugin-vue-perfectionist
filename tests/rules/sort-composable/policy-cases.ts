@@ -1,12 +1,12 @@
 import * as tsParser from '@typescript-eslint/parser'
 import { createRuleTester } from 'eslint-vitest-rule-tester'
 import { expect, it } from 'vitest'
-import { run } from './rule-tester.ts'
-import type { sortComposableReturn } from '../../src/rules/sort-composable-return.ts'
+import { run } from '../../helpers/rule-tester.ts'
+import type { sortComposableReturn } from '../../../src/rules/sort-composable-return.ts'
 import type {
   SortComposableMessageId,
   SortComposableOptions,
-} from '../../src/types/index.ts'
+} from '../../../src/types/index.ts'
 
 /**
  * Exercise the same grouping contract through both public rule interfaces.

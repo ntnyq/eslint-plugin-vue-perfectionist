@@ -9,6 +9,22 @@ description: Limit the number of lines in inline callbacks for Vue APIs.
 
 > Limit the number of lines in inline callbacks for Vue APIs.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                          |
+| ---------------- | ------------------------------------------------- |
+| Scope            | Vue scripts and standalone JS/TS files            |
+| Defaults         | At most 20 lines per lifecycle or watch callback. |
+| Required options | None; enabling the rule uses its defaults.        |
+| Automatic fixes  | —                                                 |
+| Type information | No TypeScript type services required.             |
+
+:::
+
+<!-- summary:end -->
+
 Keep inline callbacks short by extracting their internal logic into separate
 functions and calling those functions from the inline callbacks. This rule
 reports excessive length without automatic fixes or suggestions.

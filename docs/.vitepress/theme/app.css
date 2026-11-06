@@ -14,3 +14,8 @@
 .dark::view-transition-old(root) {
   z-index: 9999;
 }
+
+/* Keep the rule summary labels readable on narrow screens. */
+.rule-details .custom-block.info table :is(th, td):first-child {
+  white-space: nowrap;
+}

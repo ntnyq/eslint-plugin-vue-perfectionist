@@ -118,6 +118,12 @@ Align padding preferences with your formatter.
 
 ## Statement Ordering
 
+[`sort-composable-return`](/rules/sort-composable-return) and
+[`sort-composable-destructure`](/rules/sort-composable-destructure) check composable
+return members and consumer destructuring independently. Both default to state
+before methods, preserve within-group order, and fix whitespace only. Reorder
+members manually. Both also support standalone JS/TS files.
+
 [`sort-script-setup`](/rules/sort-script-setup) groups top-level setup statements.
 The default `type: 'unsorted'` preserves name order within ordinary groups.
 Choose `natural`, `alphabetical`, or another supported comparator to sort names.
@@ -170,6 +176,8 @@ their documented boundaries:
 | [`padding-line-between-tags`](/rules/padding-line-between-tags#automatic-fixes-and-formatting)                               | Adjust blank lines between eligible tags already on separate lines.                                      |
 | [`prefer-template-literal-in-interpolation`](/rules/prefer-template-literal-in-interpolation#automatic-fixes-and-formatting) | Combine statically safe primitive expressions and adjacent text while preserving nullish display values. |
 | [`prefer-watch-effect-alias`](/rules/prefer-watch-effect-alias#automatic-fixes-and-formatting)                               | Use dedicated effect APIs when target bindings and static options can be changed safely.                 |
+| [`sort-composable-destructure`](/rules/sort-composable-destructure#automatic-fixes-and-formatting)                           | Adjust group and within-group whitespace only; member reordering requires manual changes.                |
+| [`sort-composable-return`](/rules/sort-composable-return#automatic-fixes-and-formatting)                                     | Adjust group and within-group whitespace only; member reordering requires manual changes.                |
 | [`sort-script-setup`](/rules/sort-script-setup#partitions-and-automatic-fixes)                                               | Reorder eligible declarations within safe contiguous fragments and adjust supported spacing.             |
 
 A fixable rule can still report cases without a fix. In particular,

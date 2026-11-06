@@ -9,6 +9,22 @@ description: Disallow specified native HTML elements in Vue templates.
 
 > Disallow specified native HTML elements in Vue templates.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                        |
+| ---------------- | ----------------------------------------------- |
+| Scope            | Template                                        |
+| Defaults         | No checks until an elements list is configured. |
+| Required options | `elements`                                      |
+| Automatic fixes  | —                                               |
+| Type information | No TypeScript type services required.           |
+
+:::
+
+<!-- summary:end -->
+
 Use this rule to require project components in place of selected native HTML
 elements. Only exact lowercase tag names are matched. There are no automatic
 fixes or suggestions, since replacing an element can change its props, events,

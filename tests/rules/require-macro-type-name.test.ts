@@ -3,9 +3,12 @@ import { createRuleTester } from 'eslint-vitest-rule-tester'
 import ts from 'typescript'
 import { expect, it } from 'vitest'
 import { requireMacroTypeName } from '../../src/rules/require-macro-type-name.ts'
+import {
+  checkedMacroTypes,
+  skippedMacroTypes,
+} from '../fixtures/macro-types.ts'
 import { createVueSFC } from '../helpers/create-vue-sfc.ts'
 import { run, vueLanguageOptions } from '../helpers/rule-tester.ts'
-import { checkedMacroTypes, skippedMacroTypes } from '../macro-types.ts'
 import type {
   RequireMacroTypeNameMessageId,
   RequireMacroTypeNameOptions,

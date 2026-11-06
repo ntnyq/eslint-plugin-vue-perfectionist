@@ -9,6 +9,22 @@ description: Require function declarations in SFCs and composables.
 
 > Require function declarations in SFCs and composables.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                                     |
+| ---------------- | ------------------------------------------------------------ |
+| Scope            | Vue scripts and standalone JS/TS files                       |
+| Defaults         | Function declarations in selected SFC and composable scopes. |
+| Required options | None; enabling the rule uses its defaults.                   |
+| Automatic fixes  | —                                                            |
+| Type information | No TypeScript type services required.                        |
+
+:::
+
+<!-- summary:end -->
+
 Use declarations for directly defined function bindings at the top level of
 Vue scripts, component setup bodies, and matching composables. This is an
 opt-in project convention. The rule only reports and provides no fixes or

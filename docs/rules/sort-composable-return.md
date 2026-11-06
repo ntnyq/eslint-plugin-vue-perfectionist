@@ -9,6 +9,22 @@ description: Group composable return members by state and method.
 
 > Group composable return members by state and method.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                                                |
+| ---------------- | ----------------------------------------------------------------------- |
+| Scope            | Vue scripts and standalone JS/TS files                                  |
+| Defaults         | State before methods; preserve within-group order; fix whitespace only. |
+| Required options | None; enabling the rule uses its defaults.                              |
+| Automatic fixes  | Whitespace only                                                         |
+| Type information | Required only with `typeInformation: true`.                             |
+
+:::
+
+<!-- summary:end -->
+
 By default, state precedes methods, groups have exactly one blank line between
 them, and members retain their original order within each group. Both rules can
 share a grouping policy without requiring consumers to copy the return order.
@@ -303,4 +319,4 @@ member order or spacing.
 ## :mag: Implementation
 
 - [Rule source](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/src/rules/sort-composable-return.ts)
-- [Test source](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/tests/rules/sort-composable-return.test.ts)
+- [Test source](https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/tests/rules/sort-composable/return.test.ts)

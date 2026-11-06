@@ -3,15 +3,15 @@ import * as tsParser from '@typescript-eslint/parser'
 import { createRuleTester } from 'eslint-vitest-rule-tester'
 import ts from 'typescript'
 import { expect, it } from 'vitest'
-import { requireInjectionKey } from '../../src/rules/require-injection-key.ts'
-import { run } from '../helpers/rule-tester.ts'
+import { requireInjectionKey } from '../../../src/rules/require-injection-key.ts'
+import { run } from '../../helpers/rule-tester.ts'
 import type {
   RequireInjectionKeyMessageId,
   RequireInjectionKeyOptions,
-} from '../../src/types/index.ts'
+} from '../../../src/types/index.ts'
 
 const root = fileURLToPath(
-  new URL('../fixtures/injection-key/', import.meta.url),
+  new URL('../../fixtures/injection-key/', import.meta.url),
 )
 const parserOptions = {
   project: './tsconfig.json',

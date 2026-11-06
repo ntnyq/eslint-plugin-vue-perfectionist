@@ -9,6 +9,22 @@ description: Prefer scope-based cleanup in named Vue composables.
 
 > Prefer scope-based cleanup in named Vue composables.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                              |
+| ---------------- | ----------------------------------------------------- |
+| Scope            | Vue scripts and standalone JS/TS files                |
+| Defaults         | Prefer scope cleanup inside named useXxx composables. |
+| Required options | None; enabling the rule uses its defaults.            |
+| Automatic fixes  | —                                                     |
+| Type information | No TypeScript type services required.                 |
+
+:::
+
+<!-- summary:end -->
+
 ## Usage
 
 Configure the appropriate parser for your files; see [Getting Started](/guide/).

@@ -20,6 +20,26 @@ rules explicitly and configure their options for your project.
 
 [Documentation](https://vue-perfectionist.vercel.app) · [Getting Started](https://vue-perfectionist.vercel.app/guide/) · [Rules](https://vue-perfectionist.vercel.app/rules/)
 
+## See a Rule in Action
+
+With `callback-style` enabled, an expression callback is reported:
+
+```ts
+import { watchEffect } from 'vue'
+
+watchEffect(() => refresh())
+```
+
+After running ESLint with `--fix`, the callback uses a block body and preserves its return value:
+
+```ts
+import { watchEffect } from 'vue'
+
+watchEffect(() => {
+  return refresh()
+})
+```
+
 ## Setup
 
 This ESM package requires ESLint `^10.0.0` and `vue-eslint-parser` `^10.0.0`.
@@ -64,6 +84,17 @@ export default defineConfig([
 For JavaScript-only SFCs, omit the TypeScript parser import and `parserOptions.parser`.
 If your Vue configuration already supplies the parsers, add the plugin and your chosen rules.
 
+Run the checks and apply supported automatic fixes when needed:
+
+```shell
+pnpm exec eslint .
+pnpm exec eslint . --fix
+```
+
+Some diagnostics need manual changes, including naming changes and statement
+moves whose safety cannot be established. `--fix` does not resolve every report;
+see each rule's documented boundaries.
+
 See the [setup guide](https://vue-perfectionist.vercel.app/guide/) for more configuration options.
 
 ## Configuration
@@ -72,12 +103,15 @@ See the [setup guide](https://vue-perfectionist.vercel.app/guide/) for more conf
 - [Auto-imported APIs](https://vue-perfectionist.vercel.app/guide/configuration#auto-imported-vue-apis): recognize Vue APIs supplied by auto-import tools.
 - [Rule composition](https://vue-perfectionist.vercel.app/guide/rule-composition): combine related checks and avoid overlapping sorting or padding rules.
 - [Public types](https://vue-perfectionist.vercel.app/guide/configuration#public-typescript-api): type your rule options and shared settings.
+- [Troubleshooting](https://vue-perfectionist.vercel.app/guide/troubleshooting): inactive rules, missing fixes, and type-service configuration.
 
 ## Rules
 
 Browse rules by purpose below. See the
 [rules overview](https://vue-perfectionist.vercel.app/rules/) for file scopes
 and automatic fix support, and individual rule pages for options and defaults.
+
+<!-- rules:start -->
 
 ### Callbacks and Composables
 
@@ -138,6 +172,8 @@ and automatic fix support, and individual rule pages for options and defaults.
 | [sort-composable-destructure](https://vue-perfectionist.vercel.app/rules/sort-composable-destructure) | Group destructured composable members by state and method. |
 | [sort-composable-return](https://vue-perfectionist.vercel.app/rules/sort-composable-return)           | Group composable return members by state and method.       |
 | [sort-script-setup](https://vue-perfectionist.vercel.app/rules/sort-script-setup)                     | Group and order top-level statements in `<script setup>`.  |
+
+<!-- rules:end -->
 
 ## Development
 

@@ -18,6 +18,26 @@ ESLint 规则，帮助你编写风格一致、易读且易于维护的 Vue 3 代
 
 [文档](https://vue-perfectionist.vercel.app/zh/) · [快速开始](https://vue-perfectionist.vercel.app/zh/guide/) · [规则](https://vue-perfectionist.vercel.app/zh/rules/)
 
+## 看看规则效果
+
+启用 `callback-style` 后，表达式回调会被报告：
+
+```ts
+import { watchEffect } from 'vue'
+
+watchEffect(() => refresh())
+```
+
+运行 ESLint 的 `--fix` 后，回调使用块级函数体，并保留返回值：
+
+```ts
+import { watchEffect } from 'vue'
+
+watchEffect(() => {
+  return refresh()
+})
+```
+
 ## 安装与使用
 
 本包采用 ESM 格式，要求安装 ESLint `^10.0.0` 和 `vue-eslint-parser` `^10.0.0`。
@@ -61,6 +81,16 @@ export default defineConfig([
 
 对于仅使用 JavaScript 的单文件组件，省略 TypeScript 解析器的导入和 `parserOptions.parser`。如果现有 Vue 配置已经设置了解析器，只需添加插件及所需规则。
 
+运行检查，并按需应用支持的自动修复：
+
+```shell
+pnpm exec eslint .
+pnpm exec eslint . --fix
+```
+
+部分诊断需要手动修改，例如命名变更和无法证明安全的语句重排。
+`--fix` 不会修复所有问题，具体边界见各规则页面。
+
 更多配置方式请参阅[快速开始](https://vue-perfectionist.vercel.app/zh/guide/)。
 
 ## 配置
@@ -69,10 +99,13 @@ export default defineConfig([
 - [自动导入的 API](https://vue-perfectionist.vercel.app/zh/guide/configuration#auto-imported-vue-apis)：识别自动导入工具提供的 Vue API。
 - [规则组合](https://vue-perfectionist.vercel.app/zh/guide/rule-composition)：组合相关检查，避免排序规则或空行规则相互冲突。
 - [公共类型](https://vue-perfectionist.vercel.app/zh/guide/configuration#public-typescript-api)：为规则选项和共享设置添加类型约束。
+- [问题排查](https://vue-perfectionist.vercel.app/zh/guide/troubleshooting)：规则未生效、无法自动修复和类型服务配置。
 
 ## 规则
 
 下方按用途列出全部规则。文件范围及自动修复支持情况请参阅[规则概览](https://vue-perfectionist.vercel.app/zh/rules/)，选项与默认行为见对应规则页。
+
+<!-- rules:start -->
 
 ### 回调函数与组合式函数
 
@@ -128,9 +161,13 @@ export default defineConfig([
 
 ### 语句排序
 
-| 规则                                                                                 | 描述                                           |
-| ------------------------------------------------------------------------------------ | ---------------------------------------------- |
-| [sort-script-setup](https://vue-perfectionist.vercel.app/zh/rules/sort-script-setup) | 对 `<script setup>` 的顶层语句进行分组和排序。 |
+| 规则                                                                                                     | 描述                                           |
+| -------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| [sort-composable-destructure](https://vue-perfectionist.vercel.app/zh/rules/sort-composable-destructure) | 按状态和方法对组合式函数的解构成员分组。       |
+| [sort-composable-return](https://vue-perfectionist.vercel.app/zh/rules/sort-composable-return)           | 按状态和方法对组合式函数的返回成员分组。       |
+| [sort-script-setup](https://vue-perfectionist.vercel.app/zh/rules/sort-script-setup)                     | 对 `<script setup>` 的顶层语句进行分组和排序。 |
+
+<!-- rules:end -->
 
 ## 开发
 

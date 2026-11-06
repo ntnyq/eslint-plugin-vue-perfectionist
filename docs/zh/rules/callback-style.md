@@ -9,6 +9,22 @@ description: 要求在已知 Vue API 的参数位置内联声明回调函数，�
 
 > 要求在已知 Vue API 的参数位置内联声明回调函数，并可配置函数及函数体风格。
 
+<!-- summary:start -->
+
+::: info 规则速览
+
+| 项目     | 说明                                              |
+| -------- | ------------------------------------------------- |
+| 适用范围 | Vue 脚本及独立 JS/TS 文件                         |
+| 默认行为 | 生命周期与侦听 API 使用内联箭头回调和块级函数体。 |
+| 必需选项 | 无；启用后即使用默认选项。                        |
+| 自动修复 | 支持部分情况                                      |
+| 类型信息 | 不需要 TypeScript 类型服务。                      |
+
+:::
+
+<!-- summary:end -->
+
 - :wrench: ESLint 的 `--fix` 选项可以自动修复该规则报告的部分问题，仅支持将箭头表达式函数体转换为块级函数体。
 
 该规则检查 JavaScript 和 TypeScript 文件，以及 Vue 单文件组件的普通脚本和 setup 脚本，包括组合式函数及其他函数内部的调用。不检查模板表达式。请在 ESLint 配置中显式启用。
@@ -233,7 +249,7 @@ export default defineConfig([
 
 使用此配置时：
 
-::: incorrect
+::: incorrect custom-callbacks
 
 ```ts
 useResizeObserver(containerRef, resize)
@@ -243,7 +259,7 @@ tryOnUnmounted(unmount)
 
 :::
 
-::: correct
+::: correct custom-callbacks
 
 ```ts
 useResizeObserver(containerRef, () => {
@@ -278,6 +294,8 @@ tryOnUnmounted(() => {
 ::: incorrect
 
 ```ts
+import { onMounted } from 'vue'
+
 onMounted(() => fetchData())
 ```
 
@@ -286,6 +304,8 @@ onMounted(() => fetchData())
 ::: correct
 
 ```ts
+import { onMounted } from 'vue'
+
 onMounted(() => {
   return fetchData()
 })

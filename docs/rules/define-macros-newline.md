@@ -9,6 +9,22 @@ description: Require line breaks inside braces and between top-level members of 
 
 > Require line breaks inside braces and between top-level members of inline Vue compiler macro declarations.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                                       |
+| ---------------- | -------------------------------------------------------------- |
+| Scope            | Setup                                                          |
+| Defaults         | Multiline inline props, emits, slots, and expose declarations. |
+| Required options | None; enabling the rule uses its defaults.                     |
+| Automatic fixes  | Supported cases                                                |
+| Type information | No TypeScript type services required.                          |
+
+:::
+
+<!-- summary:end -->
+
 - :wrench: ESLint's `--fix` option can automatically fix problems reported by this rule.
 
 This is an autofixable `layout` rule for `.vue` files with `<script setup>`. Enable it explicitly in your ESLint configuration.
@@ -39,7 +55,10 @@ Even declarations with a single member must use multiple lines:
 
 ::: correct
 
-```ts
+<!-- eslint-skip -->
+
+```vue
+<script setup lang="ts">
 defineProps<{
   name: string
 }>()
@@ -53,17 +72,22 @@ defineExpose({
   open,
   close,
 })
+</script>
 ```
 
 :::
 
 ::: incorrect
 
-```ts
+<!-- eslint-skip -->
+
+```vue
+<script setup lang="ts">
 defineProps<{ name: string }>()
 defineEmits<{ change: [value: string] }>()
 defineSlots<{ default(props: { name: string }): unknown }>()
 defineExpose({ open, close })
+</script>
 ```
 
 :::
@@ -72,22 +96,30 @@ Each member must start on a later line than the previous member ends. Members th
 
 ::: correct
 
-```ts
+<!-- eslint-skip -->
+
+```vue
+<script setup lang="ts">
 defineProps<{
   name: string
   age: number
 }>()
+</script>
 ```
 
 :::
 
 ::: incorrect
 
+<!-- eslint-skip -->
+
 <!-- prettier-ignore -->
-```ts
+```vue
+<script setup lang="ts">
 defineProps<{
   name: string; age: number
 }>()
+</script>
 ```
 
 :::
@@ -133,7 +165,10 @@ Only direct, nonempty type literals and object arguments are checked:
 
 ::: correct
 
-```ts
+<!-- eslint-skip -->
+
+```vue
+<script setup lang="ts">
 // The props type is checked; the defaults object is not.
 withDefaults(
   defineProps<{
@@ -167,6 +202,7 @@ defineEmits(['change'])
 defineProps<Props & { name: string }>()
 defineProps<Partial<{ name: string }>>()
 defineExpose({ open } satisfies Exposed)
+</script>
 ```
 
 :::

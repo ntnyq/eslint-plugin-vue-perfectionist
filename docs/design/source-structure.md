@@ -33,22 +33,28 @@ The root package is published; `docs/` is a private pnpm workspace. See
 
 ## Ownership
 
-| Location                              | Responsibility                                                                                             |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `src/rules/`                          | Rule metadata, schemas, visitor composition, diagnostic selection, and reports                             |
-| `src/utils/ast/`                      | Expression unwrapping, static strings, traversal, bindings, and exact scope reference lookup               |
-| `src/utils/vue/`                      | Parser service guards, script ranges, merged SFC scopes, runtime imports, callbacks, refs, and macro types |
-| `src/utils/component-props/`          | Component matching, bindings, configuration, conservative values, Boolean casting, and value constraints   |
-| `src/utils/sort-script-setup/`        | Statement classification, grouping, comparisons, dependencies, partitions, reports, and internal models    |
-| `src/utils/composable-options.ts`     | Composable parameter shape analysis                                                                        |
-| `src/utils/template-interpolation.ts` | Conservative template interpolation conversion                                                             |
-| `src/types/eslint.ts`                 | Shared readonly ESLint source access, independent of rule context generics                                 |
-| `src/types/rules/`                    | Rule configuration and diagnostic types; public configuration exports remain explicit in `src/index.ts`    |
-| `src/constants/`                      | Finite values and schemas, with sorting options in `sort-script-setup-schema.ts`                           |
+| Location                              | Responsibility                                                                                                                   |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `src/rules/`                          | Rule metadata, schemas, visitor composition, diagnostic selection, and reports                                                   |
+| `src/utils/ast/`                      | Expression unwrapping, static strings, traversal, bindings, and exact scope reference lookup                                     |
+| `src/utils/vue/`                      | Parser service guards, script ranges, merged SFC scopes, runtime imports, callbacks, refs, and macro types                       |
+| `src/utils/component-props/`          | Component matching, bindings, configuration, conservative values, Boolean casting, and value constraints                         |
+| `src/utils/sort-script-setup/`        | Statement sorting constants, schema, classification, groups, comparisons, dependencies, partitions, reports, and internal models |
+| `src/utils/sort-composable/`          | Shared schema, member classification, AST analysis, and reporting for composable return and destructuring rules                  |
+| `src/utils/injection-key.ts`          | Injection key recognition and TypeScript symbol provenance for strict mode                                                       |
+| `src/utils/vue-generic.ts`            | Generic directive matching and configured component exemptions                                                                   |
+| `src/utils/composable-options.ts`     | Composable parameter shape analysis                                                                                              |
+| `src/utils/template-interpolation.ts` | Conservative template interpolation conversion                                                                                   |
+| `src/types/eslint.ts`                 | Shared readonly ESLint source access, independent of rule context generics                                                       |
+| `src/types/rules/`                    | Rule configuration and diagnostic types; public configuration exports remain explicit in `src/index.ts`                          |
+| `src/constants/`                      | Remaining finite values and schemas; established sorting domains own their constants and schemas locally                         |
 
 Import internal utilities from their explicit file paths. There is no root utility
 or constants barrel. Keep sorting's `Statement`, `Group`, and `ResolvedOptions`
-models beside their consumers in `utils/sort-script-setup/types.ts`.
+models beside their consumers in `utils/sort-script-setup/types.ts`. Sorting
+constants and defaults live in that directory's `constants.ts`; both sorting
+domains keep their option schemas in `schema.ts`. Public configuration types
+remain in `src/types/rules/`. The two sorting domains retain separate semantics.
 
 Within sorting, `options.ts` resolves defaults and option interactions, `groups.ts`
 validates and resolves groups and prepares statement matchers, and `validation.ts`
@@ -59,11 +65,47 @@ locales, patterns, option interactions, and explicit `undefined` properties that
 schema validation treats as absent. Compiled regexes reset `lastIndex`
 before every match so global and sticky flags remain deterministic.
 
-Sorting tests are split by responsibility under `tests/rules/sort-script-setup/`.
-Keep detailed diagnostics and fixes in rule suites; use integration suites for
-plugin registration, shared settings, compiler compatibility, and rule interactions.
-The shared sorting runner also checks that report-only cases expose no fix or
-suggestion.
+## Test ownership
+
+Statement sorting tests are split by responsibility under
+`tests/rules/sort-script-setup/`. Composable sorting tests live together in
+`tests/rules/sort-composable/`: `return.test.ts`, `destructure.test.ts`, and
+`types.test.ts` exercise their respective rule surfaces, while `policy-cases.ts`
+provides shared behavior cases invoked by the return and destructuring suites.
+Keep runners, builders, and reusable assertions in `tests/helpers/`; shared
+behavior cases belong with their rule suites. The statement sorting runner also
+checks that report-only cases expose no fix or suggestion.
+
+`tests/rules/require-injection-key/` separates `syntax.test.ts` from type-aware
+`strict.test.ts`. Shared macro type source samples live in
+`tests/fixtures/macro-types.ts`.
+
+Integration suites follow the contract under test:
+
+| Suite                                                | Responsibility                                                                            |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `eslint-plugin.test.ts`                              | Package exports, the rule inventory, and user-composed configuration                      |
+| `rule-registration.test.ts`                          | Individual rules through an aliased public plugin                                         |
+| `rule-composition.test.ts`                           | Combined diagnostics across rules                                                         |
+| `sort-composable.test.ts`                            | Return/destructuring composition, evaluation order, and formatter stability               |
+| `model-composition.test.ts`                          | Interactions between model rules through the public plugin                                |
+| `model-name-casing.test.ts`                          | Model naming fix output checked against Vue compilers, runtimes, and TypeScript semantics |
+| `model-compilation.test.ts`                          | Compiled model props and defineModel conversion compatibility                             |
+| `template-refs.test.ts` and `vue-api-scopes.test.ts` | Ref rule composition, scope recognition, and shared auto-import settings                  |
+
+Keep detailed diagnostics and fix expectations in rule suites. When a case also
+asserts compiler output, runtime behavior, or TypeScript semantics, keep the
+complete case and its assertions in the corresponding integration suite. These
+cases can use the shared rule tester to preserve fix-stability checks.
+
+## Documentation implementation
+
+Keep user content under `guide/`, `rules/`, and `design/`, with matching paths
+under `zh/`. The site entry `docs/.vitepress/config.ts` composes
+`config/example-rules.ts` for default example rule options and
+`config/examples.ts` for example profiles, Markdown container validation, and
+diagnostic rendering. Sorting demo implementation and its tests remain
+colocated under `docs/.vitepress/components/demos/sort-script-setup/`.
 
 ## Shared contracts
 

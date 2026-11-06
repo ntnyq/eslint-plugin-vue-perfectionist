@@ -27,18 +27,20 @@ needed before running tests or serving the docs: both consume source files.
 
 Run these commands from the repository root:
 
-| Command                                                   | Purpose                                                              |
-| --------------------------------------------------------- | -------------------------------------------------------------------- |
-| `pnpm dev`                                                | Rebuild the plugin when source files change.                         |
-| `pnpm build`                                              | Bundle the package and generate TypeScript declarations with tsdown. |
-| `pnpm test`                                               | Run Vitest once; watch mode is disabled in configuration.            |
-| `pnpm exec vitest run tests/rules/callback-style.test.ts` | Run a focused rule suite.                                            |
-| `pnpm typecheck`                                          | Check TypeScript without emitting files.                             |
-| `pnpm lint`                                               | Run ESLint.                                                          |
-| `pnpm format`                                             | Apply Oxfmt formatting.                                              |
-| `pnpm format:check`                                       | Check formatting.                                                    |
-| `pnpm docs:dev`                                           | Serve the VitePress site locally.                                    |
-| `pnpm docs:build`                                         | Build the documentation and check page links.                        |
+| Command                                                   | Purpose                                                                 |
+| --------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `pnpm dev`                                                | Rebuild the plugin when source files change.                            |
+| `pnpm build`                                              | Bundle the package and generate TypeScript declarations with tsdown.    |
+| `pnpm test`                                               | Run Vitest once; watch mode is disabled in configuration.               |
+| `pnpm exec vitest run tests/rules/callback-style.test.ts` | Run a focused rule suite.                                               |
+| `pnpm typecheck`                                          | Check TypeScript without emitting files.                                |
+| `pnpm lint`                                               | Run ESLint.                                                             |
+| `pnpm format`                                             | Apply Oxfmt formatting.                                                 |
+| `pnpm format:check`                                       | Check formatting.                                                       |
+| `pnpm docs:dev`                                           | Serve the VitePress site locally.                                       |
+| `pnpm docs:build`                                         | Build the documentation and check page links.                           |
+| `pnpm docs:sync`                                          | Regenerate rule catalogs and rule-page summaries.                       |
+| `pnpm docs:check`                                         | Check bilingual coverage, catalogs, example diagnostics, and rendering. |
 
 `dist/` and `docs/.vitepress/dist/` are generated output. Edit their sources
 instead. The pre-commit hook runs nano-staged lint and formatting fixes.
@@ -67,8 +69,12 @@ verifies fixed code. Use `createRuleTester<unknown>` for invalid options, and
 reserve ESLint's `Linter` for plugin integration tests.
 
 Cover the rule's actual file scopes, parser variants, option combinations,
-import identity, and local shadowing where relevant. A fixer must preserve
-behavior; add regressions whenever its safety boundary changes.
+import identity, and local shadowing where relevant. Keep shared behavior cases
+with their rule suites and reusable runners and assertions in `tests/helpers/`.
+Compiler, runtime, and type-semantic comparisons belong in focused
+`tests/integration/` suites; keep the complete case and its diagnostic and fix
+assertions together. A fixer must preserve behavior; add regressions whenever
+its safety boundary changes.
 
 ## Documentation Changes
 
@@ -81,12 +87,30 @@ code, including diagnostics without fixes. Keep positive and negative examples
 separate, and leave configuration snippets in ordinary fences. Preserve code
 formatting that intentionally triggers a diagnostic.
 
-The VitePress configuration in `docs/.vitepress/config.ts` registers those
-containers and per-rule ESLint examples. Rendered diagnostics use the configured
-example options, not options inferred from prose. Check examples against tests
-and inspect the rendered page when changing containers or diagnostic examples.
-A successful build alone does not prove that an example reports the intended
-problem.
+`docs/.vitepress/rules.ts` owns the bilingual catalog, scopes, defaults, and fix
+capabilities. After editing it, run `pnpm docs:sync` to update marked sections
+in the READMEs, rules overviews, standalone-script lists, and rule summaries,
+then format the changed files. The sidebar reads the catalog directly. Prose
+outside generated sections remains manually authored.
+
+`docs/.vitepress/config/examples.ts` supplies the same parsers and rule options
+to rendering and validation. Every fence inside a rule page's `correct` or
+`incorrect` container is checked, including fences preceded by prose or formatter
+comments. Correct examples must have no diagnostics; incorrect examples must
+report their own rule. Parser errors fail validation. Show complete SFCs when
+setup context is required and preserve imports when API recognition needs them.
+
+Use an explicit named profile for non-default options, such as
+`::: incorrect custom-callbacks`. Define the profile in `examples.ts`, apply it
+to both sides of the example, and explain its options in the surrounding prose.
+Typed examples run against a real TypeScript program. Unknown profiles and
+profiles for another rule are errors. `<!-- prettier-ignore -->` preserves
+intentional diagnostic-triggering formatting without skipping validation.
+
+Run `pnpm docs:check` and `pnpm docs:build`. The former checks catalog consistency,
+bilingual coverage, every rule example, and diagnostic rendering; the latter
+also validates examples and checks page links. Inspect the actual page when
+changing the container presentation.
 
 The sorting demo reads source rules at build time, with supporting tests beside
 its data loader in `docs/.vitepress/components/demos/sort-script-setup/`.
@@ -104,6 +128,7 @@ pnpm lint
 pnpm typecheck
 pnpm build
 pnpm test
+pnpm docs:check
 pnpm docs:build
 ```
 
@@ -112,5 +137,4 @@ Update rule documentation whenever options or behavior change. Use concise
 Conventional Commit prefixes such as `fix:` or `docs:`.
 
 CI checks formatting, lint, and types, then builds and tests the package on Node
-22, 24, and 26 across Linux, Windows, and macOS. The documentation build is a
-separate local check; it is not part of the current CI workflow.
+22, 24, and 26 across Linux, Windows, and macOS. A separate documentation CI job runs `pnpm docs:check` and `pnpm docs:build`.

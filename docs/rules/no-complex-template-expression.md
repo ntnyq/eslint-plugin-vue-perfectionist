@@ -9,6 +9,22 @@ description: Limit logical operators and conditional nesting in Vue templates.
 
 > Limit logical operators and conditional nesting in Vue templates.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                                         |
+| ---------------- | ---------------------------------------------------------------- |
+| Scope            | Template                                                         |
+| Defaults         | At most two logical operators and one conditional nesting level. |
+| Required options | None; enabling the rule uses its defaults.                       |
+| Automatic fixes  | —                                                                |
+| Type information | No TypeScript type services required.                            |
+
+:::
+
+<!-- summary:end -->
+
 ## Usage
 
 Configure `vue-eslint-parser`; see [Getting Started](/guide/).

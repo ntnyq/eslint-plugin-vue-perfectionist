@@ -16,11 +16,24 @@ description: 配置解析器、文件范围、自动导入识别和公共 TypeSc
 
 以下规则也支持独立脚本：
 
-- [`prefer-watch-effect-alias`](/zh/rules/prefer-watch-effect-alias)。
-- [`callback-style`](/zh/rules/callback-style) 和 [`max-lines-per-callback`](/zh/rules/max-lines-per-callback)。
-- [`prefer-composable-options`](/zh/rules/prefer-composable-options) 和 [`prefer-function-declaration`](/zh/rules/prefer-function-declaration)。
-- [`prefer-function-result-pattern`](/zh/rules/prefer-function-result-pattern)。
-- [`consistent-template-ref-name`](/zh/rules/consistent-template-ref-name)，以及 [`prefer-ref-pattern`](/zh/rules/prefer-ref-pattern) 的 `useTemplateRef` 和 `render` 检查目标。
+<!-- standalone:start -->
+
+- [`callback-style`](/zh/rules/callback-style)
+- [`max-lines-per-callback`](/zh/rules/max-lines-per-callback)
+- [`prefer-composable-options`](/zh/rules/prefer-composable-options)
+- [`prefer-function-declaration`](/zh/rules/prefer-function-declaration)
+- [`prefer-on-scope-dispose`](/zh/rules/prefer-on-scope-dispose)
+- [`prefer-watch-effect-alias`](/zh/rules/prefer-watch-effect-alias)
+- [`require-injection-key`](/zh/rules/require-injection-key)
+- [`consistent-template-ref-name`](/zh/rules/consistent-template-ref-name)
+- [`prefer-function-result-pattern`](/zh/rules/prefer-function-result-pattern)
+- [`prefer-ref-pattern`](/zh/rules/prefer-ref-pattern)
+- [`sort-composable-destructure`](/zh/rules/sort-composable-destructure)
+- [`sort-composable-return`](/zh/rules/sort-composable-return)
+
+<!-- standalone:end -->
+
+`prefer-ref-pattern` 的独立脚本检查仅适用于 `useTemplateRef` 和 `render` 目标。
 
 为这些文件单独添加配置。独立脚本可以直接使用 ESLint 默认的 JavaScript 解析器或 TypeScript 解析器：
 

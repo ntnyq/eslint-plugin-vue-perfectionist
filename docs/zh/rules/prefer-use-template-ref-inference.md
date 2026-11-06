@@ -9,6 +9,22 @@ description: 优先为静态 Vue 模板 ref 使用推断类型。
 
 > 优先为静态 Vue 模板 ref 使用推断类型。
 
+<!-- summary:start -->
+
+::: info 规则速览
+
+| 项目     | 说明                                                             |
+| -------- | ---------------------------------------------------------------- |
+| 适用范围 | TS setup + 模板                                                  |
+| 默认行为 | 对符合条件的静态模板 ref 报告显式泛型。                          |
+| 必需选项 | 无；启用后即使用默认选项。                                       |
+| 自动修复 | —                                                                |
+| 类型信息 | 无需类型服务；类型推断依赖 Vue 3.5+ 及 Vue language tools 2.1+。 |
+
+:::
+
+<!-- summary:end -->
+
 Vue 3.5+ 配合 `@vue/language-tools` 2.1+ 可从同一 SFC 中匹配的静态 ref 推断类型，包括 DOM 元素及组件实例，见 [Vue 模板 ref 类型指南](https://vuejs.org/guide/typescript/composition-api.html#typing-template-refs)。编辑器中请使用兼容的 Vue 语言工具，命令行用 `vue-tsc` 检查类型。本规则不检查工具版本或 TypeScript 配置。
 
 这是风格偏好，无法证明显式类型与推断类型等价。仅报告，不提供自动修复或建议；删除泛型仍需有意评估其对类型检查的影响。
@@ -142,7 +158,7 @@ const element = useTemplateRef<HTMLVideoElement>('videoRef')
 
 设置 `{ ignoreRefs: ['editorRef'] }` 时，以下代码被接受：
 
-::: correct
+::: correct ignore-editor-ref
 
 <!-- prettier-ignore -->
 ```vue

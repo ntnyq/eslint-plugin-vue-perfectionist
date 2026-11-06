@@ -1,5 +1,5 @@
-import type { Modifier, Selector } from '../types/index.ts'
-import type { ResolvedOptions } from '../utils/sort-script-setup/types.ts'
+import type { Modifier, Selector } from '../../types/index.ts'
+import type { ResolvedOptions } from './types.ts'
 
 /**
  * Ordered modifier precedence used when multiple configured groups match.

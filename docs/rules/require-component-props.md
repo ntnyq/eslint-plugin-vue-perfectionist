@@ -9,6 +9,22 @@ description: Require configured props at Vue component usage sites.
 
 > Require configured props at Vue component usage sites.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                          |
+| ---------------- | ------------------------------------------------- |
+| Scope            | Template                                          |
+| Defaults         | No checks until component targets are configured. |
+| Required options | `targets`                                         |
+| Automatic fixes  | —                                                 |
+| Type information | No TypeScript type services required.             |
+
+:::
+
+<!-- summary:end -->
+
 ## Usage
 
 Configure the Vue parser and list the component contracts to enforce. No components are checked by default.

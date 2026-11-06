@@ -9,6 +9,22 @@ description: Enforce blank-line counts between consecutive Vue template tags.
 
 > Enforce blank-line counts between consecutive Vue template tags.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                              |
+| ---------------- | ----------------------------------------------------- |
+| Scope            | Template                                              |
+| Defaults         | Exactly one blank line between eligible sibling tags. |
+| Required options | None; enabling the rule uses its defaults.            |
+| Automatic fixes  | Supported cases                                       |
+| Type information | No TypeScript type services required.                 |
+
+:::
+
+<!-- summary:end -->
+
 :wrench: Tags already on separate lines can be fixed automatically. Inline
 siblings are reported without a fix when additional blank lines are required.
 
@@ -151,7 +167,7 @@ to check matching sibling tags across one or more HTML comments, including
 With this configuration, the fix inserts a blank line before the comment,
 keeping it next to the following component:
 
-::: correct
+::: correct ignore-comments
 
 <!-- prettier-ignore -->
 ```vue
@@ -165,7 +181,7 @@ keeping it next to the following component:
 
 :::
 
-::: incorrect
+::: incorrect ignore-comments
 
 <!-- prettier-ignore -->
 ```vue

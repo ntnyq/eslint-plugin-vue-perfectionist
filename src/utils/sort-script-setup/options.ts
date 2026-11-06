@@ -1,6 +1,6 @@
 import { isArray } from '@ntnyq/utils'
-import { DEFAULT_OPTIONS, VUE_APIS } from '../../constants/sort-script-setup.ts'
 import { resolveVueGlobals } from '../vue/globals.ts'
+import { DEFAULT_OPTIONS, VUE_APIS } from './constants.ts'
 import { validateGroups } from './groups.ts'
 import { invalid, isRecord, validateDefinedOptions } from './validation.ts'
 import type { SortScriptSetupRuleContext } from '../../types/rules/sort-script-setup.ts'

@@ -1,15 +1,15 @@
 import { fileURLToPath } from 'node:url'
 import { expect } from 'vitest'
-import { sortComposableDestructure } from '../../src/rules/sort-composable-destructure.ts'
-import { sortComposableReturn } from '../../src/rules/sort-composable-return.ts'
-import { run } from '../helpers/rule-tester.ts'
+import { sortComposableDestructure } from '../../../src/rules/sort-composable-destructure.ts'
+import { sortComposableReturn } from '../../../src/rules/sort-composable-return.ts'
+import { run } from '../../helpers/rule-tester.ts'
 import type {
   SortComposableMessageId,
   SortComposableOptions,
-} from '../../src/types/index.ts'
+} from '../../../src/types/index.ts'
 
 const root = fileURLToPath(
-  new URL('../fixtures/sort-composable/', import.meta.url),
+  new URL('../../fixtures/sort-composable/', import.meta.url),
 )
 const parserOptions = {
   project: './tsconfig.json',

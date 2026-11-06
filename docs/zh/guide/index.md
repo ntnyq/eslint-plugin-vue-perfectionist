@@ -101,3 +101,4 @@ pnpm exec eslint . --fix
 - [选择规则](/zh/rules/)：按用途浏览规则，查看适用文件范围、默认行为和自动修复支持情况。
 - [配置](/zh/guide/configuration)：配置独立 JS/TS 文件、自动导入的 Vue API 和公共类型。
 - [规则组合](/zh/guide/rule-composition)：组合相关检查，了解自动修复边界及与其他插件的交互。
+- [问题排查](/zh/guide/troubleshooting)：排查规则未生效、缺少自动修复和类型服务配置。

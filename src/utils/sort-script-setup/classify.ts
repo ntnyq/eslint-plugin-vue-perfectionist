@@ -1,7 +1,7 @@
-import { MACROS, VUE_APIS } from '../../constants/sort-script-setup.ts'
 import { isPrimitiveConstant, unwrapExpression } from '../ast/expressions.ts'
 import { containsTopLevelAwait, getBindingNames } from '../ast/traversal.ts'
 import { getCallIdentity } from '../vue/call-identity.ts'
+import { MACROS, VUE_APIS } from './constants.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type { SourceCode } from '../../types/eslint.ts'
 import type { Selector } from '../../types/index.ts'

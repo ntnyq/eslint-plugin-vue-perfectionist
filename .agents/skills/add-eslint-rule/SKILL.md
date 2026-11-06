@@ -34,19 +34,16 @@ The examples use `example-rule` for the rule name, `exampleRule` for its export,
 | Update                    | `src/types/index.ts`                      | Add `export type * from './rules/example-rule.ts'`                                                                                             |
 | Update for the public API | `src/index.ts`                            | Explicitly export options and related user configuration types in the existing `export type { ... }`; keep internal MessageId types private    |
 | Update                    | `tests/integration/eslint-plugin.test.ts` | Add the name to the exact rule list in registration order; preserve assertions for matching default/named exports and the absence of `configs` |
-| Update                    | `README.md`                               | Add a Rules table entry linking to `https://vue-perfectionist.vercel.app/rules/example-rule`                                                   |
-| Update                    | `docs/rules/index.md`                     | Add a rule table entry with a `./example-rule.md` relative link and a short description                                                        |
-| Update                    | `docs/.vitepress/config/theme.ts`         | Add `{ link: '/rules/example-rule', text: 'example-rule' }` to the Rules sidebar                                                               |
 | Update                    | `docs/guide/index.md`                     | Update the rule enumeration and related text under Choosing Rules                                                                              |
 
-Registration, plugin contract tests, rule tables, and the Rules sidebar currently use alphabetical rule order. Keep them consistent, with Overview first in the sidebar.
+Update `docs/.vitepress/rules.ts` with bilingual descriptions, scope, defaults, required options, and fix support. Add the generated-summary markers to both rule pages, then run `pnpm docs:sync`. This updates both README tables, rule overviews, standalone-script lists, and page summaries. The sidebar reads the same catalog. Keep names alphabetical within each purpose group and keep Overview first.
 
 Add or update the following only when needed; do not create empty modules merely to fill out the structure:
 
 - `src/constants/example-rule.ts`: Large or shared API tables, defaults, and similar constants. Use `UPPER_SNAKE_CASE`. Import constants from their explicit module paths; there is no root constants barrel.
-- `src/utils/ast/`, `src/utils/vue/`, or `src/utils/component-props/`: Reuse the narrowest existing owner for shared analysis. Rule-specific sorting internals belong in `src/utils/sort-script-setup/`. Keep standalone helpers in `src/utils/example-rule.ts` when no domain fits; use explicit imports without a root utility barrel. `src/constants/sort-script-setup-schema.ts` serves sorting options; keep unrelated schemas elsewhere.
+- `src/utils/ast/`, `src/utils/vue/`, or `src/utils/component-props/`: Reuse the narrowest existing owner for shared analysis. Sorting internals and schemas belong in `src/utils/sort-script-setup/` or `src/utils/sort-composable/`, with each domain's schema in `schema.ts`. Keep standalone helpers in `src/utils/example-rule.ts` when no domain fits; use explicit imports without a root utility barrel.
 - `tests/helpers/rule-tester.ts`: Add helpers only when multiple tests need them. Prefer the existing `run`, `vueLanguageOptions`, and `$` helpers.
-- `docs/.vitepress/config.ts`: Enable the new rule in the documentation's `eslintConfig` when its Vue examples need rendered diagnostics. Keep the existing `correct` / `incorrect` container renderer.
+- `docs/.vitepress/config/example-rules.ts`: Register the rule's default documentation example configuration. Use an explicit profile in `config/examples.ts` when examples need different options or parser services; keep container validation and diagnostic rendering together.
 - `docs/design/example-rule.md`: Create this when complex semantics, sorting, or fix strategies need a discussion of tradeoffs, and register it in the Design sidebar.
 - `docs/index.md` and documentation demos: Update only when homepage claims or interactive examples are affected. New rules do not require a demo.
 
@@ -218,9 +215,9 @@ const answer = 42
 :::
 ````
 
-The containers are registered in `docs/.vitepress/config.ts` and rendered by `docs/.vitepress/components/CustomWrapper.vue`. Normally put the code fence first inside the container: the renderer adds `eslint-check` only to a directly following fence, so duplicating that metadata is unnecessary. The current ESLint transformer handles only `vue` fences and uses its configured rules/options; it does not infer options from page prose. A successful documentation build does not prove that every example has the intended diagnostics. Verify examples against rule tests and check rendered diagnostics where used.
+The containers are registered in `docs/.vitepress/config/examples.ts` and rendered by `docs/.vitepress/components/CustomWrapper.vue`. Every `vue`, `js`, and `ts` fence in a rule-page example container is validated and rendered with the same rule configuration. Correct examples must report nothing; incorrect examples must report the page's rule. Parsing failures are errors. Non-default options use an explicit named profile, such as `::: incorrect custom-callbacks`, applied to both sides of the example. Options are not inferred from prose. Typed profiles provide a real TypeScript program.
 
-Leave blank lines around container delimiters, Markdown tables, lists, and code blocks. Preserve formatting that intentionally triggers diagnostics. When needed, place `<!-- prettier-ignore -->` immediately before the affected fence inside the container, following `define-macros-newline.md`; this comment interrupts automatic `eslint-check` injection, so check any required rendered diagnostics explicitly. Verify that examples remain meaningful after formatting.
+Leave blank lines around container delimiters, tables, lists, and fences. Preserve diagnostic-triggering formatting with `<!-- prettier-ignore -->` when needed; it no longer skips validation or diagnostic rendering. Use `<!-- eslint-skip -->` when a fixture intentionally violates unrelated repository lint rules. Neither comment disables the documentation's own rule checks. Show complete SFC context for setup-only rules and retain imports needed for API recognition. Run `pnpm docs:check` and inspect rendered diagnostics when changing examples.
 
 ## 7. Final checks
 
@@ -240,6 +237,7 @@ pnpm lint
 pnpm typecheck
 pnpm build
 pnpm test
+pnpm docs:check
 pnpm docs:build
 git diff --check
 git status --short

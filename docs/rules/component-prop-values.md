@@ -9,6 +9,22 @@ description: Enforce configured prop value constraints at Vue component usage si
 
 > Enforce configured prop value constraints at Vue component usage sites.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                          |
+| ---------------- | ------------------------------------------------- |
+| Scope            | Template                                          |
+| Defaults         | No checks until component targets are configured. |
+| Required options | `targets`                                         |
+| Automatic fixes  | —                                                 |
+| Type information | No TypeScript type services required.             |
+
+:::
+
+<!-- summary:end -->
+
 Use this rule to require values such as multiples of ten, bounded numbers,
 allowed variants, or strings with a particular length or pattern. These are
 lightweight constraints implemented by the rule, not a JSON Schema dialect.

@@ -9,6 +9,22 @@ description: 要求 Vue 编译器宏调用处的类型使用指定名称。
 
 > 要求 Vue 编译器宏调用处的类型使用指定名称。
 
+<!-- summary:start -->
+
+::: info 规则速览
+
+| 项目     | 说明                                        |
+| -------- | ------------------------------------------- |
+| 适用范围 | TS setup                                    |
+| 默认行为 | 宏调用处使用 Props、Emits 和 Slots 类型名。 |
+| 必需选项 | 无；启用后即使用默认选项。                  |
+| 自动修复 | —                                           |
+| 类型信息 | 不需要 TypeScript 类型服务。                |
+
+:::
+
+<!-- summary:end -->
+
 ## 用法 {#usage}
 
 在现有的 `vue-eslint-parser` 配置中启用规则，并使用 `@typescript-eslint/parser` 作为脚本解析器：

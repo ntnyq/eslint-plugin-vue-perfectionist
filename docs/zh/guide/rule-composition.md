@@ -77,6 +77,11 @@ const rules = {
 
 ## 语句排序 {#statement-ordering}
 
+[`sort-composable-return`](/zh/rules/sort-composable-return) 与
+[`sort-composable-destructure`](/zh/rules/sort-composable-destructure)
+分别检查组合式函数返回值和调用处的解构。两者默认状态在方法之前，保留组内顺序，
+仅自动修复空白；成员重排需手动完成。它们也支持独立 JS/TS 文件。
+
 [`sort-script-setup`](/zh/rules/sort-script-setup) 对 setup 顶层语句分组。默认的 `type: 'unsorted'` 保留普通组内的名称顺序。选择 `natural`、`alphabetical` 或其他支持的比较方式可对名称排序。所有排序偏好均应直接放在规则选项中。
 
 继续使用 `perfectionist/sort-imports` 对导入排序。当本规则负责相同 Vue 文件中的声明和宏顺序时，禁用 `perfectionist/sort-modules` 和 `vue/define-macros-order`。以下覆盖配置假定相应插件和 Vue 解析器已配置，应放在这些预设之后：
@@ -118,6 +123,8 @@ export default defineConfig([
 | [`padding-line-between-tags`](/zh/rules/padding-line-between-tags#automatic-fixes-and-formatting)                               | 调整已分行的、符合条件的标签之间的空行。                          |
 | [`prefer-template-literal-in-interpolation`](/zh/rules/prefer-template-literal-in-interpolation#automatic-fixes-and-formatting) | 合并静态安全的原始值表达式与相邻文本，保留 nullish 值的显示行为。 |
 | [`prefer-watch-effect-alias`](/zh/rules/prefer-watch-effect-alias#automatic-fixes-and-formatting)                               | 在目标绑定及静态选项可安全修改时，改用专用的副作用 API。          |
+| [`sort-composable-destructure`](/zh/rules/sort-composable-destructure#automatic-fixes-and-formatting)                           | 仅调整组间及组内空白；成员顺序问题需手动修改。                    |
+| [`sort-composable-return`](/zh/rules/sort-composable-return#automatic-fixes-and-formatting)                                     | 仅调整组间及组内空白；成员顺序问题需手动修改。                    |
 | [`sort-script-setup`](/zh/rules/sort-script-setup#partitions-and-automatic-fixes)                                               | 在安全的连续片段内重排符合条件的声明，并调整支持的间距。          |
 
 可自动修复的规则仍可能报告无法修复的情况。例如，`sort-script-setup` 会报告无法确定安全性的运行时移动，但不调整其顺序；`fix: 'none'` 会禁用包括间距在内的全部修复。模型名称大小写修复会改变公共组件约定，因此需要单独启用。其他命名、类型风格、组件约定、回调行数和函数声明问题均需手动修改。

@@ -9,6 +9,22 @@ description: Prefer dedicated aliases for post and sync watch effects.
 
 > Prefer dedicated aliases for post and sync watch effects.
 
+<!-- summary:start -->
+
+::: info At a glance
+
+| Concern          | Behavior                                                           |
+| ---------------- | ------------------------------------------------------------------ |
+| Scope            | Vue scripts and standalone JS/TS files                             |
+| Defaults         | Prefer watchPostEffect / watchSyncEffect for static flush options. |
+| Required options | None; enabling the rule uses its defaults.                         |
+| Automatic fixes  | Supported cases                                                    |
+| Type information | No TypeScript type services required.                              |
+
+:::
+
+<!-- summary:end -->
+
 :wrench: Automatically fixes calls when the target API and options can be
 changed safely. Other matching calls are reported without a fix.
 
