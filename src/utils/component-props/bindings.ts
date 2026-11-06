@@ -1,5 +1,6 @@
 import { COMPONENT_NATIVE_TAGS } from '../../constants/component-native-tags.ts'
 import { getStaticStringValue, unwrapExpression } from '../ast/expressions.ts'
+import { isInVPre } from '../vue/v-pre.ts'
 import { hyphenateName, normalizePropName } from './config.ts'
 import { inferPropValue, stringPropValue, unknownPropValue } from './value.ts'
 import type { AST } from 'vue-eslint-parser'
@@ -10,36 +11,6 @@ export interface ComponentPropBinding {
   presence: 'present' | 'absent' | 'unknown'
   value: PropValue
   rawNames: Set<string>
-}
-
-/**
- * Check whether v-pre disables compilation on an element or its ancestors.
- *
- * @param element - The element to inspect.
- * @returns Whether the element is within a v-pre subtree.
- */
-function isInVPre(element: AST.VElement): boolean {
-  let current: AST.VElement | AST.VDocumentFragment = element
-  while (current.type === 'VElement') {
-    if (
-      current.startTag.attributes.some(
-        /**
-         * Recognize v-pre in parsed directive or raw attribute form.
-         *
-         * @param attribute - The ancestor attribute to inspect.
-         * @returns Whether the attribute enables v-pre.
-         */
-        attribute =>
-          attribute.directive
-            ? attribute.key.name.name === 'pre'
-            : attribute.key.name === 'v-pre',
-      )
-    ) {
-      return true
-    }
-    current = current.parent
-  }
-  return false
 }
 
 /**

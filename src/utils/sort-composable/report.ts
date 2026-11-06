@@ -10,6 +10,8 @@ import type {
 } from '../../types/rules/sort-composable.ts'
 import type { MemberKind } from './classify.ts'
 
+const MAX_WHITESPACE_LENGTH = 65_536
+
 interface Group extends Required<ComposableGroupOverrides> {
   names: string[]
   before: ComposableNewlines
@@ -182,8 +184,10 @@ export function createComposableReporter(
           /^[^\S\r\n\u{2028}\u{2029}]*/u,
         )?.[0] ?? '')
     const newline = gap.match(/\r\n|[\n\r\u{2028}\u{2029}]/u)?.[0] ?? eol
-    const replacement =
-      !breaks && count === 0 ? gap : newline.repeat(count + 1) + indent
+    const replacementLength =
+      !breaks && count === 0
+        ? gap.length
+        : newline.length * (count + 1) + indent.length
     context.report({
       node: right.node,
       messageId:
@@ -192,9 +196,13 @@ export function createComposableReporter(
           : 'unexpectedNewlinesBetween',
       data: { name: right.name, count },
       fix:
-        options.fix === 'none'
+        options.fix === 'none' || replacementLength > MAX_WHITESPACE_LENGTH
           ? null
           : fixer => {
+              const replacement =
+                !breaks && count === 0
+                  ? gap
+                  : newline.repeat(count + 1) + indent
               const fixes: TSESLint.RuleFix[] = []
               if (beforeBreaks.length > 1) {
                 fixes.push(

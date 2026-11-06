@@ -26,6 +26,25 @@ await run<PreferRefPatternOptions, PreferRefPatternMessageId>({
     }
   },
   valid: [
+    ...[
+      '<slot ref="invoice" />',
+      '<slot :ref="\'invoice\'" />',
+      '<slot :ref="`invoice`" />',
+      '<slot :ref="invoice" />',
+      '<template v-if="ok" ref="invoice"><div /></template>',
+      '<template v-if="ok" :ref="invoice"><div /></template>',
+      '<div v-if="ok" /><template v-else-if="other" ref="invoice"><div /></template>',
+      '<div v-if="ok" /><template v-else ref="invoice"><div /></template>',
+      '<template v-for="item in items" ref="invoice"><div /></template>',
+      '<Widget><template #default ref="invoice"><div /></template></Widget>',
+    ].map(template => ({
+      description: `ignores attributes that do not create template refs: ${template}`,
+      code: createVueSFC({
+        script:
+          '<script setup>import { ref } from "vue"; const invoice = ref(null)</script>',
+        template: `<template>${template}</template>`,
+      }),
+    })),
     {
       description: 'skips auto-imported APIs when disabled',
       code: createVueSFC({
@@ -296,6 +315,35 @@ ${script}; h("div", { ref: panel })
     },
   ],
   invalid: [
+    ...[
+      '<Slot ref="invoice" />',
+      '<Slot :ref="\'invoice\'" />',
+      '<Slot :ref="invoice" />',
+      '<Template v-if="ok" ref="invoice" />',
+      '<template ref="invoice"><div /></template>',
+      '<template :ref="invoice"><div /></template>',
+      '<slot><div ref="invoice" /></slot>',
+      '<template v-if="ok"><div ref="invoice" /></template>',
+      '<div v-pre ref="invoice" />',
+      '<slot v-pre ref="invoice" />',
+      '<div v-pre><slot ref="invoice" /></div>',
+      '<template v-pre v-if="ok" ref="invoice"><div /></template>',
+      '<div v-pre><template v-if="ok" ref="invoice"><div /></template></div>',
+    ].map(template => ({
+      description: `checks real template refs: ${template}`,
+      code: createVueSFC({
+        script:
+          '<script setup>import { ref } from "vue"; const invoice = ref(null)</script>',
+        template: `<template>${template}</template>`,
+      }),
+      errors: [
+        {
+          messageId: 'unexpectedRefPattern' as const,
+          data: { name: 'invoice', pattern: '.+Ref$' },
+        },
+      ],
+      output: null,
+    })),
     ...['ref', 'shallowRef', 'useTemplateRef'].flatMap(api =>
       [false, true].map(withGlobals => ({
         description: `recognizes auto-imported ${api} in template bindings, globals: ${withGlobals}`,

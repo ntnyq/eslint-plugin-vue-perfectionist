@@ -104,6 +104,75 @@ export async function runComposablePolicyTests(
       { code: wrap('a, z'), options: { type: 'alphabetical' } },
     ],
     invalid: [
+      ...(['safe', 'none'] as const).flatMap(fix =>
+        [
+          {
+            members: 'z, submit',
+            options: { newlinesBetween: Number.MAX_SAFE_INTEGER },
+            messageId: 'unexpectedNewlinesBetween' as const,
+            name: 'submit',
+          },
+          {
+            members: 'z, a',
+            options: { newlinesInside: Number.MAX_SAFE_INTEGER },
+            messageId: 'unexpectedNewlinesInside' as const,
+            name: 'a',
+          },
+          {
+            members: 'z, submit',
+            options: {
+              groups: [
+                'state',
+                { newlinesBetween: Number.MAX_SAFE_INTEGER },
+                'method',
+              ],
+            },
+            messageId: 'unexpectedNewlinesBetween' as const,
+            name: 'submit',
+          },
+          {
+            members: 'z, a',
+            options: {
+              groups: [
+                { group: 'state', newlinesInside: Number.MAX_SAFE_INTEGER },
+              ],
+            },
+            messageId: 'unexpectedNewlinesInside' as const,
+            name: 'a',
+          },
+        ].map(({ members, options, messageId, name }) => ({
+          description: `reports huge spacing without allocating a fix: ${JSON.stringify(options)}, fix: ${fix}`,
+          code: wrap(members),
+          options: { ...options, fix },
+          errors: [
+            {
+              messageId,
+              data: { name, count: Number.MAX_SAFE_INTEGER },
+            },
+          ],
+          output: null,
+        })),
+      ),
+      ...[
+        { eol: '\n', indent: '', count: 65_535 },
+        { eol: '\r\n', indent: '  ', count: 32_766 },
+      ].flatMap(({ eol, indent, count }) => [
+        {
+          description: 'allows whitespace fixes at the output length limit',
+          code: wrap(`z,${eol}${indent}submit`),
+          options: { newlinesBetween: count },
+          errors: ['unexpectedNewlinesBetween' as const],
+          output: wrap(`z,${eol.repeat(count + 1)}${indent}submit`),
+        },
+        {
+          description:
+            'leaves the entire gap unchanged when a fix exceeds the length limit',
+          code: wrap(`z${eol}${eol},${eol}${indent}submit`),
+          options: { newlinesBetween: count + 1 },
+          errors: ['unexpectedNewlinesBetween' as const],
+          output: null,
+        },
+      ]),
       {
         description: 'removes excess blank lines before a separator',
         code: wrap('z\n\n,\na'),
@@ -346,6 +415,18 @@ export async function runComposablePolicyTests(
     { ignoreNames: ['same', 'same'] },
     { newlinesBetween: -1 },
     { newlinesInside: 0.5 },
+    { newlinesBetween: Number.MAX_SAFE_INTEGER + 1 },
+    { newlinesInside: Number.MAX_SAFE_INTEGER + 1 },
+    {
+      groups: [
+        'state',
+        { newlinesBetween: Number.MAX_SAFE_INTEGER + 1 },
+        'method',
+      ],
+    },
+    {
+      groups: [{ group: 'state', newlinesInside: Number.MAX_SAFE_INTEGER + 1 }],
+    },
     { groups: [['state', 'state']] },
     { groups: ['state', 'state'] },
     { groups: ['missing'] },

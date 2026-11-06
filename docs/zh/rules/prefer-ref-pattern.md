@@ -155,6 +155,7 @@ h('section', { ref: 'panel' })
 - 默认必须显式从 `vue` 导入 API。支持具名别名和命名空间导入，包括静态命名空间访问。启用共享 `autoImport: true` 可识别未绑定的 `ref`、`shallowRef`、`useTemplateRef`、`h`，见[自动导入配置](../guide/configuration.md#auto-imported-vue-apis)，适用于模板 ref 绑定、键和渲染 ref。跳过局部函数、遮蔽绑定、仅类型及其他模块导入。
 - 已确认 ref 标识符必须直接由 Vue `ref()`、`shallowRef()` 或 `useTemplateRef()` 初始化，且未重新赋值。支持 TypeScript 断言、非空断言及 `satisfies`。
 - 模板标识符仅从 `<script setup>` 声明解析。普通脚本同名声明和赋值不影响 setup ref 识别，`v-for` 和插槽绑定优先。不推断选项式 API `setup()` 返回映射、解构、ref 变量别名或自定义组合式函数返回值。普通脚本或无脚本时仍检查静态模板字符串。
+- 小写 `<slot>` 出口将 `ref` 作为普通参数传给插槽，因此跳过其属性。使用 `v-if`、`v-else-if`、`v-else`、`v-for` 或 `v-slot` 的结构性 `<template>` 同样不创建模板引用。`v-pre` 内不适用这些排除条件：这些标签是普通元素，静态 `ref` 仍会创建引用。`<Slot>` 等组件标签和普通 `<template>` 元素仍会检查。
 - 跳过函数 ref、成员表达式、条件表达式、含插值字符串及动态指令参数。不求值保存字符串键的常量。跳过目标为普通属性而非模板 ref 的 `.prop` 和 `.attr` 绑定。
 - 渲染检查仅查看内联 props 对象，包括简写 `ref` 和静态计算属性名。数值属性名不会隐藏前面的 `ref`。后续属性覆盖前面的属性；后续展开或未知计算键会使先前 ref 无法确定并跳过。不检查 props 变量、`mergeProps()`、JSX 或其他渲染 API。
 

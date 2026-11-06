@@ -186,6 +186,12 @@ Targets replace the default list. They must be unique and use the names above.
   mappings, destructuring, aliases of ref variables, and custom composable
   return values are not inferred. Static template strings are still checked
   with ordinary `<script>` or no script block.
+- Lowercase `<slot>` outlets pass `ref` to the slot as an ordinary prop, so their
+  attributes are skipped. Structural `<template>` elements using `v-if`,
+  `v-else-if`, `v-else`, `v-for`, or `v-slot` do not create template refs either.
+  These exclusions do not apply inside `v-pre`, where the tags are ordinary
+  elements and static `ref` attributes still create references. Component tags
+  such as `<Slot>` and ordinary `<template>` elements are still checked.
 - Function refs, member expressions, conditional expressions, interpolated
   strings, and dynamically selected directive arguments are skipped. Constants
   holding string keys are not evaluated. `.prop` and `.attr` bindings are skipped

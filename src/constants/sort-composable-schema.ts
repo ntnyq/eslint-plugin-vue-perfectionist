@@ -16,7 +16,7 @@ const KIND = {
 } satisfies JSONSchema.JSONSchema4
 const NEWLINES = {
   anyOf: [
-    { minimum: 0, type: 'integer' },
+    { maximum: Number.MAX_SAFE_INTEGER, minimum: 0, type: 'integer' },
     { enum: ['ignore'], type: 'string' },
   ],
 } satisfies JSONSchema.JSONSchema4

@@ -290,6 +290,11 @@ comma, moving required blank lines after it and removing excess blank lines befo
 Expressions, comments, existing indentation (including Unicode horizontal whitespace), and LF/CRLF are preserved. Inline members from different groups can gain line breaks. A single
 group does not require between-group spacing.
 
+Blank-line counts must be nonnegative safe integers (at most
+`Number.MAX_SAFE_INTEGER`). If the replacement whitespace after a comma would
+exceed 65,536 UTF-16 code units, including line endings and indentation, the rule
+reports the spacing violation without fixing either side of that comma.
+
 The rules never change key enumeration order, getter/Proxy reads, or evaluation
 of destructuring defaults. `fix: 'none'` disables every fix. There are no reorder
 suggestions or `fix: 'unsafe'`. Leave indentation to the formatter. The default `0/1` spacing policy is compatible with Oxfmt. Counts greater than `1` are collapsed by Oxfmt and will trigger diagnostics again; use `fix: 'none'` for report-only checks or avoid formatting the same gap with Oxfmt. Avoid combining rules that demand conflicting

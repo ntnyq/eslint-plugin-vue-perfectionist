@@ -8,6 +8,7 @@ import { resolveVueGlobals } from '../utils/vue/globals.ts'
 import { hasTemplateVisitor } from '../utils/vue/parser-services.ts'
 import { getVueRefApi, isVueRefVariable } from '../utils/vue/refs.ts'
 import { getSetupRange } from '../utils/vue/script-scope.ts'
+import { isInVPre } from '../utils/vue/v-pre.ts'
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
 import type { AST } from 'vue-eslint-parser'
 import type {
@@ -154,6 +155,23 @@ export const preferRefPattern = createRule<
     }
 
     function checkAttribute(node: AST.VAttribute | AST.VDirective) {
+      const element = node.parent.parent
+      // Slot outlet props and structural template attributes do not create refs.
+      // Inside v-pre these tags are ordinary elements; Slot is a component.
+      if (
+        (element.rawName === 'slot' ||
+          (element.rawName === 'template' &&
+            element.startTag.attributes.some(
+              attribute =>
+                attribute.directive &&
+                ['if', 'else', 'else-if', 'for', 'slot'].includes(
+                  attribute.key.name.name,
+                ),
+            ))) &&
+        !isInVPre(element)
+      ) {
+        return
+      }
       if (!node.directive) {
         if (node.key.name === 'ref' && node.value) {
           checkName(node.value.value, node.value)
