@@ -54,6 +54,87 @@ const scriptContexts = [
 it.each(
   scriptContexts.flatMap(context =>
     ['type', 'interface'].flatMap(declarationKind =>
+      [false, true].flatMap(namespace =>
+        [false, true].map(runtimeShadow => ({
+          ...context,
+          declarationKind,
+          namespace,
+          runtimeShadow,
+        })),
+      ),
+    ),
+  ),
+)(
+  'resolves outer runtime imports through inner $declarationKind bindings ($name, namespace: $namespace, value shadow: $runtimeShadow)',
+  ({
+    filename,
+    languageOptions,
+    open,
+    close,
+    declarationKind,
+    namespace,
+    runtimeShadow,
+  }) => {
+    const names = namespace ? ['Vue'] : ['Effect', 'PostEffect']
+    const types = names
+      .map(name =>
+        declarationKind === 'type'
+          ? `type ${name} = string`
+          : `interface ${name} {}`,
+      )
+      .join('\n')
+    const imports = namespace
+      ? "import * as Vue from 'vue'"
+      : "import { watchEffect as Effect, watchPostEffect as PostEffect } from 'vue'"
+    const call = namespace ? 'Vue.watchEffect' : 'Effect'
+    const alias = namespace ? 'Vue.watchPostEffect' : 'PostEffect'
+    const parameters = runtimeShadow ? names.join(', ') : ''
+    const source = `${open}${imports}\nfunction usePage(${parameters}) {\n${types}\n${call}(() => 1, { flush: 'post' })\n}${close}`
+    const expected = runtimeShadow
+      ? source
+      : source.replace(
+          `${call}(() => 1, { flush: 'post' })`,
+          () => `${alias}(() => { return (1) })`,
+        )
+    const composedConfig: Linter.Config = {
+      files: ['**/*.{ts,vue}'],
+      languageOptions,
+      plugins: { vp: plugin },
+      rules: {
+        'vp/callback-style': 'error',
+        'vp/prefer-watch-effect-alias': 'error',
+      },
+    }
+    const linter = new Linter()
+
+    expect(
+      linter
+        .verify(source, composedConfig, filename)
+        .map(message => [message.ruleId, message.messageId]),
+    ).toEqual(
+      runtimeShadow
+        ? []
+        : [
+            ['vp/prefer-watch-effect-alias', 'preferredAlias'],
+            ['vp/callback-style', 'expectedBlockBody'],
+          ],
+    )
+    expect(linter.verifyAndFix(source, composedConfig, filename)).toEqual({
+      fixed: !runtimeShadow,
+      messages: [],
+      output: expected,
+    })
+    expect(linter.verifyAndFix(expected, composedConfig, filename)).toEqual({
+      fixed: false,
+      messages: [],
+      output: expected,
+    })
+  },
+)
+
+it.each(
+  scriptContexts.flatMap(context =>
+    ['type', 'interface'].flatMap(declarationKind =>
       [false, true].map(typesFirst => ({
         ...context,
         declarationKind,

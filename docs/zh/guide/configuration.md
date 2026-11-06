@@ -54,7 +54,7 @@ export default defineConfig([
 
 各规则仍遵循自身的适用范围。例如，`prefer-function-declaration` 在独立文件中检查匹配的组合式函数体；启用它并不意味着所有模块级函数绑定都必须改用函数声明。仅针对模板或 setup 的规则需要相应的 Vue 单文件组件上下文。
 
-当 TypeScript 类型别名或接口与运行时 API 导入在同一作用域内同名时，无论声明顺序如何，API 识别均以运行时导入为准。这适用于独立 TypeScript 文件、普通 SFC 脚本及 setup 脚本。仅有类型绑定、没有运行时定义，不足以认定为自动导入的 API。
+当 TypeScript 类型别名或接口与运行时 API 导入在同一作用域内同名时，无论声明顺序如何，API 识别均以运行时导入为准。内层作用域中的类型别名或接口也不会遮蔽外层运行时导入；局部值或参数仍优先。这适用于独立 TypeScript 文件、普通 SFC 脚本及 setup 脚本。仅有类型绑定、没有运行时定义，不足以认定为自动导入的 API。
 
 ## 自动导入的 Vue API {#auto-imported-vue-apis}
 

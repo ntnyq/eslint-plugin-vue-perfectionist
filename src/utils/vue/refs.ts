@@ -1,9 +1,6 @@
 import { getStaticStringValue, unwrapExpression } from '../ast/expressions.ts'
 import { getRuntimeImportBinding } from './call-identity.ts'
-import {
-  getScriptVariableDefinitions,
-  isInScriptRange,
-} from './script-scope.ts'
+import { getScriptVariableDefinitions } from './script-scope.ts'
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
 import type { SourceCode } from '../../types/eslint.ts'
 
@@ -54,8 +51,7 @@ export function getVueRefApi(
  *
  * @param variable - The scope variable to inspect, or nullish when unresolved.
  * @param sourceCode - The source code used to resolve the initializer call.
- * @param declarationRange - The optional script-block range restricting
- * declarations and writes.
+ * @param visibleDefinitions - The definitions visible at the ref usage site.
  * @param vueGlobals - The enabled Vue auto-import globals; defaults to an empty
  * list.
  * @returns Whether a single identifier declaration calls ref, shallowRef, or
@@ -64,43 +60,41 @@ export function getVueRefApi(
 export function isVueRefVariable(
   variable: TSESLint.Scope.Variable | null | undefined,
   sourceCode: SourceCode,
-  declarationRange?: TSESTree.Range,
+  visibleDefinitions: readonly TSESLint.Scope.Definition[],
   vueGlobals: readonly string[] = [],
 ): boolean {
-  // vue-eslint-parser merges same-name bindings from both script blocks.
-  // Only declarations and writes in the selected block belong to a setup ref.
-  /**
-   * Check whether a node belongs to the selected declaration range.
-   *
-   * @param node - The declaration or reference node.
-   * @returns Whether the node is in range, or true when no range restriction is
-   * supplied.
-   */
-  const isInRange = (node: TSESTree.Node) =>
-    !declarationRange || isInScriptRange(node, declarationRange)
-  const definitions = variable?.defs.filter(
+  const definitions: TSESLint.Scope.Definition[] = visibleDefinitions.filter(
     /**
-     * Keep variable definitions in the selected script block.
+     * Ignore types sharing the runtime binding's name.
      *
      * @param definition - The variable definition.
-     * @returns Whether its declaration belongs to the selected range.
+     * @returns Whether the definition can introduce a runtime value.
      */
-    definition => isInRange(definition.node),
+    definition => definition.isVariableDefinition !== false,
   )
   if (
     !variable ||
-    definitions?.length !== 1 ||
+    definitions.length !== 1 ||
     variable.references.some(
       /**
-       * Detect a write after initialization within the selected script block.
+       * Detect writes to this binding, accounting for setup-local shadowing.
        *
        * @param reference - The variable reference.
-       * @returns Whether it is a non-initializing write in range.
+       * @returns Whether it is a non-initializing write to a visible definition.
        */
       reference =>
         reference.isWrite() &&
         !reference.init &&
-        isInRange(reference.identifier),
+        reference.identifier.type === 'Identifier' &&
+        getScriptVariableDefinitions(reference.identifier, sourceCode).some(
+          /**
+           * Match the write's binding to the ref declaration being checked.
+           *
+           * @param definition - The definition resolved for this write.
+           * @returns Whether the write targets the same runtime binding.
+           */
+          definition => definitions.includes(definition),
+        ),
     )
   ) {
     return false

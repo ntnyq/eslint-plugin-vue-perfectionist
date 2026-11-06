@@ -179,6 +179,11 @@ Targets replace the default list. They must be unique and use the names above.
 - A confirmed ref identifier has a direct `ref()`, `shallowRef()`, or
   `useTemplateRef()` initializer from Vue and is not reassigned. TypeScript
   assertions, non-null assertions, and `satisfies` wrappers are supported.
+  Same-name type aliases and interfaces do not hide the runtime ref binding.
+  Render usages follow the visible runtime binding: setup locals do not hide
+  ordinary-script refs from ordinary-script render functions. A setup assignment
+  to an ordinary-script ref still counts as reassignment when no setup-local
+  value shadows it.
 - Template identifiers are resolved only against `<script setup>` declarations.
   Same-name declarations and assignments in an ordinary `<script>` block do
   not affect setup ref recognition. `v-for` and slot bindings take precedence.

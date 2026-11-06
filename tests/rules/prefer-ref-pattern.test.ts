@@ -26,6 +26,46 @@ await run<PreferRefPatternOptions, PreferRefPatternMessageId>({
     }
   },
   valid: [
+    ...['type panel = string', 'interface panel {}'].map(declaration => ({
+      description: `retains reassignment checks alongside ${declaration}`,
+      code: `<script setup lang="ts">
+import { ref, h } from 'vue'
+${declaration}
+let panel = ref(null)
+panel = () => {}
+h('div', { ref: panel })
+</script><template><div :ref="panel" /></template>`,
+    })),
+    ...[
+      'panel = () => {}',
+      'function replace() { panel = () => {} }',
+      'type panel = string; panel = () => {}',
+      'function replace() { interface panel {}; panel = () => {} }',
+    ].flatMap(write =>
+      [false, true].map(setupFirst => {
+        const ordinary = `<script lang="ts">
+import { ref, h } from 'vue'
+let panel = ref(null)
+export function renderPanel() { return h('div', { ref: panel }) }
+</script>`
+        const setup = `<script setup lang="ts">${write}</script>`
+        return {
+          description: `recognizes setup writes to an ordinary ref (${write}, setup first: ${setupFirst})`,
+          code: setupFirst ? setup + ordinary : ordinary + setup,
+        }
+      }),
+    ),
+    {
+      description:
+        'keeps runtime parameter shadowing alongside a type declaration',
+      filename: 'Test.ts',
+      code: `import { ref, h } from 'vue'
+const panel = ref(null)
+function renderPanel(panel) {
+  type panel = string
+  return h('div', { ref: panel })
+}`,
+    },
     ...[
       '<slot ref="invoice" />',
       '<slot :ref="\'invoice\'" />',
@@ -315,6 +355,62 @@ ${script}; h("div", { ref: panel })
     },
   ],
   invalid: [
+    ...['type panel = HTMLElement | null', 'interface panel {}'].flatMap(
+      declaration =>
+        ['ref', 'shallowRef', 'useTemplateRef'].flatMap(api =>
+          [false, true].map(typeFirst => {
+            const value = `const panel = ${api}(${api === 'useTemplateRef' ? "'panelRef'" : 'null'})`
+            return {
+              description: `recognizes ${api} alongside ${declaration} (type first: ${typeFirst})`,
+              code: `<script setup lang="ts">
+import { ${api}, h } from 'vue'
+${typeFirst ? `${declaration}\n${value}` : `${value}\n${declaration}`}
+h('div', { ref: panel })
+</script><template><div :ref="panel" /></template>`,
+              errors: [
+                'unexpectedRefPattern' as const,
+                'unexpectedRefPattern' as const,
+              ],
+              output: null,
+            }
+          }),
+        ),
+    ),
+    ...['type panel = string', 'interface panel {}'].map(declaration => ({
+      description: `resolves outer render refs through ${declaration}`,
+      filename: 'Test.ts',
+      code: `import { ref, h } from 'vue'
+const panel = ref(null)
+function renderPanel() {
+  ${declaration}
+  return h('div', { ref: panel })
+}`,
+      errors: ['unexpectedRefPattern' as const],
+      output: null,
+    })),
+    ...['', ' lang="ts"'].flatMap(language =>
+      [false, true].flatMap(setupFirst =>
+        ['const panel = 1', 'let panel = ref(null); panel = () => {}'].map(
+          local => {
+            const ordinary = `<script${language}>
+import { ref, h } from 'vue'
+const panel = ref(null)
+export function renderPanel() { return h('div', { ref: panel }) }
+</script>`
+            const setup = `<script setup${language}>${local}; h('div', { ref: panel })</script>`
+            return {
+              description: `isolates ordinary refs from setup locals (${language || 'JavaScript'}, setup first: ${setupFirst}, ${local})`,
+              code: `${setupFirst ? setup + ordinary : ordinary + setup}<template><div :ref="panel" /></template>`,
+              languageOptions: language
+                ? vueLanguageOptions
+                : { parserOptions: { parser: null } },
+              errors: ['unexpectedRefPattern' as const],
+              output: null,
+            }
+          },
+        ),
+      ),
+    ),
     ...[
       '<Slot ref="invoice" />',
       '<Slot :ref="\'invoice\'" />',

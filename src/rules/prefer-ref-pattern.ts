@@ -3,11 +3,16 @@ import {
   getStaticStringValue,
   unwrapExpression,
 } from '../utils/ast/expressions.ts'
+import { findScopeReference } from '../utils/ast/scope.ts'
 import { createRule } from '../utils/create-rule.ts'
 import { resolveVueGlobals } from '../utils/vue/globals.ts'
 import { hasTemplateVisitor } from '../utils/vue/parser-services.ts'
 import { getVueRefApi, isVueRefVariable } from '../utils/vue/refs.ts'
-import { getSetupRange } from '../utils/vue/script-scope.ts'
+import {
+  getScriptVariableDefinitions,
+  getSetupRange,
+  isInScriptRange,
+} from '../utils/vue/script-scope.ts'
 import { isInVPre } from '../utils/vue/v-pre.ts'
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
 import type { AST } from 'vue-eslint-parser'
@@ -87,24 +92,12 @@ export const preferRefPattern = createRule<
       if (name !== undefined) {
         checkName(name, expression)
       } else if (expression.type === 'Identifier') {
-        const variable = ASTUtils.findVariable(
-          sourceCode.getScope(expression),
-          expression,
-        )
-        const isSetupBinding =
-          setupRange &&
-          expression.range[0] >= setupRange[0] &&
-          expression.range[1] <= setupRange[1] &&
-          variable?.defs.some(
-            definition =>
-              definition.node.range[0] >= setupRange[0] &&
-              definition.node.range[1] <= setupRange[1],
-          )
+        const variable = findScopeReference(expression, sourceCode)?.resolved
         if (
           isVueRefVariable(
             variable,
             sourceCode,
-            isSetupBinding ? setupRange : undefined,
+            getScriptVariableDefinitions(expression, sourceCode),
             vueGlobals,
           )
         ) {
@@ -206,7 +199,11 @@ export const preferRefPattern = createRule<
         scope => scope.type === 'module',
       )
       const variable = moduleScope?.set.get(expression.name)
-      if (isVueRefVariable(variable, sourceCode, setupRange, vueGlobals)) {
+      const definitions =
+        variable?.defs.filter(definition =>
+          isInScriptRange(definition.node, setupRange),
+        ) ?? []
+      if (isVueRefVariable(variable, sourceCode, definitions, vueGlobals)) {
         checkName(expression.name, expression)
       }
     }

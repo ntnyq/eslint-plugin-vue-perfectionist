@@ -1,4 +1,3 @@
-import { ASTUtils } from '@typescript-eslint/utils'
 import { hasVueServices } from './parser-services.ts'
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
 import type { SourceCode } from '../../types/eslint.ts'
@@ -73,22 +72,30 @@ export function getScriptVariableDefinitions(
   sourceCode: SourceCode,
   name = identifier.name,
 ): TSESLint.Scope.Definition[] {
-  const variable = ASTUtils.findVariable(sourceCode.getScope(identifier), name)
-  const definitions = variable?.defs ?? []
-  const runtimeDefinitions = definitions.filter(
-    /**
-     * Keep scope definitions that may introduce runtime variables.
-     *
-     * @param definition - The resolved scope definition.
-     * @returns Whether the definition is not explicitly type-only.
-     */
-    definition => definition.isVariableDefinition !== false,
-  )
-  // Keep type-only bindings when there is no value binding, so they do not
-  // accidentally opt into auto-import recognition.
-  const candidates = runtimeDefinitions.length
-    ? runtimeDefinitions
-    : definitions
+  let scope: TSESLint.Scope.Scope | null = sourceCode.getScope(identifier)
+  let candidates: TSESLint.Scope.Definition[] = []
+  while (scope) {
+    const definitions = scope.set.get(name)?.defs ?? []
+    const runtimeDefinitions = definitions.filter(
+      /**
+       * Keep scope definitions that may introduce runtime variables.
+       *
+       * @param definition - The resolved scope definition.
+       * @returns Whether the definition is not explicitly type-only.
+       */
+      definition => definition.isVariableDefinition !== false,
+    )
+    if (runtimeDefinitions.length) {
+      candidates = runtimeDefinitions
+      break
+    }
+    // A type-only binding does not shadow an outer value. Retain the nearest
+    // type definitions as a fallback so they cannot opt into auto-imports.
+    if (!candidates.length) {
+      candidates = definitions
+    }
+    scope = scope.upper
+  }
   const setupRange = getSetupRange(sourceCode)
   if (!setupRange) {
     return candidates
