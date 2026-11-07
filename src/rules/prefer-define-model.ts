@@ -1,9 +1,17 @@
 import { createRule } from '../utils/create-rule.ts'
+import { resolveVueGlobals, resolveVueUse } from '../utils/vue/globals.ts'
 import { getModelContractMembers } from '../utils/vue/model-contracts.ts'
+import { getPassiveModelNames } from '../utils/vue/passive-models.ts'
 import { getSetupMacroCalls } from '../utils/vue/setup-macros.ts'
-import type { PreferDefineModelMessageId } from '../types/index.ts'
+import type {
+  PreferDefineModelMessageId,
+  PreferDefineModelOptions,
+} from '../types/index.ts'
 
-export const preferDefineModel = createRule<[], PreferDefineModelMessageId>({
+export const preferDefineModel = createRule<
+  [PreferDefineModelOptions],
+  PreferDefineModelMessageId
+>({
   name: 'prefer-define-model',
   meta: {
     type: 'suggestion',
@@ -12,14 +20,30 @@ export const preferDefineModel = createRule<[], PreferDefineModelMessageId>({
       description:
         'require defineModel instead of matching prop and update event declarations.',
     },
-    schema: [],
+    schema: [
+      {
+        type: 'object',
+        properties: {
+          vueuse: {
+            type: 'boolean',
+            description: 'Override shared VueUse integration recognition.',
+          },
+        },
+        additionalProperties: false,
+      },
+    ],
+    defaultOptions: [{}],
     messages: {
       preferDefineModel:
         'Use defineModel for the "{{name}}" prop and its "update:{{name}}" event.',
     },
   },
-  defaultOptions: [],
-  create(context) {
+  defaultOptions: [{}],
+  create(context, [options]) {
+    const supportsVueUse = resolveVueUse(context.settings, options.vueuse)
+    const autoImport = supportsVueUse
+      ? resolveVueGlobals(context.settings, ['useVModel']).includes('useVModel')
+      : false
     return {
       Program(program) {
         const calls = getSetupMacroCalls(
@@ -52,6 +76,15 @@ export const preferDefineModel = createRule<[], PreferDefineModelMessageId>({
             member => member.name,
           ),
         )
+        const passiveModels = supportsVueUse
+          ? getPassiveModelNames(
+              program,
+              context.sourceCode,
+              propCall,
+              emitCall,
+              autoImport,
+            )
+          : new Set<string>()
         const reported = new Set<string>()
         for (const member of getModelContractMembers(
           propCall,
@@ -61,6 +94,7 @@ export const preferDefineModel = createRule<[], PreferDefineModelMessageId>({
           if (
             !member.name ||
             reported.has(member.name) ||
+            passiveModels.has(member.name) ||
             !events.has(`update:${member.name}`)
           ) {
             continue

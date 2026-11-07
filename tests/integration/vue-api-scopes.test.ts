@@ -1,6 +1,8 @@
+import { runInNewContext } from 'node:vm'
 import * as tsParser from '@typescript-eslint/parser'
 import { Linter } from 'eslint'
 import { describe, expect, it } from 'vitest'
+import { effectScope, watchEffect, watchSyncEffect } from 'vue'
 import { compileScript, parse } from 'vue/compiler-sfc'
 import plugin from '../../src/index.ts'
 import { vueLanguageOptions } from '../helpers/rule-tester.ts'
@@ -50,6 +52,43 @@ const scriptContexts = [
     close: '\n</script>',
   },
 ]
+
+it.each(['watchEffect', 'watchSyncEffect'])(
+  'preserves runtime behavior after a global object overwrites %s',
+  name => {
+    const source = `globalThis.${name} = () => log.push('replacement'); watchEffect(() => log.push('effect'), { flush: 'sync' })`
+    const result = new Linter().verifyAndFix(
+      source,
+      {
+        languageOptions: { parser: tsParser },
+        plugins: { vp: plugin },
+        rules: {
+          'vp/prefer-watch-effect-alias': [
+            'error',
+            { vueGlobals: ['watchEffect', 'watchSyncEffect'] },
+          ],
+        },
+      },
+      'Test.js',
+    )
+    const log: string[] = []
+    const scope = effectScope()
+    try {
+      scope.run(() =>
+        runInNewContext(result.output, { watchEffect, watchSyncEffect, log }),
+      )
+      expect(log).toEqual([name === 'watchEffect' ? 'replacement' : 'effect'])
+    } finally {
+      scope.stop()
+    }
+    expect(result.fixed).toBe(false)
+    expect(result.output).toBe(source)
+    expect(result.messages.map(message => message.messageId)).toEqual([
+      'preferredAlias',
+    ])
+    expect(result.messages[0]?.fix).toBeUndefined()
+  },
+)
 
 it.each(
   scriptContexts.flatMap(context =>

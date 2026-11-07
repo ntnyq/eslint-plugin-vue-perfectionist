@@ -114,6 +114,12 @@ colocated under `docs/.vitepress/components/demos/sort-script-setup/`.
   wrappers only; it does not unwrap optional chains or evaluate expressions.
 - `getStaticStringValue()` reads string literals and expression-free template
   literals. It does not resolve bindings or evaluate concatenations.
+- `isRuntimeNode()` excludes erased type branches while retaining the value
+  expression inside TypeScript wrappers for template complexity checks.
+- `hasGlobalWrite()` in `utils/vue/global-writes.ts` detects direct writes and
+  property write targets through unshadowed global objects. Watch-effect alias
+  fixes and passive model recognition share this analysis, while retaining
+  their separate policies for `eval`.
 - `hasTemplateVisitor()` narrows the Vue parser service and infers node types for
   template entry, exit, and wildcard visitors. The script visitor is optional.
 - `findScopeReference()` finds the exact node's reference through enclosing

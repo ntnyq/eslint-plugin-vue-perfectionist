@@ -40,6 +40,7 @@ export type {
   PaddingLineBetweenTagsEntry,
   PaddingLineBetweenTagsOptions,
   PreferComposableOptionsOptions,
+  PreferDefineModelOptions,
   PreferFunctionDeclarationOptions,
   PreferFunctionDeclarationScope,
   PreferFunctionResultPatternOptions,

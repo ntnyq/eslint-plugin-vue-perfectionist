@@ -97,7 +97,9 @@ export default defineConfig([
 
 ## 规则选项与共享设置 {#rule-options-and-shared-settings}
 
-规则偏好应放在对应规则的选项对象中。共享的 `settings['vue-perfectionist']` 仅包含 `autoImport`。共享设置中的排序偏好不会生效。
+规则偏好应放在对应规则的选项对象中。共享的 `settings['vue-perfectionist']` 包含 `autoImport` 和 `vueuse`。共享设置中的排序偏好不会生效。
+
+`vueuse` 为布尔值，默认为 `false`，仅为明确支持它的规则启用 VueUse 集成。目前 [`prefer-define-model`](/zh/rules/prefer-define-model#vueuse) 使用此设置跳过已识别的 passive `useVModel` 模型。该规则的 `vueuse` 选项覆盖共享值，省略时继承共享值。显式导入仅需启用 VueUse 集成，未绑定的 `useVModel` 还需 `autoImport: true`。启用 `vueuse` 不会扩展其他规则的 API 识别范围。
 
 `sort-script-setup` 默认为 `type: 'unsorted'`：对分组排序，保留普通分组内的名称顺序。若还需对名称排序，请设置 `type: 'natural'` 或其他支持的比较方式。与其他排序规则的交互请参阅[规则组合](/zh/guide/rule-composition#statement-ordering)。
 

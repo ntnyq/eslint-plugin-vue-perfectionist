@@ -200,6 +200,10 @@ the API and removes a single static `flush` property:
   `vueGlobals`, provided that name is not shadowed or assigned to in the file.
   Assignments to the source global also prevent fixes, including when an alias
   import is available. Writes to local shadows do not count as global writes.
+  This includes assignments, updates, deletions, destructuring targets, and
+  loop targets through unshadowed `globalThis`, `window`, `self`, or `global`.
+  Unknown computed property names conservatively prevent global fixes; reads,
+  unrelated known properties, and writes through local objects do not.
   Unbound `eval` references prevent global fixes because evaluated code may
   reassign these APIs.
   Other global calls remain report-only if a suitable import cannot be reused.

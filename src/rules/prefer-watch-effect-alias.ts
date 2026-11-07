@@ -4,6 +4,7 @@ import {
 } from '../utils/ast/expressions.ts'
 import { createRule } from '../utils/create-rule.ts'
 import { getCallIdentity } from '../utils/vue/call-identity.ts'
+import { hasGlobalWrite } from '../utils/vue/global-writes.ts'
 import { resolveVueGlobals } from '../utils/vue/globals.ts'
 import { hasVueServices } from '../utils/vue/parser-services.ts'
 import { getScriptVariableDefinitions } from '../utils/vue/script-scope.ts'
@@ -145,25 +146,6 @@ export const preferWatchEffectAlias = createRule<
         ),
       ) ?? true
 
-    /**
-     * Detect writes that contradict the configured identity of a global API.
-     *
-     * @param name - The global API name.
-     * @returns Whether any unresolved or configured-global reference writes it.
-     */
-    function hasGlobalWrite(name: string): boolean {
-      return (
-        sourceCode.scopeManager?.scopes.some(scope =>
-          scope.references.some(
-            reference =>
-              reference.identifier.name === name &&
-              reference.isWrite() &&
-              !reference.resolved?.defs.length,
-          ),
-        ) ?? true
-      )
-    }
-
     return {
       CallExpression(node) {
         if (
@@ -246,7 +228,7 @@ export const preferWatchEffectAlias = createRule<
                 unwrapExpression(callee.object) !==
                   unwrapNonNullExpression(callee.object)) ||
               (identity.isUnbound &&
-                (hasUnboundEval || hasGlobalWrite('watchEffect')))
+                (hasUnboundEval || hasGlobalWrite(sourceCode, 'watchEffect')))
             ) {
               return null
             }
@@ -290,7 +272,7 @@ export const preferWatchEffectAlias = createRule<
               } else if (
                 identity.isUnbound &&
                 options.vueGlobals?.includes(alias) &&
-                !hasGlobalWrite(alias) &&
+                !hasGlobalWrite(sourceCode, alias) &&
                 !getScriptVariableDefinitions(callee, sourceCode, alias).length
               ) {
                 fixes.push(fixer.replaceText(callee, alias))

@@ -77,6 +77,8 @@ description: 仓库布局、源码职责、共享分析约定及行为边界。
 ## 共享约定 {#shared-contracts}
 
 - `unwrapExpression()` 接受脚本及模板 AST 节点，为脚本调用方保留脚本 AST 返回类型。仅移除现有 TypeScript 包装，不解包可选链或求值。
+- `isRuntimeNode()` 排除擦除的类型分支，保留 TypeScript 包装内的值表达式，供模板复杂度检查使用。
+- `utils/vue/global-writes.ts` 中的 `hasGlobalWrite()` 检测直接写入及通过未被遮蔽的全局对象进行的属性目标写入。watch-effect 别名修复与被动 model 识别共享此分析，各自保留独立的 `eval` 策略。
 - `getStaticStringValue()` 读取字符串和无表达式模板字面量，不解析绑定或求值拼接。
 - `hasTemplateVisitor()` 收窄 Vue 解析器服务，推断模板进入、退出和通配访问器节点类型。脚本访问器可选。
 - `findScopeReference()` 通过外层作用域查找精确节点引用，类型和声明过滤仍由使用方负责。

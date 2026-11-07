@@ -5,13 +5,16 @@ import { compileScript, parse } from 'vue/compiler-sfc'
 import { preferDefineModel } from '../../src/rules/prefer-define-model.ts'
 import { run } from '../helpers/rule-tester.ts'
 import type { Linter } from 'eslint'
-import type { PreferDefineModelMessageId } from '../../src/types/index.ts'
+import type {
+  PreferDefineModelMessageId,
+  PreferDefineModelOptions,
+} from '../../src/types/index.ts'
 
 const pair =
   "defineProps({ modelValue: String }); defineEmits(['update:modelValue'])"
 const sfc = (script: string) => `<script setup lang="ts">${script}</script>`
 
-await run<never, PreferDefineModelMessageId>({
+await run<PreferDefineModelOptions[], PreferDefineModelMessageId>({
   name: 'prefer-define-model',
   rule: preferDefineModel,
   onResult(testcase, result) {
@@ -195,7 +198,7 @@ const tester = createRuleTester<unknown>({
   name: 'prefer-define-model',
   rule: preferDefineModel,
 })
-it.each([{}, { fix: true }, 'always', true])(
+it.each([{ fix: true }, { vueuse: 'true' }, { vueuse: null }, 'always', true])(
   'rejects options: %j',
   async options => {
     await expect(tester.valid({ code: '', options })).rejects.toThrow()

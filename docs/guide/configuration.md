@@ -147,8 +147,16 @@ Generated globals alone do not identify an API as belonging to Vue.
 ## Rule Options and Shared Settings
 
 Put rule preferences in the rule's options object. The shared
-`settings['vue-perfectionist']` contract contains only `autoImport`.
+`settings['vue-perfectionist']` contract contains `autoImport` and `vueuse`.
 Sorting preferences in shared settings are ignored.
+
+`vueuse` is a boolean, defaults to `false`, and enables VueUse integration only
+in rules that explicitly support it. Currently,
+[`prefer-define-model`](/rules/prefer-define-model#vueuse) uses it to skip
+recognized passive `useVModel` models. That rule's `vueuse` option overrides
+the shared value; omitting it inherits the shared value. Explicit imports need
+only the VueUse opt-in, while unbound `useVModel` calls additionally require
+`autoImport: true`. Enabling `vueuse` does not extend other rules' API recognition.
 
 `sort-script-setup` defaults to `type: 'unsorted'`: it orders groups but preserves
 name order within ordinary groups. Set `type: 'natural'` or another supported

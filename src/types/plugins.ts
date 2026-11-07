@@ -9,6 +9,12 @@ export interface VuePerfectionistSettings {
    * Defaults to false; rule-level vueGlobals and target autoImport take precedence.
    */
   autoImport?: boolean
+
+  /**
+   * Enable VueUse integration in rules that support it. Defaults to false;
+   * rule-level vueuse takes precedence. Unbound APIs also require autoImport.
+   */
+  vueuse?: boolean
 }
 
 /**

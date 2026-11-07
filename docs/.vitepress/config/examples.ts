@@ -18,6 +18,11 @@ interface ExampleProfile {
 }
 
 const EXAMPLE_PROFILES: Record<string, ExampleProfile> = {
+  'passive-vueuse-model': {
+    rule: 'prefer-define-model',
+    options: { vueuse: true },
+    settings: { 'vue-perfectionist': { autoImport: true } },
+  },
   'custom-callbacks': {
     rule: 'callback-style',
     options: {

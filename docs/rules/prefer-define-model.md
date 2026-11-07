@@ -158,7 +158,170 @@ const emit = defineEmits(['save'])
 
 ## :wrench: Options
 
-This rule has no options.
+### `vueuse`
+
+Boolean. Overrides `settings['vue-perfectionist'].vueuse`; when omitted, inherits
+that setting, which defaults to `false`. An explicit rule value always wins:
+
+| Shared `vueuse`   | Rule `vueuse` | Enabled |
+| ----------------- | ------------- | ------- |
+| Omitted / `false` | Omitted       | No      |
+| `true`            | Omitted       | Yes     |
+| Any               | `true`        | Yes     |
+| Any               | `false`       | No      |
+
+```js
+{
+  settings: {
+    'vue-perfectionist': {
+      vueuse: true,
+      autoImport: true,
+    },
+  },
+  rules: {
+    'vue-perfectionist/prefer-define-model': ['error', { vueuse: true }],
+  },
+}
+```
+
+When enabled, the rule skips the corresponding model if a recognized
+[`useVModel`](https://vueuse.org/core/useVModel/) call has `passive: true`.
+Passive models retain local state and watcher-based synchronization, so a direct
+replacement with `defineModel` need not preserve behavior. `defaultValue` is not
+required for this exception.
+
+Named imports from `@vueuse/core`, including aliases, and non-computed namespace
+calls are recognized. An unbound `useVModel` also requires the shared
+`autoImport: true` setting. Declaring an ESLint global alone is insufficient;
+local values, other imports, and type-only bindings do not qualify as auto-imports.
+
+For unbound calls, writes to `useVModel` or the same property on an unshadowed
+`globalThis`, `window`, `self`, or `global` prevent the exception. This includes
+assignment, update, deletion, destructuring targets, and loop targets anywhere in
+the file, including ordinary scripts and nested functions. Computed writes with
+unknown property names are conservative too. An unbound direct `eval` call also
+prevents auto-import recognition because it can change runtime bindings. Plain
+reads and shadowed local objects or `eval` do not affect recognition. These
+global checks do not affect explicit VueUse imports. Global-object aliases and
+mutation APIs such as `Object.assign` are not analyzed.
+
+This global write keeps the declaration report even with both opt-ins enabled:
+
+::: incorrect passive-vueuse-model
+
+```vue
+<script setup>
+const props = defineProps({ modelValue: String })
+const emit = defineEmits(['update:modelValue'])
+globalThis.useVModel = customModel
+const inputValue = useVModel(props, 'modelValue', emit, { passive: true })
+</script>
+```
+
+:::
+
+With VueUse support enabled, this imported passive model is accepted:
+
+::: correct passive-vueuse-model
+
+```vue
+<script setup lang="ts">
+import { useVModel } from '@vueuse/core'
+
+const props = defineProps<{
+  modelValue?: string
+  defaultValue?: string
+}>()
+const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
+const inputValue = useVModel(props, 'modelValue', emit, {
+  passive: true,
+  defaultValue: props.defaultValue,
+})
+</script>
+
+<template>
+  <input v-model="inputValue" />
+</template>
+```
+
+:::
+
+With both VueUse support and shared `autoImport` enabled, an automatically
+imported call is accepted too:
+
+::: correct passive-vueuse-model
+
+```vue
+<script setup>
+const props = defineProps({ modelValue: String })
+const emit = defineEmits(['update:modelValue'])
+const inputValue = useVModel(props, 'modelValue', emit, { passive: true })
+</script>
+
+<template>
+  <input v-model="inputValue" />
+</template>
+```
+
+:::
+
+Only the corresponding passive model is exempt. Here `title` is still reported:
+
+::: incorrect passive-vueuse-model
+
+```vue
+<script setup>
+import { useVModel } from '@vueuse/core'
+
+const props = defineProps({ modelValue: String, title: String })
+const emit = defineEmits(['update:modelValue', 'update:title'])
+const inputValue = useVModel(props, 'modelValue', emit, { passive: true })
+</script>
+```
+
+:::
+
+The exception requires a direct top-level setup initializer or expression
+statement with four arguments: the unreassigned binding of the current
+`defineProps` (optionally wrapped in `withDefaults`), a static string or
+substitution-free template for the model name, the unreassigned binding of the
+current `defineEmits`, and an inline options object. Parentheses and transparent
+TypeScript wrappers are accepted. Binding aliases, destructured props, nested or
+conditional calls, optional calls, and external options variables are not followed.
+
+The final `passive` value must be the literal `true`; `eventName` must be absent
+or statically equal `update:modelName`. Spreads and unknown computed keys make
+both values unknown until explicitly overwritten. For example,
+`{ ...options, passive: true }` is insufficient because `eventName` remains
+unknown; adding `eventName: 'update:modelValue'` confirms that model's event.
+Any inline getter or setter prevents the exception, even on another option or
+before later explicit values: VueUse reads `clone` before `passive`, and a getter
+can mutate other options during that read. A non-computed `__proto__` prototype
+setter is also rejected unless its value is literally `null`, because inherited
+accessors have the same risk. A computed `['__proto__']` data property does not
+change the prototype. Dynamic `passive` and `eventName` values do not establish
+the exception. Unrecognized calls keep the usual declaration reports.
+
+Inline accessors keep the declaration report, even alongside `passive: true`:
+
+::: incorrect passive-vueuse-model
+
+```vue
+<script setup>
+import { useVModel } from '@vueuse/core'
+
+const props = defineProps({ modelValue: String })
+const emit = defineEmits(['update:modelValue'])
+const inputValue = useVModel(props, 'modelValue', emit, {
+  get clone() {
+    return false
+  },
+  passive: true,
+})
+</script>
+```
+
+:::
 
 ## Scope
 
@@ -171,7 +334,8 @@ There must be exactly one eligible props call and one eligible emits call.
 Imported macros (including aliases and namespaces), shadowed names, optional
 calls, nested calls and functions, ordinary scripts, templates, and standalone
 JS/TS files are skipped. The rule needs Vue parser services, but no TypeScript
-project or type checker. It does not depend on auto-import settings.
+project or type checker. Macro recognition does not depend on auto-import
+settings; the optional VueUse exception follows the settings described above.
 
 Imported, unresolved, generic, ambient, mapped, conditional, and union prop types
 are not resolved. Runtime declaration variables, spreads, and dynamic names are

@@ -17,13 +17,45 @@ export function resolveVueGlobals(
   supportedApis: Iterable<string>,
   explicitGlobals?: string[],
 ): string[] {
+  const autoImport = getSharedBooleanSetting(settings, 'autoImport')
+  return explicitGlobals ?? (autoImport ? [...supportedApis] : [])
+}
+
+/**
+ * Resolve the VueUse integration opt-in, preserving an explicit rule override.
+ *
+ * @param settings - The shared ESLint settings.
+ * @param explicitVueUse - The rule-level override.
+ * @returns Whether the calling rule should recognize supported VueUse APIs.
+ * @throws {Error} If shared vueuse is present but is not a boolean.
+ */
+export function resolveVueUse(
+  settings: Record<string, unknown>,
+  explicitVueUse?: boolean,
+): boolean {
+  const vueuse = getSharedBooleanSetting(settings, 'vueuse')
+  return explicitVueUse ?? vueuse ?? false
+}
+
+/**
+ * Read and validate one supported shared boolean setting.
+ *
+ * @param settings - The shared ESLint settings.
+ * @param name - The supported setting to read.
+ * @returns The configured boolean, or undefined when absent.
+ * @throws {Error} If the configured value is not a boolean.
+ */
+function getSharedBooleanSetting(
+  settings: Record<string, unknown>,
+  name: 'autoImport' | 'vueuse',
+): boolean | undefined {
   const shared = settings['vue-perfectionist']
   if (shared === null || typeof shared !== 'object' || isArray(shared)) {
-    return explicitGlobals ?? []
+    return undefined
   }
-  const autoImport = 'autoImport' in shared ? shared.autoImport : undefined
-  if (autoImport !== undefined && !isBoolean(autoImport)) {
-    throw new Error('vue-perfectionist: autoImport must be a boolean.')
+  const value: unknown = Reflect.get(shared, name)
+  if (value !== undefined && !isBoolean(value)) {
+    throw new Error(`vue-perfectionist: ${name} must be a boolean.`)
   }
-  return explicitGlobals ?? (autoImport ? [...supportedApis] : [])
+  return value
 }

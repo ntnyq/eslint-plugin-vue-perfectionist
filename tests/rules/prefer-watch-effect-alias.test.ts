@@ -186,6 +186,105 @@ await run<PreferWatchEffectAliasOptions, PreferWatchEffectAliasMessageId>({
       errors: [diagnostic()],
       output: null,
     },
+    ...(['post', 'sync'] as const).flatMap(flush => {
+      const alias = flush === 'post' ? 'watchPostEffect' : 'watchSyncEffect'
+      return ['watchEffect', alias].flatMap(name =>
+        [
+          'globalThis.API = custom;',
+          'window["API"] = custom;',
+          'self[`API`] = custom;',
+          'global.API = custom;',
+          '(globalThis as any).API = custom;',
+          'globalThis.API ||= custom;',
+          'globalThis.API++;',
+          'delete globalThis.API;',
+          '({ value: globalThis.API } = replacement);',
+          '[globalThis.API = custom] = replacement;',
+          '[...globalThis.API] = replacement;',
+          'for (globalThis.API of replacements) {}',
+          'for (globalThis.API in replacements) {}',
+          'function later() { globalThis.API = custom }',
+        ].map(prefix => ({
+          description: `keeps global property writes report-only: ${prefix}, ${name}`,
+          code: `${prefix.replaceAll('API', () => name)} watchEffect(update, { flush: '${flush}' })`,
+          options: { vueGlobals: ['watchEffect', alias] },
+          errors: [diagnostic(flush)],
+          output: null,
+        })),
+      )
+    }),
+    ...[
+      'globalThis[key] = custom;',
+      '(globalThis.watchPostEffect as Function) = custom;',
+    ].map(prefix => ({
+      description: 'keeps uncertain and type-wrapped global writes report-only',
+      code: `${prefix} ${post}`,
+      languageOptions: {
+        globals: { globalThis: 'readonly', watchPostEffect: 'writable' },
+      },
+      options: { vueGlobals: ['watchEffect', 'watchPostEffect'] },
+      errors: [diagnostic()],
+      output: null,
+    })),
+    {
+      description: 'a source property write cannot reuse an alias import',
+      code: `import { watchPostEffect } from 'vue'; globalThis.watchEffect = custom; ${post}`,
+      options: { vueGlobals: ['watchEffect'] },
+      errors: [diagnostic()],
+      output: null,
+    },
+    ...[
+      'function assign(globalThis) { globalThis.watchPostEffect = custom };',
+      'const window = {}; window.watchPostEffect = custom;',
+      'globalThis.other = custom;',
+      'globalThis.state.watchPostEffect = custom;',
+      'const value = globalThis.watchPostEffect;',
+      'const { value = globalThis.watchPostEffect } = source;',
+      'const { [globalThis.watchPostEffect]: value } = source;',
+      'const value = globalThis[key];',
+    ].map(prefix => ({
+      description:
+        'ignores shadowed global objects, unrelated writes, and reads',
+      code: `${prefix} ${post}`,
+      options: { vueGlobals: ['watchEffect', 'watchPostEffect'] },
+      errors: [diagnostic()],
+      output: `${prefix} watchPostEffect(update)`,
+    })),
+    {
+      description: 'type-only shadows do not hide global property writes',
+      code: `function assign() { type globalThis = object; globalThis.watchEffect = custom }; ${post}`,
+      options: { vueGlobals: ['watchEffect', 'watchPostEffect'] },
+      errors: [diagnostic()],
+      output: null,
+    },
+    {
+      description:
+        'setup-local objects cannot hide ordinary-script global writes',
+      code: `<script lang="ts">globalThis.watchEffect = custom; ${post}</script>${sfc('const globalThis = {}')}`,
+      filename: 'Test.vue',
+      options: { vueGlobals: ['watchEffect', 'watchPostEffect'] },
+      errors: [diagnostic()],
+      output: null,
+    },
+    {
+      description:
+        'setup-local object writes do not invalidate ordinary-script globals',
+      code: `<script lang="ts">${post}</script>${sfc('const globalThis = {}; globalThis.watchEffect = custom')}`,
+      filename: 'Test.vue',
+      options: { vueGlobals: ['watchEffect', 'watchPostEffect'] },
+      errors: [diagnostic()],
+      output: `<script lang="ts">watchPostEffect(update)</script>${sfc('const globalThis = {}; globalThis.watchEffect = custom')}`,
+    },
+    {
+      description:
+        'global property writes do not invalidate explicit Vue imports',
+      code: withVue(
+        `globalThis.watchEffect = custom; globalThis.watchPostEffect = custom; ${post}`,
+      ),
+      errors: [diagnostic()],
+      output:
+        "import { watchEffect, watchPostEffect } from 'vue'; globalThis.watchEffect = custom; globalThis.watchPostEffect = custom; watchPostEffect(update)",
+    },
     {
       description: 'a reassigned source global cannot reuse an alias import',
       code: `import { watchPostEffect } from 'vue'; watchEffect = custom; ${post}`,
