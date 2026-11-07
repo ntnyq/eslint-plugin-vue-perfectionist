@@ -161,6 +161,7 @@ and automatic fix support, and individual rule pages for options and defaults.
 | [no-complex-template-expression](https://vue-perfectionist.vercel.app/rules/no-complex-template-expression)                     | Limit logical operators and conditional nesting in Vue templates.  |
 | [no-complex-v-for-source](https://vue-perfectionist.vercel.app/rules/no-complex-v-for-source)                                   | Disallow complex expressions in Vue v-for sources.                 |
 | [no-restricted-html-elements](https://vue-perfectionist.vercel.app/rules/no-restricted-html-elements)                           | Disallow specified native HTML elements in Vue templates.          |
+| [no-template-type-assertion](https://vue-perfectionist.vercel.app/rules/no-template-type-assertion)                             | Disallow as type assertions in Vue templates.                      |
 | [padding-line-between-tags](https://vue-perfectionist.vercel.app/rules/padding-line-between-tags)                               | Enforce blank-line counts between consecutive template tags.       |
 | [prefer-simple-event-handler](https://vue-perfectionist.vercel.app/rules/prefer-simple-event-handler)                           | Require simple expressions in named template event handlers.       |
 | [prefer-template-literal-in-interpolation](https://vue-perfectionist.vercel.app/rules/prefer-template-literal-in-interpolation) | Prefer a single template literal for mixed text and interpolation. |

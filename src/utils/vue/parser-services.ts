@@ -1,5 +1,5 @@
 import { isFunction as isCallable } from '@ntnyq/utils'
-import type { TSESLint } from '@typescript-eslint/utils'
+import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
 import type { AST } from 'vue-eslint-parser'
 
 /**
@@ -20,15 +20,20 @@ export function hasVueServices(
   )
 }
 
+// vue-eslint-parser also visits TypeScript nodes produced by the script parser.
+type TemplateNode = AST.Node | Extract<TSESTree.Node, { type: `TS${string}` }>
+
 type TemplateVisitor = {
-  [Type in AST.Node['type']]?: (node: Extract<AST.Node, { type: Type }>) => void
-} & {
-  [Type in AST.Node['type'] as `${Type}:exit`]?: (
-    node: Extract<AST.Node, { type: Type }>,
+  [Type in TemplateNode['type']]?: (
+    node: Extract<TemplateNode, { type: Type }>,
   ) => void
 } & {
-  '*'?: (node: AST.Node) => void
-  '*:exit'?: (node: AST.Node) => void
+  [Type in TemplateNode['type'] as `${Type}:exit`]?: (
+    node: Extract<TemplateNode, { type: Type }>,
+  ) => void
+} & {
+  '*'?: (node: TemplateNode) => void
+  '*:exit'?: (node: TemplateNode) => void
 }
 
 /**

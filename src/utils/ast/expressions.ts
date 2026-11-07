@@ -46,6 +46,54 @@ export function unwrapExpression(
 }
 
 /**
+ * Locate an expression's outer transparent TypeScript wrapper.
+ *
+ * @param node - The expression or assignment target to inspect.
+ * @returns The outer node used by its enclosing syntax.
+ */
+export function getOuterExpression(node: TSESTree.Node): TSESTree.Node {
+  let current = node
+  while (
+    current.parent &&
+    unwrapExpression(current.parent) === unwrapExpression(current)
+  ) {
+    current = current.parent
+  }
+  return current
+}
+
+/**
+ * Exclude erased TypeScript branches, including value-shaped nodes in types.
+ *
+ * @param node - A script or template node being checked for runtime behavior.
+ * @returns Whether the node participates in runtime evaluation.
+ */
+export function isRuntimeNode(node: AST.Node | TSESTree.Node): boolean {
+  let child = node
+  let parent = child.parent
+  while (parent && parent.type !== 'VExpressionContainer') {
+    switch (parent.type) {
+      case 'TSAsExpression':
+      case 'TSSatisfiesExpression':
+      case 'TSTypeAssertion':
+        if (parent.expression !== child) {
+          return false
+        }
+        break
+      case 'TSTypeAnnotation':
+      case 'TSTypeParameterDeclaration':
+      case 'TSTypeParameterInstantiation':
+      case 'TSTypeAliasDeclaration':
+      case 'TSInterfaceDeclaration':
+        return false
+    }
+    child = parent
+    parent = child.parent
+  }
+  return true
+}
+
+/**
  * Check whether a node declares or represents a JavaScript function.
  *
  * @param node - The AST node to inspect.

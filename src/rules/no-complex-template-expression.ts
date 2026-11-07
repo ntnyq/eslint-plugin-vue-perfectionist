@@ -1,42 +1,11 @@
+import { isRuntimeNode } from '../utils/ast/expressions.ts'
 import { createRule } from '../utils/create-rule.ts'
 import { hasTemplateVisitor } from '../utils/vue/parser-services.ts'
-import type { TSESTree } from '@typescript-eslint/utils'
 import type { AST } from 'vue-eslint-parser'
 import type {
   NoComplexTemplateExpressionMessageId,
   NoComplexTemplateExpressionOptions,
 } from '../types/index.ts'
-
-/**
- * Exclude erased TypeScript branches, including value-shaped nodes in types.
- *
- * @param node - A counted expression or template reference.
- * @returns Whether the node participates in runtime evaluation.
- */
-function isRuntimeNode(node: AST.Node | TSESTree.Node): boolean {
-  let child = node
-  let parent = child.parent
-  while (parent && parent.type !== 'VExpressionContainer') {
-    switch (parent.type) {
-      case 'TSAsExpression':
-      case 'TSSatisfiesExpression':
-      case 'TSTypeAssertion':
-        if (parent.expression !== child) {
-          return false
-        }
-        break
-      case 'TSTypeAnnotation':
-      case 'TSTypeParameterDeclaration':
-      case 'TSTypeParameterInstantiation':
-      case 'TSTypeAliasDeclaration':
-      case 'TSInterfaceDeclaration':
-        return false
-    }
-    child = parent
-    parent = child.parent
-  }
-  return true
-}
 
 /**
  * Resolve template locals using Vue's runtime visibility at this expression.

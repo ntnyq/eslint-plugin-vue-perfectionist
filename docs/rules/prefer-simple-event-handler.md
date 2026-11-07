@@ -467,6 +467,11 @@ are reported because they contain no expression operation. Loops, `switch`,
 `try`, `throw`, labels, nested statement blocks, declarations, class expressions,
 and `yield` are rejected; a single such statement is still complex.
 
+Erased type branches, including call and construct signatures in `as` or
+`satisfies` types, parameter annotations, and type arguments, are ignored.
+The runtime expression inside a TypeScript wrapper is still checked: for
+example, `(ok && save) as { (event: MouseEvent): void }` remains complex.
+
 This rule does not enforce method-reference versus inline-handler style.
 `allowInlineFunctions: false` still permits `save(item)` and `count++`.
 

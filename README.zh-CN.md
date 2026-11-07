@@ -155,6 +155,7 @@ pnpm exec eslint . --fix
 | [no-complex-template-expression](https://vue-perfectionist.vercel.app/zh/rules/no-complex-template-expression)                     | 限制 Vue 模板中逻辑运算符的数量和条件表达式的嵌套层数。 |
 | [no-complex-v-for-source](https://vue-perfectionist.vercel.app/zh/rules/no-complex-v-for-source)                                   | 禁止在 Vue v-for 数据源中使用复杂表达式。               |
 | [no-restricted-html-elements](https://vue-perfectionist.vercel.app/zh/rules/no-restricted-html-elements)                           | 禁止在 Vue 模板中使用指定的原生 HTML 元素。             |
+| [no-template-type-assertion](https://vue-perfectionist.vercel.app/zh/rules/no-template-type-assertion)                             | 禁止在 Vue 模板中使用 as 类型断言。                     |
 | [padding-line-between-tags](https://vue-perfectionist.vercel.app/zh/rules/padding-line-between-tags)                               | 强制相邻模板标签之间使用指定数量的空行。                |
 | [prefer-simple-event-handler](https://vue-perfectionist.vercel.app/zh/rules/prefer-simple-event-handler)                           | 要求具名模板事件处理器使用简单表达式。                  |
 | [prefer-template-literal-in-interpolation](https://vue-perfectionist.vercel.app/zh/rules/prefer-template-literal-in-interpolation) | 优先使用单个模板字面量表示混合的文本与插值。            |

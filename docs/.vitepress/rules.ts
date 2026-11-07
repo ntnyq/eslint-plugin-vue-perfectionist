@@ -443,6 +443,22 @@ export const RULE_DOCS: RuleDocumentation[] = [
     typeInformation: false,
   },
   {
+    name: 'no-template-type-assertion',
+    group: 'template-conventions',
+    description: {
+      en: 'Disallow as type assertions in Vue templates.',
+      zh: '禁止在 Vue 模板中使用 as 类型断言。',
+    },
+    scope: 'Template',
+    fix: '—',
+    defaults: {
+      en: 'Report every as assertion, including as const; move it into scripts.',
+      zh: '报告所有 as 断言（包括 as const），提示移至脚本。',
+    },
+    requiresOptions: false,
+    typeInformation: false,
+  },
+  {
     name: 'padding-line-between-tags',
     group: 'template-conventions',
     description: {

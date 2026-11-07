@@ -47,6 +47,7 @@ export const EXAMPLE_RULES: Record<string, Linter.RuleEntry> = {
       ],
     },
   ],
+  'vue-perfectionist/no-template-type-assertion': 'error',
   'vue-perfectionist/padding-line-between-tags': 'error',
   'vue-perfectionist/prefer-composable-options': 'error',
   'vue-perfectionist/prefer-define-model': 'error',

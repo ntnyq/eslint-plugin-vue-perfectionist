@@ -142,6 +142,17 @@ await run<PreferSimpleEventHandlerOptions, PreferSimpleEventHandlerMessageId>({
     { code: template('save<Item>(item)') },
     { code: template('(<T>(item: T) => save(item))') },
     { code: template('handler satisfies Handler') },
+    ...[
+      'save as { (event: MouseEvent): void }',
+      'save satisfies { (event: MouseEvent): void }',
+      'save as { new (): object }',
+      'save as { <T>(event: T): void }',
+      '(event: { (value: string): void }) => save(event)',
+      'save<{ (event: MouseEvent): void }>(item)',
+    ].map(expression => ({
+      description: `ignores erased handler types: ${expression}`,
+      code: template(expression),
+    })),
     {
       code: template('ok ? save() : close()'),
       options: { allowConditional: true },
@@ -243,6 +254,31 @@ await run<PreferSimpleEventHandlerOptions, PreferSimpleEventHandlerMessageId>({
                 : ('expectedSingleOperation' as const),
         },
       ],
+      output: null,
+    })),
+    ...[
+      {
+        expression:
+          '(ok ? save : close) satisfies { (event: MouseEvent): void }',
+        messageId: 'unexpectedConditional' as const,
+      },
+      {
+        expression: '(ok && save) as { (event: MouseEvent): void }',
+        messageId: 'unexpectedLogical' as const,
+      },
+      {
+        expression: '(prepare(), save) as { (event: MouseEvent): void }',
+        messageId: 'unexpectedSequence' as const,
+      },
+      {
+        expression:
+          '(event: { (value: string): void }) => { save(event); close() }',
+        messageId: 'expectedSingleOperation' as const,
+      },
+    ].map(({ expression, messageId }) => ({
+      description: 'checks runtime expressions alongside erased handler types',
+      code: template(expression),
+      errors: [messageId],
       output: null,
     })),
     {

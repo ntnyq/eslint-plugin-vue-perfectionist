@@ -1,5 +1,7 @@
+import { isRuntimeNode } from '../utils/ast/expressions.ts'
 import { createRule } from '../utils/create-rule.ts'
 import { hasTemplateVisitor } from '../utils/vue/parser-services.ts'
+import type { TSESTree } from '@typescript-eslint/utils'
 import type { AST } from 'vue-eslint-parser'
 import type {
   PreferSimpleEventHandlerMessageId,
@@ -61,11 +63,9 @@ export const preferSimpleEventHandler = createRule<
     }
 
     function getMessageId(
-      node: AST.Node,
-      parent: AST.Node | null | undefined,
+      node: AST.Node | TSESTree.Node,
+      parent: AST.Node | TSESTree.Node | null | undefined,
     ): PreferSimpleEventHandlerMessageId | undefined {
-      // The Vue AST types omit TS nodes, but the template visitor includes them.
-      const nodeType: string = node.type
       switch (node.type) {
         case 'VOnExpression':
           return node.body.length === 1 ? undefined : 'expectedSingleOperation'
@@ -106,7 +106,7 @@ export const preferSimpleEventHandler = createRule<
         default:
           return node.type.endsWith('Statement') ||
             (node.type.endsWith('Declaration') &&
-              nodeType !== 'TSTypeParameterDeclaration')
+              node.type !== 'TSTypeParameterDeclaration')
             ? 'unexpectedStatement'
             : undefined
       }
@@ -136,6 +136,7 @@ export const preferSimpleEventHandler = createRule<
         if (
           !handlerExpression ||
           hasReported ||
+          !isRuntimeNode(node) ||
           node.range[0] < handlerExpression.range[0] ||
           node.range[1] > handlerExpression.range[1]
         ) {

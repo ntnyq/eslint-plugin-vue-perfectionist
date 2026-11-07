@@ -22,6 +22,7 @@ describe('plugin contract', () => {
       'no-complex-template-expression',
       'no-complex-v-for-source',
       'no-restricted-html-elements',
+      'no-template-type-assertion',
       'padding-line-between-tags',
       'prefer-composable-options',
       'prefer-define-model',

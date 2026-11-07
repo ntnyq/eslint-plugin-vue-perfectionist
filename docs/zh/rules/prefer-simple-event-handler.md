@@ -431,6 +431,8 @@ function handleClick() {
 
 尾部分号、注释、换行、括号及 TypeScript 断言或非空断言不影响检查。额外空语句仍算语句。空函数块和裸 `return` 因不含表达式操作而报告。循环、`switch`、`try`、`throw`、标签、嵌套语句块、声明、类表达式及 `yield` 均被拒绝，即使只有一条也视为复杂。
 
+忽略擦除的类型分支，包括 `as` 或 `satisfies` 类型中的调用和构造签名、参数类型注解及类型实参。TypeScript 包装内的运行时表达式仍会检查，例如 `(ok && save) as { (event: MouseEvent): void }` 仍视为复杂。
+
 不强制方法引用或内联处理器风格。`allowInlineFunctions: false` 仍允许 `save(item)` 和 `count++`。
 
 ## 自动修复 {#automatic-fixes}

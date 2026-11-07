@@ -92,6 +92,7 @@ also report problems that require manual changes. See
 | [no-complex-template-expression](./no-complex-template-expression.md)                     | Limit logical operators and conditional nesting in Vue templates.  | Template | —               |
 | [no-complex-v-for-source](./no-complex-v-for-source.md)                                   | Disallow complex expressions in Vue v-for sources.                 | Template | —               |
 | [no-restricted-html-elements](./no-restricted-html-elements.md)                           | Disallow specified native HTML elements in Vue templates.          | Template | —               |
+| [no-template-type-assertion](./no-template-type-assertion.md)                             | Disallow as type assertions in Vue templates.                      | Template | —               |
 | [padding-line-between-tags](./padding-line-between-tags.md)                               | Enforce blank-line counts between consecutive template tags.       | Template | Supported cases |
 | [prefer-simple-event-handler](./prefer-simple-event-handler.md)                           | Require simple expressions in named template event handlers.       | Template | —               |
 | [prefer-template-literal-in-interpolation](./prefer-template-literal-in-interpolation.md) | Prefer a single template literal for mixed text and interpolation. | Template | Supported cases |
