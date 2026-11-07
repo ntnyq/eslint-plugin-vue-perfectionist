@@ -106,9 +106,9 @@ export default defineConfig([
   />
   <button
     @click="
-      function () {
+      (function () {
         return save(item)
-      }
+      })
     "
     type="button"
   />

@@ -111,9 +111,9 @@ statement or one `return` with an expression:
   />
   <button
     @click="
-      function () {
+      (function () {
         return save(item)
-      }
+      })
     "
     type="button"
   />
