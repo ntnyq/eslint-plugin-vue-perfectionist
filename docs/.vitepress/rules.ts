@@ -276,8 +276,8 @@ export const RULE_DOCS: RuleDocumentation[] = [
     scope: 'Scripts',
     fix: '—',
     defaults: {
-      en: 'Boolean Vue refs/computed and VueUse toggles use is/has/should/can prefixes.',
-      zh: '布尔 Vue ref/computed 与 VueUse toggle 使用 is/has/should/can 前缀。',
+      en: 'Boolean Vue refs/computed use is/has/should/can prefixes; VueUse is opt-in.',
+      zh: '布尔 Vue ref/computed 使用 is/has/should/can 前缀；VueUse 需显式启用。',
     },
     requiresOptions: false,
     typeInformation: false,

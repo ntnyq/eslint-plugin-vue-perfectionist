@@ -44,7 +44,7 @@ export const CALLBACK_TARGET_SCHEMA = {
     },
   },
   vueGlobals: {
-    description: 'Unbound API names supplied by Vue auto-import tooling.',
+    description: 'Unbound built-in API names supplied by auto-import tooling.',
     items: { type: 'string' },
     type: 'array',
     uniqueItems: true,
@@ -54,5 +54,9 @@ export const CALLBACK_TARGET_SCHEMA = {
     items: { type: 'string' },
     type: 'array',
     uniqueItems: true,
+  },
+  vueuse: {
+    description: 'Override the shared VueUse integration setting.',
+    type: 'boolean',
   },
 } satisfies Record<string, JSONSchema4>

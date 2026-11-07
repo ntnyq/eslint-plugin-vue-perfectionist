@@ -108,15 +108,16 @@ onMounted(function () {
 }
 ```
 
-| 选项               | 默认值                   | 含义                                                             |
-| ------------------ | ------------------------ | ---------------------------------------------------------------- |
-| `groups`           | `['lifecycle', 'watch']` | 要检查的内置 API 分组。`[]` 禁用内置目标。                       |
-| `functionStyle`    | `'arrow'`                | `'arrow'` 要求箭头函数；`'any'` 也接受内联函数表达式。           |
-| `bodyStyle`        | `'block'`                | `'block'` 要求箭头函数体使用花括号；`'any'` 也允许表达式函数体。 |
-| `exclude`          | `[]`                     | 要跳过的内置 API，使用原始导出名称。                             |
-| `customCallbacks`  | `[]`                     | 额外的回调目标，支持为每个条目配置自动导入。                     |
-| `vueGlobals`       | `[]`                     | 显式指定自动导入工具提供的、未绑定的 Vue API 名称。              |
-| `vueImportSources` | `['vue']`                | 提供 Vue API 的精确模块标识符，替换默认列表。                    |
+| 选项               | 默认值                   | 含义                                                                  |
+| ------------------ | ------------------------ | --------------------------------------------------------------------- |
+| `groups`           | `['lifecycle', 'watch']` | 要检查的内置 API 分组。`[]` 禁用内置目标。                            |
+| `functionStyle`    | `'arrow'`                | `'arrow'` 要求箭头函数；`'any'` 也接受内联函数表达式。                |
+| `bodyStyle`        | `'block'`                | `'block'` 要求箭头函数体使用花括号；`'any'` 也允许表达式函数体。      |
+| `exclude`          | `[]`                     | 要跳过的内置 API，使用原始导出名称。                                  |
+| `customCallbacks`  | `[]`                     | 额外的回调目标，支持为每个条目配置自动导入。                          |
+| `vueGlobals`       | 共享设置，否则 `[]`      | 显式指定未绑定的内置 API 名称；`[]` 禁用 Vue 与 VueUse 内置全局目标。 |
+| `vueImportSources` | `['vue']`                | 提供 Vue API 的精确模块标识符；替换默认列表，不影响 VueUse 模块。     |
+| `vueuse`           | 共享设置，否则 `false`   | 启用内置 VueUse 回调，规则级值优先于共享设置。                        |
 
 即使两个风格选项都为 `'any'`，仍要求内联回调。每条规则有独立的选项，不继承 `sort-script-setup` 的设置。
 
@@ -173,9 +174,68 @@ Vue.onMounted(handler)
 
 双脚本 SFC 中，`<script setup>` 内的局部声明仅在 setup 内遮蔽同名导入。两个脚本块的导入在模块作用域中均可用，与 Vue 的导入提升行为一致。
 
-自动导入可通过 `settings['vue-perfectionist'].autoImport: true` 启用（见[共享配置](../guide/configuration.md#auto-imported-vue-apis)），也可以单独为本规则设置 `vueGlobals: ['onMounted', 'watch', 'watchEffect']`。显式 `vueGlobals` 会覆盖内置 Vue API 的共享设置；`[]` 禁用全局识别。自定义回调使用各自的 `autoImport`。这些名称仅在没有局部绑定时匹配，包括 ESLint 全局变量声明的名称。重新导出模块可配置为 `vueImportSources: ['vue', '#imports']`。
+自动导入可通过 `settings['vue-perfectionist'].autoImport: true` 启用（见[共享配置](../guide/configuration.md#auto-imported-vue-apis)），也可以单独为本规则设置 `vueGlobals: ['onMounted', 'watch', 'watchEffect']`。显式 `vueGlobals` 会覆盖内置 Vue API 及已启用 VueUse API 的共享设置；`[]` 禁用全局识别。自定义回调使用各自的 `autoImport`。这些名称仅在没有局部绑定时匹配，包括 ESLint 全局变量声明的名称。重新导出模块可配置为 `vueImportSources: ['vue', '#imports']`。
 
 不根据前缀猜测，也不进行跨文件分析。跳过计算成员访问、可选调用及可选成员访问。
+
+### VueUse {#vueuse}
+
+启用 `settings['vue-perfectionist'].vueuse: true` 后，会检查下表中的 VueUse API。规则级布尔选项 `vueuse` 优先于共享值：`options.vueuse ?? settings['vue-perfectionist'].vueuse ?? false`。
+
+```js
+import { defineConfig } from 'eslint/config'
+
+export default defineConfig([
+  {
+    settings: {
+      'vue-perfectionist': { vueuse: true, autoImport: true },
+    },
+    rules: {
+      'vue-perfectionist/callback-style': 'error',
+    },
+  },
+])
+```
+
+| 分组        | VueUse API                                                                                                                                                                       | 回调索引 |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `lifecycle` | `tryOnBeforeMount`, `tryOnBeforeUnmount`, `tryOnMounted`, `tryOnUnmounted`                                                                                                       | `0`      |
+| `watch`     | `watchArray`, `watchAtMost`, `watchDebounced`, `watchDeep`, `watchIgnorable`, `watchImmediate`, `watchOnce`, `watchThrottled`, `watchTriggerable`, `watchWithFilter`, `whenever` | `1`      |
+| `cleanup`   | `tryOnScopeDispose`                                                                                                                                                              | `0`      |
+| `scheduler` | `useIntervalFn`, `useTimeoutFn`                                                                                                                                                  | `0`      |
+
+精确匹配来自 `@vueuse/core` 和 `@vueuse/shared` 的导入，包括别名和命名空间导入。`groups` 和 `exclude` 同时作用于 Vue 与 VueUse 内置目标；`cleanup` 和 `scheduler` 仍需显式启用。`vueImportSources` 仅配置 Vue 导入，不替换 VueUse 的模块列表。其他模块重新导出的 VueUse API 请用 `customCallbacks` 配置。回调位置依据 [VueUse API 源码](https://github.com/vueuse/vueuse/tree/main/packages/shared)。已弃用别名和未列出的 API 不在内置列表中。`useEventListener` 等回调位置可变的 API，需根据项目使用的签名自行配置。
+
+未绑定的 VueUse 名称还需要 `autoImport: true`，或在显式 `vueGlobals` 列表中包含相应名称。显式列表（包括 `[]`）覆盖两类内置 API 的共享自动导入识别，但不能单独启用 VueUse 集成。导入身份、局部遮蔽、缺失参数及展开边界与 Vue API 一致，不检查侦听源 getter 和源数组。
+
+使用上述配置时：
+
+::: incorrect vueuse-callback-style
+
+```ts
+watchDebounced(() => query.value, refresh)
+tryOnMounted(() => initialize())
+```
+
+:::
+
+::: correct vueuse-callback-style
+
+```ts
+watchDebounced(
+  () => query.value,
+  () => {
+    refresh()
+  },
+)
+tryOnMounted(() => {
+  initialize()
+})
+```
+
+:::
+
+为本规则设置 `vueuse: false` 仅关闭其内置 VueUse 回调支持。显式 `customCallbacks` 始终生效，包括其中配置的 VueUse API。
 
 ### 自定义回调 {#custom-callbacks}
 
@@ -203,11 +263,13 @@ Vue.onMounted(handler)
 
 `source` 和 `name` 为精确匹配的非空字符串。`name` 是原始导出名称；使用 `'default'` 可匹配任意本地名称的默认导入。支持别名和命名空间调用。`callbackIndices` 必须至少包含一个非负整数，且不得重复。
 
-自定义条目独立于 `groups`、`exclude` 和 `vueGlobals` 生效。匹配的索引会合并，每个参数最多报告一次。
+自定义条目独立于 `vueuse`、`groups`、`exclude` 和 `vueGlobals` 生效。内置与自定义目标匹配的索引会合并，每个参数最多报告一次。
+
+条目的 `autoImport: false` 不会关闭与其重叠的内置目标。若希望完全由自定义条目控制该 API 的未绑定名称匹配，请用 `exclude` 或 `groups` 关闭对应内置目标。
 
 各条目接受可选布尔值 `autoImport`。省略时继承 `settings['vue-perfectionist'].autoImport`（默认 `false`）；设为 `true` 或 `false` 可覆盖共享设置。显式导入不受此选项影响，仍会匹配。
 
-例如，让以下 VueUse 回调继承共享设置：
+例如，关闭内置集成后，仍可显式配置以下 VueUse 回调；它们的自动导入识别继续继承共享设置：
 
 ```js
 import { defineConfig } from 'eslint/config'
@@ -223,6 +285,7 @@ export default defineConfig([
       'vue-perfectionist/callback-style': [
         'error',
         {
+          vueuse: false,
           customCallbacks: [
             {
               source: '@vueuse/core',

@@ -150,16 +150,17 @@ onMounted(() => {
 }
 ```
 
-| 选项               | 类型               | 默认值                   | 含义                                                                 |
-| ------------------ | ------------------ | ------------------------ | -------------------------------------------------------------------- |
-| `max`              | 整数 ≥ 1           | `20`                     | 每个内联回调最多计入的行数。                                         |
-| `skipBlankLines`   | boolean            | `false`                  | 排除仅含空白的行。                                                   |
-| `skipComments`     | boolean            | `false`                  | 排除仅含注释的行。                                                   |
-| `groups`           | `CallbackGroup[]`  | `['lifecycle', 'watch']` | 内置 API 分组，替换默认值；`[]` 禁用内置目标。                       |
-| `exclude`          | `string[]`         | `[]`                     | 要跳过的内置原始导出名称，不影响自定义条目。                         |
-| `customCallbacks`  | `CustomCallback[]` | `[]`                     | 以精确导入来源和导出名称匹配的额外回调位置。                         |
-| `vueGlobals`       | `string[]`         | 共享设置，否则 `[]`      | 显式的未绑定 Vue API 名称，覆盖共享设置；`[]` 禁用内置全局目标。     |
-| `vueImportSources` | `string[]`         | `['vue']`                | 提供 Vue API 的精确模块标识符，替换默认值；`[]` 禁用导入的内置目标。 |
+| 选项               | 类型               | 默认值                   | 含义                                                                            |
+| ------------------ | ------------------ | ------------------------ | ------------------------------------------------------------------------------- |
+| `max`              | 整数 ≥ 1           | `20`                     | 每个内联回调最多计入的行数。                                                    |
+| `skipBlankLines`   | boolean            | `false`                  | 排除仅含空白的行。                                                              |
+| `skipComments`     | boolean            | `false`                  | 排除仅含注释的行。                                                              |
+| `groups`           | `CallbackGroup[]`  | `['lifecycle', 'watch']` | 内置 API 分组，替换默认值；`[]` 禁用内置目标。                                  |
+| `exclude`          | `string[]`         | `[]`                     | 要跳过的内置原始导出名称，不影响自定义条目。                                    |
+| `customCallbacks`  | `CustomCallback[]` | `[]`                     | 以精确导入来源和导出名称匹配的额外回调位置。                                    |
+| `vueGlobals`       | `string[]`         | 共享设置，否则 `[]`      | 显式的未绑定内置 API 名称，覆盖共享设置；`[]` 禁用 Vue 与 VueUse 内置全局目标。 |
+| `vueImportSources` | `string[]`         | `['vue']`                | 提供 Vue API 的精确模块标识符；`[]` 禁用 Vue 导入，不影响 VueUse 模块。         |
+| `vueuse`           | boolean            | 共享设置，否则 `false`   | 启用内置 VueUse 回调，规则级值优先于共享设置。                                  |
 
 省略 `vueGlobals` 时继承 `settings['vue-perfectionist'].autoImport`。上方配置显式传入空列表，会对内置 API 禁用继承。其他选项不继承自 `callback-style` 或 `sort-script-setup`。
 
@@ -182,6 +183,67 @@ onMounted(() => {
 具名导入别名及命名空间导入按原始导出名称匹配。命名空间接收者外的 TypeScript 包装（如 `(Vue as typeof Vue).onMounted(...)`）保留导入和遮蔽检查。局部声明、遮蔽参数、其他模块导入及仅类型导入不匹配。默认导入不视为内置 Vue API。重新导出模块可设置 `vueImportSources: ['vue', '#imports']`。
 
 启用 `settings['vue-perfectionist'].autoImport: true`，或配置本规则的 `vueGlobals`，可识别未绑定 Vue API。ESLint 全局变量声明的名称也符合条件，但仅声明全局变量不会启用识别，见[共享配置](../guide/configuration.md#auto-imported-vue-apis)。显式 `vueGlobals` 仅对内置目标覆盖共享设置。
+
+### VueUse {#vueuse}
+
+启用 `settings['vue-perfectionist'].vueuse: true` 后，会检查下表中的 VueUse API。规则级布尔选项 `vueuse` 优先于共享值：`options.vueuse ?? settings['vue-perfectionist'].vueuse ?? false`。
+
+```js
+import { defineConfig } from 'eslint/config'
+
+export default defineConfig([
+  {
+    settings: {
+      'vue-perfectionist': { vueuse: true, autoImport: true },
+    },
+    rules: {
+      'vue-perfectionist/max-lines-per-callback': ['error', { max: 3 }],
+    },
+  },
+])
+```
+
+| 分组        | VueUse API                                                                                                                                                                       | 回调索引 |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `lifecycle` | `tryOnBeforeMount`, `tryOnBeforeUnmount`, `tryOnMounted`, `tryOnUnmounted`                                                                                                       | `0`      |
+| `watch`     | `watchArray`, `watchAtMost`, `watchDebounced`, `watchDeep`, `watchIgnorable`, `watchImmediate`, `watchOnce`, `watchThrottled`, `watchTriggerable`, `watchWithFilter`, `whenever` | `1`      |
+| `cleanup`   | `tryOnScopeDispose`                                                                                                                                                              | `0`      |
+| `scheduler` | `useIntervalFn`, `useTimeoutFn`                                                                                                                                                  | `0`      |
+
+精确匹配来自 `@vueuse/core` 和 `@vueuse/shared` 的导入，包括别名和命名空间导入。`groups` 和 `exclude` 同时作用于 Vue 与 VueUse 内置目标；`cleanup` 和 `scheduler` 仍需显式启用。`vueImportSources` 仅配置 Vue 导入，不替换 VueUse 的模块列表。其他模块重新导出的 VueUse API 请用 `customCallbacks` 配置。回调位置依据 [VueUse API 源码](https://github.com/vueuse/vueuse/tree/main/packages/shared)。已弃用别名和未列出的 API 不在内置列表中。`useEventListener` 等回调位置可变的 API，需根据项目使用的签名自行配置。
+
+未绑定的 VueUse 名称还需要 `autoImport: true`，或在显式 `vueGlobals` 列表中包含相应名称。显式列表（包括 `[]`）覆盖两类内置 API 的共享自动导入识别，但不能单独启用 VueUse 集成。不计侦听源 getter 和源数组；导入身份及展开边界与 Vue API 一致。行数计算选项保持原有语义，不提供修复或建议。
+
+使用上述配置时：
+
+::: incorrect vueuse-callback-length
+
+```ts
+watchDebounced(
+  () => query.value,
+  () => {
+    updateCache()
+    refreshView()
+  },
+)
+```
+
+:::
+
+::: correct vueuse-callback-length
+
+```ts
+watchDebounced(
+  () => query.value,
+  () => {
+    refresh()
+  },
+)
+```
+
+:::
+
+为本规则设置 `vueuse: false` 仅关闭其内置 VueUse 回调支持。显式 `customCallbacks` 始终生效，包括其中配置的 VueUse API。
 
 ### 自定义回调 {#custom-callbacks}
 
@@ -210,7 +272,9 @@ onMounted(() => {
 
 `source` 和 `name` 必须为精确的非空字符串。`name` 为原始导出名称；`'default'` 匹配任意本地名称的显式默认导入。支持别名及命名空间调用。`callbackIndices` 至少包含一个非负整数，不得重复。
 
-自定义条目独立于 `groups`、`exclude` 和 `vueGlobals` 生效。匹配索引合并，每个参数最多报告一次。
+自定义条目独立于 `vueuse`、`groups`、`exclude` 和 `vueGlobals` 生效。内置与自定义目标匹配的索引会合并，每个参数最多报告一次。
+
+条目的 `autoImport: false` 不会关闭与其重叠的内置目标。若希望完全由自定义条目控制该 API 的未绑定名称匹配，请用 `exclude` 或 `groups` 关闭对应内置目标。
 
 各条目的可选 `autoImport` 继承共享设置（默认 `false`）；可显式设为 `true` 或 `false` 覆盖。显式导入始终匹配。自动导入仅匹配没有局部绑定的配置名称。不读取自动导入清单，不推断别名或命名空间对象，也不自动导入 `name: 'default'`。
 

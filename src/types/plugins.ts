@@ -12,7 +12,8 @@ export interface VuePerfectionistSettings {
 
   /**
    * Enable VueUse integration in rules that support it. Defaults to false;
-   * rule-level vueuse takes precedence. Unbound APIs also require autoImport.
+   * rule-level vueuse takes precedence. Unbound APIs follow each rule's
+   * auto-import options.
    */
   vueuse?: boolean
 }

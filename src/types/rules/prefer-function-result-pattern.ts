@@ -31,11 +31,16 @@ export interface PreferFunctionResultPatternTarget {
 
 export interface PreferFunctionResultPatternOptions {
   /**
-   * Replaces the default Vue ref/shallowRef/computed and VueUse useToggle targets.
+   * Replaces all built-in targets, independently of the vueuse setting.
    * An empty array disables checks. Later targets override earlier ones for
    * the same method and binding position, before boolean filtering.
    */
   targets?: PreferFunctionResultPatternTarget[]
+  /**
+   * Enable the built-in VueUse useToggle target. Overrides the shared vueuse
+   * setting, which defaults to false. Explicit targets are unaffected.
+   */
+  vueuse?: boolean
 }
 
 export type PreferFunctionResultPatternMessageId =

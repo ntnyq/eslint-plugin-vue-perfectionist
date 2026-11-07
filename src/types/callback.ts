@@ -1,5 +1,5 @@
 /**
- * Built-in Vue API groups with known callback argument positions.
+ * Built-in Vue and VueUse API groups with known callback argument positions.
  */
 export type CallbackGroup = 'cleanup' | 'lifecycle' | 'scheduler' | 'watch'
 
@@ -36,11 +36,17 @@ export interface CallbackTargetOptions {
    */
   groups?: CallbackGroup[]
   /**
-   * Unbound Vue API names supplied by auto-import tooling.
+   * Unbound built-in API names supplied by auto-import tooling. Overrides the
+   * shared autoImport setting; VueUse names still require vueuse to be enabled.
    */
   vueGlobals?: string[]
   /**
    * Modules exposing Vue's named APIs. Defaults to ["vue"].
    */
   vueImportSources?: string[]
+  /**
+   * Enable built-in VueUse callbacks. Overrides the shared vueuse setting,
+   * which defaults to false. Custom callbacks are independent of this option.
+   */
+  vueuse?: boolean
 }

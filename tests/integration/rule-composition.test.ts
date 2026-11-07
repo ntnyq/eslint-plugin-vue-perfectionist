@@ -4,6 +4,37 @@ import plugin from '../../src/index.ts'
 import { vueLanguageOptions } from '../helpers/rule-tester.ts'
 
 describe('cross-rule diagnostics', () => {
+  it.each([false, true])(
+    'shares VueUse settings while preserving independent rule overrides: %s',
+    disableStyle => {
+      const linter = new Linter()
+      const source = `watchDebounced(source, () => {
+  first()
+  second()
+})
+tryOnMounted(handler)`
+      const configuration: Linter.Config = {
+        plugins: { vp: plugin },
+        settings: { 'vue-perfectionist': { vueuse: true, autoImport: true } },
+        rules: {
+          'vp/callback-style': ['error', { vueuse: !disableStyle }],
+          'vp/max-lines-per-callback': ['error', { max: 3 }],
+        },
+      }
+      const result = linter.verifyAndFix(source, configuration)
+      expect(
+        result.messages.map(message => [message.ruleId, message.messageId]),
+      ).toEqual([
+        ['vp/max-lines-per-callback', 'exceededMaxLines'],
+        ...(disableStyle
+          ? []
+          : [['vp/callback-style', 'expectedInlineCallback']]),
+      ])
+      expect(result.fixed).toBe(false)
+      expect(result.output).toBe(source)
+    },
+  )
+
   it('composes injection, template complexity, and composable cleanup checks without fixes', () => {
     const linter = new Linter()
     const source = `<script setup lang="ts">

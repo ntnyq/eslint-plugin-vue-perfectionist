@@ -113,7 +113,8 @@ unbound, same-name Vue APIs already supported by `sort-script-setup`,
 `prefer-watch-effect-alias`, `require-injection-key`, and `prefer-on-scope-dispose`.
 `callback-style` and `max-lines-per-callback` also recognize configured `customCallbacks` names.
 `prefer-function-result-pattern` recognizes all configured target names under this
-setting, including `ref`, `shallowRef`, `computed`, and VueUse's `useToggle` by default.
+setting, including `ref`, `shallowRef`, and `computed` by default. Its built-in
+VueUse `useToggle` target additionally requires `vueuse: true`.
 This includes unbound names declared in ESLint's `languageOptions.globals`,
 but declaring globals alone does not enable API recognition.
 Local declarations, parameters, imports from other modules, and type-only
@@ -125,10 +126,14 @@ replaces the shared selection of built-in Vue APIs, including `vueGlobals: []`
 to disable it for one rule. Callback `groups` and `exclude` continue to control
 which built-in APIs are checked. Each `customCallbacks` entry in either callback rule has an
 `autoImport` boolean that overrides the shared setting independently of `vueGlobals`.
+In callback rules, `vueGlobals` also covers supported VueUse names when
+`vueuse` is enabled.
 For `prefer-function-result-pattern`, each target's `autoImport` boolean overrides
 the shared setting for that group of functions.
-Macros and component prop rules do not require this setting. Literal template
-refs are also checked independently of API imports.
+Vue compiler macros and component prop checks do not require this setting.
+For `prefer-define-model`, recognizing an unbound VueUse `useVModel` call for
+the optional passive-model exception still requires both `vueuse` and
+`autoImport`. Literal template refs are checked independently of API imports.
 
 This setting declares that the unbound names come from their supported libraries; it does not read
 Vite configuration, generated declarations, or auto-import manifests. Custom
@@ -151,12 +156,56 @@ Put rule preferences in the rule's options object. The shared
 Sorting preferences in shared settings are ignored.
 
 `vueuse` is a boolean, defaults to `false`, and enables VueUse integration only
-in rules that explicitly support it. Currently,
-[`prefer-define-model`](/rules/prefer-define-model#vueuse) uses it to skip
-recognized passive `useVModel` models. That rule's `vueuse` option overrides
-the shared value; omitting it inherits the shared value. Explicit imports need
-only the VueUse opt-in, while unbound `useVModel` calls additionally require
-`autoImport: true`. Enabling `vueuse` does not extend other rules' API recognition.
+in rules that explicitly support it:
+
+- [`callback-style`](/rules/callback-style#vueuse) and
+  [`max-lines-per-callback`](/rules/max-lines-per-callback#vueuse) check their
+  documented VueUse callback positions from `@vueuse/core` and `@vueuse/shared`.
+- [`prefer-define-model`](/rules/prefer-define-model#vueuse) skips recognized
+  passive `useVModel` models.
+- [`prefer-function-result-pattern`](/rules/prefer-function-result-pattern#vueuse)
+  enables its built-in `useToggle` result naming target from `@vueuse/core`.
+
+Each supporting rule resolves
+`options.vueuse ?? settings['vue-perfectionist'].vueuse ?? false` independently.
+Explicit imports need only the VueUse opt-in. Unbound VueUse calls additionally
+need `autoImport: true`; callback rules also accept an explicit `vueGlobals`
+list, including `[]` to disable built-in auto-import recognition for both Vue
+and VueUse. Callback `groups` and `exclude` apply to both built-in libraries.
+Explicit `customCallbacks` are independent of `vueuse`, even when they target
+VueUse APIs; each entry keeps its own auto-import policy.
+Likewise, explicit `prefer-function-result-pattern` targets replace all built-ins
+and remain active regardless of `vueuse`, including targets for `useToggle`.
+
+Custom callbacks add to the built-in callback positions. An entry's
+`autoImport: false` disables only that entry's unbound matching; an enabled
+built-in can still recognize the same call. To control such an API exclusively
+through a custom entry, disable its built-in with `exclude` or `groups`.
+In contrast, an explicit `targets` array in `prefer-function-result-pattern`
+replaces built-ins, so the selected target's `autoImport` is authoritative.
+
+Shared `vueuse` must be a boolean when present. Its type is validated even
+when a rule-level `vueuse` override is configured.
+
+```js
+import { defineConfig } from 'eslint/config'
+
+export default defineConfig([
+  {
+    settings: {
+      'vue-perfectionist': { vueuse: true, autoImport: true },
+    },
+    rules: {
+      'vue-perfectionist/callback-style': 'error',
+      'vue-perfectionist/max-lines-per-callback': ['error', { vueuse: false }],
+    },
+  },
+])
+```
+
+Here, only `callback-style` inherits VueUse callback support; the length rule
+disables its built-in VueUse callbacks. Other rules retain their documented
+API recognition.
 
 `sort-script-setup` defaults to `type: 'unsorted'`: it orders groups but preserves
 name order within ordinary groups. Set `type: 'natural'` or another supported

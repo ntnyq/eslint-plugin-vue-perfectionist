@@ -494,9 +494,16 @@ const result = useSubscription(handler)
 )
 
 describe('auto-import settings across public rules', () => {
-  it.each([false, true])(
-    'recognizes boolean state auto-imports with an aliased plugin: %s',
-    autoImport => {
+  it.each(
+    [false, true].flatMap(autoImport =>
+      [false, true].map(vueuse => ({
+        autoImport,
+        vueuse,
+      })),
+    ),
+  )(
+    'recognizes boolean state auto-imports with an aliased plugin: $autoImport, VueUse: $vueuse',
+    ({ autoImport, vueuse }) => {
       const linter = new Linter()
       const source = `<script setup lang="ts">
 const loading = ref(false)
@@ -517,14 +524,17 @@ function local(ref: Function) { const state = ref(false) }
             },
           },
           plugins: { vp: plugin },
-          settings: { 'vue-perfectionist': { autoImport } },
+          settings: { 'vue-perfectionist': { autoImport, vueuse } },
           rules: { 'vp/prefer-function-result-pattern': 'error' },
         },
         'Test.vue',
       )
       expect(result.messages.map(message => message.messageId)).toEqual(
         autoImport
-          ? Array.from({ length: 3 }, () => 'unexpectedFunctionResultPattern')
+          ? Array.from(
+              { length: vueuse ? 3 : 2 },
+              () => 'unexpectedFunctionResultPattern',
+            )
           : [],
       )
       expect(result.fixed).toBe(false)

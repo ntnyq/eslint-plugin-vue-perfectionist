@@ -32,3 +32,39 @@ export const CALLBACK_APIS: Record<CallbackGroup, Record<string, number>> = {
     watchSyncEffect: 0,
   },
 }
+
+/**
+ * VueUse callback positions shared by `@vueuse/core` and `@vueuse/shared`.
+ * Watch sources and deprecated aliases are deliberately excluded.
+ */
+export const VUEUSE_CALLBACK_APIS: Record<
+  CallbackGroup,
+  Record<string, number>
+> = {
+  cleanup: {
+    tryOnScopeDispose: 0,
+  },
+  lifecycle: {
+    tryOnBeforeMount: 0,
+    tryOnBeforeUnmount: 0,
+    tryOnMounted: 0,
+    tryOnUnmounted: 0,
+  },
+  scheduler: {
+    useIntervalFn: 0,
+    useTimeoutFn: 0,
+  },
+  watch: {
+    watchArray: 1,
+    watchAtMost: 1,
+    watchDebounced: 1,
+    watchDeep: 1,
+    watchIgnorable: 1,
+    watchImmediate: 1,
+    watchOnce: 1,
+    watchThrottled: 1,
+    watchTriggerable: 1,
+    watchWithFilter: 1,
+    whenever: 1,
+  },
+}

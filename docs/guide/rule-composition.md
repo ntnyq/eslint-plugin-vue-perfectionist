@@ -24,9 +24,10 @@ rules check definitions, not how a composable is imported or called.
 
 [`prefer-function-result-pattern`](/rules/prefer-function-result-pattern)
 checks names bound to selected function results. Its defaults cover statically
-boolean Vue refs, supported computed getters, and VueUse toggles. Configure
-`targets` for other libraries or naming conventions; these targets replace the
-defaults.
+boolean Vue refs and supported computed getters. Enable `vueuse` in shared
+settings or this rule's options to include the built-in VueUse `useToggle`
+target. Configure `targets` for other libraries or naming conventions; these
+targets replace all built-ins and remain active regardless of `vueuse`.
 
 ## Macro Types and Layout
 

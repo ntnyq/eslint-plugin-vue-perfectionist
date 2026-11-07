@@ -64,6 +64,49 @@ await run<
   },
   valid: [
     {
+      description: 'autoImport alone does not enable built-in useToggle',
+      code: 'const [open] = useToggle()',
+      settings: autoImport,
+    },
+    {
+      description: 'an empty target list disables all enabled built-ins',
+      code: `${withToggle('const [open] = useToggle()')}; ${withVue('const ready = ref(false)')}`,
+      settings: { 'vue-perfectionist': { vueuse: true, autoImport: true } },
+      options: { targets: [] },
+    },
+    ...[
+      {},
+      {
+        settings: { 'vue-perfectionist': { vueuse: false, autoImport: true } },
+      },
+      {
+        settings: { 'vue-perfectionist': { vueuse: true } },
+        options: { vueuse: false },
+      },
+    ].map(config => ({
+      description: 'built-in useToggle is disabled by default or rule opt-out',
+      code: withToggle('const [open] = useToggle()'),
+      ...config,
+    })),
+    ...[undefined, false].map(autoImport => ({
+      description: 'unbound built-in useToggle requires autoImport as well',
+      code: 'const [open] = useToggle()',
+      settings: { 'vue-perfectionist': { vueuse: true, autoImport } },
+      languageOptions: { globals: { useToggle: 'readonly' as const } },
+    })),
+    ...[[], [vueTarget]].map(targets => ({
+      description: 'explicit targets replace enabled VueUse and Vue defaults',
+      code: withToggle('const [open] = useToggle()'),
+      settings: { 'vue-perfectionist': { vueuse: true, autoImport: true } },
+      options: { vueuse: true, targets },
+    })),
+    {
+      description: 'custom useToggle target keeps its own auto-import opt-out',
+      code: 'const [open] = useToggle()',
+      settings: { 'vue-perfectionist': { vueuse: true, autoImport: true } },
+      options: { targets: [{ ...toggleTarget, autoImport: false }] },
+    },
+    {
       description: 'namespace wrappers do not bypass parameter shadowing',
       code: "import * as Vue from 'vue'; function local(Vue: unknown) { const ready = (Vue as typeof Vue).ref(false) }",
       settings: autoImport,
@@ -264,6 +307,7 @@ const isReady = makeFlag()`,
       'const [state] = useToggle<boolean, boolean>(false)',
     ].map(code => ({
       code: withToggle(code),
+      options: { vueuse: true },
     })),
     ...[
       "import { ref } from 'other'; const state = ref(false)",
@@ -288,6 +332,7 @@ const isReady = makeFlag()`,
     ].map(code => ({
       code,
       settings: autoImport,
+      options: { vueuse: true },
     })),
     { code: 'const state = ref(false); const [open] = useToggle()' },
     {
@@ -358,6 +403,101 @@ const isReady = makeFlag()`,
     },
   ],
   invalid: [
+    {
+      description:
+        'custom useToggle still inherits shared autoImport with integration disabled',
+      code: 'const [open] = useToggle()',
+      settings: { 'vue-perfectionist': { vueuse: false, autoImport: true } },
+      options: { vueuse: false, targets: [toggleTarget] },
+      errors,
+      output: null,
+    },
+    ...[
+      { settings: { 'vue-perfectionist': { vueuse: true } } },
+      { options: { vueuse: true } },
+      {
+        settings: { 'vue-perfectionist': { vueuse: false } },
+        options: { vueuse: true },
+      },
+    ].map(config => ({
+      description: 'shared or rule opt-in enables imported built-in useToggle',
+      code: withToggle('const [open] = useToggle()'),
+      ...config,
+      errors: [
+        {
+          messageId: 'unexpectedFunctionResultPattern' as const,
+          data: { name: 'open', pattern },
+        },
+      ],
+      output: null,
+    })),
+    ...[undefined, false, true].flatMap(vueuse =>
+      [undefined, false, true].map(ruleVueUse => ({
+        description: 'explicit VueUse targets ignore shared and rule switches',
+        code: `${withToggle('const [open] = useToggle()')}; import { useDark } from '@vueuse/core'; const dark = useDark()`,
+        settings: { 'vue-perfectionist': { vueuse } },
+        options: {
+          vueuse: ruleVueUse,
+          targets: [
+            toggleTarget,
+            { source: '@vueuse/core', names: ['useDark'], pattern },
+          ],
+        },
+        errors: [...errors, ...errors],
+        output: null,
+      })),
+    ),
+    ...[undefined, false, true].map(vueuse => ({
+      description: 'VueUse switch never disables built-in Vue targets',
+      code: withVue('const ready = ref(false)'),
+      options: { vueuse },
+      errors,
+      output: null,
+    })),
+    ...[false, true].map(autoImport => ({
+      description: 'custom useToggle target can enable its own auto-imports',
+      code: 'const [open] = useToggle()',
+      settings: { 'vue-perfectionist': { vueuse: false, autoImport } },
+      options: {
+        vueuse: false,
+        targets: [{ ...toggleTarget, autoImport: true }],
+      },
+      errors,
+      output: null,
+    })),
+    {
+      description:
+        'custom imports still match with both shared opt-ins disabled',
+      code: withToggle('const [open] = useToggle()'),
+      settings: { 'vue-perfectionist': { vueuse: false, autoImport: false } },
+      options: {
+        vueuse: false,
+        targets: [{ ...toggleTarget, autoImport: false }],
+      },
+      errors,
+      output: null,
+    },
+    {
+      description:
+        'custom useToggle filtering can be disabled independently of integration',
+      code: withToggle('const [open] = useToggle(initial)'),
+      options: {
+        vueuse: false,
+        targets: [{ ...toggleTarget, booleanOnly: false }],
+      },
+      errors,
+      output: null,
+    },
+    ...['', ' lang="ts"'].flatMap(language =>
+      ['script', 'script setup'].map(tag => ({
+        description: 'shared opt-ins recognize useToggle in both SFC scripts',
+        filename: 'Test.vue',
+        code: `<${tag}${language}>const [open] = useToggle()</script>`,
+        settings: { 'vue-perfectionist': { vueuse: true, autoImport: true } },
+        errors,
+        output: null,
+      })),
+    ),
     {
       description: 'recognizes wrapped namespace receivers for result naming',
       code: "import * as Vue from 'vue'; const ready = (Vue as typeof Vue).ref(false)",
@@ -648,6 +788,7 @@ const ready = makeFlag()`,
       "import * as VueUse from '@vueuse/core'; const [ready] = VueUse.useToggle(false)",
     ].map(code => ({
       code,
+      options: { vueuse: true },
       errors,
       output: null,
     })),
@@ -657,6 +798,7 @@ const ready = makeFlag()`,
       'const [open] = useToggle(true)',
     ].map(code => ({
       code: withToggle(code),
+      options: { vueuse: true },
       errors,
       output: null,
     })),
@@ -730,6 +872,7 @@ const ready = makeFlag()`,
     ].map(globals => ({
       code: 'const loading = ref(false); const ready = shallowRef<boolean>(); const [open] = useToggle()',
       settings: autoImport,
+      options: { vueuse: true },
       languageOptions: { globals },
       errors: [...errors, ...errors, ...errors],
       output: null,
@@ -776,6 +919,9 @@ const tester = createRuleTester<unknown>({
 
 describe('prefer-function-result-pattern configuration', () => {
   it.each([
+    ...['true', 1, null, [], {}].map(vueuse => ({
+      vueuse,
+    })),
     { unknown: true },
     { prefixes: ['is'] },
     { globals: ['ref'] },
@@ -809,4 +955,17 @@ describe('prefer-function-result-pattern configuration', () => {
   ])('rejects invalid options: %j', async options => {
     await expect(tester.valid({ code: '', options })).rejects.toThrow()
   })
+
+  it.each(['true', 1, null, [], {}])(
+    'rejects invalid shared vueuse even with custom targets and an override: %j',
+    async vueuse => {
+      await expect(
+        tester.valid({
+          code: '',
+          settings: { 'vue-perfectionist': { vueuse } },
+          options: { vueuse: false, targets: [] },
+        }),
+      ).rejects.toThrow('vueuse must be a boolean')
+    },
+  )
 })

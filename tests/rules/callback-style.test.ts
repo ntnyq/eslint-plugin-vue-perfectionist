@@ -62,6 +62,11 @@ await run<CallbackStyleOptions, CallbackStyleMessageId>({
     }
   },
   valid: [
+    {
+      description: 'VueUse built-ins honor both relaxed callback styles',
+      code: "import { tryOnMounted } from '@vueuse/shared'; tryOnMounted(function () {}); tryOnMounted(() => initialize())",
+      options: { vueuse: true, functionStyle: 'any', bodyStyle: 'any' },
+    },
     ...[
       [undefined, undefined],
       [false, undefined],
@@ -215,6 +220,39 @@ await run<CallbackStyleOptions, CallbackStyleMessageId>({
     },
   ],
   invalid: [
+    ...['test.js', 'test.ts', 'Test.vue'].map(filename => {
+      const code =
+        "import { watchDebounced as watchLater } from '@vueuse/core'; watchLater(() => source.value, () => update())"
+      const output =
+        "import { watchDebounced as watchLater } from '@vueuse/core'; watchLater(() => source.value, () => { return (update()) })"
+      return {
+        description:
+          'fixes VueUse callback bodies without changing watch sources',
+        filename,
+        code: filename.endsWith('.vue')
+          ? `<script setup lang="ts">${code}</script>`
+          : code,
+        settings: { 'vue-perfectionist': { vueuse: true } },
+        errors: [
+          {
+            messageId: 'expectedBlockBody' as const,
+            data: { name: 'watchDebounced' },
+          },
+        ],
+        output: filename.endsWith('.vue')
+          ? `<script setup lang="ts">${output}</script>`
+          : output,
+      }
+    }),
+    {
+      description: 'VueUse built-ins require arrow functions by default',
+      code: "import { tryOnMounted } from '@vueuse/shared'; tryOnMounted(function () {})",
+      options: { vueuse: true },
+      errors: [
+        { messageId: 'expectedArrowCallback', data: { name: 'tryOnMounted' } },
+      ],
+      output: null,
+    },
     ...[
       '(Vue as typeof Vue)',
       '(Vue satisfies typeof Vue)',

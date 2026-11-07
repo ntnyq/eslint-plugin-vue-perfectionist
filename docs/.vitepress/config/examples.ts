@@ -18,6 +18,21 @@ interface ExampleProfile {
 }
 
 const EXAMPLE_PROFILES: Record<string, ExampleProfile> = {
+  'vueuse-function-results': {
+    rule: 'prefer-function-result-pattern',
+    options: {},
+    settings: { 'vue-perfectionist': { vueuse: true, autoImport: true } },
+  },
+  'vueuse-callback-style': {
+    rule: 'callback-style',
+    options: {},
+    settings: { 'vue-perfectionist': { vueuse: true, autoImport: true } },
+  },
+  'vueuse-callback-length': {
+    rule: 'max-lines-per-callback',
+    options: { max: 3 },
+    settings: { 'vue-perfectionist': { vueuse: true, autoImport: true } },
+  },
   'passive-vueuse-model': {
     rule: 'prefer-define-model',
     options: { vueuse: true },
@@ -26,6 +41,7 @@ const EXAMPLE_PROFILES: Record<string, ExampleProfile> = {
   'custom-callbacks': {
     rule: 'callback-style',
     options: {
+      vueuse: false,
       customCallbacks: [
         {
           source: '@vueuse/core',
@@ -54,6 +70,7 @@ const EXAMPLE_PROFILES: Record<string, ExampleProfile> = {
   'custom-functions': {
     rule: 'prefer-function-result-pattern',
     options: {
+      vueuse: false,
       targets: [
         {
           source: '@vueuse/core',

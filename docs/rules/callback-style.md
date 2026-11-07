@@ -111,15 +111,16 @@ that function from the inline callback.
 }
 ```
 
-| Option             | Default                  | Meaning                                                                                 |
-| ------------------ | ------------------------ | --------------------------------------------------------------------------------------- |
-| `groups`           | `['lifecycle', 'watch']` | Built-in API groups to check. `[]` disables built-ins.                                  |
-| `functionStyle`    | `'arrow'`                | `'arrow'` requires arrow functions; `'any'` also accepts inline function expressions.   |
-| `bodyStyle`        | `'block'`                | `'block'` requires braces for arrow callback bodies; `'any'` permits expression bodies. |
-| `exclude`          | `[]`                     | Built-in APIs to skip, using original export names.                                     |
-| `customCallbacks`  | `[]`                     | Additional callback targets with per-entry auto-import support.                         |
-| `vueGlobals`       | `[]`                     | Explicit unbound Vue API names supplied by auto-import tooling.                         |
-| `vueImportSources` | `['vue']`                | Exact module specifiers exposing Vue APIs. Replaces the default list.                   |
+| Option             | Default                           | Meaning                                                                                 |
+| ------------------ | --------------------------------- | --------------------------------------------------------------------------------------- |
+| `groups`           | `['lifecycle', 'watch']`          | Built-in API groups to check. `[]` disables built-ins.                                  |
+| `functionStyle`    | `'arrow'`                         | `'arrow'` requires arrow functions; `'any'` also accepts inline function expressions.   |
+| `bodyStyle`        | `'block'`                         | `'block'` requires braces for arrow callback bodies; `'any'` permits expression bodies. |
+| `exclude`          | `[]`                              | Built-in APIs to skip, using original export names.                                     |
+| `customCallbacks`  | `[]`                              | Additional callback targets with per-entry auto-import support.                         |
+| `vueGlobals`       | Shared setting, otherwise `[]`    | Explicit unbound built-in API names. Overrides shared recognition for Vue and VueUse.   |
+| `vueImportSources` | `['vue']`                         | Exact Vue module specifiers. Replaces defaults without changing VueUse modules.         |
+| `vueuse`           | Shared setting, otherwise `false` | Enable built-in VueUse callbacks. Overrides the shared setting.                         |
 
 Inline callbacks are always required, even when both style options are `'any'`. Each rule has its own options; these settings are not inherited from `sort-script-setup`.
 
@@ -182,12 +183,87 @@ available in module scope, matching Vue's import hoisting.
 For auto-imports, enable `settings['vue-perfectionist'].autoImport: true`
 (see the [shared setup](../guide/configuration.md#auto-imported-vue-apis)), or configure
 `vueGlobals: ['onMounted', 'watch', 'watchEffect']` for this rule alone. An explicit
-`vueGlobals` list overrides the shared setting for built-in Vue APIs; `[]` disables
+`vueGlobals` list overrides the shared setting for built-in Vue and enabled VueUse APIs; `[]` disables
 their global recognition. Custom callbacks use their own `autoImport` option.
 These names match only when there is no local binding, including names declared
 in ESLint globals. For re-export modules, configure `vueImportSources: ['vue', '#imports']`.
 
 There is no prefix guessing or cross-file analysis. Computed member access, optional calls, and optional member access are skipped.
+
+### VueUse
+
+Enable `settings['vue-perfectionist'].vueuse: true` to check the VueUse APIs
+listed below. The rule-level `vueuse` boolean overrides the shared value:
+`options.vueuse ?? settings['vue-perfectionist'].vueuse ?? false`.
+
+```js
+import { defineConfig } from 'eslint/config'
+
+export default defineConfig([
+  {
+    settings: {
+      'vue-perfectionist': { vueuse: true, autoImport: true },
+    },
+    rules: {
+      'vue-perfectionist/callback-style': 'error',
+    },
+  },
+])
+```
+
+| Group       | VueUse APIs                                                                                                                                                                      | Callback index |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `lifecycle` | `tryOnBeforeMount`, `tryOnBeforeUnmount`, `tryOnMounted`, `tryOnUnmounted`                                                                                                       | `0`            |
+| `watch`     | `watchArray`, `watchAtMost`, `watchDebounced`, `watchDeep`, `watchIgnorable`, `watchImmediate`, `watchOnce`, `watchThrottled`, `watchTriggerable`, `watchWithFilter`, `whenever` | `1`            |
+| `cleanup`   | `tryOnScopeDispose`                                                                                                                                                              | `0`            |
+| `scheduler` | `useIntervalFn`, `useTimeoutFn`                                                                                                                                                  | `0`            |
+
+These APIs match exact imports from `@vueuse/core` and `@vueuse/shared`,
+including aliases and namespace imports. `groups` and `exclude` apply to both
+Vue and VueUse built-ins; `cleanup` and `scheduler` remain opt-in.
+`vueImportSources` configures Vue imports only; it does not replace VueUse's
+module list. Use `customCallbacks` for VueUse re-exports from other modules.
+Callback positions follow the [VueUse API sources](https://github.com/vueuse/vueuse/tree/main/packages/shared).
+Deprecated aliases and unlisted APIs are not built in. APIs with variable
+callback positions, such as `useEventListener`, require custom configuration
+for the signatures used in your project.
+
+Unbound VueUse names additionally need `autoImport: true`, or an explicit
+`vueGlobals` list containing those names. An explicit list, including `[]`,
+overrides shared auto-import recognition for both built-in libraries. It never
+enables VueUse integration by itself. Import identity, local shadowing, missing
+arguments, and spread boundaries follow the same rules as Vue APIs. Watch
+source getters and arrays are not checked.
+
+With the configuration above:
+
+::: incorrect vueuse-callback-style
+
+```ts
+watchDebounced(() => query.value, refresh)
+tryOnMounted(() => initialize())
+```
+
+:::
+
+::: correct vueuse-callback-style
+
+```ts
+watchDebounced(
+  () => query.value,
+  () => {
+    refresh()
+  },
+)
+tryOnMounted(() => {
+  initialize()
+})
+```
+
+:::
+
+Set this rule's `vueuse: false` to disable only its built-in VueUse callbacks.
+Explicit `customCallbacks` remain active, even for VueUse APIs.
 
 ### Custom callbacks
 
@@ -215,14 +291,19 @@ There is no prefix guessing or cross-file analysis. Computed member access, opti
 
 `source` and `name` are exact, nonempty strings. `name` is the original export name; use `'default'` to match a default import regardless of its local name. Aliases and namespace calls are supported. Each `callbackIndices` list must contain at least one unique, nonnegative integer.
 
-Custom entries apply independently of `groups`, `exclude`, and `vueGlobals`. Matching indices are combined, and each argument is reported at most once.
+Custom entries apply independently of `vueuse`, `groups`, `exclude`, and `vueGlobals`. Matching built-in and custom indices are combined, and each argument is reported at most once.
+
+An entry's `autoImport: false` does not disable an overlapping built-in target.
+Use `exclude` or `groups` to disable that built-in if the custom entry should
+control the API's unbound matching exclusively.
 
 Each entry accepts an optional `autoImport` boolean. When omitted, it inherits
 `settings['vue-perfectionist'].autoImport`, which defaults to `false`. Set it to
 `true` or `false` to override the shared setting for that entry. Explicit imports
 continue to match regardless of this option.
 
-For example, configure these VueUse callbacks to inherit the shared setting:
+For example, explicitly configure VueUse callbacks with built-in integration
+disabled. Their auto-import recognition still inherits the shared setting:
 
 ```js
 import { defineConfig } from 'eslint/config'
@@ -238,6 +319,7 @@ export default defineConfig([
       'vue-perfectionist/callback-style': [
         'error',
         {
+          vueuse: false,
           customCallbacks: [
             {
               source: '@vueuse/core',

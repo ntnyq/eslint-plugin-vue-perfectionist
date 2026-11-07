@@ -87,9 +87,9 @@ export default defineConfig([
 ])
 ```
 
-`autoImport` 为布尔值，默认为 `false`。启用后，`sort-script-setup`、`callback-style`、`max-lines-per-callback`、`consistent-template-ref-name`、`prefer-ref-pattern`、`prefer-use-template-ref-inference`、`prefer-watch-effect-alias`、`require-injection-key` 和 `prefer-on-scope-dispose` 会识别它们已支持的、未绑定且名称相同的 Vue API。两条回调规则还会识别 `customCallbacks` 配置的名称。`prefer-function-result-pattern` 会识别所有已配置目标名称，默认包括 `ref`、`shallowRef`、`computed` 和 VueUse 的 `useToggle`。这也包括 ESLint `languageOptions.globals` 声明的未绑定名称，但仅声明全局变量不会启用 API 识别。局部声明、参数、其他模块的导入及仅类型导入仍优先，不会被视为自动导入。
+`autoImport` 为布尔值，默认为 `false`。启用后，`sort-script-setup`、`callback-style`、`max-lines-per-callback`、`consistent-template-ref-name`、`prefer-ref-pattern`、`prefer-use-template-ref-inference`、`prefer-watch-effect-alias`、`require-injection-key` 和 `prefer-on-scope-dispose` 会识别它们已支持的、未绑定且名称相同的 Vue API。两条回调规则还会识别 `customCallbacks` 配置的名称。`prefer-function-result-pattern` 会识别所有已配置目标名称，默认包括 `ref`、`shallowRef` 和 `computed`；其内置 VueUse `useToggle` 目标还需要 `vueuse: true`。这也包括 ESLint `languageOptions.globals` 声明的未绑定名称，但仅声明全局变量不会启用 API 识别。局部声明、参数、其他模块的导入及仅类型导入仍优先，不会被视为自动导入。
 
-对于 `sort-script-setup`、`callback-style`、`max-lines-per-callback`、`prefer-watch-effect-alias`、`require-injection-key` 和 `prefer-on-scope-dispose`，显式配置 `vueGlobals` 会替换共享设置选中的内置 Vue API；设为 `[]` 可以对单条规则禁用此识别。回调的 `groups` 和 `exclude` 仍决定检查哪些内置 API。两条回调规则中，每个 `customCallbacks` 条目的 `autoImport` 均可独立于 `vueGlobals` 覆盖共享设置。`prefer-function-result-pattern` 中每个目标的 `autoImport` 可以覆盖对应函数组的共享设置。宏规则和组件 prop 规则不需要此设置；字面量模板 ref 的检查也不依赖 API 导入。
+对于 `sort-script-setup`、`callback-style`、`max-lines-per-callback`、`prefer-watch-effect-alias`、`require-injection-key` 和 `prefer-on-scope-dispose`，显式配置 `vueGlobals` 会替换共享设置选中的内置 Vue API；设为 `[]` 可以对单条规则禁用此识别。回调的 `groups` 和 `exclude` 仍决定检查哪些内置 API。两条回调规则中，每个 `customCallbacks` 条目的 `autoImport` 均可独立于 `vueGlobals` 覆盖共享设置。启用 `vueuse` 后，回调规则的 `vueGlobals` 也覆盖受支持的 VueUse 名称。`prefer-function-result-pattern` 中每个目标的 `autoImport` 可以覆盖对应函数组的共享设置。Vue 编译器宏和组件 prop 检查不需要此设置，但 `prefer-define-model` 为可选的 passive 模型例外识别未绑定 VueUse `useVModel` 时，仍需同时启用 `vueuse` 和 `autoImport`。字面量模板 ref 的检查也不依赖 API 导入。
 
 此设置表示未绑定名称来自相应的受支持库；它不会读取 Vite 配置、生成的声明文件或自动导入清单，也不会推断自定义别名和其他库的 API。别名请使用显式导入；其他 API 可以通过回调规则的 `customCallbacks` 或 `prefer-function-result-pattern` 的目标配置启用自动导入识别。排序规则仍遵守原有修复安全边界。即使以其他名称注册插件，设置的命名空间仍为 `vue-perfectionist`。
 
@@ -99,7 +99,37 @@ export default defineConfig([
 
 规则偏好应放在对应规则的选项对象中。共享的 `settings['vue-perfectionist']` 包含 `autoImport` 和 `vueuse`。共享设置中的排序偏好不会生效。
 
-`vueuse` 为布尔值，默认为 `false`，仅为明确支持它的规则启用 VueUse 集成。目前 [`prefer-define-model`](/zh/rules/prefer-define-model#vueuse) 使用此设置跳过已识别的 passive `useVModel` 模型。该规则的 `vueuse` 选项覆盖共享值，省略时继承共享值。显式导入仅需启用 VueUse 集成，未绑定的 `useVModel` 还需 `autoImport: true`。启用 `vueuse` 不会扩展其他规则的 API 识别范围。
+`vueuse` 为布尔值，默认为 `false`，仅为明确支持它的规则启用 VueUse 集成：
+
+- [`callback-style`](/zh/rules/callback-style#vueuse) 和 [`max-lines-per-callback`](/zh/rules/max-lines-per-callback#vueuse) 检查各自文档列出的、来自 `@vueuse/core` 与 `@vueuse/shared` 的 VueUse 回调位置。
+- [`prefer-define-model`](/zh/rules/prefer-define-model#vueuse) 跳过已识别的 passive `useVModel` 模型。
+- [`prefer-function-result-pattern`](/zh/rules/prefer-function-result-pattern#vueuse) 启用其来自 `@vueuse/core` 的内置 `useToggle` 返回值命名目标。
+
+每条支持规则独立解析 `options.vueuse ?? settings['vue-perfectionist'].vueuse ?? false`。显式导入仅需启用 VueUse 集成。未绑定的 VueUse 调用还需要 `autoImport: true`；两条回调规则也接受显式 `vueGlobals` 列表，设为 `[]` 可禁用 Vue 与 VueUse 内置目标的自动导入识别。回调的 `groups` 和 `exclude` 同时作用于两类内置目标。显式 `customCallbacks` 不受 `vueuse` 影响，包括其中配置的 VueUse API；各条目的自动导入策略保持独立。
+
+同样，`prefer-function-result-pattern` 的显式 `targets` 替换全部内置目标，不受 `vueuse` 影响，包括其中配置的 `useToggle` 目标。
+
+自定义回调与内置回调位置叠加。条目的 `autoImport: false` 仅关闭该条目的未绑定名称匹配，已启用的内置目标仍可能识别同一调用。若要完全由自定义条目控制该 API，请用 `exclude` 或 `groups` 关闭对应内置目标。相比之下，`prefer-function-result-pattern` 的显式 `targets` 替换内置目标，因此以最终选中目标的 `autoImport` 为准。
+
+共享 `vueuse` 在提供时必须为布尔值。即使配置了规则级 `vueuse` 覆盖，仍会校验该共享值的类型。
+
+```js
+import { defineConfig } from 'eslint/config'
+
+export default defineConfig([
+  {
+    settings: {
+      'vue-perfectionist': { vueuse: true, autoImport: true },
+    },
+    rules: {
+      'vue-perfectionist/callback-style': 'error',
+      'vue-perfectionist/max-lines-per-callback': ['error', { vueuse: false }],
+    },
+  },
+])
+```
+
+这里仅 `callback-style` 继承 VueUse 回调支持；行数规则关闭其内置 VueUse 回调。其他规则保留各自文档中定义的 API 识别范围。
 
 `sort-script-setup` 默认为 `type: 'unsorted'`：对分组排序，保留普通分组内的名称顺序。若还需对名称排序，请设置 `type: 'natural'` 或其他支持的比较方式。与其他排序规则的交互请参阅[规则组合](/zh/guide/rule-composition#statement-ordering)。
 

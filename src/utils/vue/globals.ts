@@ -2,7 +2,7 @@ import { isArray, isBoolean } from '@ntnyq/utils'
 
 /**
  * Rule-level globals override the shared opt-in, including an empty list. Each
- * rule supplies only the Vue APIs it already understands.
+ * rule supplies only the API names it already understands.
  *
  * @param settings - The shared ESLint settings.
  * @param supportedApis - The APIs supported by the calling rule.

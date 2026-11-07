@@ -12,7 +12,7 @@ description: 组合相关规则、配置组件使用约定，并了解自动修�
 
 [`prefer-composable-options`](/zh/rules/prefer-composable-options) 检查参数结构，[`prefer-function-declaration`](/zh/rules/prefer-function-declaration) 检查指定 SFC 与组合式函数作用域中的函数声明方式。它们检查函数定义，不检查组合式函数的导入或调用方式。
 
-[`prefer-function-result-pattern`](/zh/rules/prefer-function-result-pattern) 检查接收指定函数返回值的绑定名称。默认覆盖静态可确定为布尔值的 Vue ref、受支持的计算属性 getter 和 VueUse 开关函数。其他库或命名规范可通过 `targets` 配置；传入的目标会替换默认值。
+[`prefer-function-result-pattern`](/zh/rules/prefer-function-result-pattern) 检查接收指定函数返回值的绑定名称。默认覆盖静态可确定为布尔值的 Vue ref 和受支持的计算属性 getter。在共享设置或本规则选项中启用 `vueuse`，可加入内置 VueUse `useToggle` 目标。其他库或命名规范可通过 `targets` 配置；传入的目标会替换全部内置目标，不受 `vueuse` 开关影响。
 
 ## 宏类型与布局 {#macro-types-and-layout}
 

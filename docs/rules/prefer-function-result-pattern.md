@@ -13,13 +13,13 @@ description: Enforce naming patterns for function result bindings.
 
 ::: info At a glance
 
-| Concern          | Behavior                                                                     |
-| ---------------- | ---------------------------------------------------------------------------- |
-| Scope            | Vue scripts and standalone JS/TS files                                       |
-| Defaults         | Boolean Vue refs/computed and VueUse toggles use is/has/should/can prefixes. |
-| Required options | None; enabling the rule uses its defaults.                                   |
-| Automatic fixes  | —                                                                            |
-| Type information | No TypeScript type services required.                                        |
+| Concern          | Behavior                                                                    |
+| ---------------- | --------------------------------------------------------------------------- |
+| Scope            | Vue scripts and standalone JS/TS files                                      |
+| Defaults         | Boolean Vue refs/computed use is/has/should/can prefixes; VueUse is opt-in. |
+| Required options | None; enabling the rule uses its defaults.                                  |
+| Automatic fixes  | —                                                                           |
+| Type information | No TypeScript type services required.                                       |
 
 :::
 
@@ -56,21 +56,18 @@ By default, boolean state names must match `^(is|has|should|can)[A-Z]`.
 `isOpen` and `hasPermission` pass; `is`, `island`, `is_open`, and `IsOpen` do not.
 The default pattern does not constrain the rest of the identifier.
 
-| Source         | Exports             | Checked binding                                                                       |
-| -------------- | ------------------- | ------------------------------------------------------------------------------------- |
-| `vue`          | `ref`, `shallowRef` | Direct variable, for a boolean literal or explicit boolean type argument.             |
-| `vue`          | `computed`          | Direct variable, for an explicit boolean type argument or a supported boolean getter. |
-| `@vueuse/core` | `useToggle`         | First array element, for no arguments or one boolean literal argument.                |
+| Source | Exports             | Checked binding                                                                       |
+| ------ | ------------------- | ------------------------------------------------------------------------------------- |
+| `vue`  | `ref`, `shallowRef` | Direct variable, for a boolean literal or explicit boolean type argument.             |
+| `vue`  | `computed`          | Direct variable, for an explicit boolean type argument or a supported boolean getter. |
 
 ::: correct
 
 ```ts
-import { useToggle } from '@vueuse/core'
 import { ref, shallowRef } from 'vue'
 
 const isLoading = ref(false)
 const hasPermission = shallowRef<boolean>()
-const [shouldRender, toggle] = useToggle(true)
 const count = ref(0)
 ```
 
@@ -79,12 +76,10 @@ const count = ref(0)
 ::: incorrect
 
 ```ts
-import { useToggle } from '@vueuse/core'
 import { ref, shallowRef } from 'vue'
 
 const loading = ref(false)
 const permission = shallowRef<boolean>()
-const [visible, toggle] = useToggle()
 ```
 
 :::
@@ -97,17 +92,18 @@ These declarations are reported without automatic renaming:
 
 ```ts
 import { ref as makeRef } from 'vue'
-import * as VueUse from '@vueuse/core'
+import * as Vue from 'vue'
 
 const ready = makeRef(false)
-const [open] = VueUse.useToggle(false)
+const open = Vue.shallowRef(false)
 ```
 
 :::
 
 ## :wrench: Options
 
-Omitting `targets` uses these defaults:
+Omitting `targets` uses this Vue target. Enabling `vueuse` also adds the
+`useToggle` target described below:
 
 ```json
 {
@@ -117,22 +113,102 @@ Omitting `targets` uses these defaults:
       "names": ["ref", "shallowRef", "computed"],
       "pattern": "^(is|has|should|can)[A-Z]",
       "booleanOnly": true
-    },
-    {
-      "source": "@vueuse/core",
-      "names": ["useToggle"],
-      "pattern": "^(is|has|should|can)[A-Z]",
-      "returnIndex": 0,
-      "booleanOnly": true
     }
   ]
 }
 ```
 
+### VueUse
+
+- Option: `vueuse`
+- Type: `boolean`
+- Default: `settings['vue-perfectionist'].vueuse`, otherwise `false`
+
+The rule-level `vueuse` option overrides the shared setting:
+`options.vueuse ?? settings['vue-perfectionist'].vueuse ?? false`.
+It controls only the built-in `useToggle` target. Vue's built-in targets and
+explicit `targets` are independent of this switch.
+
+```js
+import { defineConfig } from 'eslint/config'
+
+export default defineConfig([
+  {
+    settings: {
+      'vue-perfectionist': { vueuse: true, autoImport: true },
+    },
+    rules: {
+      'vue-perfectionist/prefer-function-result-pattern': 'error',
+    },
+  },
+])
+```
+
+This enables the following built-in target from `@vueuse/core`:
+
+```json
+{
+  "source": "@vueuse/core",
+  "names": ["useToggle"],
+  "pattern": "^(is|has|should|can)[A-Z]",
+  "returnIndex": 0,
+  "booleanOnly": true
+}
+```
+
+Only array element zero is checked, for no arguments or one boolean literal
+argument. Explicit imports need only `vueuse: true`; unbound `useToggle` calls
+also require `autoImport: true`. Aliases, namespace calls, TypeScript wrappers,
+and shadowing follow the same identity checks as Vue APIs.
+
+With the configuration above:
+
+::: correct vueuse-function-results
+
+```ts
+import { useToggle } from '@vueuse/core'
+
+const [isOpen, toggle] = useToggle(false)
+const [hasPermission] = useToggle()
+const flip = useToggle(isOpen)
+```
+
+:::
+
+::: incorrect vueuse-function-results
+
+```ts
+import { useToggle as createToggle } from '@vueuse/core'
+import * as VueUse from '@vueuse/core'
+
+const [open] = createToggle()
+const [ready] = VueUse.useToggle(false)
+```
+
+:::
+
+Set the rule's `vueuse: false` to override a shared opt-in. With VueUse
+integration disabled, this declaration is accepted:
+
+::: correct
+
+```ts
+import { useToggle } from '@vueuse/core'
+
+const [open] = useToggle()
+```
+
+:::
+
+An explicit `targets` array replaces all built-ins, even with `vueuse: true`.
+Conversely, a custom target for `useToggle` or any other VueUse API remains
+active with `vueuse: false`, using its own pattern, return position, boolean
+filter, and auto-import policy.
+
 ### `targets`
 
 - Type: `PreferFunctionResultPatternTarget[]`
-- Default: the two targets above
+- Default: the Vue target above, plus the built-in `useToggle` target when `vueuse` is enabled
 
 An explicit array **replaces** all defaults. `targets: []` disables checks.
 To keep default behavior while adding custom methods, include the default
@@ -205,7 +281,8 @@ A direct binding and array element zero are different positions.
 ### Custom functions and tuple results
 
 Custom functions use the same target format. They need no boolean evidence
-unless `booleanOnly: true` is configured:
+unless `booleanOnly: true` is configured, and remain active regardless of
+`vueuse`:
 
 ```json
 {
@@ -282,7 +359,7 @@ inference. For Vue `ref` / `shallowRef` and custom methods:
 For `useToggle` from `@vueuse/core`, boolean filtering instead requires no
 arguments or one boolean literal argument, and no type arguments. Calls with
 options, custom truthy/falsy values, or unknown initial values are skipped.
-The default target checks only array element zero, so a direct function binding
+The built-in target, when enabled, checks only array element zero, so a direct function binding
 such as `const toggle = useToggle(isOpen)` is outside its scope.
 Setting `booleanOnly: false` removes this filter, including for `useToggle`.
 A custom export named `useToggle` from another source uses the generic filter.
@@ -392,6 +469,9 @@ can override the setting independently:
   ]
 }
 ```
+
+The built-in `useToggle` target additionally requires `vueuse: true`.
+Explicit targets for VueUse APIs do not require this switch.
 
 `autoImport: false` affects unbound calls only; explicit imports still match.
 Local declarations, parameters, imports from other sources, and type-only

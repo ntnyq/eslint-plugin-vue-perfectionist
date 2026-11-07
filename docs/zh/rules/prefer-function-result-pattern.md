@@ -13,13 +13,13 @@ description: 强制函数返回值绑定使用指定的命名模式。
 
 ::: info 规则速览
 
-| 项目     | 说明                                                                 |
-| -------- | -------------------------------------------------------------------- |
-| 适用范围 | Vue 脚本及独立 JS/TS 文件                                            |
-| 默认行为 | 布尔 Vue ref/computed 与 VueUse toggle 使用 is/has/should/can 前缀。 |
-| 必需选项 | 无；启用后即使用默认选项。                                           |
-| 自动修复 | —                                                                    |
-| 类型信息 | 不需要 TypeScript 类型服务。                                         |
+| 项目     | 说明                                                                   |
+| -------- | ---------------------------------------------------------------------- |
+| 适用范围 | Vue 脚本及独立 JS/TS 文件                                              |
+| 默认行为 | 布尔 Vue ref/computed 使用 is/has/should/can 前缀；VueUse 需显式启用。 |
+| 必需选项 | 无；启用后即使用默认选项。                                             |
+| 自动修复 | —                                                                      |
+| 类型信息 | 不需要 TypeScript 类型服务。                                           |
 
 :::
 
@@ -50,21 +50,18 @@ export default defineConfig([
 
 默认布尔状态名必须匹配 `^(is|has|should|can)[A-Z]`。`isOpen`、`hasPermission` 通过；`is`、`island`、`is_open`、`IsOpen` 不通过。默认模式不限制标识符剩余部分。
 
-| 来源           | 导出                | 检查的绑定                                           |
-| -------------- | ------------------- | ---------------------------------------------------- |
-| `vue`          | `ref`, `shallowRef` | 布尔字面量或显式布尔类型参数对应的直接变量。         |
-| `vue`          | `computed`          | 显式布尔类型参数或支持的布尔 getter 对应的直接变量。 |
-| `@vueuse/core` | `useToggle`         | 无参数或仅一个布尔字面量参数时的首个数组元素。       |
+| 来源  | 导出                | 检查的绑定                                           |
+| ----- | ------------------- | ---------------------------------------------------- |
+| `vue` | `ref`, `shallowRef` | 布尔字面量或显式布尔类型参数对应的直接变量。         |
+| `vue` | `computed`          | 显式布尔类型参数或支持的布尔 getter 对应的直接变量。 |
 
 ::: correct
 
 ```ts
-import { useToggle } from '@vueuse/core'
 import { ref, shallowRef } from 'vue'
 
 const isLoading = ref(false)
 const hasPermission = shallowRef<boolean>()
-const [shouldRender, toggle] = useToggle(true)
 const count = ref(0)
 ```
 
@@ -73,12 +70,10 @@ const count = ref(0)
 ::: incorrect
 
 ```ts
-import { useToggle } from '@vueuse/core'
 import { ref, shallowRef } from 'vue'
 
 const loading = ref(false)
 const permission = shallowRef<boolean>()
-const [visible, toggle] = useToggle()
 ```
 
 :::
@@ -89,17 +84,17 @@ const [visible, toggle] = useToggle()
 
 ```ts
 import { ref as makeRef } from 'vue'
-import * as VueUse from '@vueuse/core'
+import * as Vue from 'vue'
 
 const ready = makeRef(false)
-const [open] = VueUse.useToggle(false)
+const open = Vue.shallowRef(false)
 ```
 
 :::
 
 ## :wrench: 选项 {#options}
 
-省略 `targets` 时使用以下默认值：
+省略 `targets` 时使用以下 Vue 目标。启用 `vueuse` 后，还会加入下文的 `useToggle` 目标：
 
 ```json
 {
@@ -109,22 +104,92 @@ const [open] = VueUse.useToggle(false)
       "names": ["ref", "shallowRef", "computed"],
       "pattern": "^(is|has|should|can)[A-Z]",
       "booleanOnly": true
-    },
-    {
-      "source": "@vueuse/core",
-      "names": ["useToggle"],
-      "pattern": "^(is|has|should|can)[A-Z]",
-      "returnIndex": 0,
-      "booleanOnly": true
     }
   ]
 }
 ```
 
+### VueUse {#vueuse}
+
+- 选项：`vueuse`
+- 类型：`boolean`
+- 默认值：`settings['vue-perfectionist'].vueuse`，否则为 `false`
+
+规则级 `vueuse` 选项优先于共享设置：`options.vueuse ?? settings['vue-perfectionist'].vueuse ?? false`。它仅控制内置 `useToggle` 目标。Vue 内置目标和显式 `targets` 均不受此开关影响。
+
+```js
+import { defineConfig } from 'eslint/config'
+
+export default defineConfig([
+  {
+    settings: {
+      'vue-perfectionist': { vueuse: true, autoImport: true },
+    },
+    rules: {
+      'vue-perfectionist/prefer-function-result-pattern': 'error',
+    },
+  },
+])
+```
+
+这会启用以下来自 `@vueuse/core` 的内置目标：
+
+```json
+{
+  "source": "@vueuse/core",
+  "names": ["useToggle"],
+  "pattern": "^(is|has|should|can)[A-Z]",
+  "returnIndex": 0,
+  "booleanOnly": true
+}
+```
+
+仅在无参数或只有一个布尔字面量参数时检查数组元素零。显式导入仅需 `vueuse: true`；未绑定的 `useToggle` 调用还需要 `autoImport: true`。别名、命名空间调用、TypeScript 包装和局部遮蔽均遵循与 Vue API 相同的身份检查。
+
+使用上述配置时：
+
+::: correct vueuse-function-results
+
+```ts
+import { useToggle } from '@vueuse/core'
+
+const [isOpen, toggle] = useToggle(false)
+const [hasPermission] = useToggle()
+const flip = useToggle(isOpen)
+```
+
+:::
+
+::: incorrect vueuse-function-results
+
+```ts
+import { useToggle as createToggle } from '@vueuse/core'
+import * as VueUse from '@vueuse/core'
+
+const [open] = createToggle()
+const [ready] = VueUse.useToggle(false)
+```
+
+:::
+
+为本规则设置 `vueuse: false` 可覆盖共享启用值。关闭 VueUse 集成时，以下声明不会报告：
+
+::: correct
+
+```ts
+import { useToggle } from '@vueuse/core'
+
+const [open] = useToggle()
+```
+
+:::
+
+显式 `targets` 数组替换全部内置目标，即使设置了 `vueuse: true`。反过来，显式配置的 `useToggle` 或其他 VueUse API 目标在 `vueuse: false` 时仍然生效，继续使用各自的命名模式、返回位置、布尔过滤及自动导入策略。
+
 ### `targets`
 
 - 类型：`PreferFunctionResultPatternTarget[]`
-- 默认值：上述两个目标
+- 默认值：上述 Vue 目标；启用 `vueuse` 时还包含内置 `useToggle` 目标
 
 显式数组**替换**全部默认值，`targets: []` 禁用检查。若希望保留默认行为并增加自定义方法，需在数组中包含默认目标。
 
@@ -188,7 +253,7 @@ const hasAccess = shallowRef(false)
 
 ### 自定义函数与元组返回值 {#custom-functions-and-tuple-results}
 
-自定义函数使用相同格式。除非设置 `booleanOnly: true`，否则无需布尔证据：
+自定义函数使用相同格式，不受 `vueuse` 开关影响。除非设置 `booleanOnly: true`，否则无需布尔证据：
 
 ```json
 {
@@ -255,7 +320,7 @@ const ready = makeFlag()
 - 否则首个参数必须是 `true` 或 `false`，包括括号及 TypeScript 包装。
 - 跳过未知初始值、比较、取反、别名及 `boolean | string` 等混合类型。后续参数和类型参数不作为证据。
 
-对 `@vueuse/core` 的 `useToggle`，布尔过滤要求无参数或仅一个布尔字面量参数，且无类型参数。带选项、自定义真/假值或未知初始值时跳过。默认仅检查数组首元素，因此 `const toggle = useToggle(isOpen)` 等直接函数绑定不在范围内。`booleanOnly: false` 移除此过滤，也适用于 `useToggle`。其他来源的同名导出使用通用过滤。
+对 `@vueuse/core` 的 `useToggle`，布尔过滤要求无参数或仅一个布尔字面量参数，且无类型参数。带选项、自定义真/假值或未知初始值时跳过。内置目标启用时仅检查数组首元素，因此 `const toggle = useToggle(isOpen)` 等直接函数绑定不在范围内。`booleanOnly: false` 移除此过滤，也适用于 `useToggle`。其他来源的同名导出使用通用过滤。
 
 #### 布尔计算属性 {#boolean-computed-values}
 
@@ -345,6 +410,8 @@ export default defineConfig([
   ]
 }
 ```
+
+内置 `useToggle` 目标还需要 `vueuse: true`。显式配置的 VueUse API 目标不需要此开关。
 
 `autoImport: false` 仅影响未绑定调用，显式导入仍匹配。局部声明、参数、其他来源导入及仅类型导入始终不视为自动导入。不推断自定义自动导入别名，也不读取 Vite 配置、生成声明或自动导入清单。
 

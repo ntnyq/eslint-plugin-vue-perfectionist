@@ -1,7 +1,7 @@
 import { unwrapExpression } from '../utils/ast/expressions.ts'
 import { createRule } from '../utils/create-rule.ts'
 import { getCallIdentity } from '../utils/vue/call-identity.ts'
-import { resolveVueGlobals } from '../utils/vue/globals.ts'
+import { resolveVueGlobals, resolveVueUse } from '../utils/vue/globals.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type {
   PreferFunctionResultPatternMessageId,
@@ -16,6 +16,9 @@ const DEFAULT_TARGETS: PreferFunctionResultPatternTarget[] = [
     pattern: '^(is|has|should|can)[A-Z]',
     booleanOnly: true,
   },
+]
+
+const VUEUSE_TARGETS: PreferFunctionResultPatternTarget[] = [
   {
     source: '@vueuse/core',
     names: ['useToggle'],
@@ -176,6 +179,10 @@ export const preferFunctionResultPattern = createRule<
       {
         type: 'object',
         properties: {
+          vueuse: {
+            description: 'Override the shared VueUse integration setting.',
+            type: 'boolean',
+          },
           targets: {
             description:
               'Function groups; replaces defaults. Later matches take precedence.',
@@ -231,7 +238,10 @@ export const preferFunctionResultPattern = createRule<
   defaultOptions: [{}],
   create(context, [options]) {
     const sourceCode = context.sourceCode
-    const targets = (options.targets ?? DEFAULT_TARGETS).map(target => ({
+    const vueuse = resolveVueUse(context.settings, options.vueuse)
+    const targets = (
+      options.targets ?? [...DEFAULT_TARGETS, ...(vueuse ? VUEUSE_TARGETS : [])]
+    ).map(target => ({
       ...target,
       matcher: new RegExp(target.pattern),
       globals: new Set(
