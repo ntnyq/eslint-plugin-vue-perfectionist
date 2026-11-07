@@ -162,6 +162,8 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+packageExtensionsChecksum: sha256-DxTcw+/jReKJujRbUI4tpc3PDuyc984KsUJAY9Bkda8=
+
 patchedDependencies:
   '@shikijs/magic-move@4.6.0': d8d01daea4b00dc92469107c550d3e3f28e1c29f9399eac0f608b0a80a9fd8ef
 
@@ -4317,6 +4319,7 @@ snapshots:
 
   '@unocss/autocomplete@66.12.0':
     dependencies:
+      '@unocss/core': 66.12.0
       fzf: 0.5.2
       lru-cache: 11.5.3
 

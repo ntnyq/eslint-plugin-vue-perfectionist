@@ -5,6 +5,12 @@ packages:
 patchedDependencies:
   '@shikijs/magic-move@4.6.0': patches/@shikijs__magic-move@4.6.0.patch
 
+packageExtensions:
+  # The published autocomplete bundle imports core but omits its runtime dependency.
+  '@unocss/autocomplete@66.12.0':
+    dependencies:
+      '@unocss/core': 66.12.0
+
 allowBuilds:
   unrs-resolver: true
 
