@@ -17,8 +17,7 @@ export const createRule = ESLintUtils.RuleCreator<PluginDocs>(
    * Build the documentation URL used by a plugin rule.
    *
    * @param name - The rule name matching its Markdown filename.
-   * @returns The GitHub URL of the rule documentation.
+   * @returns The documentation site URL of the rule.
    */
-  name =>
-    `https://github.com/ntnyq/eslint-plugin-vue-perfectionist/blob/main/docs/rules/${name}.md`,
+  name => `https://vue-perfectionist.ntnyq.dev/rules/${name}`,
 )
