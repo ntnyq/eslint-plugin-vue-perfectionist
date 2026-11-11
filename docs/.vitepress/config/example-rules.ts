@@ -76,6 +76,7 @@ export const EXAMPLE_RULES: Record<string, Linter.RuleEntry> = {
   ],
   'vue-perfectionist/require-injection-key': 'error',
   'vue-perfectionist/require-macro-type-name': 'error',
+  'vue-perfectionist/require-props-prefix': 'error',
   'vue-perfectionist/require-vue-generic': [
     'error',
     {

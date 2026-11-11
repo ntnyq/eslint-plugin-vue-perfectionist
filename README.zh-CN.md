@@ -159,6 +159,7 @@ pnpm exec eslint . --fix
 | [padding-line-between-tags](https://vue-perfectionist.vercel.app/zh/rules/padding-line-between-tags)                               | 强制相邻模板标签之间使用指定数量的空行。                |
 | [prefer-simple-event-handler](https://vue-perfectionist.vercel.app/zh/rules/prefer-simple-event-handler)                           | 要求具名模板事件处理器使用简单表达式。                  |
 | [prefer-template-literal-in-interpolation](https://vue-perfectionist.vercel.app/zh/rules/prefer-template-literal-in-interpolation) | 优先使用单个模板字面量表示混合的文本与插值。            |
+| [require-props-prefix](https://vue-perfectionist.vercel.app/zh/rules/require-props-prefix)                                         | 要求在 Vue 模板中显式使用 props 对象前缀。              |
 
 ### 语句排序
 

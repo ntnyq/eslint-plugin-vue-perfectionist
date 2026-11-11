@@ -60,6 +60,7 @@ export type {
   RequireInjectionKeyOptions,
   RequireMacroTypeNameMacro,
   RequireMacroTypeNameOptions,
+  RequirePropsPrefixOptions,
   RequireVueGenericIgnoreCondition,
   RequireVueGenericOptions,
   RequireVueGenericTarget,

@@ -85,6 +85,7 @@ description: 按用途、文件范围及自动修复支持情况浏览所有 Vue
 | [padding-line-between-tags](./padding-line-between-tags.md)                               | 强制相邻模板标签之间使用指定数量的空行。                | 模板 | 支持部分情况 |
 | [prefer-simple-event-handler](./prefer-simple-event-handler.md)                           | 要求具名模板事件处理器使用简单表达式。                  | 模板 | —            |
 | [prefer-template-literal-in-interpolation](./prefer-template-literal-in-interpolation.md) | 优先使用单个模板字面量表示混合的文本与插值。            | 模板 | 支持部分情况 |
+| [require-props-prefix](./require-props-prefix.md)                                         | 要求在 Vue 模板中显式使用 props 对象前缀。              | 模板 | 需显式启用   |
 
 ### 语句排序 {#statement-ordering}
 

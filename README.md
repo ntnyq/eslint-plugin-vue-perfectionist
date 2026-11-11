@@ -165,6 +165,7 @@ and automatic fix support, and individual rule pages for options and defaults.
 | [padding-line-between-tags](https://vue-perfectionist.vercel.app/rules/padding-line-between-tags)                               | Enforce blank-line counts between consecutive template tags.       |
 | [prefer-simple-event-handler](https://vue-perfectionist.vercel.app/rules/prefer-simple-event-handler)                           | Require simple expressions in named template event handlers.       |
 | [prefer-template-literal-in-interpolation](https://vue-perfectionist.vercel.app/rules/prefer-template-literal-in-interpolation) | Prefer a single template literal for mixed text and interpolation. |
+| [require-props-prefix](https://vue-perfectionist.vercel.app/rules/require-props-prefix)                                         | Require explicit props object prefixes in Vue templates.           |
 
 ### Statement Ordering
 

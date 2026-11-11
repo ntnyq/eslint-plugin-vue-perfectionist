@@ -96,6 +96,7 @@ also report problems that require manual changes. See
 | [padding-line-between-tags](./padding-line-between-tags.md)                               | Enforce blank-line counts between consecutive template tags.       | Template | Supported cases |
 | [prefer-simple-event-handler](./prefer-simple-event-handler.md)                           | Require simple expressions in named template event handlers.       | Template | —               |
 | [prefer-template-literal-in-interpolation](./prefer-template-literal-in-interpolation.md) | Prefer a single template literal for mixed text and interpolation. | Template | Supported cases |
+| [require-props-prefix](./require-props-prefix.md)                                         | Require explicit props object prefixes in Vue templates.           | Template | Opt-in          |
 
 ### Statement Ordering
 

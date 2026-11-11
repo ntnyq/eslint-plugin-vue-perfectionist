@@ -45,6 +45,15 @@ Combine the macro rules according to your preferred declaration style:
 to be inline. `define-macros-newline` formats inline declarations; it does not
 convert local or imported types into inline types.
 
+## Explicit Props Access
+
+Combine [`require-props-prefix`](/rules/require-props-prefix) with
+`vue/define-props-destructuring` (`destructure: 'never'`) to keep the props object,
+and `vue/require-macro-variable-name` (`defineProps: 'props'`) to name it.
+The new rule checks template references; it does not track all prop-derived
+script values. Its `autofix` option defaults to `false`. See the
+[combined configuration](/rules/require-props-prefix#combining-declaration-rules).
+
 ## Template Refs
 
 [`consistent-template-ref-name`](/rules/consistent-template-ref-name) requires a
@@ -169,17 +178,18 @@ coordinate any explicit spacing options with padding rules and formatters.
 Only the following rules currently provide automatic fixes, and only within
 their documented boundaries:
 
-| Rule                                                                                                                         | Automatic changes                                                                                        |
-| ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| [`callback-style`](/rules/callback-style#diagnostics-and-fixes)                                                              | Convert arrow expression bodies to blocks while preserving return values.                                |
-| [`define-macros-newline`](/rules/define-macros-newline#automatic-fixes-and-formatting)                                       | Insert line breaks without changing member order; a formatter finishes indentation.                      |
-| [`define-model-name-casing`](/rules/define-model-name-casing#automatic-fixes-and-formatting)                                 | Rename model contracts only with `fix: true` (default `false`); consumers require review.                |
-| [`padding-line-between-tags`](/rules/padding-line-between-tags#automatic-fixes-and-formatting)                               | Adjust blank lines between eligible tags already on separate lines.                                      |
-| [`prefer-template-literal-in-interpolation`](/rules/prefer-template-literal-in-interpolation#automatic-fixes-and-formatting) | Combine statically safe primitive expressions and adjacent text while preserving nullish display values. |
-| [`prefer-watch-effect-alias`](/rules/prefer-watch-effect-alias#automatic-fixes-and-formatting)                               | Use dedicated effect APIs when target bindings and static options can be changed safely.                 |
-| [`sort-composable-destructure`](/rules/sort-composable-destructure#automatic-fixes-and-formatting)                           | Adjust group and within-group whitespace only; member reordering requires manual changes.                |
-| [`sort-composable-return`](/rules/sort-composable-return#automatic-fixes-and-formatting)                                     | Adjust group and within-group whitespace only; member reordering requires manual changes.                |
-| [`sort-script-setup`](/rules/sort-script-setup#partitions-and-automatic-fixes)                                               | Reorder eligible declarations within safe contiguous fragments and adjust supported spacing.             |
+| Rule                                                                                                                         | Automatic changes                                                                                            |
+| ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| [`callback-style`](/rules/callback-style#diagnostics-and-fixes)                                                              | Convert arrow expression bodies to blocks while preserving return values.                                    |
+| [`define-macros-newline`](/rules/define-macros-newline#automatic-fixes-and-formatting)                                       | Insert line breaks without changing member order; a formatter finishes indentation.                          |
+| [`define-model-name-casing`](/rules/define-model-name-casing#automatic-fixes-and-formatting)                                 | Rename model contracts only with `fix: true` (default `false`); consumers require review.                    |
+| [`padding-line-between-tags`](/rules/padding-line-between-tags#automatic-fixes-and-formatting)                               | Adjust blank lines between eligible tags already on separate lines.                                          |
+| [`prefer-template-literal-in-interpolation`](/rules/prefer-template-literal-in-interpolation#automatic-fixes-and-formatting) | Combine statically safe primitive expressions and adjacent text while preserving nullish display values.     |
+| [`prefer-watch-effect-alias`](/rules/prefer-watch-effect-alias#automatic-fixes-and-formatting)                               | Use dedicated effect APIs when target bindings and static options can be changed safely.                     |
+| [`require-props-prefix`](/rules/require-props-prefix#automatic-fixes-and-formatting)                                         | Add existing props binding prefixes to safe template references only with `autofix: true` (default `false`). |
+| [`sort-composable-destructure`](/rules/sort-composable-destructure#automatic-fixes-and-formatting)                           | Adjust group and within-group whitespace only; member reordering requires manual changes.                    |
+| [`sort-composable-return`](/rules/sort-composable-return#automatic-fixes-and-formatting)                                     | Adjust group and within-group whitespace only; member reordering requires manual changes.                    |
+| [`sort-script-setup`](/rules/sort-script-setup#partitions-and-automatic-fixes)                                               | Reorder eligible declarations within safe contiguous fragments and adjust supported spacing.                 |
 
 A fixable rule can still report cases without a fix. In particular,
 `sort-script-setup` reports uncertain runtime movement without reordering it;

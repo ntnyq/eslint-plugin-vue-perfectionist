@@ -76,6 +76,7 @@ export default defineConfig([
       'vue-perfectionist/define-macros-newline': 'error',
       'vue-perfectionist/no-complex-template-expression': 'error',
       'vue-perfectionist/no-template-type-assertion': 'error',
+      'vue-perfectionist/require-props-prefix': 'error',
     },
   },
 ])

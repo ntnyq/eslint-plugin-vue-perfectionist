@@ -26,6 +26,7 @@ import { requireComponentProps } from './rules/require-component-props.ts'
 import { requireComponentSlots } from './rules/require-component-slots.ts'
 import { requireInjectionKey } from './rules/require-injection-key.ts'
 import { requireMacroTypeName } from './rules/require-macro-type-name.ts'
+import { requirePropsPrefix } from './rules/require-props-prefix.ts'
 import { requireVueGeneric } from './rules/require-vue-generic.ts'
 import { sortComposableDestructure } from './rules/sort-composable-destructure.ts'
 import { sortComposableReturn } from './rules/sort-composable-return.ts'
@@ -66,6 +67,7 @@ export const plugin: VuePerfectionistPlugin = {
     'require-component-slots': requireComponentSlots,
     'require-injection-key': requireInjectionKey,
     'require-macro-type-name': requireMacroTypeName,
+    'require-props-prefix': requirePropsPrefix,
     'require-vue-generic': requireVueGeneric,
     'sort-composable-destructure': sortComposableDestructure,
     'sort-composable-return': sortComposableReturn,

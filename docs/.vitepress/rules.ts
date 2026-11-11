@@ -507,6 +507,22 @@ export const RULE_DOCS: RuleDocumentation[] = [
     typeInformation: false,
   },
   {
+    name: 'require-props-prefix',
+    group: 'template-conventions',
+    description: {
+      en: 'Require explicit props object prefixes in Vue templates.',
+      zh: '要求在 Vue 模板中显式使用 props 对象前缀。',
+    },
+    scope: 'Template',
+    fix: 'Opt-in',
+    defaults: {
+      en: 'Report bare prop references in setup component templates; fixes are disabled.',
+      zh: '报告 setup 组件模板中的裸 prop 引用；默认禁用修复。',
+    },
+    requiresOptions: false,
+    typeInformation: false,
+  },
+  {
     name: 'sort-composable-destructure',
     group: 'statement-ordering',
     description: {

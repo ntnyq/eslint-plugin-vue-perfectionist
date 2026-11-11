@@ -18,6 +18,10 @@ interface ExampleProfile {
 }
 
 const EXAMPLE_PROFILES: Record<string, ExampleProfile> = {
+  'props-prefix-autofix': {
+    rule: 'require-props-prefix',
+    options: { autofix: true },
+  },
   'vueuse-function-results': {
     rule: 'prefer-function-result-pattern',
     options: {},

@@ -38,6 +38,7 @@ describe('plugin contract', () => {
       'require-component-slots',
       'require-injection-key',
       'require-macro-type-name',
+      'require-props-prefix',
       'require-vue-generic',
       'sort-composable-destructure',
       'sort-composable-return',

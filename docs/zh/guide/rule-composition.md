@@ -26,6 +26,10 @@ description: 组合相关规则、配置组件使用约定，并了解自动修�
 
 `define-macros-type-style` 默认要求 `defineProps`、`defineEmits` 和 `defineSlots` 使用本地类型。`require-macro-type-name` 默认要求分别使用 `Props`、`Emits` 和 `Slots`。如果要求某个宏使用内联类型，请在命名规则中禁用该宏。`define-macros-newline` 仅规范内联声明格式，不会把本地或导入的类型转为内联类型。
 
+## 显式访问 props {#explicit-props-access}
+
+将 [`require-props-prefix`](/zh/rules/require-props-prefix) 与 `vue/define-props-destructuring`（`destructure: 'never'`）组合使用，保留 props 对象；再用 `vue/require-macro-variable-name`（`defineProps: 'props'`）约束其名称。本规则负责模板引用，不追踪所有由 prop 派生的脚本值。`autofix` 默认 `false`，具体配置见[组合使用示例](/zh/rules/require-props-prefix#combining-declaration-rules)。
+
 ## 模板 ref {#template-refs}
 
 [`consistent-template-ref-name`](/zh/rules/consistent-template-ref-name) 要求 `useTemplateRef()` 的变量名与键名一致。[`prefer-ref-pattern`](/zh/rules/prefer-ref-pattern) 则要求指定 ref 使用位置符合命名模式。两者独立：名称一致仍可能违反命名模式，符合命名模式也不保证变量名与键名一致。
@@ -115,16 +119,17 @@ export default defineConfig([
 
 目前只有以下规则提供自动修复，且均遵守各自文档中说明的边界：
 
-| 规则                                                                                                                            | 自动修改内容                                                      |
-| ------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| [`callback-style`](/zh/rules/callback-style#diagnostics-and-fixes)                                                              | 将箭头表达式函数体转为块级函数体，同时保留返回值。                |
-| [`define-macros-newline`](/zh/rules/define-macros-newline#automatic-fixes-and-formatting)                                       | 插入换行而不改变成员顺序，缩进由格式化工具处理。                  |
-| [`define-model-name-casing`](/zh/rules/define-model-name-casing#automatic-fixes-and-formatting)                                 | 仅在 `fix: true` 时重命名模型约定（默认 `false`），需检查调用方。 |
-| [`padding-line-between-tags`](/zh/rules/padding-line-between-tags#automatic-fixes-and-formatting)                               | 调整已分行的、符合条件的标签之间的空行。                          |
-| [`prefer-template-literal-in-interpolation`](/zh/rules/prefer-template-literal-in-interpolation#automatic-fixes-and-formatting) | 合并静态安全的原始值表达式与相邻文本，保留 nullish 值的显示行为。 |
-| [`prefer-watch-effect-alias`](/zh/rules/prefer-watch-effect-alias#automatic-fixes-and-formatting)                               | 在目标绑定及静态选项可安全修改时，改用专用的副作用 API。          |
-| [`sort-composable-destructure`](/zh/rules/sort-composable-destructure#automatic-fixes-and-formatting)                           | 仅调整组间及组内空白；成员顺序问题需手动修改。                    |
-| [`sort-composable-return`](/zh/rules/sort-composable-return#automatic-fixes-and-formatting)                                     | 仅调整组间及组内空白；成员顺序问题需手动修改。                    |
-| [`sort-script-setup`](/zh/rules/sort-script-setup#partitions-and-automatic-fixes)                                               | 在安全的连续片段内重排符合条件的声明，并调整支持的间距。          |
+| 规则                                                                                                                            | 自动修改内容                                                                 |
+| ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| [`callback-style`](/zh/rules/callback-style#diagnostics-and-fixes)                                                              | 将箭头表达式函数体转为块级函数体，同时保留返回值。                           |
+| [`define-macros-newline`](/zh/rules/define-macros-newline#automatic-fixes-and-formatting)                                       | 插入换行而不改变成员顺序，缩进由格式化工具处理。                             |
+| [`define-model-name-casing`](/zh/rules/define-model-name-casing#automatic-fixes-and-formatting)                                 | 仅在 `fix: true` 时重命名模型约定（默认 `false`），需检查调用方。            |
+| [`padding-line-between-tags`](/zh/rules/padding-line-between-tags#automatic-fixes-and-formatting)                               | 调整已分行的、符合条件的标签之间的空行。                                     |
+| [`prefer-template-literal-in-interpolation`](/zh/rules/prefer-template-literal-in-interpolation#automatic-fixes-and-formatting) | 合并静态安全的原始值表达式与相邻文本，保留 nullish 值的显示行为。            |
+| [`prefer-watch-effect-alias`](/zh/rules/prefer-watch-effect-alias#automatic-fixes-and-formatting)                               | 在目标绑定及静态选项可安全修改时，改用专用的副作用 API。                     |
+| [`require-props-prefix`](/zh/rules/require-props-prefix#automatic-fixes-and-formatting)                                         | 仅在 `autofix: true` 时为安全模板引用补上现有 props 绑定前缀，默认 `false`。 |
+| [`sort-composable-destructure`](/zh/rules/sort-composable-destructure#automatic-fixes-and-formatting)                           | 仅调整组间及组内空白；成员顺序问题需手动修改。                               |
+| [`sort-composable-return`](/zh/rules/sort-composable-return#automatic-fixes-and-formatting)                                     | 仅调整组间及组内空白；成员顺序问题需手动修改。                               |
+| [`sort-script-setup`](/zh/rules/sort-script-setup#partitions-and-automatic-fixes)                                               | 在安全的连续片段内重排符合条件的声明，并调整支持的间距。                     |
 
 可自动修复的规则仍可能报告无法修复的情况。例如，`sort-script-setup` 会报告无法确定安全性的运行时移动，但不调整其顺序；`fix: 'none'` 会禁用包括间距在内的全部修复。模型名称大小写修复会改变公共组件约定，因此需要单独启用。其他命名、类型风格、组件约定、回调行数和函数声明问题均需手动修改。
