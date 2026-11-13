@@ -1,4 +1,38 @@
-# Documentation dependency compatibility
+# Dependency compatibility and security
+
+## Legacy Vue SSR attribute validation
+
+The private `vue-runtime-legacy` fixture deliberately retains Vue 3.4.38 to test
+older model behavior. Its `@vue/shared@3.4.38` patch backports the missing
+carriage-return check in SSR attribute names from
+[GHSA-g2v6-rqmx-r4w6](https://github.com/advisories/GHSA-g2v6-rqmx-r4w6).
+The three distributed JavaScript builds receive the same one-character fix;
+the model compiler and runtime behavior remain on the legacy version.
+
+`tests/integration/legacy-runtime-security.test.ts` verifies that an attribute
+name containing a carriage return is rejected while ordinary attributes still
+render. Keep the patch while this fixture is pinned. Package-version audits
+still report the old server-renderer version because they do not inspect this
+backport. Do not suppress the advisory globally.
+
+## minimatch preprocessing
+
+The workspace override moves affected minimatch versions to 11.0.7 for
+[GHSA-g3hv-75wg-m249](https://github.com/isaacs/minimatch/security/advisories/GHSA-g3hv-75wg-m249).
+Current ESLint and typescript-eslint releases still request vulnerable 10.x
+versions. Remove the override once those consumers require patched releases.
+Workspace overrides protect this repository's installed tooling; they do not
+propagate to consumers of the published plugin. Consumers should audit their
+own ESLint dependency graph and apply a patched resolution as needed.
+
+## KaTeX renderer options
+
+The Markdown linting toolchain reaches KaTeX through `micromark-extension-math`.
+The workspace override uses 0.18.2 or newer for
+[GHSA-238p-pmpm-9mq7](https://github.com/advisories/GHSA-238p-pmpm-9mq7),
+which rejects inherited renderer settings that could otherwise bypass trust
+restrictions after prototype pollution elsewhere. Remove this override once
+the upstream toolchain requires a patched version.
 
 ## `@shikijs/magic-move@4.6.0`
 

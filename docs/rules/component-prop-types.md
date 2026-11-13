@@ -140,6 +140,11 @@ argument is a constant string.
 
 In `:count="1" v-bind="extra"` and `{ count: 1, ...extra }`, the key remains present but its final value is unknown. Mixed raw spellings such as `pageSize` and `page-size` also make the effective value unknown: Vue's raw-key merge and later prop normalization cannot be replaced by simply merging normalized names.
 
+An unknown spread can hide both spellings of a prop. A later explicit
+`page-size` or `pageSize` write therefore cannot restore certainty: updating an
+existing raw key does not move it after its alias. Multiple unknown computed
+keys can create the same ambiguity. Known presence is still preserved.
+
 ## :wrench: Options
 
 Defaults:

@@ -104,6 +104,7 @@ export function analyzeComponentBindings(
 ): Map<string, ComponentPropBinding> {
   const bindings = new Map<string, ComponentPropBinding>()
   const explicitNames = new Set<string>()
+  const uncertainAliases = new Set<string>()
   for (const name of propNames) {
     bindings.set(name, {
       presence: 'absent',
@@ -117,11 +118,26 @@ export function analyzeComponentBindings(
    *
    * @param node - The node responsible for the uncertain write.
    * @param name - The affected raw prop name; omit to mark every tracked prop.
+   * @param canIntroduceMultipleKeys - Whether this write may introduce multiple
+   * raw keys.
    */
-  function uncertain(node: ComponentPropNode, name?: string) {
+  function uncertain(
+    node: ComponentPropNode,
+    name?: string,
+    canIntroduceMultipleKeys = false,
+  ) {
     for (const [key, binding] of bindings) {
       if (name !== undefined && normalizePropName(name) !== key) {
         continue
+      }
+      // Camelization can remove hyphens before uppercase letters, digits, and
+      // underscores. Unknown keys can leave an alias after a later raw-key write.
+      if (
+        name === undefined &&
+        (canIntroduceMultipleKeys || binding.presence !== 'absent') &&
+        /[A-Z\d_]/u.test(key)
+      ) {
+        uncertainAliases.add(key)
       }
       if (binding.presence !== 'present') {
         binding.presence = 'unknown'
@@ -137,7 +153,8 @@ export function analyzeComponentBindings(
    * @param value - The inferred value associated with the write.
    */
   function write(rawName: string, value: PropValue) {
-    const binding = bindings.get(normalizePropName(rawName))
+    const name = normalizePropName(rawName)
+    const binding = bindings.get(name)
     if (!binding) {
       return
     }
@@ -145,7 +162,9 @@ export function analyzeComponentBindings(
     binding.rawNames.add(rawName)
     // Vue normalizes aliases after raw-key merging. Do not invent precedence.
     binding.value =
-      binding.rawNames.size > 1 ? unknownPropValue(value.node) : value
+      binding.rawNames.size > 1 || uncertainAliases.has(name)
+        ? unknownPropValue(value.node)
+        : value
   }
 
   /**
@@ -248,7 +267,7 @@ export function analyzeComponentBindings(
       ) {
         return
       }
-      uncertain(node)
+      uncertain(node, undefined, true)
       return
     }
     for (const property of node.properties) {
@@ -271,7 +290,7 @@ export function analyzeComponentBindings(
           !property.method &&
           property.kind === 'init')
       ) {
-        uncertain(property)
+        uncertain(property, undefined, name === '__proto__')
       } else {
         write(
           name,
@@ -333,7 +352,7 @@ export function analyzeComponentBindings(
       if (attribute.value?.expression) {
         spread(attribute.value.expression, attribute.value)
       } else {
-        uncertain(attribute)
+        uncertain(attribute, undefined, true)
       }
       continue
     }

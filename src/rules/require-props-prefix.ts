@@ -15,6 +15,40 @@ import type {
 } from '../types/index.ts'
 
 /**
+ * Vue's separate template compiler keeps these names global in member accesses,
+ * even with a same-name setup binding. They cannot prefix generated prop reads.
+ */
+const TEMPLATE_GLOBALS = new Set([
+  'Infinity',
+  'undefined',
+  'NaN',
+  'isFinite',
+  'isNaN',
+  'parseFloat',
+  'parseInt',
+  'decodeURI',
+  'decodeURIComponent',
+  'encodeURI',
+  'encodeURIComponent',
+  'Math',
+  'Number',
+  'Date',
+  'Array',
+  'Object',
+  'Boolean',
+  'String',
+  'RegExp',
+  'Map',
+  'Set',
+  'JSON',
+  'Intl',
+  'BigInt',
+  'console',
+  'Error',
+  'Symbol',
+])
+
+/**
  * Keep writes and receiver-sensitive calls report-only, including writes through
  * members and transparent TypeScript expressions.
  */
@@ -329,7 +363,8 @@ export const requirePropsPrefix = createRule<
             !binding.references.some(
               reference => reference.isWrite() && !reference.init,
             ) &&
-            declaration.id.name !== '$event'
+            declaration.id.name !== '$event' &&
+            !TEMPLATE_GLOBALS.has(declaration.id.name)
           ) {
             prefix = declaration.id.name
           }

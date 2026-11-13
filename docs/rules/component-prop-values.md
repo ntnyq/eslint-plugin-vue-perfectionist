@@ -124,7 +124,7 @@ diagnostic explaining that it cannot be verified:
 :::
 
 An unknown object binding may overwrite a known value. A known binding in a
-later group can establish it again:
+later group can establish it again when the prop has no ambiguous raw aliases:
 
 ::: correct
 
@@ -139,6 +139,11 @@ later group can establish it again:
 ```
 
 :::
+
+An unknown spread can contain both `fieldName` and `field-name`. A later
+explicit write cannot establish their final normalized value, because raw-key
+updates preserve key order. Multiple unknown computed keys can also leave such
+aliases. These values remain subject to `unknownValues`.
 
 Duplicate static keys within one group of explicit attributes and named bindings
 keep the first value. Object `v-bind`, object `v-on`, and dynamic event names

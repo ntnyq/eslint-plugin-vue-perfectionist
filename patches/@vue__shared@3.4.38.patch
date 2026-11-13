@@ -1,0 +1,39 @@
+diff --git a/dist/shared.cjs.js b/dist/shared.cjs.js
+index 88b8f137e982c30efbe73779dc3d05b6a2da83cc..086206a2f9a6f3aec7163d61c6186a3ae0960f7a 100644
+--- a/dist/shared.cjs.js
++++ b/dist/shared.cjs.js
+@@ -335,7 +335,7 @@ const isBooleanAttr = /* @__PURE__ */ makeMap(
+ function includeBooleanAttr(value) {
+   return !!value || value === "";
+ }
+-const unsafeAttrCharRE = /[>/="'\u0009\u000a\u000c\u0020]/;
++const unsafeAttrCharRE = /[>/="'\u0009\u000a\u000c\u000d\u0020]/;
+ const attrValidationCache = {};
+ function isSSRSafeAttrName(name) {
+   if (attrValidationCache.hasOwnProperty(name)) {
+diff --git a/dist/shared.cjs.prod.js b/dist/shared.cjs.prod.js
+index 63b93366414ad85696c49bf75728d1ba72ddf7a0..60408421318162ea252fc4feed4b39acbe087d61 100644
+--- a/dist/shared.cjs.prod.js
++++ b/dist/shared.cjs.prod.js
+@@ -335,7 +335,7 @@ const isBooleanAttr = /* @__PURE__ */ makeMap(
+ function includeBooleanAttr(value) {
+   return !!value || value === "";
+ }
+-const unsafeAttrCharRE = /[>/="'\u0009\u000a\u000c\u0020]/;
++const unsafeAttrCharRE = /[>/="'\u0009\u000a\u000c\u000d\u0020]/;
+ const attrValidationCache = {};
+ function isSSRSafeAttrName(name) {
+   if (attrValidationCache.hasOwnProperty(name)) {
+diff --git a/dist/shared.esm-bundler.js b/dist/shared.esm-bundler.js
+index 06814c771ba41b85038da8134bda854870fc7569..95ce1cc7fe58e7640814a61351c9815c9ae0ea43 100644
+--- a/dist/shared.esm-bundler.js
++++ b/dist/shared.esm-bundler.js
+@@ -331,7 +331,7 @@ const isBooleanAttr = /* @__PURE__ */ makeMap(
+ function includeBooleanAttr(value) {
+   return !!value || value === "";
+ }
+-const unsafeAttrCharRE = /[>/="'\u0009\u000a\u000c\u0020]/;
++const unsafeAttrCharRE = /[>/="'\u0009\u000a\u000c\u000d\u0020]/;
+ const attrValidationCache = {};
+ function isSSRSafeAttrName(name) {
+   if (attrValidationCache.hasOwnProperty(name)) {

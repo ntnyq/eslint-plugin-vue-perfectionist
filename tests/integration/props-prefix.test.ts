@@ -2,7 +2,7 @@ import { runInNewContext } from 'node:vm'
 import { ModuleKind, ScriptTarget, transpileModule } from 'typescript'
 import { expect } from 'vitest'
 import * as Vue from 'vue'
-import { compileScript, parse } from 'vue/compiler-sfc'
+import { compileScript, compileTemplate, parse } from 'vue/compiler-sfc'
 import { renderToString } from 'vue/server-renderer'
 import { requirePropsPrefix } from '../../src/rules/require-props-prefix.ts'
 import { run } from '../helpers/rule-tester.ts'
@@ -15,18 +15,30 @@ import type {
 /**
  * Compile the complete SFC and render it to verify template fix semantics.
  */
-async function renderSfc(source: string) {
-  const compiled = compileScript(parse(source).descriptor, {
+async function renderSfc(source: string, inlineTemplate = true) {
+  const descriptor = parse(source).descriptor
+  const compiled = compileScript(descriptor, {
     id: 'props-prefix-regression',
-    inlineTemplate: true,
+    inlineTemplate,
   })
-  const { outputText } = transpileModule(compiled.content, {
+  const template = inlineTemplate
+    ? ''
+    : compileTemplate({
+        source: descriptor.template?.content ?? '',
+        filename: 'Test.vue',
+        id: 'props-prefix-regression',
+        compilerOptions: { bindingMetadata: compiled.bindings ?? {} },
+      }).code
+  const { outputText } = transpileModule(`${compiled.content}\n${template}`, {
     compilerOptions: {
       module: ModuleKind.CommonJS,
       target: ScriptTarget.ESNext,
     },
   })
-  const exports: { default?: Vue.Component } = {}
+  const exports: {
+    default?: Vue.Component
+    render?: Vue.ComponentOptions['render']
+  } = {}
   runInNewContext(outputText, {
     exports,
     require(name: string) {
@@ -38,6 +50,9 @@ async function renderSfc(source: string) {
   })
   if (!exports.default) {
     throw new Error('Expected the compiled SFC to export a component.')
+  }
+  if (!inlineTemplate) {
+    Reflect.set(exports.default, 'render', exports.render)
   }
   const warnings: string[] = []
   const app = Vue.createSSRApp(exports.default, {
@@ -56,6 +71,25 @@ await run<RequirePropsPrefixOptions, RequirePropsPrefixMessageId>({
   rule: requirePropsPrefix,
   valid: [],
   invalid: [
+    ...['Math', 'undefined', 'console', 'Symbol'].map(name => {
+      const code = `<script setup lang="ts">const ${name} = defineProps<{ title: string; items: string[] }>()</script><template>{{ title }}</template>`
+      return {
+        description: `keeps global-name prefixes report-only with separate compilation: ${name}`,
+        code,
+        options: { autofix: true },
+        errors: ['requirePropsPrefix' as const],
+        output: null,
+        async after(result: Linter.FixReport) {
+          expect(await renderSfc(code, false)).toEqual({
+            html: 'hello',
+            warnings: [],
+          })
+          expect(await renderSfc(result.output, false)).toEqual(
+            await renderSfc(code, false),
+          )
+        },
+      }
+    }),
     ...[
       {
         template: '<div :title>{{ ({ title }).title }}</div>',
@@ -89,9 +123,13 @@ await run<RequirePropsPrefixOptions, RequirePropsPrefixMessageId>({
         ),
         output: `${script}<template>${fixed}</template>`,
         async after(result: Linter.FixReport) {
-          const original = await renderSfc(code)
-          expect(original.warnings).toEqual([])
-          expect(await renderSfc(result.output)).toEqual(original)
+          for (const inlineTemplate of [false, true]) {
+            const original = await renderSfc(code, inlineTemplate)
+            expect(original.warnings).toEqual([])
+            expect(await renderSfc(result.output, inlineTemplate)).toEqual(
+              original,
+            )
+          }
           expect(result.fixed).toBe(true)
         },
       }

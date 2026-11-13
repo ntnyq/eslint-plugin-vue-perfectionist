@@ -40,6 +40,19 @@ await run<ComponentPropTypesOptions, ComponentPropTypesMessageId>({
     }
   },
   valid: [
+    ...[
+      ':[key]="1" :field-name="2"',
+      'v-bind="{ [key]: 1, fieldName: 2 }"',
+    ].map(attributes => ({
+      description: 'a single earlier computed key cannot leave two raw aliases',
+      code: counter(attributes),
+      options: {
+        targets: [
+          { components: ['AppCounter'], props: { fieldName: 'number' } },
+        ],
+        unknownValues: 'report',
+      } satisfies ComponentPropTypesOptions,
+    })),
     {
       description: 'excludes slot outlet bindings from component prop types',
       code: createVueSFC({

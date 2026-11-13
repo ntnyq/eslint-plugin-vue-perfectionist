@@ -14,7 +14,14 @@ function resolveRuntimeProps(
 ) {
   let received: Partial<
     Record<
-      'count' | 'countModifiers' | 'modelModifiers' | 'disabled' | 'isReady',
+      | 'count'
+      | 'countModifiers'
+      | 'modelModifiers'
+      | 'disabled'
+      | 'isReady'
+      | 'fieldName'
+      | 'count1'
+      | 'value_',
       unknown
     >
   > = {}
@@ -25,6 +32,9 @@ function resolveRuntimeProps(
       modelModifiers: null,
       disabled: Boolean,
       isReady: Boolean,
+      fieldName: null,
+      count1: null,
+      value_: null,
     },
     setup(props) {
       received = { ...props }
@@ -206,6 +216,90 @@ describe('component prop contracts with Vue compilation and runtime', () => {
       )
       expect(result.fixed).toBe(false)
       expect(result.output).toBe(code)
+    },
+  )
+
+  it.each([
+    ['fieldName', 'field-name'],
+    ['count1', 'count-1'],
+    ['value_', 'value-_'],
+  ] as const)(
+    'keeps hidden aliases of %s uncertain after unknown writes',
+    (prop, rawName) => {
+      const attributes = [
+        `${rawName}="old" v-bind="extra" :${rawName}="2"`,
+        `v-bind="extra" :${rawName}="2"`,
+        `v-bind="{ '${rawName}': 1, ...extra, '${rawName}': 2 }"`,
+        `${rawName}="old" :[key]="'wrong'" v-on="{}" :${rawName}="2"`,
+        `:[firstKey]="1" :[key]="'wrong'" :${rawName}="2"`,
+      ]
+      for (const bindings of attributes) {
+        const template = `<AppCounter ${bindings} />`
+        expect(
+          resolveRuntimeProps(template, {
+            extra: { [rawName]: 1, [prop]: 'wrong' },
+            firstKey: rawName,
+            key: prop,
+          })[prop],
+        ).toBe('wrong')
+        const code = `<template>${template}</template>`
+        const result = new Linter().verifyAndFix(
+          code,
+          {
+            files: ['**/*.vue'],
+            languageOptions: vueLanguageOptions,
+            plugins: { vp: plugin },
+            rules: {
+              'vp/require-component-props': [
+                'error',
+                { targets: [{ components: ['AppCounter'], props: [prop] }] },
+              ],
+              'vp/component-prop-types': [
+                'error',
+                {
+                  targets: [
+                    { components: ['AppCounter'], props: { [prop]: 'number' } },
+                  ],
+                  unknownValues: 'report',
+                },
+              ],
+              'vp/component-prop-values': [
+                'error',
+                {
+                  targets: [
+                    {
+                      components: ['AppCounter'],
+                      props: { [prop]: { enum: [2] } },
+                    },
+                  ],
+                  unknownValues: 'report',
+                },
+              ],
+              'vp/require-vue-generic': [
+                'error',
+                {
+                  targets: [
+                    {
+                      components: ['AppCounter'],
+                      ignoreWhen: [{ props: { [prop]: { enum: [2] } } }],
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+          'Test.vue',
+        )
+        expect(
+          result.messages.map(message => message.messageId).sort(),
+        ).toEqual([
+          'missingVueGeneric',
+          'unverifiablePropType',
+          'unverifiablePropValue',
+        ])
+        expect(result.fixed).toBe(false)
+        expect(result.output).toBe(code)
+      }
     },
   )
 

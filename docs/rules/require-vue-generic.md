@@ -262,7 +262,9 @@ template literals without substitutions, conditional expression variants, and
 object literal bindings with nested spreads. It does not execute code, follow
 script variables, trust asserted types, or apply child prop defaults.
 Binding order matters: a known write after an unknown spread can establish a
-value; a later unknown spread can invalidate it. Dynamic argument names and
+value when raw aliases cannot interfere; a later unknown spread can invalidate
+it. An unknown spread can retain both `fieldName` and `field-name`, so a later
+explicit write cannot establish that prop's exemption. Dynamic argument names and
 `v-bind` `.prop` / `.attr` bindings introduce uncertainty for affected props.
 `v-model` modifiers generate object-valued `modelModifiers` or
 `<argument>Modifiers` props. These writes follow the same deduplication and

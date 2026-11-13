@@ -251,6 +251,9 @@ The following references remain report-only even with `autofix: true`:
 
 - Missing or destructured object bindings, mutable declarations, or the special
   event-handler name `$event` used as the props binding.
+- Props bindings named after Vue template globals, such as `Math`, `undefined`,
+  or `console`. Separately compiled templates can resolve these names to the
+  global value instead of the setup binding.
 - Assignments, updates, deletions, writes through members, and `v-model` targets.
 - Direct calls of a prop function and tagged templates, to avoid changing
   receiver-sensitive behavior. Calls through a prop object's members retain

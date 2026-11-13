@@ -211,6 +211,7 @@ const props = defineProps(['title'])
 即使启用 `autofix: true`，以下引用仍只报告：
 
 - 缺少对象绑定、绑定为解构或可变声明，或使用事件处理器特殊名称 `$event` 作为 props 绑定。
+- props 绑定使用 `Math`、`undefined`、`console` 等 Vue 模板全局名称。单独编译模板时，这些名称可能解析为全局值，而非 setup 绑定。
 - 赋值、更新、删除、经成员写入及 `v-model` 目标。
 - 直接调用 prop 函数及标签模板，避免改变依赖接收者的行为。经 prop 对象成员的调用保留原接收者，可以修复。
 - 名为 `__proto__` 的对象简写，展开可能改变对象构造语义。

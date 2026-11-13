@@ -135,6 +135,8 @@ export default defineConfig([
 
 对于 `:count="1" v-bind="extra"` 和 `{ count: 1, ...extra }`，键仍然存在，但最终值无法确定。混用 `pageSize` 与 `page-size` 等原始写法也会导致最终值无法确定：不能用简单合并规范化名称来代替 Vue 先合并原始键、后规范化 prop 的行为。
 
+未知展开可能同时包含两种写法，因此后续显式写入 `page-size` 或 `pageSize` 也不能重新确定值：更新已有原始键不会将其移到别名之后。多个未知计算键也可能造成同样的歧义，但已确定的存在性仍会保留。
+
 ## :wrench: 选项 {#options}
 
 默认值：
