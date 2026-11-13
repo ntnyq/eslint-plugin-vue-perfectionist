@@ -1,19 +1,18 @@
 import type ts from 'typescript'
 
 /**
- * Collect the canonical Vue key and its marker from installed Vue declarations.
+ * Collect the canonical Vue key markers from installed Vue declarations.
  * Structural assignability is insufficient: plain symbols satisfy Vue's empty
  * InjectionConstraint interface too. Custom API sources must still use Vue keys.
  *
  * @param program - The parser's complete TypeScript program.
  * @param checker - The checker belonging to that program.
- * @returns Full Vue key symbols and markers that additionally require a symbol.
+ * @returns Vue key markers that additionally require a primitive symbol.
  */
-function getInjectionKeySymbols(
+function getInjectionKeyMarkers(
   program: ts.Program,
   checker: ts.TypeChecker,
-): { keys: Set<ts.Symbol>; markers: Set<ts.Symbol> } {
-  const keys = new Set<ts.Symbol>()
+): Set<ts.Symbol> {
   const markers = new Set<ts.Symbol>()
   for (const source of program.getSourceFiles()) {
     const filename = source.fileName.replaceAll('\\', '/')
@@ -32,9 +31,11 @@ function getInjectionKeySymbols(
     if (!exported) {
       continue
     }
-    keys.add(exported)
     const type = checker.getDeclaredTypeOfSymbol(exported)
-    for (const part of type.isIntersection() ? type.types : [type]) {
+    if (!type.isIntersection()) {
+      continue
+    }
+    for (const part of type.types) {
       const symbol = part.getSymbol()
       if (
         symbol?.declarations?.some(
@@ -46,10 +47,7 @@ function getInjectionKeySymbols(
       }
     }
   }
-  return {
-    keys,
-    markers,
-  }
+  return markers
 }
 
 /**
@@ -65,7 +63,7 @@ export function createInjectionKeyTypeChecker(
   allowedStrings: ReadonlySet<string>,
 ): (type: ts.Type) => boolean {
   const checker = program.getTypeChecker()
-  const { keys, markers } = getInjectionKeySymbols(program, checker)
+  const markers = getInjectionKeyMarkers(program, checker)
   const symbolType = checker.getESSymbolType()
 
   /**
@@ -96,12 +94,6 @@ export function createInjectionKeyTypeChecker(
         return allowedStrings.has(type.value)
       }
       const symbol = type.getSymbol()
-      if (
-        (symbol && keys.has(symbol)) ||
-        (type.aliasSymbol && keys.has(type.aliasSymbol))
-      ) {
-        return true
-      }
       // The empty Vue marker can be extracted with conditional inference. It
       // establishes provenance only when the complete candidate is a symbol.
       if (

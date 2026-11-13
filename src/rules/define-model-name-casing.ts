@@ -39,21 +39,18 @@ function getModelPropNames(name: string): string[] {
     name,
     name === 'modelValue' ? 'modelModifiers' : `${name}Modifiers`,
   ].map(normalizePropName)
-  // Older runtimes look up the original name; newer ones camelize it first.
-  for (const modelName of new Set([name, normalizePropName(name)])) {
-    if (modelName === 'modelValue' || modelName === 'model-value') {
-      props.push('modelModifiers')
-    } else {
-      const lookups = [
-        `${modelName}Modifiers`,
-        `${normalizePropName(modelName)}Modifiers`,
-        `${hyphenateName(modelName)}Modifiers`,
-      ]
-      // Lookup keys stay literal; only camelized keys can exist in props.
-      props.push(
-        ...lookups.filter(property => normalizePropName(property) === property),
-      )
-    }
+  const modelName = normalizePropName(name)
+  if (modelName === 'modelValue') {
+    props.push('modelModifiers')
+  } else {
+    const lookups = [
+      `${modelName}Modifiers`,
+      `${hyphenateName(modelName)}Modifiers`,
+    ]
+    // Lookup keys stay literal; only camelized keys can exist in props.
+    props.push(
+      ...lookups.filter(property => normalizePropName(property) === property),
+    )
   }
   return props
 }
@@ -145,8 +142,9 @@ export const defineModelNameCasing = createRule<
               result?.output &&
               !hasSatisfiesConstraint(node, argument) &&
               !convert(result.output).changed &&
-              // Older runtimes read props by the original model name.
-              normalizePropName(result.output) === result.output
+              // The compiler and runtime disagree on model-value modifiers.
+              (normalizePropName(result.output) !== 'modelValue' ||
+                result.output === 'modelValue')
                 ? result.output
                 : undefined
             return {
@@ -174,10 +172,6 @@ export const defineModelNameCasing = createRule<
                 ...getModelPropNames(
                   other.replacement ?? other.name ?? 'modelValue',
                 ),
-                // Before Vue 3.5.31, template names declare the default model.
-                ...(other.node?.type === 'TemplateLiteral'
-                  ? getModelPropNames('modelValue')
-                  : []),
               ].some(property => targetProps.includes(property)),
           )
           context.report({

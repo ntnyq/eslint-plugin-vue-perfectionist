@@ -1,7 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import * as tsParser from '@typescript-eslint/parser'
 import { createRuleTester } from 'eslint-vitest-rule-tester'
-import ts from 'typescript'
 import { expect, it } from 'vitest'
 import { requireInjectionKey } from '../../../src/rules/require-injection-key.ts'
 import { run } from '../../helpers/rule-tester.ts'
@@ -21,56 +20,6 @@ const parserOptions = {
 const imports =
   "import { inject, provide } from 'vue'; import type { InjectionKey } from 'vue'; "
 
-/**
- * Exercise Vue 3.2/3.4's interface-based key without installing another Vue copy.
- * Only the canonical key declaration changes; normal module resolution remains.
- *
- * @param code - Source code for the parser's project file.
- * @param filename - Project filename, including platform-specific separators.
- * @returns A real compiler program using the earlier InjectionKey declaration.
- */
-function createLegacyKeyProgram(code: string, filename: string): ts.Program {
-  const normalizedFilename = filename.replaceAll('\\', '/')
-  const options: ts.CompilerOptions = {
-    target: ts.ScriptTarget.ESNext,
-    module: ts.ModuleKind.ESNext,
-    moduleResolution: ts.ModuleResolutionKind.Bundler,
-    strict: true,
-    skipLibCheck: true,
-  }
-  const host = ts.createCompilerHost(options)
-  const readFile = host.readFile
-  host.readFile = path => {
-    const normalizedPath = path.replaceAll('\\', '/')
-    if (normalizedPath === normalizedFilename) {
-      return code
-    }
-    const source = readFile(path)
-    if (normalizedPath.endsWith('/@vue/runtime-core/dist/runtime-core.d.ts')) {
-      const declaration =
-        'type InjectionKey<T> = symbol & InjectionConstraint<T>;'
-      if (!source?.includes(declaration)) {
-        throw new Error(
-          'The installed Vue key declaration changed; update the legacy fixture.',
-        )
-      }
-      return source.replace(
-        declaration,
-        'interface InjectionKey<T> extends Symbol {}',
-      )
-    }
-    return source
-  }
-  return ts.createProgram([normalizedFilename], options, host)
-}
-
-const legacyCode = `${imports}
-const key: InjectionKey<string> = Symbol()
-inject(key)
-inject(Symbol())
-const plainKey: Symbol = Symbol()
-inject(plainKey)`
-
 await run<RequireInjectionKeyOptions, RequireInjectionKeyMessageId>({
   name: 'require-injection-key',
   rule: requireInjectionKey,
@@ -84,6 +33,11 @@ await run<RequireInjectionKeyOptions, RequireInjectionKeyMessageId>({
     }
   },
   valid: [
+    {
+      description: 'recognizes the minimum supported Vue key declaration',
+      code: "import { inject } from 'vue-minimum'; import type { InjectionKey } from 'vue-minimum'; const key: InjectionKey<string> = Symbol(); inject(key)",
+      options: { strict: true, vueImportSources: ['vue-minimum'] },
+    },
     ...[
       'type Marker = InjectionKey<string> extends symbol & infer Brand ? Brand : never; declare const key: symbol & Marker; inject(key)',
       'type Marker = InjectionKey<string> extends symbol & infer Brand ? Brand : never; function read<T extends symbol>(key: T & Marker) { inject(key) }',
@@ -199,27 +153,6 @@ inject(key)`,
   ],
   invalid: [
     ...[
-      `${root}case.ts`.replaceAll('\\', '/'),
-      `${root}case.ts`.replaceAll('/', '\\'),
-    ].map(filename => ({
-      description:
-        'preserves legacy Vue key interfaces while rejecting untyped symbols',
-      code: legacyCode,
-      languageOptions: {
-        parserOptions: {
-          project: false,
-          programs: [createLegacyKeyProgram(legacyCode, filename)],
-        },
-      },
-      options: { strict: true },
-      errors: [
-        { messageId: 'expectedInjectionKey' as const, line: 4 },
-        { messageId: 'expectedInjectionKey' as const, line: 6 },
-      ],
-      output: null,
-    })),
-
-    ...[
       "function read<T extends { key: InjectionKey<string> | undefined }>(key: T['key']) { inject(key) }",
       "function read<T extends { key: InjectionKey<string> | symbol }>(key: T['key']) { inject(key) }",
       "function read<T extends { key: any }>(key: T['key']) { inject(key) }",
@@ -300,6 +233,7 @@ inject(key)`,
       'inject(Symbol())',
       'const key = Symbol(); inject(key)',
       'declare const key: symbol; inject(key)',
+      'declare const key: Symbol; inject(key)',
       'declare const key: unique symbol; inject(key)',
       "import { plainKey } from './keys'; inject(plainKey)",
       'declare const key: any; inject(key)',

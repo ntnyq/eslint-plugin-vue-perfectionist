@@ -158,7 +158,7 @@ the configured casing:
 With these options, `defineModel('file-list')` becomes
 `defineModel('fileList')`. With the default `fix: false`, mismatches are reported
 without fixes. No editor suggestions are provided.
-Fixes also follow the runtime compatibility and collision boundaries below;
+Fixes also follow the runtime semantics and collision boundaries below;
 `fix: true` does not make every casing conversion fixable.
 
 ::: warning Component contract changes
@@ -198,19 +198,15 @@ They preserve its quote delimiter, surrounding comments, parentheses, TypeScript
 wrappers, options, receiving variable names, template arguments, and line endings.
 Escapes within the replaced name are normalized to the converted value.
 
-The converted name must be unchanged by Vue's camelization. The rule does not
-infer the consumer's Vue runtime version and has no version override, so it
-applies this conservative boundary even with newer Vue versions. For example,
-when requiring `kebab-case`, `fileList` is reported without a fix: changing it
-to `file-list` makes the returned model lose its value on Vue 3.4.38, even after
-updating the parent binding. Converting `FILE` to the single-word name `file`
-remains fixable.
+Fixes target the supported Vue range `>=3.5.42 <4`. With `casing: 'kebab-case'`
+and `fix: true`, `fileList` and `file_list` can become `file-list`; the supported
+runtime resolves the camelized value and modifiers props.
 
-This also prevents conversion to `model-value`. Even on current Vue, the
-compiler generates `model-valueModifiers` while `useModel` reads the special
-`modelModifiers` prop, so a rename from `modelValue` would lose modifiers despite
-updated parent bindings. Migrate names requiring runtime camelization manually
-after checking both model values and modifiers with the target Vue runtime.
+Conversion to `model-value` remains report-only. The compiler generates
+`model-valueModifiers` while `useModel` reads the special `modelModifiers` prop,
+so a rename from `modelValue` would lose modifiers despite updated parent
+bindings. Check both model values and modifiers before migrating this name
+manually.
 
 Name arguments containing `satisfies` are reported without fixes, including
 constraints wrapped in assertions or non-null expressions. Renaming the literal
@@ -236,7 +232,7 @@ which would then become `Ss`; in camelCase, `İ` first becomes `i` plus a
 combining dot, which another pass removes. These names remain report-only,
 including when a later result would collide with another model. This prevents
 partial contract renames. Stable Unicode conversions remain fixable. Constrained
-names, unstable names, and conversions blocked by runtime compatibility reserve
+names, unstable names, and conversions blocked by runtime semantics reserve
 their existing generated props and runtime modifier lookups during collision
 checks, rather than their hypothetical converted names.
 
@@ -269,25 +265,30 @@ or `number` modifiers and change emitted values, even after parent bindings are
 updated. This also blocks renaming a model value to a prop read by another
 model's modifier fallback. Independent names remain fixable.
 
-Template literal model names require
-[Vue 3.5.31+](https://github.com/vuejs/core/blob/main/CHANGELOG.md#3531-2026-03-25).
-Earlier compilers interpret the template literal as options for the default
-`modelValue` model. The rule does not infer the consumer's compiler version, so
-template literal names also reserve `modelValue` and `modelModifiers`, including
-names constrained by `satisfies` or calls skipped for naming checks. Renames
-that conflict with either compiler interpretation remain report-only.
-Independent model fixes remain available.
+Template literal model names are supported throughout the supported Vue range.
+They reserve their named model and modifiers props, so independent names such
+as `ModelValue` and `ModelModifiers` can be fixed beside ``defineModel(`other`)``.
+They do not reserve an implicit default model.
 
-Even with `fix: true`, both string literal names below are reported without
-fixes, preventing default model and modifiers collisions in older compilers:
+With `fix: true`, the mismatching string literal name below can be fixed:
 
 ::: incorrect
 
 ```vue
 <script setup>
 const other = defineModel(`other`)
-const value = defineModel('ModelValue')
-const modifiers = defineModel('ModelModifiers')
+const model = defineModel('Model')
+</script>
+```
+
+:::
+
+::: correct
+
+```vue
+<script setup>
+const other = defineModel(`other`)
+const model = defineModel('model')
 </script>
 ```
 

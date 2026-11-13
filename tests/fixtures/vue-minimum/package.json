@@ -1,5 +1,5 @@
 {
-  "name": "vue-runtime-legacy",
+  "name": "vue-minimum",
   "type": "module",
   "version": "0.0.0",
   "private": true,
@@ -9,6 +9,6 @@
     "./server-renderer": "./server-renderer.ts"
   },
   "dependencies": {
-    "vue": "3.4.38"
+    "vue": "3.5.42"
   }
 }

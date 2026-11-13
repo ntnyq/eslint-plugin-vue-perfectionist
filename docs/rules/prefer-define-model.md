@@ -27,7 +27,7 @@ description: Prefer defineModel over matching prop and update event declarations
 
 ## Usage
 
-Enable this rule for Vue 3.4+ components alongside your existing
+Enable this rule for Vue `>=3.5.42 <4` components alongside your existing
 `vue-eslint-parser` configuration. TypeScript scripts additionally need
 `@typescript-eslint/parser` as their script parser.
 

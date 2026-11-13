@@ -38,6 +38,8 @@ Use kebab-case filenames such as `sort-script-setup.ts`, camelCase functions and
 
 Add tests in `tests/rules/<rule-name>.test.ts` using `eslint-vitest-rule-tester` through the shared `run` helper in `tests/helpers/rule-tester.ts`. Declare `valid` and `invalid` cases with explicit diagnostics and expected output; use `output: null` for reports without fixes. The runner checks recursive fix stability and verifies fixed code. Use `createRuleTester<unknown>` with Vitest for invalid option validation, and reserve ESLint's `Linter` for plugin integration tests. Cover option combinations and JavaScript and TypeScript SFC cases where relevant. No numeric coverage threshold is configured.
 
+Target Vue `>=3.5.42 <4`. Model naming integration tests cover the pinned minimum in `tests/fixtures/vue-minimum/` and the current development dependency with matching compilers and runtimes. Keep the minimum fixture pinned during dependency updates.
+
 Preserve program behavior in automatic fixes. For sorting rules, unsafe runtime reordering must report without autofixing; other rules must respect their own documented fix boundaries. Add regression cases for any changes to these safety boundaries.
 
 ## Rule Documentation Guidelines

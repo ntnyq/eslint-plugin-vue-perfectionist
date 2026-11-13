@@ -159,7 +159,7 @@ const form = inject(formKey)
 
 识别已安装 `@vue/runtime-core` 中实际的 `InjectionKey` 声明和标记。本地或无关包中的同名类型不足以满足要求，普通 symbol 的结构可赋值性也不够。`vueImportSources` 仅改变 API 识别，不改变可信键类型来源。
 
-联合的每个成员都必须是识别的键或允许的字符串字面量。交叉类型可细化识别的键。仅提取 Vue 内部标记不算键：完整交叉类型仍须是原始 symbol。拒绝仅携带标记的对象、字符串、数值和装箱 `Symbol`，同时兼容 Vue 早期基于接口的 `InjectionKey`。
+联合的每个成员都必须是识别的键或允许的字符串字面量。交叉类型可细化识别的键。仅提取 Vue 内部标记不算键：完整交叉类型仍须是原始 symbol。拒绝仅携带标记的对象、字符串、数值和装箱 `Symbol`。支持范围内的 Vue 使用原始 symbol 与 Vue 内部标记的交叉类型声明 `InjectionKey`。
 
 报告 `any`、`unknown`、`never`、普通 `symbol`/`unique symbol`、宽泛字符串、无约束泛型和可空键。调用前请收窄可空键，或有意使用非空断言。不限制载荷类型参数本身。
 

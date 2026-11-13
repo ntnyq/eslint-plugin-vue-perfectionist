@@ -185,7 +185,8 @@ Every member of a union must be a recognized key or an allowed string literal.
 Intersections may refine recognized keys. An extracted internal Vue marker alone
 is not a key: its complete intersection must still be a primitive symbol.
 This rejects objects, strings, numbers, and boxed `Symbol` values carrying only
-the marker, while preserving Vue's earlier interface-based `InjectionKey` type.
+the marker. The supported Vue range uses a primitive symbol intersected with
+Vue's internal marker as its `InjectionKey` declaration.
 
 `any`, `unknown`, `never`, plain
 `symbol`/`unique symbol`, broad strings, unconstrained generics, and nullable keys

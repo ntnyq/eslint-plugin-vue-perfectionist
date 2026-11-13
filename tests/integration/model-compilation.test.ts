@@ -2,9 +2,9 @@ import { Linter } from 'eslint'
 import { describe, expect, it } from 'vitest'
 import { camelize } from 'vue'
 import {
-  compileScript as compileLegacyScript,
-  parse as parseLegacy,
-} from 'vue-compiler-sfc-legacy'
+  compileScript as compileMinimumScript,
+  parse as parseMinimum,
+} from 'vue-minimum/compiler-sfc'
 import { babelParse, compileScript, parse } from 'vue/compiler-sfc'
 import plugin from '../../src'
 import { vueLanguageOptions } from '../helpers/rule-tester.ts'
@@ -81,7 +81,7 @@ describe('compiled model props', () => {
         normalizedCount: 2,
       },
     ].flatMap(testcase =>
-      ['legacy', 'current'].map(compiler => ({
+      ['minimum', 'current'].map(compiler => ({
         ...testcase,
         compiler,
       })),
@@ -91,8 +91,8 @@ describe('compiled model props', () => {
     ({ script, expectedProps, rawCount, normalizedCount, compiler }) => {
       const source = `<script setup lang="ts">${script}</script>`
       const compiled =
-        compiler === 'legacy'
-          ? compileLegacyScript(parseLegacy(source).descriptor, {
+        compiler === 'minimum'
+          ? compileMinimumScript(parseMinimum(source).descriptor, {
               id: 'duplicate-model-props',
             })
           : compileScript(parse(source).descriptor, {
@@ -146,8 +146,7 @@ describe('model fix compilation compatibility', () => {
           { name: 'foo', line: 2 },
           { name: 'FOO', line: 3 },
         ],
-        legacyProps: ['foo', 'fooModifiers', 'FOO', 'FOOModifiers'],
-        currentProps: ['foo', 'fooModifiers', 'FOO', 'FOOModifiers'],
+        expectedProps: ['foo', 'fooModifiers', 'FOO', 'FOOModifiers'],
       },
       {
         description:
@@ -168,15 +167,7 @@ describe('model fix compilation compatibility', () => {
           { name: 'foo', line: 2 },
           { name: 'FOO', line: 3 },
         ],
-        legacyProps: [
-          'foo',
-          'fooModifiers',
-          'FOO',
-          'FOOModifiers',
-          'Bar',
-          'BarModifiers',
-        ],
-        currentProps: [
+        expectedProps: [
           'foo',
           'fooModifiers',
           'FOO',
@@ -198,34 +189,27 @@ describe('model fix compilation compatibility', () => {
         ],
         reportedNames: ['ß', 'SS'],
         remainingDiagnostics: [{ name: 'ß', line: 2 }],
-        legacyProps: ['ß', 'ßModifiers', 'Ss', 'SsModifiers'],
-        currentProps: ['ß', 'ßModifiers', 'Ss', 'SsModifiers'],
+        expectedProps: ['ß', 'ßModifiers', 'Ss', 'SsModifiers'],
       },
       {
         description:
-          'fixes an independent name beside a runtime-dependent target',
+          'fixes an independent name beside the model-value modifiers special case',
         casing: 'kebab-case',
         declarations: [
-          "const a = defineModel('ModelModifiers')",
-          "const b = defineModel('MODEL')",
+          "const a = defineModel('ModelValue')",
+          "const b = defineModel('FILE')",
         ],
         expectedDeclarations: [
-          "const a = defineModel('ModelModifiers')",
-          "const b = defineModel('model')",
+          "const a = defineModel('ModelValue')",
+          "const b = defineModel('file')",
         ],
-        reportedNames: ['ModelModifiers', 'MODEL'],
-        remainingDiagnostics: [{ name: 'ModelModifiers', line: 2 }],
-        legacyProps: [
-          'ModelModifiers',
-          'ModelModifiersModifiers',
-          'model',
-          'modelModifiers',
-        ],
-        currentProps: [
-          'ModelModifiers',
-          'ModelModifiersModifiers',
-          'model',
-          'modelModifiers',
+        reportedNames: ['ModelValue', 'FILE'],
+        remainingDiagnostics: [{ name: 'ModelValue', line: 2 }],
+        expectedProps: [
+          'ModelValue',
+          'ModelValueModifiers',
+          'file',
+          'fileModifiers',
         ],
       },
       {
@@ -242,13 +226,7 @@ describe('model fix compilation compatibility', () => {
         ],
         reportedNames: [undefined, 'ModelValueModifiers'],
         remainingDiagnostics: [],
-        legacyProps: [
-          'modelValue',
-          'modelModifiers',
-          'modelValueModifiers',
-          'modelValueModifiersModifiers',
-        ],
-        currentProps: [
+        expectedProps: [
           'other',
           'otherModifiers',
           'modelValueModifiers',
@@ -256,7 +234,8 @@ describe('model fix compilation compatibility', () => {
         ],
       },
       {
-        description: 'fixes a template name beside a legacy default collision',
+        description:
+          'fixes a template name and an independent default model name',
         casing: 'camelCase',
         declarations: [
           'const a = defineModel(`file-list`)',
@@ -264,21 +243,15 @@ describe('model fix compilation compatibility', () => {
         ],
         expectedDeclarations: [
           'const a = defineModel(`fileList`)',
-          "const b = defineModel('ModelValue')",
+          "const b = defineModel('modelValue')",
         ],
         reportedNames: ['file-list', 'ModelValue'],
-        remainingDiagnostics: [{ name: 'ModelValue', line: 3 }],
-        legacyProps: [
-          'modelValue',
-          'modelModifiers',
-          'ModelValue',
-          'ModelValueModifiers',
-        ],
-        currentProps: [
+        remainingDiagnostics: [],
+        expectedProps: [
           'fileList',
           'fileListModifiers',
-          'ModelValue',
-          'ModelValueModifiers',
+          'modelValue',
+          'modelModifiers',
         ],
       },
       {
@@ -298,8 +271,7 @@ describe('model fix compilation compatibility', () => {
           { name: 'foo', line: 2 },
           { name: 'FOO', line: 3 },
         ],
-        legacyProps: ['modelValue', 'modelModifiers', 'FOO', 'FOOModifiers'],
-        currentProps: ['foo', 'fooModifiers', 'FOO', 'FOOModifiers'],
+        expectedProps: ['foo', 'fooModifiers', 'FOO', 'FOOModifiers'],
       },
       {
         description: 'preserves a template name with unstable Unicode casing',
@@ -314,11 +286,11 @@ describe('model fix compilation compatibility', () => {
         ],
         reportedNames: ['ß', 'SS'],
         remainingDiagnostics: [{ name: 'ß', line: 2 }],
-        legacyProps: ['modelValue', 'modelModifiers', 'Ss', 'SsModifiers'],
-        currentProps: ['ß', 'ßModifiers', 'Ss', 'SsModifiers'],
+        expectedProps: ['ß', 'ßModifiers', 'Ss', 'SsModifiers'],
       },
       {
-        description: 'keeps two reports beside a satisfies-protected template',
+        description:
+          'fixes independent names beside a satisfies-protected template',
         casing: 'camelCase',
         declarations: [
           "const a = defineModel(`foo-1` satisfies 'foo-1')",
@@ -327,33 +299,23 @@ describe('model fix compilation compatibility', () => {
         ],
         expectedDeclarations: [
           "const a = defineModel(`foo-1` satisfies 'foo-1')",
-          "const b = defineModel('ModelValue')",
+          "const b = defineModel('modelValue')",
           "const c = defineModel('modelValueModifiers')",
         ],
         reportedNames: ['foo-1', 'ModelValue', 'ModelValueModifiers'],
-        remainingDiagnostics: [
-          { name: 'foo-1', line: 2 },
-          { name: 'ModelValue', line: 3 },
-        ],
-        legacyProps: [
-          'modelValue',
-          'modelModifiers',
-          'ModelValue',
-          'ModelValueModifiers',
-          'modelValueModifiers',
-          'modelValueModifiersModifiers',
-        ],
-        currentProps: [
+        remainingDiagnostics: [{ name: 'foo-1', line: 2 }],
+        expectedProps: [
           'foo-1',
           'foo-1Modifiers',
-          'ModelValue',
-          'ModelValueModifiers',
+          'modelValue',
+          'modelModifiers',
           'modelValueModifiers',
           'modelValueModifiersModifiers',
         ],
       },
       {
-        description: 'keeps two reports beside an unstable Unicode template',
+        description:
+          'fixes independent names beside an unstable Unicode template',
         casing: 'camelCase',
         declarations: [
           'const a = defineModel(`İ`)',
@@ -362,27 +324,16 @@ describe('model fix compilation compatibility', () => {
         ],
         expectedDeclarations: [
           'const a = defineModel(`İ`)',
-          "const b = defineModel('ModelValue')",
+          "const b = defineModel('modelValue')",
           "const c = defineModel('modelValueModifiers')",
         ],
         reportedNames: ['İ', 'ModelValue', 'ModelValueModifiers'],
-        remainingDiagnostics: [
-          { name: 'İ', line: 2 },
-          { name: 'ModelValue', line: 3 },
-        ],
-        legacyProps: [
-          'modelValue',
-          'modelModifiers',
-          'ModelValue',
-          'ModelValueModifiers',
-          'modelValueModifiers',
-          'modelValueModifiersModifiers',
-        ],
-        currentProps: [
+        remainingDiagnostics: [{ name: 'İ', line: 2 }],
+        expectedProps: [
           'İ',
           'İModifiers',
-          'ModelValue',
-          'ModelValueModifiers',
+          'modelValue',
+          'modelModifiers',
           'modelValueModifiers',
           'modelValueModifiersModifiers',
         ],
@@ -415,8 +366,7 @@ describe('model fix compilation compatibility', () => {
       expectedDeclarations,
       reportedNames,
       remainingDiagnostics,
-      legacyProps,
-      currentProps,
+      expectedProps,
       order,
     }) => {
       const linter = new Linter()
@@ -472,19 +422,16 @@ describe('model fix compilation compatibility', () => {
       expect(
         linter.verifyAndFix(result.output, configuration, 'Test.vue'),
       ).toEqual({ ...result, fixed: false })
-      const legacy = compileLegacyScript(
-        parseLegacy(result.output).descriptor,
+      const minimum = compileMinimumScript(
+        parseMinimum(result.output).descriptor,
         {
-          id: 'legacy-partial-model-fix',
+          id: 'minimum-partial-model-fix',
         },
       ).content
       const current = compileScript(parse(result.output).descriptor, {
         id: 'current-partial-model-fix',
       }).content
-      for (const [content, expectedProps] of [
-        [legacy, legacyProps],
-        [current, currentProps],
-      ] satisfies [string, string[]][]) {
+      for (const content of [minimum, current]) {
         const props = getCompiledPropNames(content)
         expect(props.toSorted()).toEqual(expectedProps.toSorted())
         expect(new Set(props.map(camelize)).size).toBe(props.length)

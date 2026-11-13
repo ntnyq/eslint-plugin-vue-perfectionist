@@ -1,6 +1,6 @@
 packages:
   - docs
-  - tests/fixtures/vue-runtime-legacy
+  - tests/fixtures/vue-minimum
 
 overrides:
   # GHSA-238p-pmpm-9mq7, through Markdown linting's math renderer.
@@ -10,7 +10,6 @@ overrides:
 
 patchedDependencies:
   '@shikijs/magic-move@4.6.0': patches/@shikijs__magic-move@4.6.0.patch
-  '@vue/shared@3.4.38': patches/@vue__shared@3.4.38.patch
 
 packageExtensions:
   # The published autocomplete bundle imports core but omits its runtime dependency.

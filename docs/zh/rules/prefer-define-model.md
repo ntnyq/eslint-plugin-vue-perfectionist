@@ -27,7 +27,7 @@ description: 优先使用 defineModel 替代配套的 prop 和更新事件声明
 
 ## 用法 {#usage}
 
-适用于 Vue 3.4+ 组件，在现有 `vue-eslint-parser` 配置中启用。TypeScript 脚本还需以 `@typescript-eslint/parser` 作为脚本解析器。
+适用于 Vue `>=3.5.42 <4` 组件，在现有 `vue-eslint-parser` 配置中启用。TypeScript 脚本还需以 `@typescript-eslint/parser` 作为脚本解析器。
 
 ```js
 import { defineConfig } from 'eslint/config'

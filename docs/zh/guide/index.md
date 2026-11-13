@@ -13,6 +13,8 @@ description: 安装 Vue Perfectionist，并在 ESLint 扁平化配置中启用�
 
 ## 安装 {#install}
 
+本插件面向 Vue `>=3.5.42 <4`，包括版本匹配的 SFC 编译器和 SSR 渲染器。更早版本不在支持范围内。Vue 声明为可选对等依赖，运行 ESLint 时不会加载 Vue 运行时。
+
 本包采用 ESM 格式，将 ESLint `^10.0.0` 和 `vue-eslint-parser` `^10.0.0` 声明为对等依赖。请一并安装：
 
 ::: code-group

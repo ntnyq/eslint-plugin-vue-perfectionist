@@ -152,7 +152,7 @@ await run<DefineModelNameCasingOptions, DefineModelNameCasingMessageId>({
       output: sfc(`defineModel('${expected}')`),
     })),
     ...['Foo1', 'Foo1Modifiers'].map(name => ({
-      description: `also reserves a template name's modern props beside ${name}`,
+      description: `reserves a template name's props beside ${name}`,
       code: sfc(`defineModel(\`foo1\`); defineModel('${name}')`),
       options: { fix: true },
       errors: ['unexpectedNameCasing' as const],
@@ -218,10 +218,7 @@ await run<DefineModelNameCasingOptions, DefineModelNameCasingMessageId>({
       casings
         .filter(other => other !== casing)
         .map(other => ({
-          description:
-            casing === 'kebab-case'
-              ? `reports ${other} without generating a runtime-dependent kebab-case name`
-              : `renames ${other} to ${casing} only when opted in`,
+          description: `renames ${other} to ${casing} only when opted in`,
           code: sfc(`defineModel('${names[other]}')`),
           options: { casing, fix: true },
           errors: [
@@ -230,10 +227,7 @@ await run<DefineModelNameCasingOptions, DefineModelNameCasingMessageId>({
               data: { name: names[other], casing },
             },
           ],
-          output:
-            casing === 'kebab-case'
-              ? null
-              : sfc(`defineModel('${names[casing]}')`),
+          output: sfc(`defineModel('${names[casing]}')`),
         })),
     ),
     ...(

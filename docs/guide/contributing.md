@@ -23,6 +23,15 @@ pnpm install --frozen-lockfile
 The workspace installs documentation dependencies too. No package build is
 needed before running tests or serving the docs: both consume source files.
 
+## Vue Compatibility
+
+The supported Vue range is `>=3.5.42 <4`. Model naming integration tests run
+against the fixed minimum version in `tests/fixtures/vue-minimum/` and the current
+Vue development dependency, using each version's matching compiler and runtime.
+Keep the fixture pinned to 3.5.42 when updating development dependencies. Raising
+the minimum supported version is a compatibility change and must be documented
+in release notes together with any changes to automatic fixes.
+
 ## Development Commands
 
 Run these commands from the repository root:

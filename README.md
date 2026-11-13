@@ -44,6 +44,10 @@ watchEffect(() => {
 
 This ESM package requires ESLint `^10.0.0` and `vue-eslint-parser` `^10.0.0`.
 
+This plugin targets Vue `>=3.5.42 <4`, including the matching SFC compiler and
+SSR renderer. Older Vue versions are outside the supported range. Vue is an
+optional peer dependency: linting does not load the Vue runtime.
+
 ```shell
 pnpm add -D eslint eslint-plugin-vue-perfectionist vue-eslint-parser
 ```

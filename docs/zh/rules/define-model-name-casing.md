@@ -141,7 +141,7 @@ const user = defineModel('user_name' as const)
 }
 ```
 
-此配置会把 `defineModel('file-list')` 改为 `defineModel('fileList')`。默认 `fix: false` 时仅报告，不修复，也不提供编辑器建议。修复还受下述运行时兼容及冲突边界限制；`fix: true` 不代表所有转换都可修复。
+此配置会把 `defineModel('file-list')` 改为 `defineModel('fileList')`。默认 `fix: false` 时仅报告，不修复，也不提供编辑器建议。修复还受下述运行时语义及冲突边界限制；`fix: true` 不代表所有转换都可修复。
 
 ::: warning 组件对外约定变更
 
@@ -161,9 +161,9 @@ const user = defineModel('user_name' as const)
 
 自动修复需要 `fix: true`，且仅替换显式名称字面量。保留引号分隔符、周围注释、括号、TypeScript 包装、选项、接收变量名、模板参数及换行符。被替换名称中的转义会规范化为转换后的值。
 
-转换后的名称必须不受 Vue 驼峰化影响。本规则不推断使用方 Vue 运行时版本，也不提供版本覆盖，因此即使使用新版 Vue 也遵循此保守边界。例如，要求 `kebab-case` 时，`fileList` 仅报告而不修复：在 Vue 3.4.38 中将其改为 `file-list` 会使返回模型丢失值，即使父级绑定已更新。将 `FILE` 转为单词 `file` 则仍可修复。
+修复面向 Vue `>=3.5.42 <4` 的支持范围。设置 `casing: 'kebab-case'` 和 `fix: true` 后，`fileList` 和 `file_list` 均可改为 `file-list`；支持的运行时会解析驼峰化后的值及修饰符 prop。
 
-这也阻止转换为 `model-value`。即使当前 Vue 版本中，编译器也生成 `model-valueModifiers`，而 `useModel` 读取特殊的 `modelModifiers`，因此从 `modelValue` 重命名仍可能丢失修饰符，即使父级绑定已更新。对于需要运行时驼峰化的名称，请在目标 Vue 运行时验证模型值和修饰符后手动迁移。
+转换为 `model-value` 仍仅报告。编译器生成 `model-valueModifiers`，而 `useModel` 读取特殊的 `modelModifiers`，因此从 `modelValue` 重命名仍会丢失修饰符，即使父级绑定已更新。手动迁移此名称前，请验证模型值和修饰符。
 
 包含 `satisfies` 的名称参数仅报告不修复，包括被断言或非空表达式包裹的约束。重命名字面量可能违反字面量类型、联合类型或类型别名约束。缺少类型检查器时，即使 `satisfies string` 或 `satisfies unknown` 也保守地仅报告。返回模型 ref 外的 `satisfies` 不约束名称，因此不会禁用修复。
 
@@ -178,7 +178,7 @@ const files = defineModel('file-list' satisfies Name)
 
 :::
 
-转换结果还必须在一次转换后保持稳定。部分 Unicode 大小写映射需要多次转换：PascalCase 下 `ß` 先变为 `SS`，再变为 `Ss`；camelCase 下 `İ` 先变为带组合点的 `i`，下一次移除该点。这些名称只报告，包括后续结果会与其他模型冲突的情况，以避免只完成部分约定重命名。稳定的 Unicode 转换仍可修复。受约束、不稳定及因运行时兼容而无法转换的名称，在冲突检查中保留其现有生成 prop 和运行时修饰符查找名称，而非假设的转换名称。
+转换结果还必须在一次转换后保持稳定。部分 Unicode 大小写映射需要多次转换：PascalCase 下 `ß` 先变为 `SS`，再变为 `Ss`；camelCase 下 `İ` 先变为带组合点的 `i`，下一次移除该点。这些名称只报告，包括后续结果会与其他模型冲突的情况，以避免只完成部分约定重命名。稳定的 Unicode 转换仍可修复。受约束、不稳定及因运行时语义而无法转换的名称，在冲突检查中保留其现有生成 prop 和运行时修饰符查找名称，而非假设的转换名称。
 
 例如，将 `'file-list'` 改为 `'fileList'`，会把生成名称 `file-list`、`update:file-list`、`file-listModifiers` 改为 `fileList`、`update:fileList`、`fileListModifiers`。这不能证明使用方兼容。
 
@@ -186,17 +186,27 @@ const files = defineModel('file-list' satisfies Name)
 
 冲突检查还保留 Vue 运行时查找修饰符时使用的原始、驼峰及连字符形式。仅生成 prop 不同不足以证明安全：缺少 `FooModifiers` 时，`Foo` 可回退读取 `fooModifiers`。例如，`casing: 'PascalCase'` 时，受保护的 `defineModel('foo' satisfies 'foo')` 会阻止另一模型从 `FOO` 改为 `Foo`，否则重命名模型可能继承首个模型的 `trim` 或 `number`，在父级绑定已更新后仍改变发出的值。也会阻止将模型值重命名为另一模型修饰符回退读取的 prop。互不影响的名称仍可修复。
 
-模板字面量模型名称需要 [Vue 3.5.31+](https://github.com/vuejs/core/blob/main/CHANGELOG.md#3531-2026-03-25)。更早的编译器将其视为默认 `modelValue` 模型的选项。本规则不推断编译器版本，因此模板字面量名称还会保留 `modelValue` 和 `modelModifiers`，包括受 `satisfies` 约束或跳过命名检查的调用。与任一编译结果冲突的重命名均仅报告，其他独立模型仍可修复。
+支持范围内的 Vue 均支持模板字面量模型名称。它们保留具名模型及修饰符 prop，因此 ``defineModel(`other`)`` 旁的独立名称 `ModelValue` 和 `ModelModifiers` 可以修复，不会额外保留隐式默认模型。
 
-即使 `fix: true`，以下两个字符串字面量名称也仅报告而不修复，以避免旧编译器中的默认模型及修饰符冲突：
+设置 `fix: true` 后，以下不符合风格的字符串字面量名称可被修复：
 
 ::: incorrect
 
 ```vue
 <script setup>
 const other = defineModel(`other`)
-const value = defineModel('ModelValue')
-const modifiers = defineModel('ModelModifiers')
+const model = defineModel('Model')
+</script>
+```
+
+:::
+
+::: correct
+
+```vue
+<script setup>
+const other = defineModel(`other`)
+const model = defineModel('model')
 </script>
 ```
 

@@ -42,6 +42,8 @@ watchEffect(() => {
 
 本包采用 ESM 格式，要求安装 ESLint `^10.0.0` 和 `vue-eslint-parser` `^10.0.0`。
 
+本插件面向 Vue `>=3.5.42 <4`，包括版本匹配的 SFC 编译器和 SSR 渲染器。更早版本不在支持范围内。Vue 声明为可选对等依赖，运行 ESLint 时不会加载 Vue 运行时。
+
 ```shell
 pnpm add -D eslint eslint-plugin-vue-perfectionist vue-eslint-parser
 ```
