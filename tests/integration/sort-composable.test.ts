@@ -1,10 +1,84 @@
 import { runInNewContext } from 'node:vm'
+import * as tsParser from '@typescript-eslint/parser'
 import { Linter } from 'eslint'
 import { format } from 'oxfmt'
 import { describe, expect, it } from 'vitest'
 import plugin from '../../src/index.ts'
 
 describe('composable sorting composition and formatter stability', () => {
+  it.each([10, 100, 1000])(
+    'indexes local returns once when consuming %s members across calls',
+    memberCount => {
+      let blockVisits = 0
+      let propertyKeyReads = 0
+      const parser = {
+        ...tsParser,
+        parseForESLint(...args: Parameters<typeof tsParser.parseForESLint>) {
+          const parsed = tsParser.parseForESLint(...args)
+          const fn = parsed.ast.body[0]
+          const statement =
+            fn?.type === 'FunctionDeclaration' ? fn.body.body[0] : undefined
+          if (
+            statement?.type !== 'ReturnStatement' ||
+            statement.argument?.type !== 'ObjectExpression'
+          ) {
+            throw new Error('Expected a local composable return object.')
+          }
+          for (const property of statement.argument.properties) {
+            if (property.type === 'Property') {
+              const key = property.key
+              Object.defineProperty(property, 'key', {
+                get() {
+                  propertyKeyReads++
+                  return key
+                },
+                enumerable: true,
+                configurable: true,
+              })
+            }
+          }
+          return {
+            ...parsed,
+            visitorKeys: new Proxy(parsed.visitorKeys, {
+              get(target, key) {
+                if (key === 'BlockStatement') {
+                  blockVisits++
+                }
+                return Reflect.get(target, key)
+              },
+            }),
+          }
+        },
+      }
+      const names = Array.from(
+        { length: memberCount },
+        (_, index) => `state${index}`,
+      )
+      const source = [
+        `function usePage() { return { ${names.map(name => `${name}: 0`).join(', ')} } }`,
+        ...['first', 'second', 'third'].map(
+          prefix =>
+            `const { ${names.map(name => `${name}: ${prefix}${name}`).join(', ')} } = usePage()`,
+        ),
+      ].join('\n')
+      const messages = new Linter().verify(
+        source,
+        {
+          files: ['**/*.ts'],
+          languageOptions: { parser },
+          plugins: { vp: plugin },
+          rules: { 'vp/sort-composable-destructure': 'error' },
+        },
+        'test.ts',
+      )
+      expect(messages).toEqual([])
+      // Count AST work rather than elapsed time. Repeated return scans grow
+      // with members or calls; indexed property reads remain linear.
+      expect(blockVisits).toBeLessThan(10)
+      expect(propertyKeyReads).toBeLessThan(memberCount * 100)
+    },
+  )
+
   it('keeps comma-adjacent composable whitespace fixes stable through formatting', async () => {
     const linter = new Linter()
     const config: Linter.Config = {

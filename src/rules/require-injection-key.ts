@@ -132,7 +132,7 @@ export const requireInjectionKey = createRule<
         if (!identity) {
           return
         }
-        const name = identity.exportedName ?? identity.name
+        const name = identity.exportedName ?? identity.classificationName
         if (
           !['provide', 'inject'].includes(name) ||
           !(identity.source

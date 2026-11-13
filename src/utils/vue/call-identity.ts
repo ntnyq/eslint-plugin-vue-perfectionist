@@ -1,8 +1,24 @@
 import { unwrapExpression } from '../ast/expressions.ts'
 import { getScriptVariableDefinitions } from './script-scope.ts'
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
-import type { CallIdentity } from '../../types/ast.ts'
 import type { SourceCode } from '../../types/eslint.ts'
+
+export interface CallIdentity {
+  isUnbound: boolean
+  /**
+   * Identifier or dotted member name written at the call site.
+   */
+  localName: string
+  /**
+   * Classification name: default imports retain their local name for sorting.
+   */
+  classificationName: string
+  /**
+   * Original runtime export name, including "default", when imported.
+   */
+  exportedName?: string
+  source?: string
+}
 
 type RuntimeImportBinding =
   | { kind: 'default' | 'named'; source: string; exportedName: string }
@@ -78,7 +94,8 @@ export function getCallIdentity(
     const binding = getRuntimeImportBinding(definitions[0])
     if (binding && binding.kind !== 'namespace') {
       return {
-        name: binding.kind === 'default' ? callee.name : binding.exportedName,
+        classificationName:
+          binding.kind === 'default' ? callee.name : binding.exportedName,
         localName: callee.name,
         exportedName: binding.exportedName,
         source: binding.source,
@@ -86,7 +103,7 @@ export function getCallIdentity(
       }
     }
     return {
-      name: callee.name,
+      classificationName: callee.name,
       localName: callee.name,
       isUnbound: definitions.length === 0,
     }
@@ -107,7 +124,7 @@ export function getCallIdentity(
     const localName = `${object.name}.${callee.property.name}`
     if (binding?.kind === 'namespace') {
       return {
-        name: callee.property.name,
+        classificationName: callee.property.name,
         localName,
         exportedName: callee.property.name,
         source: binding.source,
@@ -115,7 +132,7 @@ export function getCallIdentity(
       }
     }
     return {
-      name: localName,
+      classificationName: localName,
       localName,
       isUnbound: false,
     }

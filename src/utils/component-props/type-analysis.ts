@@ -1,4 +1,4 @@
-import { hyphenateName } from './config.ts'
+import { hyphenateName } from '../vue/names.ts'
 import type { ComponentPropType } from '../../types/rules/component-prop-types.ts'
 import type { CompiledPropConstraint } from './config.ts'
 import type { PropValue } from './value.ts'

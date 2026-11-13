@@ -6,6 +6,11 @@ import type { CommentPartition } from '../../types/index.ts'
 import type { ResolvedOptions, Statement } from './types.ts'
 import type { PatternMatcher } from './validation.ts'
 
+interface ProtectedLines {
+  lines: Set<number>
+  openDisableStart: number | undefined
+}
+
 /**
  * Check whether a comment starts a new sorting partition.
  *
@@ -40,10 +45,9 @@ function isPartitionComment(
  * Collect lines protected by ESLint and TypeScript directives.
  *
  * @param comments - The source comments in document order.
- * @returns Protected line numbers, with a negative start line marking an
- * unterminated disable range.
+ * @returns Protected line numbers and any unterminated disable range's start.
  */
-function protectedLines(comments: TSESTree.Comment[]): Set<number> {
+function collectProtectedLines(comments: TSESTree.Comment[]): ProtectedLines {
   const lines = new Set<number>()
   const disabled = new Set<string>()
   let start: number | undefined
@@ -91,10 +95,10 @@ function protectedLines(comments: TSESTree.Comment[]): Set<number> {
       lines.add(comment.loc.end.line + 1)
     }
   }
-  if (start !== undefined) {
-    lines.add(-start)
+  return {
+    lines,
+    openDisableStart: start,
   }
-  return lines
 }
 
 /**
@@ -118,16 +122,8 @@ export function collectPartitions(
   matchesPattern: PatternMatcher,
 ): Statement[][] {
   const comments = sourceCode.getAllComments()
-  const protectedSet = protectedLines(comments)
-  const openStart = [...protectedSet].find(
-    /**
-     * Locate the sentinel for an unterminated ESLint disable range.
-     *
-     * @param line - The protected line entry.
-     * @returns Whether the entry is a negative start-line sentinel.
-     */
-    line => line < 0,
-  )
+  const { lines: protectedSet, openDisableStart } =
+    collectProtectedLines(comments)
   const all = nodes.map(
     /**
      * Classify a statement while preserving its original position.
@@ -202,7 +198,8 @@ export function collectPartitions(
         ),
     )
     const isProtected =
-      (openStart !== undefined && node.loc.end.line >= -openStart) ||
+      (openDisableStart !== undefined &&
+        node.loc.end.line >= openDisableStart) ||
       [...protectedSet].some(
         /**
          * Check whether a protected line intersects the current statement.

@@ -3,11 +3,8 @@ import {
   getStaticStringValue,
   unwrapExpression,
 } from '../utils/ast/expressions.ts'
-import {
-  hyphenateName,
-  normalizePropName,
-} from '../utils/component-props/config.ts'
 import { createRule } from '../utils/create-rule.ts'
+import { hyphenateName, normalizePropName } from '../utils/vue/names.ts'
 import { getSetupMacroCalls } from '../utils/vue/setup-macros.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type {

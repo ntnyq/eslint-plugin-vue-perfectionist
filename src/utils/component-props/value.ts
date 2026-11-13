@@ -19,7 +19,10 @@ export interface PropValueVariant {
 
 export interface PropValue {
   variants: PropValueVariant[]
-  unknown: boolean
+  /**
+   * Some possible values remain unresolved, even when known variants exist.
+   */
+  hasUnknownVariants: boolean
   node: ComponentPropNode
 }
 
@@ -33,7 +36,7 @@ export interface PropValue {
 export function unknownPropValue(node: ComponentPropNode): PropValue {
   return {
     variants: [],
-    unknown: true,
+    hasUnknownVariants: true,
     node,
   }
 }
@@ -51,7 +54,7 @@ export function stringPropValue(
 ): PropValue {
   return {
     variants: [{ type: 'string', stringValue: value }],
-    unknown: false,
+    hasUnknownVariants: false,
     node,
   }
 }
@@ -78,7 +81,7 @@ export function inferPropValue(
    */
   const known = (type: ComponentPropType): PropValue => ({
     variants: [{ type }],
-    unknown: false,
+    hasUnknownVariants: false,
     node,
   })
   switch (node.type) {
@@ -131,7 +134,7 @@ export function inferPropValue(
       if (['-', '+', '~'].includes(node.operator)) {
         const argument = inferPropValue(node.argument, isGlobalUndefined)
         if (
-          !argument.unknown &&
+          !argument.hasUnknownVariants &&
           argument.variants.every(
             /**
              * Recognize numeric types supported by the current unary operator.
@@ -157,7 +160,8 @@ export function inferPropValue(
       const alternate = inferPropValue(node.alternate, isGlobalUndefined)
       return {
         variants: [...consequent.variants, ...alternate.variants],
-        unknown: consequent.unknown || alternate.unknown,
+        hasUnknownVariants:
+          consequent.hasUnknownVariants || alternate.hasUnknownVariants,
         node,
       }
     }

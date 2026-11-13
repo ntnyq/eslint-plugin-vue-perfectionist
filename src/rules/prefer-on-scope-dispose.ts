@@ -163,7 +163,7 @@ export const preferOnScopeDispose = createRule<
         if (!identity) {
           return
         }
-        const hook = identity.exportedName ?? identity.name
+        const hook = identity.exportedName ?? identity.classificationName
         if (
           !hooks.has(hook) ||
           !(identity.source

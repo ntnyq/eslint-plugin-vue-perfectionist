@@ -51,13 +51,14 @@
     "docs:check": "vitest run docs/.vitepress/config/documentation.test.ts",
     "docs:dev": "pnpm -C docs run dev",
     "docs:sync": "node --experimental-strip-types scripts/sync-docs.ts",
+    "docs:typecheck": "vue-tsc --noEmit -p docs/tsconfig.json",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "lint": "eslint",
     "prepare": "husky",
     "prepublishOnly": "pnpm run build",
     "release": "run-s release:check release:version",
-    "release:check": "run-s format:check lint typecheck test",
+    "release:check": "run-s format:check lint typecheck docs:typecheck test",
     "release:version": "bumpp",
     "test": "vitest",
     "typecheck": "tsc --noEmit"
@@ -99,7 +100,8 @@
     "vitest": "^5.1.0",
     "vue": "^3.5.45",
     "vue-eslint-parser": "^10.4.2",
-    "vue-minimum": "workspace:*"
+    "vue-minimum": "workspace:*",
+    "vue-tsc": "^3.3.14"
   },
   "nano-staged": {
     "*.{js,ts,mjs,tsx,vue,md,yml,yaml,json,toml}": "eslint --fix",

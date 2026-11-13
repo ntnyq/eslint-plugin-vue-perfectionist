@@ -49,6 +49,7 @@ Run these commands from the repository root:
 | `pnpm docs:dev`                                           | Serve the VitePress site locally.                                       |
 | `pnpm docs:build`                                         | Build the documentation and check page links.                           |
 | `pnpm docs:sync`                                          | Regenerate rule catalogs and rule-page summaries.                       |
+| `pnpm docs:typecheck`                                     | Check documentation TypeScript and Vue components with vue-tsc.         |
 | `pnpm docs:check`                                         | Check bilingual coverage, catalogs, example diagnostics, and rendering. |
 
 `dist/` and `docs/.vitepress/dist/` are generated output. Edit their sources
@@ -116,7 +117,8 @@ Typed examples run against a real TypeScript program. Unknown profiles and
 profiles for another rule are errors. `<!-- prettier-ignore -->` preserves
 intentional diagnostic-triggering formatting without skipping validation.
 
-Run `pnpm docs:check` and `pnpm docs:build`. The former checks catalog consistency,
+Run `pnpm docs:typecheck` to check documentation component types, followed by
+`pnpm docs:check` and `pnpm docs:build`. `pnpm docs:check` checks catalog consistency,
 bilingual coverage, every rule example, and diagnostic rendering; the latter
 also validates examples and checks page links. Inspect the actual page when
 changing the container presentation.
@@ -145,6 +147,7 @@ pnpm lint
 pnpm typecheck
 pnpm build
 pnpm test
+pnpm docs:typecheck
 pnpm docs:check
 pnpm docs:build
 ```
@@ -154,4 +157,4 @@ Update rule documentation whenever options or behavior change. Use concise
 Conventional Commit prefixes such as `fix:` or `docs:`.
 
 CI checks formatting, lint, and types, then builds and tests the package on Node
-22, 24, and 26 across Linux, Windows, and macOS. A separate documentation CI job runs `pnpm docs:check` and `pnpm docs:build`.
+22, 24, and 26 across Linux, Windows, and macOS. A separate documentation CI job runs `pnpm docs:typecheck`, `pnpm docs:check`, and `pnpm docs:build`.

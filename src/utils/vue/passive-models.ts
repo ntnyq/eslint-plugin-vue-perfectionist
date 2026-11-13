@@ -210,7 +210,7 @@ export function getPassiveModelNames(
     const identity = getCallIdentity(call, sourceCode)
     if (
       !identity ||
-      (identity.exportedName ?? identity.name) !== 'useVModel' ||
+      (identity.exportedName ?? identity.classificationName) !== 'useVModel' ||
       (identity.source !== '@vueuse/core' &&
         (!identity.isUnbound || !autoImport || hasUncertainGlobal))
     ) {

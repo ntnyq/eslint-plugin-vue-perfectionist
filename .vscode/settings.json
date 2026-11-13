@@ -25,6 +25,7 @@
   "js/ts.experimental.useTsgo": true,
   "cSpell.words": [
     "bumpp",
+    "Camelization",
     "changelogithub",
     "codecov",
     "esbuild",
@@ -44,11 +45,13 @@
     "tsgo",
     "unconfigured",
     "unparseable",
+    "unreassigned",
     "unrs",
     "unshadowed",
     "vite",
     "vitepress",
     "vitest",
+    "vnode",
     "vueuse"
   ],
   "cSpell.allowCompoundWords": true

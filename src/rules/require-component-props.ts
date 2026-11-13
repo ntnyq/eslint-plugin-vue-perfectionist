@@ -1,10 +1,8 @@
-import { COMPONENT_NAMES_SCHEMA } from '../constants/component-props.ts'
-import {
-  analyzeComponentBindings,
-  matchComponent,
-} from '../utils/component-props/bindings.ts'
+import { COMPONENT_NAMES_SCHEMA } from '../constants/component-schema.ts'
+import { analyzeComponentBindings } from '../utils/component-props/bindings.ts'
 import { compileRequiredProps } from '../utils/component-props/config.ts'
 import { createRule } from '../utils/create-rule.ts'
+import { resolveComponentName } from '../utils/vue/component.ts'
 import { hasTemplateVisitor } from '../utils/vue/parser-services.ts'
 import type {
   RequireComponentPropsMessageId,
@@ -68,7 +66,7 @@ export const requireComponentProps = createRule<
     }
     return services.defineTemplateBodyVisitor({
       VElement(node) {
-        const component = matchComponent(node)
+        const component = resolveComponentName(node)
         const props = component && targets.get(component)
         if (!props) {
           return

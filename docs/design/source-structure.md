@@ -33,21 +33,21 @@ The root package is published; `docs/` is a private pnpm workspace. See
 
 ## Ownership
 
-| Location                              | Responsibility                                                                                                                   |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `src/rules/`                          | Rule metadata, schemas, visitor composition, diagnostic selection, and reports                                                   |
-| `src/utils/ast/`                      | Expression unwrapping, static strings, traversal, bindings, and exact scope reference lookup                                     |
-| `src/utils/vue/`                      | Parser service guards, script ranges, merged SFC scopes, runtime imports, callbacks, refs, and macro types                       |
-| `src/utils/component-props/`          | Component matching, bindings, configuration, conservative values, Boolean casting, and value constraints                         |
-| `src/utils/sort-script-setup/`        | Statement sorting constants, schema, classification, groups, comparisons, dependencies, partitions, reports, and internal models |
-| `src/utils/sort-composable/`          | Shared schema, member classification, AST analysis, and reporting for composable return and destructuring rules                  |
-| `src/utils/injection-key.ts`          | Injection key recognition and TypeScript symbol provenance for strict mode                                                       |
-| `src/utils/vue-generic.ts`            | Generic directive matching and configured component exemptions                                                                   |
-| `src/utils/composable-options.ts`     | Composable parameter shape analysis                                                                                              |
-| `src/utils/template-interpolation.ts` | Conservative template interpolation conversion                                                                                   |
-| `src/types/eslint.ts`                 | Shared readonly ESLint source access, independent of rule context generics                                                       |
-| `src/types/rules/`                    | Rule configuration and diagnostic types; public configuration exports remain explicit in `src/index.ts`                          |
-| `src/constants/`                      | Remaining finite values and schemas; established sorting domains own their constants and schemas locally                         |
+| Location                              | Responsibility                                                                                                                           |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/rules/`                          | Rule metadata, schemas, visitor composition, diagnostic selection, and reports                                                           |
+| `src/utils/ast/`                      | Expression unwrapping, static strings, traversal, bindings, and exact scope reference lookup                                             |
+| `src/utils/vue/`                      | Parser service guards, script ranges, merged SFC scopes, runtime imports, component identity, names, callbacks, refs, and macro types    |
+| `src/utils/component-props/`          | Prop bindings, configuration, conservative values, Boolean casting, and value constraints                                                |
+| `src/utils/sort-script-setup/`        | Statement sorting constants, schema, classification, groups, comparisons, dependencies, partitions, reports, and internal models         |
+| `src/utils/sort-composable/`          | Shared schema, compiled options, cached member classification, AST analysis, and reporting for composable return and destructuring rules |
+| `src/utils/injection-key.ts`          | Injection key recognition and TypeScript symbol provenance for strict mode                                                               |
+| `src/utils/vue-generic.ts`            | Generic directive matching and configured component exemptions                                                                           |
+| `src/utils/composable-options.ts`     | Composable parameter shape analysis                                                                                                      |
+| `src/utils/template-interpolation.ts` | Conservative template interpolation conversion                                                                                           |
+| `src/types/eslint.ts`                 | Shared readonly ESLint source access, independent of rule context generics                                                               |
+| `src/types/rules/`                    | Rule configuration and diagnostic types; public configuration exports remain explicit in `src/index.ts`                                  |
+| `src/constants/`                      | Remaining finite values and schemas; established sorting domains own their constants and schemas locally                                 |
 
 Import internal utilities from their explicit file paths. There is no root utility
 or constants barrel. Keep sorting's `Statement`, `Group`, and `ResolvedOptions`
@@ -56,7 +56,7 @@ constants and defaults live in that directory's `constants.ts`; both sorting
 domains keep their option schemas in `schema.ts`. Public configuration types
 remain in `src/types/rules/`. The two sorting domains retain separate semantics.
 
-Within sorting, `options.ts` resolves defaults and option interactions, `groups.ts`
+Within statement sorting, `options.ts` resolves defaults and option interactions, `groups.ts`
 validates and resolves groups and prepares statement matchers, and `validation.ts`
 compiles regular expressions once per rule instance. ESLint owns structural option
 validation through the public schema, including safe integer bounds for newline
@@ -64,6 +64,16 @@ counts. The internal checks retain semantic constraints such as group conflicts,
 locales, patterns, option interactions, and explicit `undefined` properties that
 schema validation treats as absent. Compiled regexes reset `lastIndex`
 before every match so global and sticky flags remain deterministic.
+
+Component identity lives in `utils/vue/component.ts`; name normalization lives in
+`utils/vue/names.ts`. Component prop consumers share these Vue boundaries with
+slot, generic, and model rules. Callback API positions live in
+`constants/callback-apis.ts`, independently of `constants/callback-schema.ts`.
+
+Composable sorting compiles groups and member patterns in its own `options.ts`.
+The classifier caches local function resolution, return-member indexes, and
+property kinds per rule instance. Direct and awaited consumers retain separate
+async and thenable safety policies; unsupported return branches remain unknown.
 
 ## Test ownership
 
@@ -104,7 +114,9 @@ Keep user content under `guide/`, `rules/`, and `design/`, with matching paths
 under `zh/`. The site entry `docs/.vitepress/config.ts` composes
 `config/example-rules.ts` for default example rule options and
 `config/examples.ts` for example profiles, Markdown container validation, and
-diagnostic rendering. Sorting demo implementation and its tests remain
+diagnostic rendering. `pnpm docs:typecheck` uses `docs/tsconfig.json` to check
+TypeScript and Vue components separately from the package TypeScript check.
+Sorting demo implementation and its tests remain
 colocated under `docs/.vitepress/components/demos/sort-script-setup/`.
 
 ## Shared contracts
@@ -114,6 +126,12 @@ colocated under `docs/.vitepress/components/demos/sort-script-setup/`.
   wrappers only; it does not unwrap optional chains or evaluate expressions.
 - `getStaticStringValue()` reads string literals and expression-free template
   literals. It does not resolve bindings or evaluate concatenations.
+- `isFunctionNode()` narrows the three runtime function node kinds without
+  classifying their binding names as composables.
+- `resolveComponentName()` returns the normalized component identity and keeps
+  native tags, slot outlets, and v-pre content outside component analysis.
+- `PropValue.hasUnknownVariants` records unresolved possibilities independently
+  of known variants; an analysis can contain both.
 - `isRuntimeNode()` excludes erased type branches while retaining the value
   expression inside TypeScript wrappers for template complexity checks.
 - `hasGlobalWrite()` in `utils/vue/global-writes.ts` detects direct writes and
@@ -125,9 +143,9 @@ colocated under `docs/.vitepress/components/demos/sort-script-setup/`.
 - `findScopeReference()` finds the exact node's reference through enclosing
   scopes. Consumers retain responsibility for type and declaration filtering.
 - `getCallIdentity()` exposes the call-site `localName`, the imported
-  `exportedName`, and the existing classification `name`. Sorting keeps default
+  `exportedName`, and the sorting `classificationName`. Sorting keeps default
   imports' local classification names; export-based targets use
-  `exportedName ?? name`.
+  `exportedName ?? classificationName`.
 - `getRuntimeImportBinding()` handles runtime import metadata. Call identity
   and ref recognition share this import analysis but keep separate syntax
   policies: call identity excludes optional and computed calls; ref recognition

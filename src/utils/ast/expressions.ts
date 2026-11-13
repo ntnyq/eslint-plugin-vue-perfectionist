@@ -2,6 +2,11 @@ import { isNumber, isString } from '@ntnyq/utils'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type { AST } from 'vue-eslint-parser'
 
+export type FunctionNode =
+  | TSESTree.ArrowFunctionExpression
+  | TSESTree.FunctionDeclaration
+  | TSESTree.FunctionExpression
+
 /**
  * Unwrap TypeScript expressions in scripts and templates. The template parser
  * accepts these wrappers at runtime without declaring them in its AST types.
@@ -100,7 +105,7 @@ export function isRuntimeNode(node: AST.Node | TSESTree.Node): boolean {
  * @returns Whether the node is a function declaration, function expression, or
  * arrow function.
  */
-export function isFunction(node: TSESTree.Node): boolean {
+export function isFunctionNode(node: TSESTree.Node): node is FunctionNode {
   return [
     'FunctionDeclaration',
     'FunctionExpression',

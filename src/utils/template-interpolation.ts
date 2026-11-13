@@ -211,7 +211,7 @@ export function createInterpolationReplacement(
       () => false,
     )
     if (
-      value.unknown ||
+      value.hasUnknownVariants ||
       !value.variants.length ||
       value.variants.some(
         /**

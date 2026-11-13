@@ -270,7 +270,7 @@ export const preferFunctionResultPattern = createRule<
         if (!identity) {
           return
         }
-        const name = identity.exportedName ?? identity.name
+        const name = identity.exportedName ?? identity.classificationName
         const selected = new Map<number | undefined, (typeof targets)[number]>()
         for (const target of targets) {
           if (

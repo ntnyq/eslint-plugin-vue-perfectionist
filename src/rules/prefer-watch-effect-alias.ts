@@ -157,7 +157,8 @@ export const preferWatchEffectAlias = createRule<
         const identity = getCallIdentity(node, sourceCode)
         if (
           !identity ||
-          (identity.exportedName ?? identity.name) !== 'watchEffect'
+          (identity.exportedName ?? identity.classificationName) !==
+            'watchEffect'
         ) {
           return
         }

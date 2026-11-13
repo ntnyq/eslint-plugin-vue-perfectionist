@@ -107,9 +107,11 @@ export const preferFunctionDeclaration = createRule<
       const identity = getCallIdentity(call, sourceCode)
       return (
         identity &&
-        (identity.exportedName ?? identity.name) === 'defineComponent' &&
+        (identity.exportedName ?? identity.classificationName) ===
+          'defineComponent' &&
         (identity.source === 'vue' ||
-          (identity.isUnbound && vueGlobals.includes(identity.name)))
+          (identity.isUnbound &&
+            vueGlobals.includes(identity.classificationName)))
       )
     }
 

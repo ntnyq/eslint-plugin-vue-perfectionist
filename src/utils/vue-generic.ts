@@ -1,8 +1,9 @@
-import { hyphenateName, validatePropName } from './component-props/config.ts'
+import { validatePropName } from './component-props/config.ts'
 import {
   compileConstraint,
   getValueFailures,
 } from './component-props/constraints.ts'
+import { hyphenateName } from './vue/names.ts'
 import type { AST } from 'vue-eslint-parser'
 import type { RequireVueGenericTarget } from '../types/rules/require-vue-generic.ts'
 import type { ComponentPropBinding } from './component-props/bindings.ts'
@@ -68,7 +69,8 @@ function matchCondition(
     }
     let accepts = false
     let rejects = false
-    let uncertain = binding.value.unknown || !binding.value.variants.length
+    let uncertain =
+      binding.value.hasUnknownVariants || !binding.value.variants.length
     for (const variant of binding.value.variants) {
       const failures = getValueFailures(variant, constraint)
       if (failures === undefined) {

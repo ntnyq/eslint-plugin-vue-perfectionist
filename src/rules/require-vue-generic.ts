@@ -1,9 +1,6 @@
 import { PROP_VALUE_CONSTRAINT_SCHEMA } from '../constants/component-prop-values.ts'
-import { COMPONENT_NAMES_SCHEMA } from '../constants/component-props.ts'
-import {
-  analyzeComponentBindings,
-  matchComponent,
-} from '../utils/component-props/bindings.ts'
+import { COMPONENT_NAMES_SCHEMA } from '../constants/component-schema.ts'
+import { analyzeComponentBindings } from '../utils/component-props/bindings.ts'
 import { inferStaticPropValue } from '../utils/component-props/static-value.ts'
 import { createRule } from '../utils/create-rule.ts'
 import {
@@ -11,6 +8,7 @@ import {
   hasVueGenericComment,
   matchGenericExemptions,
 } from '../utils/vue-generic.ts'
+import { resolveComponentName } from '../utils/vue/component.ts'
 import {
   hasTemplateVisitor,
   hasVueServices,
@@ -90,7 +88,7 @@ export const requireVueGeneric = createRule<
     const comments = services.getDocumentFragment()?.comments ?? []
     return services.defineTemplateBodyVisitor({
       VElement(node) {
-        const component = matchComponent(node)
+        const component = resolveComponentName(node)
         const conditions = component && targets.get(component)
         if (!conditions || hasVueGenericComment(node, comments)) {
           return

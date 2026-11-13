@@ -1,8 +1,8 @@
 import { compare } from 'natural-orderby'
 import { getMemberName, hasDuplicateMembers, isPrototypeSetter } from './ast.ts'
+import { resolveComposableOptions } from './options.ts'
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
 import type {
-  ComposableGroupOverrides,
   ComposableMemberKind,
   ComposableNewlines,
   SortComposableMessageId,
@@ -12,68 +12,10 @@ import type { MemberKind } from './classify.ts'
 
 const MAX_WHITESPACE_LENGTH = 65_536
 
-interface Group extends Required<ComposableGroupOverrides> {
-  names: string[]
-  before: ComposableNewlines
-}
-
 interface Member {
   node: TSESTree.Property
   name: string
   group: number
-}
-
-/**
- * Validate group references and resolve overrides once per file.
- */
-function resolveGroups(options: SortComposableOptions): Group[] {
-  const available = new Set(['state', 'method'])
-  for (const custom of options.customGroups ?? []) {
-    if (available.has(custom.groupName)) {
-      throw new Error(`Duplicate composable group: ${custom.groupName}`)
-    }
-    available.add(custom.groupName)
-  }
-  const groups: Group[] = []
-  const used = new Set<string>()
-  let separator: ComposableNewlines | undefined
-  for (const entry of options.groups ?? ['state', 'method']) {
-    if (typeof entry === 'object' && 'newlinesBetween' in entry) {
-      if (!groups.length || separator !== undefined) {
-        throw new Error(
-          'Composable newline separators must occur between groups.',
-        )
-      }
-      separator = entry.newlinesBetween
-      continue
-    }
-    const override =
-      typeof entry === 'object' && 'group' in entry ? entry : undefined
-    const names = override?.group ?? entry
-    const groupNames = typeof names === 'string' ? [names] : names
-    // Non-separator entries are strings, arrays, or group override objects.
-    if (!Array.isArray(groupNames)) {
-      throw new TypeError('Invalid composable group.')
-    }
-    for (const name of groupNames) {
-      if (!available.has(name) || used.has(name)) {
-        throw new Error(`Unknown or repeated composable group: ${name}`)
-      }
-      used.add(name)
-    }
-    groups.push({
-      names: groupNames,
-      type: override?.type ?? options.type ?? 'unsorted',
-      order: override?.order ?? options.order ?? 'asc',
-      newlinesInside: override?.newlinesInside ?? options.newlinesInside ?? 0,
-      before: separator ?? options.newlinesBetween ?? 1,
-    })
-    separator = undefined
-  }
-  if (separator !== undefined) {
-    throw new Error('Composable newline separators must occur between groups.')
-  }
-  return groups
 }
 
 export const SORT_COMPOSABLE_MESSAGES = {
@@ -101,16 +43,8 @@ export function createComposableReporter(
   options: SortComposableOptions,
 ) {
   const sourceCode = context.sourceCode
-  const groups = resolveGroups(options)
-  const customGroups = (options.customGroups ?? []).map(group => ({
-    ...group,
-    pattern: new RegExp(group.elementNamePattern ?? ''),
-  }))
-  const memberKinds = (options.memberKinds ?? []).map(member => ({
-    ...member,
-    functionRegex: new RegExp(member.functionPattern),
-    nameRegex: new RegExp(member.elementNamePattern),
-  }))
+  const { groups, customGroups, memberKinds } =
+    resolveComposableOptions(options)
   const natural = compare({ locale: 'en' })
   const eol = sourceCode.text.match(/\r\n|[\n\r\u{2028}\u{2029}]/u)?.[0] ?? '\n'
 

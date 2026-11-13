@@ -26,20 +26,21 @@ pnpm install --frozen-lockfile
 
 在仓库根目录运行以下命令：
 
-| 命令                                                      | 用途                                     |
-| --------------------------------------------------------- | ---------------------------------------- |
-| `pnpm dev`                                                | 源码变更时重新构建插件。                 |
-| `pnpm build`                                              | 使用 tsdown 打包并生成 TypeScript 声明。 |
-| `pnpm test`                                               | 运行一次 Vitest；配置中已禁用监听模式。  |
-| `pnpm exec vitest run tests/rules/callback-style.test.ts` | 运行指定规则的测试。                     |
-| `pnpm typecheck`                                          | 检查 TypeScript 类型，不生成文件。       |
-| `pnpm lint`                                               | 运行 ESLint。                            |
-| `pnpm format`                                             | 应用 Oxfmt 格式化。                      |
-| `pnpm format:check`                                       | 检查格式。                               |
-| `pnpm docs:dev`                                           | 在本地启动 VitePress 文档站。            |
-| `pnpm docs:build`                                         | 构建文档并检查页面链接。                 |
-| `pnpm docs:sync`                                          | 更新规则目录与规则页摘要的生成区块。     |
-| `pnpm docs:check`                                         | 校验双语页面、目录、示例诊断及渲染。     |
+| 命令                                                      | 用途                                           |
+| --------------------------------------------------------- | ---------------------------------------------- |
+| `pnpm dev`                                                | 源码变更时重新构建插件。                       |
+| `pnpm build`                                              | 使用 tsdown 打包并生成 TypeScript 声明。       |
+| `pnpm test`                                               | 运行一次 Vitest；配置中已禁用监听模式。        |
+| `pnpm exec vitest run tests/rules/callback-style.test.ts` | 运行指定规则的测试。                           |
+| `pnpm typecheck`                                          | 检查 TypeScript 类型，不生成文件。             |
+| `pnpm lint`                                               | 运行 ESLint。                                  |
+| `pnpm format`                                             | 应用 Oxfmt 格式化。                            |
+| `pnpm format:check`                                       | 检查格式。                                     |
+| `pnpm docs:dev`                                           | 在本地启动 VitePress 文档站。                  |
+| `pnpm docs:build`                                         | 构建文档并检查页面链接。                       |
+| `pnpm docs:sync`                                          | 更新规则目录与规则页摘要的生成区块。           |
+| `pnpm docs:typecheck`                                     | 使用 vue-tsc 检查文档 TypeScript 及 Vue 组件。 |
+| `pnpm docs:check`                                         | 校验双语页面、目录、示例诊断及渲染。           |
 
 `dist/` 和 `docs/.vitepress/dist/` 为生成产物，请修改其源文件。提交前钩子会通过 nano-staged 运行代码检查及格式修复。
 
@@ -82,7 +83,7 @@ README 规则表、规则概览、首页功能卡片及规则侧栏使用相同�
 类型检查示例通过真实的 TypeScript program 运行。未知配置名或不适用于当前规则的配置会报错。
 `<!-- prettier-ignore -->` 可保留刻意触发诊断的格式，不会跳过示例校验。
 
-运行 `pnpm docs:check` 和 `pnpm docs:build`。前者检查目录同步、双语页面覆盖、全部规则示例及诊断渲染；
+先运行 `pnpm docs:typecheck` 检查文档组件的类型，再运行 `pnpm docs:check` 和 `pnpm docs:build`。`pnpm docs:check` 检查目录同步、双语页面覆盖、全部规则示例及诊断渲染；
 后者也会验证示例并检查页面链接。修改容器展示时仍需检查实际页面。
 
 排序演示在构建时读取源码规则并预编译高亮，配套测试位于 `docs/.vitepress/components/demos/sort-script-setup/`。
@@ -101,10 +102,11 @@ pnpm lint
 pnpm typecheck
 pnpm build
 pnpm test
+pnpm docs:typecheck
 pnpm docs:check
 pnpm docs:build
 ```
 
 描述行为变化、关联相关 issue，并说明验证结果。选项或行为变化时，同步更新规则文档。使用简洁的 Conventional Commit 前缀，例如 `fix:` 或 `docs:`。
 
-CI 先检查格式、代码及类型，再在 Linux、Windows 和 macOS 上使用 Node 22、24 和 26 构建和测试包。独立的文档 CI 任务运行 `pnpm docs:check` 和 `pnpm docs:build`。
+CI 先检查格式、代码及类型，再在 Linux、Windows 和 macOS 上使用 Node 22、24 和 26 构建和测试包。独立的文档 CI 任务先运行 `pnpm docs:typecheck` 检查文档组件的类型，再运行 `pnpm docs:check` 和 `pnpm docs:build`。

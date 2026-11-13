@@ -123,6 +123,30 @@ state } = usePage()
       },
     ],
     invalid: [
+      ...[false, true].map(awaitFirst => {
+        const direct =
+          'const { submit: directSubmit, state: directState } = usePage()'
+        const awaited =
+          'const { submit: awaitedSubmit, state: awaitedState } = await usePage()'
+        return {
+          description:
+            'cached local returns preserve separate direct and awaited thenable policies',
+          code: `function usePage() { return { then(resolve) { resolve({}) }, state: 1, submit() {} } }; ${awaitFirst ? `${awaited}; ${direct}` : `${direct}; ${awaited}`}`,
+          options: { unknownMembers: 'report' as const },
+          errors: awaitFirst
+            ? [
+                'unknownMember' as const,
+                'unknownMember' as const,
+                'unexpectedGroupOrder' as const,
+              ]
+            : [
+                'unexpectedGroupOrder' as const,
+                'unknownMember' as const,
+                'unknownMember' as const,
+              ],
+          output: null,
+        }
+      }),
       {
         description:
           'known non-callable then properties do not block local await inference',

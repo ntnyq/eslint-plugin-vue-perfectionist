@@ -5,8 +5,8 @@
 This package provides ESLint rules for consistent, readable, and maintainable Vue 3 code, covering callback styles, macro declaration layout, template ref naming, and statement ordering. Each rule defines its own scope: rules may target Vue SFC templates, script blocks, or standalone JavaScript and TypeScript files.
 
 - `src/index.ts` and `src/plugin.ts` expose the plugin and its rules. The plugin does not provide built-in configurations; users compose their own.
-- `src/rules/` contains flat rule entry files. `src/utils/ast/` holds parser-independent AST helpers, `src/utils/vue/` holds Vue parser and scope integration, and `src/utils/component-props/` holds component prop analysis.
-- `src/utils/sort-script-setup/` owns statement sorting internals, including its constants, schema, internal models, group matching, option resolution, and validation. `src/utils/sort-composable/` owns composable member analysis, reporting, and its shared schema. Public rule options stay in `src/types/rules/`; shared ESLint source types live in `src/types/eslint.ts`.
+- `src/rules/` contains flat rule entry files. `src/utils/ast/` holds parser-independent AST helpers, `src/utils/vue/` holds Vue parser and scope integration, component identity, and name normalization, and `src/utils/component-props/` holds component prop analysis.
+- `src/utils/sort-script-setup/` owns statement sorting internals, including its constants, schema, internal models, group matching, option resolution, and validation. `src/utils/sort-composable/` owns composable option compilation, cached member analysis, reporting, and its shared schema. Public rule options stay in `src/types/rules/`; shared ESLint source types live in `src/types/eslint.ts`.
 - Use explicit utility imports rather than a root barrel. Keep single-purpose helpers such as `composable-options.ts` and `template-interpolation.ts` at `src/utils/` until a real multi-file domain emerges. See `docs/design/source-structure.md` for ownership and behavior boundaries.
 - `tests/rules/` contains rule behavior suites; large rules and closely related rules may use a dedicated subdirectory. `sort-composable/` keeps return, destructuring, type-aware tests, and shared policy cases together; `require-injection-key/` separates syntax and strict mode.
 - `tests/integration/` contains plugin contracts, rule composition, and Vue compiler/runtime comparisons, organized by the behavior being verified. Keep `eslint-plugin.test.ts` focused on package exports and user-composed configuration; compiler, runtime, and type-semantic model checks belong in `model-name-casing.test.ts`.
@@ -26,6 +26,7 @@ Use the pnpm version pinned in `package.json` and the Node version selected by `
 - `pnpm lint`: run ESLint.
 - `pnpm format` / `pnpm format:check`: apply or verify Oxfmt formatting.
 - `pnpm docs:dev` / `pnpm docs:build`: serve or build the documentation.
+- `pnpm docs:typecheck`: check documentation TypeScript and Vue components with vue-tsc.
 - `pnpm docs:sync` / `pnpm docs:check`: regenerate rule catalogs and summaries, or validate documentation contracts.
 
 ## Coding Style & Naming Conventions

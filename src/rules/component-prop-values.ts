@@ -1,9 +1,6 @@
 import { PROP_VALUE_CONSTRAINT_SCHEMA } from '../constants/component-prop-values.ts'
-import { COMPONENT_NAMES_SCHEMA } from '../constants/component-props.ts'
-import {
-  analyzeComponentBindings,
-  matchComponent,
-} from '../utils/component-props/bindings.ts'
+import { COMPONENT_NAMES_SCHEMA } from '../constants/component-schema.ts'
+import { analyzeComponentBindings } from '../utils/component-props/bindings.ts'
 import {
   compilePropValues,
   describePropVariant,
@@ -11,6 +8,7 @@ import {
 } from '../utils/component-props/constraints.ts'
 import { inferStaticPropValue } from '../utils/component-props/static-value.ts'
 import { createRule } from '../utils/create-rule.ts'
+import { resolveComponentName } from '../utils/vue/component.ts'
 import { hasTemplateVisitor } from '../utils/vue/parser-services.ts'
 import type {
   ComponentPropValuesMessageId,
@@ -80,7 +78,7 @@ export const componentPropValues = createRule<
     }
     return services.defineTemplateBodyVisitor({
       VElement(node) {
-        const component = matchComponent(node)
+        const component = resolveComponentName(node)
         const props = component && targets.get(component)
         if (!props) {
           return
@@ -98,7 +96,7 @@ export const componentPropValues = createRule<
           }
           const expected = new Set<string>()
           const actual = new Set<string>()
-          let unknown = binding.value.unknown
+          let unknown = binding.value.hasUnknownVariants
           for (const variant of binding.value.variants) {
             const failures = getValueFailures(variant, constraint)
             if (failures === undefined) {

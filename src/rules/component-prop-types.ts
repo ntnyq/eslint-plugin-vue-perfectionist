@@ -1,14 +1,10 @@
-import {
-  COMPONENT_NAMES_SCHEMA,
-  PROP_TYPES_SCHEMA,
-} from '../constants/component-props.ts'
-import {
-  analyzeComponentBindings,
-  matchComponent,
-} from '../utils/component-props/bindings.ts'
+import { PROP_TYPES_SCHEMA } from '../constants/component-props.ts'
+import { COMPONENT_NAMES_SCHEMA } from '../constants/component-schema.ts'
+import { analyzeComponentBindings } from '../utils/component-props/bindings.ts'
 import { compilePropTypes } from '../utils/component-props/config.ts'
 import { analyzePropTypes } from '../utils/component-props/type-analysis.ts'
 import { createRule } from '../utils/create-rule.ts'
+import { resolveComponentName } from '../utils/vue/component.ts'
 import { hasTemplateVisitor } from '../utils/vue/parser-services.ts'
 import type {
   ComponentPropTypesMessageId,
@@ -94,7 +90,7 @@ export const componentPropTypes = createRule<
     }
     return services.defineTemplateBodyVisitor({
       VElement(node) {
-        const component = matchComponent(node)
+        const component = resolveComponentName(node)
         const props = component && targets.get(component)
         if (!props) {
           return
@@ -117,11 +113,11 @@ export const componentPropTypes = createRule<
           let messageId: ComponentPropTypesMessageId
           if (invalid.length) {
             messageId =
-              actual.length > 1 || binding.value.unknown
+              actual.length > 1 || binding.value.hasUnknownVariants
                 ? 'possiblyInvalidPropType'
                 : 'invalidPropType'
           } else if (
-            binding.value.unknown &&
+            binding.value.hasUnknownVariants &&
             options.unknownValues === 'report'
           ) {
             messageId = 'unverifiablePropType'

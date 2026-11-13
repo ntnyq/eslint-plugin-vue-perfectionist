@@ -1,6 +1,6 @@
 import { isNil } from '@ntnyq/utils'
 import { ASTUtils } from '@typescript-eslint/utils'
-import { isFunction, unwrapExpression } from '../ast/expressions.ts'
+import { isFunctionNode, unwrapExpression } from '../ast/expressions.ts'
 import { getChildren } from '../ast/traversal.ts'
 import { getCallIdentity } from '../vue/call-identity.ts'
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
@@ -14,12 +14,12 @@ import type { ResolvedOptions, Statement } from './types.ts'
  * @returns The function node, or undefined when the node does not initialize a
  * function.
  */
-function getFunctionBody(node: TSESTree.Node): TSESTree.Node | undefined {
-  if (isFunction(node)) {
+function resolveFunctionNode(node: TSESTree.Node): TSESTree.Node | undefined {
+  if (isFunctionNode(node)) {
     return node
   }
   if (node.type === 'VariableDeclarator' && node.init) {
-    return getFunctionBody(unwrapExpression(node.init))
+    return resolveFunctionNode(unwrapExpression(node.init))
   }
   return undefined
 }
@@ -126,7 +126,7 @@ export function buildDependencies(
         return
       }
       const expression = unwrapExpression(node)
-      if (isFunction(expression)) {
+      if (isFunctionNode(expression)) {
         visit(expression, true)
         return
       }
@@ -135,7 +135,7 @@ export function buildDependencies(
         if (!['FunctionName', 'Variable'].includes(definition.type)) {
           continue
         }
-        const fn = getFunctionBody(definition.node)
+        const fn = resolveFunctionNode(definition.node)
         if (fn) {
           visit(fn, true)
         }
@@ -150,10 +150,10 @@ export function buildDependencies(
      * defaults to false.
      */
     function visit(node: TSESTree.Node, executeFunction = false) {
-      if (isFunction(node) && !executeFunction) {
+      if (isFunctionNode(node) && !executeFunction) {
         return
       }
-      if (isFunction(node)) {
+      if (isFunctionNode(node)) {
         if (visitedFunctions.has(node)) {
           return
         }
@@ -181,10 +181,11 @@ export function buildDependencies(
           identity &&
           ((identity.source &&
             options.vueImportSources.includes(identity.source)) ||
-            (identity.isUnbound && options.vueGlobals.includes(identity.name)))
+            (identity.isUnbound &&
+              options.vueGlobals.includes(identity.classificationName)))
         if (isVueCall) {
           const first = node.arguments[0]
-          if (identity.name === 'watch') {
+          if (identity.classificationName === 'watch') {
             const source = first ? unwrapExpression(first) : undefined
             if (source?.type === 'ArrayExpression') {
               source.elements.forEach(
@@ -206,7 +207,7 @@ export function buildDependencies(
             ) {
               visitFunction(node.arguments[1])
             }
-          } else if (identity.name === 'watchEffect') {
+          } else if (identity.classificationName === 'watchEffect') {
             const callOptions = getCallOptions(node.arguments[1], sourceCode)
             if (
               !callOptions ||
@@ -215,7 +216,11 @@ export function buildDependencies(
             ) {
               visitFunction(first)
             }
-          } else if (['watchSyncEffect', 'customRef'].includes(identity.name)) {
+          } else if (
+            ['watchSyncEffect', 'customRef'].includes(
+              identity.classificationName,
+            )
+          ) {
             visitFunction(first)
           }
         }

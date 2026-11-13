@@ -89,7 +89,7 @@ export const sortComposableDestructure = createRule<
         const name =
           callee.type === 'Identifier' && identity.exportedName === 'default'
             ? identity.localName
-            : identity.name
+            : identity.classificationName
         if (
           !pattern.test(name) ||
           ignored.has(name) ||

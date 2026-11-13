@@ -27,31 +27,32 @@ function classifyCall(
   if (!identity) {
     return undefined
   }
-  statement.callName = identity.name
+  statement.callName = identity.classificationName
   statement.importSource = identity.source
-  if (identity.isUnbound && identity.name === 'withDefaults') {
+  if (identity.isUnbound && identity.classificationName === 'withDefaults') {
     const first = call.arguments[0]
     if (first?.type === 'CallExpression') {
       const inner = getCallIdentity(first, sourceCode)
-      if (inner?.isUnbound && inner.name === 'defineProps') {
+      if (inner?.isUnbound && inner.classificationName === 'defineProps') {
         statement.callName = 'defineProps'
         return 'define-props'
       }
     }
   }
-  if (identity.isUnbound && MACROS.has(identity.name)) {
-    return MACROS.get(identity.name)
+  if (identity.isUnbound && MACROS.has(identity.classificationName)) {
+    return MACROS.get(identity.classificationName)
   }
   if (
     (identity.source && options.vueImportSources.includes(identity.source)) ||
-    (identity.isUnbound && options.vueGlobals.includes(identity.name))
+    (identity.isUnbound &&
+      options.vueGlobals.includes(identity.classificationName))
   ) {
-    const selector = VUE_APIS.get(identity.name)
+    const selector = VUE_APIS.get(identity.classificationName)
     if (selector) {
       return selector
     }
   }
-  if (identity.source && /^use[A-Z0-9]/u.test(identity.name)) {
+  if (identity.source && /^use[A-Z0-9]/u.test(identity.classificationName)) {
     return 'composable'
   }
   return undefined

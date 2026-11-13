@@ -1,7 +1,7 @@
 import {
   CALLBACK_APIS,
   VUEUSE_CALLBACK_APIS,
-} from '../../constants/callback-style.ts'
+} from '../../constants/callback-apis.ts'
 import { getCallIdentity } from './call-identity.ts'
 import { resolveVueGlobals, resolveVueUse } from './globals.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
@@ -108,7 +108,7 @@ export function createCallbackVisitor(
       if (!identity) {
         return
       }
-      const name = identity.exportedName ?? identity.name
+      const name = identity.exportedName ?? identity.classificationName
       const indices = new Set<number>()
       for (const builtin of builtins) {
         if (

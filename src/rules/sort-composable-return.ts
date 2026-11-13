@@ -1,7 +1,7 @@
 import { unwrapExpression } from '../utils/ast/expressions.ts'
 import { createRule } from '../utils/create-rule.ts'
 import {
-  getComposableFunctionName,
+  getFunctionBindingName,
   getReturnOwner,
 } from '../utils/sort-composable/ast.ts'
 import { createMemberClassifier } from '../utils/sort-composable/classify.ts'
@@ -15,7 +15,7 @@ import type {
   SortComposableReturnMessageId,
   SortComposableReturnOptions,
 } from '../types/index.ts'
-import type { ComposableFunction } from '../utils/sort-composable/ast.ts'
+import type { FunctionNode } from '../utils/ast/expressions.ts'
 
 export const sortComposableReturn = createRule<
   [SortComposableReturnOptions],
@@ -47,14 +47,11 @@ export const sortComposableReturn = createRule<
     const pattern = new RegExp(options.functionPattern ?? '^use[A-Z]')
     const ignored = new Set(options.ignoreNames)
 
-    function check(
-      fn: ComposableFunction | undefined,
-      value: TSESTree.Node | null,
-    ) {
+    function check(fn: FunctionNode | undefined, value: TSESTree.Node | null) {
       if (!fn || !value || fn.generator) {
         return
       }
-      const name = getComposableFunctionName(fn)
+      const name = getFunctionBindingName(fn)
       const object = unwrapExpression(value)
       if (
         name &&

@@ -1,31 +1,13 @@
-import { unwrapExpression } from '../ast/expressions.ts'
+import { isFunctionNode, unwrapExpression } from '../ast/expressions.ts'
+import { getChildren } from '../ast/traversal.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type { SourceCode } from '../../types/eslint.ts'
-
-export type ComposableFunction =
-  | TSESTree.ArrowFunctionExpression
-  | TSESTree.FunctionDeclaration
-  | TSESTree.FunctionExpression
-
-/**
- * Narrow function nodes without including signatures or class methods.
- */
-export function isComposableFunction(
-  node: TSESTree.Node,
-): node is ComposableFunction {
-  return [
-    'FunctionDeclaration',
-    'FunctionExpression',
-    'ArrowFunctionExpression',
-  ].includes(node.type)
-}
+import type { FunctionNode } from '../ast/expressions.ts'
 
 /**
  * Read the declaration binding name, including wrapped variable initializers.
  */
-export function getComposableFunctionName(
-  node: ComposableFunction,
-): string | undefined {
+export function getFunctionBindingName(node: FunctionNode): string | undefined {
   if (node.type === 'FunctionDeclaration') {
     return node.id?.name
   }
@@ -44,10 +26,10 @@ export function getComposableFunctionName(
  */
 export function getReturnOwner(
   node: TSESTree.ReturnStatement,
-): ComposableFunction | undefined {
+): FunctionNode | undefined {
   let parent: TSESTree.Node | undefined = node.parent
   while (parent) {
-    if (isComposableFunction(parent)) {
+    if (isFunctionNode(parent)) {
       return parent
     }
     parent = parent.parent
@@ -128,7 +110,7 @@ export function hasDuplicateMembers(node: TSESTree.ObjectExpression): boolean {
  * are retained so a consumer cannot infer a kind from only one branch.
  */
 export function getReturnedObjects(
-  fn: ComposableFunction,
+  fn: FunctionNode,
   sourceCode: SourceCode,
 ): (TSESTree.ObjectExpression | undefined)[] {
   if (!fn.body) {
@@ -142,22 +124,15 @@ export function getReturnedObjects(
     )
   }
   function visit(node: TSESTree.Node) {
-    if (isComposableFunction(node) || node.type === 'ClassDeclaration') {
+    if (isFunctionNode(node) || node.type === 'ClassDeclaration') {
       return
     }
     if (node.type === 'ReturnStatement') {
       add(node.argument)
       return
     }
-    for (const key of sourceCode.visitorKeys[node.type] ?? []) {
-      // Visitor keys describe the parser's child nodes, excluding parent links.
-      const child: unknown = Reflect.get(node, key)
-      const children = Array.isArray(child) ? child : [child]
-      for (const value of children) {
-        if (value && typeof value === 'object' && 'type' in value) {
-          visit(value as TSESTree.Node)
-        }
-      }
+    for (const child of getChildren(node, sourceCode)) {
+      visit(child)
     }
   }
   if (fn.body.type === 'BlockStatement') {

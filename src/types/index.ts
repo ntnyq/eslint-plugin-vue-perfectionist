@@ -1,5 +1,4 @@
 export * from './plugins.ts'
-export type * from './ast.ts'
 export type * from './eslint.ts'
 export type * from './callback.ts'
 export type * from './rules/callback-style.ts'

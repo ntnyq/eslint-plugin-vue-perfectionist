@@ -49,7 +49,8 @@ export function inferStaticPropValue(
       ? unknownPropValue(node)
       : {
           variants,
-          unknown: consequent.unknown || alternate.unknown,
+          hasUnknownVariants:
+            consequent.hasUnknownVariants || alternate.hasUnknownVariants,
           node,
         }
   }
@@ -85,8 +86,8 @@ export function inferStaticPropValue(
           ]
         },
       ),
-      unknown:
-        argument.unknown ||
+      hasUnknownVariants:
+        argument.hasUnknownVariants ||
         argument.variants.some(
           /**
            * Detect unary operands whose result cannot be inferred safely.
@@ -112,14 +113,14 @@ export function inferStaticPropValue(
       return unknownPropValue(node)
     }
     const variants: PropValueVariant[] = []
-    let unknown = left.unknown || right.unknown
+    let hasUnknownVariants = left.hasUnknownVariants || right.hasUnknownVariants
     for (const first of left.variants) {
       for (const second of right.variants) {
         if (
           typeof first.value !== 'number' ||
           typeof second.value !== 'number'
         ) {
-          unknown = true
+          hasUnknownVariants = true
           continue
         }
         let value: number
@@ -147,7 +148,7 @@ export function inferStaticPropValue(
     }
     return {
       variants,
-      unknown,
+      hasUnknownVariants,
       node,
     }
   }

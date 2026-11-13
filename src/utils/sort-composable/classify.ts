@@ -1,16 +1,10 @@
 import { ESLintUtils } from '@typescript-eslint/utils'
-import { unwrapExpression } from '../ast/expressions.ts'
+import { isFunctionNode, unwrapExpression } from '../ast/expressions.ts'
 import { findScopeReference } from '../ast/scope.ts'
 import { getCallIdentity } from '../vue/call-identity.ts'
 import { resolveVueGlobals } from '../vue/globals.ts'
 import { getScriptVariableDefinitions } from '../vue/script-scope.ts'
-import {
-  getMemberName,
-  getReturnedObjects,
-  hasDuplicateMembers,
-  isComposableFunction,
-  isPrototypeSetter,
-} from './ast.ts'
+import { getMemberName, getReturnedObjects, isPrototypeSetter } from './ast.ts'
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
 import type ts from 'typescript'
 import type {
@@ -18,8 +12,11 @@ import type {
   SortComposableMessageId,
   SortComposableOptions,
 } from '../../types/rules/sort-composable.ts'
+import type { FunctionNode } from '../ast/expressions.ts'
 
 export type MemberKind = ComposableMemberKind | 'unknown'
+
+type ReturnedMembers = ReadonlyMap<string, TSESTree.Property> | undefined
 
 const REF_APIS = new Set([
   'ref',
@@ -156,6 +153,14 @@ export function createMemberClassifier(
     ...REF_APIS,
     ...PROXY_APIS,
   ])
+  // AST and scope information are stable for this rule instance. Keep caches
+  // local to the file; awaited-call safety is still checked for each consumer.
+  const localFunctions = new WeakMap<
+    TSESTree.CallExpression,
+    FunctionNode | null
+  >()
+  const returnedMembers = new WeakMap<FunctionNode, ReturnedMembers[]>()
+  const propertyKinds = new WeakMap<TSESTree.Property, MemberKind>()
 
   function typeOf(node: TSESTree.Node): MemberKind {
     return services && checker
@@ -192,7 +197,7 @@ export function createMemberClassifier(
     }
     visiting.add(node)
     let kind: MemberKind = 'unknown'
-    if (isComposableFunction(node)) {
+    if (isFunctionNode(node)) {
       kind = 'method'
     } else if (
       [
@@ -226,9 +231,9 @@ export function createMemberClassifier(
       if (
         identity &&
         (identity.source === 'vue' ||
-          (identity.isUnbound && globals.includes(identity.name)))
+          (identity.isUnbound && globals.includes(identity.classificationName)))
       ) {
-        const api = identity.exportedName ?? identity.name
+        const api = identity.exportedName ?? identity.classificationName
         if (REF_APIS.has(api)) {
           kind = 'state'
         } else if (
@@ -250,17 +255,29 @@ export function createMemberClassifier(
 
   function propertyKind(node: TSESTree.Property): MemberKind {
     // Accessors expose their result, not the getter/setter function itself.
-    return node.kind === 'init' ? expressionKind(node.value) : 'unknown'
+    let kind = propertyKinds.get(node)
+    if (kind === undefined) {
+      kind = node.kind === 'init' ? expressionKind(node.value) : 'unknown'
+      propertyKinds.set(node, kind)
+    }
+    return kind
   }
 
-  function localPropertyKind(
+  /**
+   * Resolve each call's stable local function binding once, preserving writes
+   * and scope ambiguity as unknown.
+   */
+  function resolveLocalFunction(
     call: TSESTree.CallExpression,
-    name: string,
-    awaited: boolean,
-  ): MemberKind {
+  ): FunctionNode | null {
+    const cached = localFunctions.get(call)
+    if (cached !== undefined) {
+      return cached
+    }
     const callee = unwrapExpression(call.callee)
     if (callee.type !== 'Identifier') {
-      return 'unknown'
+      localFunctions.set(call, null)
+      return null
     }
     const definitions = resolveDefinitions(callee)
     const definition = definitions.length === 1 ? definitions[0] : undefined
@@ -275,36 +292,60 @@ export function createMemberClassifier(
     ) {
       fn = unwrapExpression(definition.node.init)
     }
-    if (
-      !fn ||
-      !isComposableFunction(fn) ||
-      fn.generator ||
-      (fn.async && !awaited)
-    ) {
+    const resolved = fn && isFunctionNode(fn) && !fn.generator ? fn : null
+    localFunctions.set(call, resolved)
+    return resolved
+  }
+
+  /**
+   * Index every direct return once per function. Unsupported branches remain
+   * in the result so one known branch cannot hide another unknown branch.
+   */
+  function getReturnedMembers(fn: FunctionNode): ReturnedMembers[] {
+    let cached = returnedMembers.get(fn)
+    if (cached) {
+      return cached
+    }
+    cached = getReturnedObjects(fn, sourceCode).map(object => {
+      if (!object) {
+        return undefined
+      }
+      const properties = new Map<string, TSESTree.Property>()
+      for (const property of object.properties) {
+        if (property.type !== 'Property' || isPrototypeSetter(property)) {
+          return undefined
+        }
+        const name = getMemberName(property)
+        if (name === undefined || properties.has(name)) {
+          return undefined
+        }
+        properties.set(name, property)
+      }
+      return properties
+    })
+    returnedMembers.set(fn, cached)
+    return cached
+  }
+
+  function localPropertyKind(
+    call: TSESTree.CallExpression,
+    name: string,
+    awaited: boolean,
+  ): MemberKind {
+    const fn = resolveLocalFunction(call)
+    if (!fn || (fn.async && !awaited)) {
       return 'unknown'
     }
-    const objects = getReturnedObjects(fn, sourceCode)
-    const kinds = objects.map(object => {
-      if (
-        !object ||
-        hasDuplicateMembers(object) ||
-        object.properties.some(
-          property =>
-            property.type !== 'Property' ||
-            getMemberName(property) === undefined ||
-            isPrototypeSetter(property) ||
-            (awaited &&
-              getMemberName(property) === 'then' &&
-              propertyKind(property) !== 'state'),
-        )
-      ) {
+    const kinds = getReturnedMembers(fn).map(properties => {
+      if (!properties) {
         return 'unknown'
       }
-      const property = object.properties.find(
-        property =>
-          property.type === 'Property' && getMemberName(property) === name,
-      )
-      return property?.type === 'Property' ? propertyKind(property) : 'unknown'
+      const then = properties.get('then')
+      if (awaited && then && propertyKind(then) !== 'state') {
+        return 'unknown'
+      }
+      const property = properties.get(name)
+      return property ? propertyKind(property) : 'unknown'
     })
     return kinds.length && kinds.every(kind => kind === kinds[0])
       ? (kinds[0] ?? 'unknown')

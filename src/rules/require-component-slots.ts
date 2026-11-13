@@ -1,8 +1,8 @@
-import { COMPONENT_NAMES_SCHEMA } from '../constants/component-props.ts'
+import { COMPONENT_NAMES_SCHEMA } from '../constants/component-schema.ts'
 import { getStaticStringValue } from '../utils/ast/expressions.ts'
-import { matchComponent } from '../utils/component-props/bindings.ts'
-import { hyphenateName } from '../utils/component-props/config.ts'
 import { createRule } from '../utils/create-rule.ts'
+import { resolveComponentName } from '../utils/vue/component.ts'
+import { hyphenateName } from '../utils/vue/names.ts'
 import { hasTemplateVisitor } from '../utils/vue/parser-services.ts'
 import type { AST } from 'vue-eslint-parser'
 import type {
@@ -147,7 +147,7 @@ export const requireComponentSlots = createRule<
         if (['component', 'Component', 'slot'].includes(node.rawName)) {
           return
         }
-        const component = matchComponent(node)
+        const component = resolveComponentName(node)
         const requiredSlots = component && targets.get(component)
         if (!requiredSlots) {
           return

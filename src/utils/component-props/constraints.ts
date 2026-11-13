@@ -1,4 +1,5 @@
-import { hyphenateName, validatePropName } from './config.ts'
+import { hyphenateName } from '../vue/names.ts'
+import { validatePropName } from './config.ts'
 import type {
   ComponentPropScalar,
   ComponentPropValueConstraint,

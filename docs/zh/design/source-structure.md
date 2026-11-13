@@ -29,25 +29,29 @@ description: 仓库布局、源码职责、共享分析约定及行为边界。
 
 ## 职责划分 {#ownership}
 
-| 位置                                  | 职责                                                                      |
-| ------------------------------------- | ------------------------------------------------------------------------- |
-| `src/rules/`                          | 规则元信息、schema、访问器组合、诊断选择及报告                            |
-| `src/utils/ast/`                      | 表达式解包、静态字符串、遍历、绑定和精确作用域引用查找                    |
-| `src/utils/vue/`                      | 解析器服务守卫、脚本范围、合并 SFC 作用域、运行时导入、回调、ref 和宏类型 |
-| `src/utils/component-props/`          | 组件匹配、绑定、配置、保守值分析、布尔转换及值约束                        |
-| `src/utils/sort-script-setup/`        | 语句排序常量、schema、分类、分组、比较、依赖、分区、报告及内部模型        |
-| `src/utils/sort-composable/`          | 组合式函数返回值和解构规则共享的 schema、成员分类、AST 分析及报告         |
-| `src/utils/injection-key.ts`          | 注入键识别及严格模式下的 TypeScript 符号来源分析                          |
-| `src/utils/vue-generic.ts`            | 泛型指令匹配及配置的组件豁免条件                                          |
-| `src/utils/composable-options.ts`     | 组合式函数参数结构分析                                                    |
-| `src/utils/template-interpolation.ts` | 保守的模板插值转换                                                        |
-| `src/types/eslint.ts`                 | 共享只读 ESLint 源码访问，不依赖规则上下文泛型                            |
-| `src/types/rules/`                    | 规则配置及诊断类型；公共配置仍在 `src/index.ts` 显式导出                  |
-| `src/constants/`                      | 其余有限值和 schema；已有排序领域在自身目录中维护常量和 schema            |
+| 位置                                  | 职责                                                                                          |
+| ------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `src/rules/`                          | 规则元信息、schema、访问器组合、诊断选择及报告                                                |
+| `src/utils/ast/`                      | 表达式解包、静态字符串、遍历、绑定和精确作用域引用查找                                        |
+| `src/utils/vue/`                      | 解析器服务守卫、脚本范围、合并 SFC 作用域、运行时导入、组件身份、名称转换、回调、ref 和宏类型 |
+| `src/utils/component-props/`          | prop 绑定、配置、保守值分析、布尔转换及值约束                                                 |
+| `src/utils/sort-script-setup/`        | 语句排序常量、schema、分类、分组、比较、依赖、分区、报告及内部模型                            |
+| `src/utils/sort-composable/`          | 组合式函数返回值和解构规则共享的 schema、配置编译、成员分类缓存、AST 分析及报告               |
+| `src/utils/injection-key.ts`          | 注入键识别及严格模式下的 TypeScript 符号来源分析                                              |
+| `src/utils/vue-generic.ts`            | 泛型指令匹配及配置的组件豁免条件                                                              |
+| `src/utils/composable-options.ts`     | 组合式函数参数结构分析                                                                        |
+| `src/utils/template-interpolation.ts` | 保守的模板插值转换                                                                            |
+| `src/types/eslint.ts`                 | 共享只读 ESLint 源码访问，不依赖规则上下文泛型                                                |
+| `src/types/rules/`                    | 规则配置及诊断类型；公共配置仍在 `src/index.ts` 显式导出                                      |
+| `src/constants/`                      | 其余有限值和 schema；已有排序领域在自身目录中维护常量和 schema                                |
 
 按明确文件路径导入内部工具，不提供根工具或常量聚合入口。排序的 `Statement`、`Group`、`ResolvedOptions` 模型放在使用方旁的 `utils/sort-script-setup/types.ts`。排序常量和默认值位于该目录的 `constants.ts`；两个排序领域各自在 `schema.ts` 中维护选项 schema。公共配置类型仍位于 `src/types/rules/`，两套排序逻辑保留各自的语义。
 
-排序内部，`options.ts` 解析默认值及选项交互，`groups.ts` 验证和解析分组并准备匹配器，`validation.ts` 每个规则实例仅编译一次正则。ESLint 通过公共 schema 验证选项结构，包括空行数安全整数边界。内部保留分组冲突、区域、模式、选项交互及 schema 视为缺失的显式 `undefined` 属性等语义约束。编译正则每次匹配前重置 `lastIndex`，确保全局和粘连标志确定性。
+语句排序内部，`options.ts` 解析默认值及选项交互，`groups.ts` 验证和解析分组并准备匹配器，`validation.ts` 每个规则实例仅编译一次正则。ESLint 通过公共 schema 验证选项结构，包括空行数安全整数边界。内部保留分组冲突、区域、模式、选项交互及 schema 视为缺失的显式 `undefined` 属性等语义约束。编译正则每次匹配前重置 `lastIndex`，确保全局和粘连标志确定性。
+
+组件身份识别位于 `utils/vue/component.ts`，名称转换位于 `utils/vue/names.ts`。prop、slot、generic 和 model 规则共享这些 Vue 边界。回调 API 参数位置位于 `constants/callback-apis.ts`，与 `constants/callback-schema.ts` 中的配置结构分开维护。
+
+组合式函数排序在自己的 `options.ts` 中编译分组和成员模式。分类器在每个规则实例内缓存局部函数解析、返回成员索引及属性分类。直接调用和 awaited 调用保留独立的 async 与 thenable 安全策略，不支持的返回分支仍保持未知。
 
 ## 测试归属 {#test-ownership}
 
@@ -72,17 +76,20 @@ description: 仓库布局、源码职责、共享分析约定及行为边界。
 
 ## 文档实现 {#documentation-implementation}
 
-用户内容保留在 `guide/`、`rules/` 和 `design/`，并在 `zh/` 下保持对应路径。站点配置由 `docs/.vitepress/config.ts` 组合：`config/example-rules.ts` 保存默认示例规则选项，`config/examples.ts` 负责示例配置变体、Markdown 容器校验和诊断渲染。排序演示实现及测试继续放在 `docs/.vitepress/components/demos/sort-script-setup/`。
+用户内容保留在 `guide/`、`rules/` 和 `design/`，并在 `zh/` 下保持对应路径。站点配置由 `docs/.vitepress/config.ts` 组合：`config/example-rules.ts` 保存默认示例规则选项，`config/examples.ts` 负责示例配置变体、Markdown 容器校验和诊断渲染。`pnpm docs:typecheck` 使用 `docs/tsconfig.json` 检查 TypeScript 及 Vue 组件，与包的 TypeScript 检查分开运行。排序演示实现及测试继续放在 `docs/.vitepress/components/demos/sort-script-setup/`。
 
 ## 共享约定 {#shared-contracts}
 
 - `unwrapExpression()` 接受脚本及模板 AST 节点，为脚本调用方保留脚本 AST 返回类型。仅移除现有 TypeScript 包装，不解包可选链或求值。
+- `isFunctionNode()` 收窄三种运行时函数节点，不负责判断绑定名称是否符合组合式函数约定。
+- `resolveComponentName()` 返回归一化的组件身份，排除原生标签、slot outlet 及 v-pre 内容。
+- `PropValue.hasUnknownVariants` 独立记录尚未解析的可能值，可与已知分支同时存在。
 - `isRuntimeNode()` 排除擦除的类型分支，保留 TypeScript 包装内的值表达式，供模板复杂度检查使用。
 - `utils/vue/global-writes.ts` 中的 `hasGlobalWrite()` 检测直接写入及通过未被遮蔽的全局对象进行的属性目标写入。watch-effect 别名修复与被动 model 识别共享此分析，各自保留独立的 `eval` 策略。
 - `getStaticStringValue()` 读取字符串和无表达式模板字面量，不解析绑定或求值拼接。
 - `hasTemplateVisitor()` 收窄 Vue 解析器服务，推断模板进入、退出和通配访问器节点类型。脚本访问器可选。
 - `findScopeReference()` 通过外层作用域查找精确节点引用，类型和声明过滤仍由使用方负责。
-- `getCallIdentity()` 提供调用处 `localName`、导入 `exportedName` 及现有分类 `name`。排序保留默认导入的本地分类名，基于导出的目标使用 `exportedName ?? name`。
+- `getCallIdentity()` 提供调用处 `localName`、导入 `exportedName` 及排序分类名 `classificationName`。排序保留默认导入的本地分类名，基于导出的目标使用 `exportedName ?? classificationName`。
 - `getRuntimeImportBinding()` 处理运行时导入元信息。调用身份及 ref 识别共享导入分析，但语法策略独立：调用身份排除可选/计算调用，ref 保留静态计算成员支持。外围访问器仍决定可选链表达式是否符合条件。
 - `analyzePropTypes()` 应用配置的布尔转换，返回实际和不允许类型。规则结合这些结果及原值不确定性选择诊断。
 

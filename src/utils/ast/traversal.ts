@@ -1,5 +1,5 @@
 import { isArray, isString } from '@ntnyq/utils'
-import { isFunction } from './expressions.ts'
+import { isFunctionNode } from './expressions.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type { SourceCode } from '../../types/eslint.ts'
 
@@ -54,7 +54,7 @@ export function containsTopLevelAwait(
   node: TSESTree.Node,
   sourceCode: SourceCode,
 ): boolean {
-  if (isFunction(node)) {
+  if (isFunctionNode(node)) {
     return false
   }
   if (
