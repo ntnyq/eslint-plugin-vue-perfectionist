@@ -111,15 +111,16 @@ pnpm exec eslint . --fix
 
 ### 回调函数与组合式函数
 
-| 规则                                                                                                    | 描述                                                  |
-| ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| [callback-style](https://vue-perfectionist.ntnyq.dev/zh/rules/callback-style)                           | 强制 Vue API 的回调函数使用指定风格。                 |
-| [max-lines-per-callback](https://vue-perfectionist.ntnyq.dev/zh/rules/max-lines-per-callback)           | 限制 Vue API 内联回调函数的行数。                     |
-| [prefer-composable-options](https://vue-perfectionist.ntnyq.dev/zh/rules/prefer-composable-options)     | 优先使用末尾的选项对象传递组合式函数参数。            |
-| [prefer-function-declaration](https://vue-perfectionist.ntnyq.dev/zh/rules/prefer-function-declaration) | 要求在单文件组件和组合式函数中使用函数声明。          |
-| [prefer-on-scope-dispose](https://vue-perfectionist.ntnyq.dev/zh/rules/prefer-on-scope-dispose)         | 优先在具名 Vue 组合式函数中使用基于作用域的清理方式。 |
-| [prefer-watch-effect-alias](https://vue-perfectionist.ntnyq.dev/zh/rules/prefer-watch-effect-alias)     | 优先为 post 和 sync 侦听副作用使用专用别名。          |
-| [require-injection-key](https://vue-perfectionist.ntnyq.dev/zh/rules/require-injection-key)             | 禁止在 Vue 的 provide 和 inject 调用中使用字符串键。  |
+| 规则                                                                                                                  | 描述                                                  |
+| --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| [callback-style](https://vue-perfectionist.ntnyq.dev/zh/rules/callback-style)                                         | 强制 Vue API 的回调函数使用指定风格。                 |
+| [max-lines-per-callback](https://vue-perfectionist.ntnyq.dev/zh/rules/max-lines-per-callback)                         | 限制 Vue API 内联回调函数的行数。                     |
+| [prefer-composable-options](https://vue-perfectionist.ntnyq.dev/zh/rules/prefer-composable-options)                   | 优先使用末尾的选项对象传递组合式函数参数。            |
+| [prefer-function-declaration](https://vue-perfectionist.ntnyq.dev/zh/rules/prefer-function-declaration)               | 要求在单文件组件和组合式函数中使用函数声明。          |
+| [prefer-on-scope-dispose](https://vue-perfectionist.ntnyq.dev/zh/rules/prefer-on-scope-dispose)                       | 优先在具名 Vue 组合式函数中使用基于作用域的清理方式。 |
+| [prefer-watch-effect-alias](https://vue-perfectionist.ntnyq.dev/zh/rules/prefer-watch-effect-alias)                   | 优先为 post 和 sync 侦听副作用使用专用别名。          |
+| [require-composable-return-bindings](https://vue-perfectionist.ntnyq.dev/zh/rules/require-composable-return-bindings) | 要求组合式函数的返回字段暴露本地绑定。                |
+| [require-injection-key](https://vue-perfectionist.ntnyq.dev/zh/rules/require-injection-key)                           | 禁止在 Vue 的 provide 和 inject 调用中使用字符串键。  |
 
 ### 宏声明与组件模型
 

@@ -173,3 +173,19 @@ export function getFunctionBindingName(node: FunctionNode): string | undefined {
     ? parent.id.name
     : undefined
 }
+
+/**
+ * Find the owning function, stopping before callbacks can leak into an API.
+ */
+export function getReturnOwner(
+  node: TSESTree.ReturnStatement,
+): FunctionNode | undefined {
+  let parent: TSESTree.Node | undefined = node.parent
+  while (parent) {
+    if (isFunctionNode(parent)) {
+      return parent
+    }
+    parent = parent.parent
+  }
+  return undefined
+}

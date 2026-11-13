@@ -14,6 +14,9 @@ description: 组合相关规则、配置组件使用约定，并了解自动修�
 
 [`prefer-function-result-pattern`](/zh/rules/prefer-function-result-pattern) 检查接收指定函数返回值的绑定名称。默认覆盖静态可确定为布尔值的 Vue ref 和受支持的计算属性 getter。在共享设置或本规则选项中启用 `vueuse`，可加入内置 VueUse `useToggle` 目标。其他库或命名规范可通过 `targets` 配置；传入的目标会替换全部内置目标，不受 `vueuse` 开关影响。
 
+[`require-composable-return-bindings`](/zh/rules/require-composable-return-bindings)
+检查直接返回的字段是否暴露本地绑定。可与 `sort-composable-return` 组合，分别检查 API 结构和成员布局；绑定诊断不会阻止排序规则修复安全的空白。
+
 ## 宏类型与布局 {#macro-types-and-layout}
 
 根据偏好的声明风格组合宏规则：

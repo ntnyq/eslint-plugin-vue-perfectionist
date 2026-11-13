@@ -18,6 +18,18 @@ interface ExampleProfile {
 }
 
 const EXAMPLE_PROFILES: Record<string, ExampleProfile> = {
+  'return-bindings-no-aliases': {
+    rule: 'require-composable-return-bindings',
+    options: { allowAliases: false },
+  },
+  'return-bindings-parameters': {
+    rule: 'require-composable-return-bindings',
+    options: { allowParameters: true },
+  },
+  'return-bindings-custom-names': {
+    rule: 'require-composable-return-bindings',
+    options: { functionPattern: '^create[A-Z]', ignoreNames: ['createLegacy'] },
+  },
   'props-prefix-autofix': {
     rule: 'require-props-prefix',
     options: { autofix: true },

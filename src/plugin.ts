@@ -24,6 +24,7 @@ import { preferUseTemplateRefInference } from './rules/prefer-use-template-ref-i
 import { preferWatchEffectAlias } from './rules/prefer-watch-effect-alias.ts'
 import { requireComponentProps } from './rules/require-component-props.ts'
 import { requireComponentSlots } from './rules/require-component-slots.ts'
+import { requireComposableReturnBindings } from './rules/require-composable-return-bindings.ts'
 import { requireInjectionKey } from './rules/require-injection-key.ts'
 import { requireMacroTypeName } from './rules/require-macro-type-name.ts'
 import { requirePropsPrefix } from './rules/require-props-prefix.ts'
@@ -64,6 +65,7 @@ export const rules = {
   'prefer-watch-effect-alias': preferWatchEffectAlias,
   'require-component-props': requireComponentProps,
   'require-component-slots': requireComponentSlots,
+  'require-composable-return-bindings': requireComposableReturnBindings,
   'require-injection-key': requireInjectionKey,
   'require-macro-type-name': requireMacroTypeName,
   'require-props-prefix': requirePropsPrefix,

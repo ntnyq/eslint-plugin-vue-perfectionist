@@ -36,6 +36,7 @@ describe('plugin contract', () => {
       'prefer-watch-effect-alias',
       'require-component-props',
       'require-component-slots',
+      'require-composable-return-bindings',
       'require-injection-key',
       'require-macro-type-name',
       'require-props-prefix',

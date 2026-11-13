@@ -24,6 +24,7 @@ description: 配置解析器、文件范围、自动导入识别和公共 TypeSc
 - [`prefer-function-declaration`](/zh/rules/prefer-function-declaration)
 - [`prefer-on-scope-dispose`](/zh/rules/prefer-on-scope-dispose)
 - [`prefer-watch-effect-alias`](/zh/rules/prefer-watch-effect-alias)
+- [`require-composable-return-bindings`](/zh/rules/require-composable-return-bindings)
 - [`require-injection-key`](/zh/rules/require-injection-key)
 - [`consistent-template-ref-name`](/zh/rules/consistent-template-ref-name)
 - [`prefer-function-result-pattern`](/zh/rules/prefer-function-result-pattern)

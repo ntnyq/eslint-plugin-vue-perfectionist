@@ -1,10 +1,11 @@
 import { ESLintUtils } from '@typescript-eslint/utils'
 import { isFunctionNode, unwrapExpression } from '../ast/expressions.ts'
+import { getMemberName, isPrototypeSetter } from '../ast/object-members.ts'
 import { findScopeReference } from '../ast/scope.ts'
 import { getCallIdentity } from '../vue/call-identity.ts'
 import { resolveVueGlobals } from '../vue/globals.ts'
 import { getScriptVariableDefinitions } from '../vue/script-scope.ts'
-import { getMemberName, getReturnedObjects, isPrototypeSetter } from './ast.ts'
+import { getReturnedObjects } from './ast.ts'
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
 import type ts from 'typescript'
 import type {

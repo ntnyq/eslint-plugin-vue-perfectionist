@@ -119,15 +119,16 @@ and automatic fix support, and individual rule pages for options and defaults.
 
 ### Callbacks and Composables
 
-| Rule                                                                                                 | Description                                               |
-| ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| [callback-style](https://vue-perfectionist.ntnyq.dev/rules/callback-style)                           | Enforce callback styles for Vue APIs.                     |
-| [max-lines-per-callback](https://vue-perfectionist.ntnyq.dev/rules/max-lines-per-callback)           | Limit the length of inline callbacks for Vue APIs.        |
-| [prefer-composable-options](https://vue-perfectionist.ntnyq.dev/rules/prefer-composable-options)     | Prefer a final options object for composable parameters.  |
-| [prefer-function-declaration](https://vue-perfectionist.ntnyq.dev/rules/prefer-function-declaration) | Require function declarations in SFCs and composables.    |
-| [prefer-on-scope-dispose](https://vue-perfectionist.ntnyq.dev/rules/prefer-on-scope-dispose)         | Prefer scope-based cleanup in named Vue composables.      |
-| [prefer-watch-effect-alias](https://vue-perfectionist.ntnyq.dev/rules/prefer-watch-effect-alias)     | Prefer dedicated aliases for post and sync watch effects. |
-| [require-injection-key](https://vue-perfectionist.ntnyq.dev/rules/require-injection-key)             | Disallow string keys in Vue provide and inject calls.     |
+| Rule                                                                                                               | Description                                                |
+| ------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
+| [callback-style](https://vue-perfectionist.ntnyq.dev/rules/callback-style)                                         | Enforce callback styles for Vue APIs.                      |
+| [max-lines-per-callback](https://vue-perfectionist.ntnyq.dev/rules/max-lines-per-callback)                         | Limit the length of inline callbacks for Vue APIs.         |
+| [prefer-composable-options](https://vue-perfectionist.ntnyq.dev/rules/prefer-composable-options)                   | Prefer a final options object for composable parameters.   |
+| [prefer-function-declaration](https://vue-perfectionist.ntnyq.dev/rules/prefer-function-declaration)               | Require function declarations in SFCs and composables.     |
+| [prefer-on-scope-dispose](https://vue-perfectionist.ntnyq.dev/rules/prefer-on-scope-dispose)                       | Prefer scope-based cleanup in named Vue composables.       |
+| [prefer-watch-effect-alias](https://vue-perfectionist.ntnyq.dev/rules/prefer-watch-effect-alias)                   | Prefer dedicated aliases for post and sync watch effects.  |
+| [require-composable-return-bindings](https://vue-perfectionist.ntnyq.dev/rules/require-composable-return-bindings) | Require composable return fields to expose local bindings. |
+| [require-injection-key](https://vue-perfectionist.ntnyq.dev/rules/require-injection-key)                           | Disallow string keys in Vue provide and inject calls.      |
 
 ### Macros and Component Models
 

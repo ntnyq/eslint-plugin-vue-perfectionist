@@ -6,6 +6,42 @@ import { describe, expect, it } from 'vitest'
 import plugin from '../../src/index.ts'
 
 describe('composable sorting composition and formatter stability', () => {
+  it('composes binding reports with safe return spacing fixes', () => {
+    const linter = new Linter()
+    const config: Linter.Config = {
+      files: ['**/*.ts'],
+      languageOptions: { parser: tsParser },
+      plugins: { vp: plugin },
+      rules: {
+        'vp/require-composable-return-bindings': 'error',
+        'vp/sort-composable-return': 'error',
+      },
+    }
+    const source = `function usePage() {
+  const count = 0
+  function reset() {}
+  return {
+    count,
+    enabled: true,
+    reset,
+  }
+}`
+    const result = linter.verifyAndFix(source, config, 'test.ts')
+    expect(result.fixed).toBe(true)
+    expect(result.output).toBe(source.replace('    reset,', '\n    reset,'))
+    expect(result.messages).toHaveLength(1)
+    expect(result.messages[0]).toMatchObject({
+      ruleId: 'vp/require-composable-return-bindings',
+      messageId: 'expectedBinding',
+    })
+    expect(result.messages[0]?.fix).toBeUndefined()
+    expect(result.messages[0]?.suggestions).toBeUndefined()
+    expect(linter.verifyAndFix(result.output, config, 'test.ts')).toEqual({
+      ...result,
+      fixed: false,
+    })
+  })
+
   it.each([10, 100, 1000])(
     'indexes local returns once when consuming %s members across calls',
     memberCount => {

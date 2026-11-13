@@ -29,6 +29,11 @@ settings or this rule's options to include the built-in VueUse `useToggle`
 target. Configure `targets` for other libraries or naming conventions; these
 targets replace all built-ins and remain active regardless of `vueuse`.
 
+[`require-composable-return-bindings`](/rules/require-composable-return-bindings)
+checks that directly returned fields expose local bindings. Combine it with
+`sort-composable-return` to check API structure and member layout. Binding
+diagnostics do not prevent safe whitespace fixes from the sorting rule.
+
 ## Macro Types and Layout
 
 Combine the macro rules according to your preferred declaration style:

@@ -157,6 +157,22 @@ export const RULE_DOCS: RuleDocumentation[] = [
     typeInformation: false,
   },
   {
+    name: 'require-composable-return-bindings',
+    group: 'callbacks-and-composables',
+    description: {
+      en: 'Require composable return fields to expose local bindings.',
+      zh: '要求组合式函数的返回字段暴露本地绑定。',
+    },
+    scope: 'Scripts',
+    fix: '—',
+    defaults: {
+      en: 'Expose local bindings; allow aliases; disallow parameters and inline expressions.',
+      zh: '暴露本地绑定；允许改名；禁止直接暴露参数及内联表达式。',
+    },
+    requiresOptions: false,
+    typeInformation: false,
+  },
+  {
     name: 'require-injection-key',
     group: 'callbacks-and-composables',
     description: {

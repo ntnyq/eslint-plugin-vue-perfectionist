@@ -111,6 +111,10 @@ For composable return objects and consumer destructuring, enable
 Both default to state before methods, preserve within-group order, and fix only
 whitespace.
 
+Require explicit local fields with
+[require-composable-return-bindings](/rules/require-composable-return-bindings).
+It allows aliases by default and reports inline expressions without fixes.
+
 ## Next Steps
 
 - [Choose rules](/rules/): browse by purpose and check file scopes, defaults, and automatic fix support.

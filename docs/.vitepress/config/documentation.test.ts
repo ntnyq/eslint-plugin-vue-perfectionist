@@ -232,4 +232,25 @@ describe('example validation and rendering', () => {
     expect(html).toContain('Expected an inline callback')
     expect(html).toContain('<CustomWrapper type="incorrect">')
   })
+
+  it('renders return binding diagnostics for defaults and alias profiles', async () => {
+    const renderer = await createMarkdownRenderer(docsRoot, {
+      config: configureExamples,
+      codeTransformers: createExampleTransformers(),
+    })
+    const source = await readFile(
+      new URL('docs/rules/require-composable-return-bindings.md', root),
+      'utf8',
+    )
+    const html = await renderer.renderAsync(source, {
+      frontmatter: {
+        title: 'vue-perfectionist/require-composable-return-bindings',
+      },
+    })
+    expect(html).toContain('twoslash-error')
+    expect(html).toContain('outside the return object and expose its binding')
+    expect(html).toContain('when allowAliases is false')
+    expect(html).toContain('<CustomWrapper type="correct">')
+    expect(html).toContain('<CustomWrapper type="incorrect">')
+  })
 })

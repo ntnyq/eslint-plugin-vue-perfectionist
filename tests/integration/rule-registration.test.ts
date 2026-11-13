@@ -5,6 +5,13 @@ import { vueLanguageOptions } from '../helpers/rule-tester.ts'
 
 it.each([
   {
+    name: 'require-composable-return-bindings',
+    source:
+      '<script setup>function usePage(target) { const count = 0; return { total: count, target, enabled: true } }</script>',
+    options: [{ allowAliases: false, allowParameters: true }],
+    messageIds: ['unexpectedAlias', 'expectedBinding'],
+  },
+  {
     name: 'prefer-function-declaration',
     source:
       '<script setup>const useForm = () => { const save = () => {}; return { save } }</script>',

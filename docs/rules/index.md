@@ -46,15 +46,16 @@ also report problems that require manual changes. See
 
 ### Callbacks and Composables
 
-| Rule                                                            | Description                                               | Scope   | Automatic fix   |
-| --------------------------------------------------------------- | --------------------------------------------------------- | ------- | --------------- |
-| [callback-style](./callback-style.md)                           | Enforce callback styles for Vue APIs.                     | Scripts | Supported cases |
-| [max-lines-per-callback](./max-lines-per-callback.md)           | Limit the length of inline callbacks for Vue APIs.        | Scripts | —               |
-| [prefer-composable-options](./prefer-composable-options.md)     | Prefer a final options object for composable parameters.  | Scripts | —               |
-| [prefer-function-declaration](./prefer-function-declaration.md) | Require function declarations in SFCs and composables.    | Scripts | —               |
-| [prefer-on-scope-dispose](./prefer-on-scope-dispose.md)         | Prefer scope-based cleanup in named Vue composables.      | Scripts | —               |
-| [prefer-watch-effect-alias](./prefer-watch-effect-alias.md)     | Prefer dedicated aliases for post and sync watch effects. | Scripts | Supported cases |
-| [require-injection-key](./require-injection-key.md)             | Disallow string keys in Vue provide and inject calls.     | Scripts | —               |
+| Rule                                                                          | Description                                                | Scope   | Automatic fix   |
+| ----------------------------------------------------------------------------- | ---------------------------------------------------------- | ------- | --------------- |
+| [callback-style](./callback-style.md)                                         | Enforce callback styles for Vue APIs.                      | Scripts | Supported cases |
+| [max-lines-per-callback](./max-lines-per-callback.md)                         | Limit the length of inline callbacks for Vue APIs.         | Scripts | —               |
+| [prefer-composable-options](./prefer-composable-options.md)                   | Prefer a final options object for composable parameters.   | Scripts | —               |
+| [prefer-function-declaration](./prefer-function-declaration.md)               | Require function declarations in SFCs and composables.     | Scripts | —               |
+| [prefer-on-scope-dispose](./prefer-on-scope-dispose.md)                       | Prefer scope-based cleanup in named Vue composables.       | Scripts | —               |
+| [prefer-watch-effect-alias](./prefer-watch-effect-alias.md)                   | Prefer dedicated aliases for post and sync watch effects.  | Scripts | Supported cases |
+| [require-composable-return-bindings](./require-composable-return-bindings.md) | Require composable return fields to expose local bindings. | Scripts | —               |
+| [require-injection-key](./require-injection-key.md)                           | Disallow string keys in Vue provide and inject calls.      | Scripts | —               |
 
 ### Macros and Component Models
 

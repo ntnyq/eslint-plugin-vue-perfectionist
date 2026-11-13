@@ -55,6 +55,7 @@ import type {
   RequireComponentPropsTarget,
   RequireComponentSlotsOptions,
   RequireComponentSlotsTarget,
+  RequireComposableReturnBindingsOptions,
   RequireInjectionKeyOptions,
   RequireMacroTypeNameMacro,
   RequireMacroTypeNameOptions,
@@ -128,6 +129,7 @@ export interface PublicTypes {
   RequireComponentPropsTarget: RequireComponentPropsTarget
   RequireComponentSlotsOptions: RequireComponentSlotsOptions
   RequireComponentSlotsTarget: RequireComponentSlotsTarget
+  RequireComposableReturnBindingsOptions: RequireComposableReturnBindingsOptions
   RequireInjectionKeyOptions: RequireInjectionKeyOptions
   RequireMacroTypeNameMacro: RequireMacroTypeNameMacro
   RequireMacroTypeNameOptions: RequireMacroTypeNameOptions
@@ -146,6 +148,12 @@ export interface PublicTypes {
 
 const sorting = { type: 'natural', fix: 'safe' } satisfies SortScriptSetupOptions
 const settings = { autoImport: true, vueuse: false } satisfies VuePerfectionistSettings
+export const returnBindings = {
+  functionPattern: '^use[A-Z]',
+  ignoreNames: [],
+  allowAliases: true,
+  allowParameters: false,
+} satisfies RequireComposableReturnBindingsOptions
 
 export const configuration: Linter.Config = {
   plugins: { vp: plugin },
@@ -159,6 +167,9 @@ export const invalidSorting: SortScriptSetupOptions = { type: 'random' }
 
 // @ts-expect-error Shared settings accept booleans only.
 export const invalidSettings: VuePerfectionistSettings = { autoImport: 'yes' }
+
+// @ts-expect-error The return binding parameter policy accepts booleans only.
+export const invalidReturnBindings: RequireComposableReturnBindingsOptions = { allowParameters: 'yes' }
 
 // @ts-expect-error Internal registry types are not package exports.
 export type { RuleName } from 'eslint-plugin-vue-perfectionist'

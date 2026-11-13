@@ -100,6 +100,9 @@ pnpm exec eslint . --fix
 [sort-composable-destructure](/zh/rules/sort-composable-destructure)。
 两者默认状态在前、方法在后，保留组内顺序，只自动修复空行。
 
+使用 [require-composable-return-bindings](/zh/rules/require-composable-return-bindings)
+要求返回字段显式暴露本地绑定。默认允许改名，对内联表达式只报告、不修复。
+
 ## 后续步骤 {#next-steps}
 
 - [选择规则](/zh/rules/)：按用途浏览规则，查看适用文件范围、默认行为和自动修复支持情况。

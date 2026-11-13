@@ -1,71 +1,9 @@
 import { isFunctionNode, unwrapExpression } from '../ast/expressions.ts'
+import { getMemberName, isPrototypeSetter } from '../ast/object-members.ts'
 import { getChildren } from '../ast/traversal.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type { SourceCode } from '../../types/eslint.ts'
 import type { FunctionNode } from '../ast/expressions.ts'
-
-/**
- * Find the owning function, stopping before callbacks can leak into an API.
- */
-export function getReturnOwner(
-  node: TSESTree.ReturnStatement,
-): FunctionNode | undefined {
-  let parent: TSESTree.Node | undefined = node.parent
-  while (parent) {
-    if (isFunctionNode(parent)) {
-      return parent
-    }
-    parent = parent.parent
-  }
-  return undefined
-}
-
-/**
- * Apply property-key coercion to supported static primitives, never aliases.
- */
-export function getMemberName(node: TSESTree.Property): string | undefined {
-  if (!node.computed && node.key.type === 'Identifier') {
-    return node.key.name
-  }
-  const key = unwrapExpression(node.key)
-  if (
-    key.type === 'Literal' &&
-    (key.value === null ||
-      ['string', 'number', 'bigint', 'boolean'].includes(typeof key.value))
-  ) {
-    return String(key.value)
-  }
-  if (key.type === 'UnaryExpression' && ['+', '-'].includes(key.operator)) {
-    const argument = unwrapExpression(key.argument)
-    if (argument.type === 'Literal') {
-      if (typeof argument.value === 'number') {
-        return String(key.operator === '-' ? -argument.value : argument.value)
-      }
-      if (typeof argument.value === 'bigint' && key.operator === '-') {
-        return String(-argument.value)
-      }
-    }
-  }
-  if (key.type === 'TemplateLiteral' && !key.expressions.length) {
-    return key.quasis[0]?.value.cooked ?? undefined
-  }
-  return undefined
-}
-
-/**
- * A non-computed colon-form __proto__ changes the object's prototype; it does
- * not create the public property represented by ordinary keys or destructuring.
- */
-export function isPrototypeSetter(node: TSESTree.Property): boolean {
-  return (
-    node.parent.type === 'ObjectExpression' &&
-    node.kind === 'init' &&
-    !node.computed &&
-    !node.method &&
-    !node.shorthand &&
-    getMemberName(node) === '__proto__'
-  )
-}
 
 /**
  * Duplicate public keys invalidate the whole object, including spacing checks.

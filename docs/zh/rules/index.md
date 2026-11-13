@@ -35,15 +35,16 @@ description: 按用途、文件范围及自动修复支持情况浏览所有 Vue
 
 ### 回调函数与组合式函数 {#callbacks-and-composables}
 
-| 规则                                                            | 描述                                                  | 范围 | 自动修复     |
-| --------------------------------------------------------------- | ----------------------------------------------------- | ---- | ------------ |
-| [callback-style](./callback-style.md)                           | 强制 Vue API 的回调函数使用指定风格。                 | 脚本 | 支持部分情况 |
-| [max-lines-per-callback](./max-lines-per-callback.md)           | 限制 Vue API 内联回调函数的行数。                     | 脚本 | —            |
-| [prefer-composable-options](./prefer-composable-options.md)     | 优先使用末尾的选项对象传递组合式函数参数。            | 脚本 | —            |
-| [prefer-function-declaration](./prefer-function-declaration.md) | 要求在单文件组件和组合式函数中使用函数声明。          | 脚本 | —            |
-| [prefer-on-scope-dispose](./prefer-on-scope-dispose.md)         | 优先在具名 Vue 组合式函数中使用基于作用域的清理方式。 | 脚本 | —            |
-| [prefer-watch-effect-alias](./prefer-watch-effect-alias.md)     | 优先为 post 和 sync 侦听副作用使用专用别名。          | 脚本 | 支持部分情况 |
-| [require-injection-key](./require-injection-key.md)             | 禁止在 Vue 的 provide 和 inject 调用中使用字符串键。  | 脚本 | —            |
+| 规则                                                                          | 描述                                                  | 范围 | 自动修复     |
+| ----------------------------------------------------------------------------- | ----------------------------------------------------- | ---- | ------------ |
+| [callback-style](./callback-style.md)                                         | 强制 Vue API 的回调函数使用指定风格。                 | 脚本 | 支持部分情况 |
+| [max-lines-per-callback](./max-lines-per-callback.md)                         | 限制 Vue API 内联回调函数的行数。                     | 脚本 | —            |
+| [prefer-composable-options](./prefer-composable-options.md)                   | 优先使用末尾的选项对象传递组合式函数参数。            | 脚本 | —            |
+| [prefer-function-declaration](./prefer-function-declaration.md)               | 要求在单文件组件和组合式函数中使用函数声明。          | 脚本 | —            |
+| [prefer-on-scope-dispose](./prefer-on-scope-dispose.md)                       | 优先在具名 Vue 组合式函数中使用基于作用域的清理方式。 | 脚本 | —            |
+| [prefer-watch-effect-alias](./prefer-watch-effect-alias.md)                   | 优先为 post 和 sync 侦听副作用使用专用别名。          | 脚本 | 支持部分情况 |
+| [require-composable-return-bindings](./require-composable-return-bindings.md) | 要求组合式函数的返回字段暴露本地绑定。                | 脚本 | —            |
+| [require-injection-key](./require-injection-key.md)                           | 禁止在 Vue 的 provide 和 inject 调用中使用字符串键。  | 脚本 | —            |
 
 ### 宏声明与组件模型 {#macros-and-component-models}
 

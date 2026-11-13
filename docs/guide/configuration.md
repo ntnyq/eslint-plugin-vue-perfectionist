@@ -31,6 +31,7 @@ The following rules also work in standalone scripts:
 - [`prefer-function-declaration`](/rules/prefer-function-declaration)
 - [`prefer-on-scope-dispose`](/rules/prefer-on-scope-dispose)
 - [`prefer-watch-effect-alias`](/rules/prefer-watch-effect-alias)
+- [`require-composable-return-bindings`](/rules/require-composable-return-bindings)
 - [`require-injection-key`](/rules/require-injection-key)
 - [`consistent-template-ref-name`](/rules/consistent-template-ref-name)
 - [`prefer-function-result-pattern`](/rules/prefer-function-result-pattern)

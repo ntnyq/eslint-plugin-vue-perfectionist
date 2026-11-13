@@ -57,6 +57,7 @@ export type {
   RequireComponentPropsTarget,
   RequireComponentSlotsOptions,
   RequireComponentSlotsTarget,
+  RequireComposableReturnBindingsOptions,
   RequireInjectionKeyOptions,
   RequireMacroTypeNameMacro,
   RequireMacroTypeNameOptions,

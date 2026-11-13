@@ -1,5 +1,6 @@
 import { compare } from 'natural-orderby'
-import { getMemberName, hasDuplicateMembers, isPrototypeSetter } from './ast.ts'
+import { getMemberName, isPrototypeSetter } from '../ast/object-members.ts'
+import { hasDuplicateMembers } from './ast.ts'
 import { resolveComposableOptions } from './options.ts'
 import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
 import type {
