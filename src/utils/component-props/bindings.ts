@@ -1,14 +1,21 @@
 import { getStaticStringValue, unwrapExpression } from '../ast/expressions.ts'
+import {
+  createStringValueAnalysis,
+  createUnknownValueAnalysis,
+  inferExpressionValueShape,
+} from '../ast/value-analysis.ts'
 import { getStaticDirectiveArgument } from '../vue/directive-argument.ts'
 import { normalizePropName } from '../vue/names.ts'
-import { inferPropValue, stringPropValue, unknownPropValue } from './value.ts'
 import type { AST } from 'vue-eslint-parser'
 import type { SourceCode } from '../../types/eslint.ts'
-import type { ComponentPropNode, PropValue } from './value.ts'
+import type {
+  ExpressionValueAnalysis,
+  ExpressionValueNode,
+} from '../ast/value-analysis.ts'
 
 export interface ComponentPropBinding {
   presence: 'present' | 'absent' | 'unknown'
-  value: PropValue
+  value: ExpressionValueAnalysis
   rawNames: Set<string>
 }
 
@@ -29,7 +36,7 @@ export function analyzeComponentBindings(
   element: AST.VElement,
   propNames: Iterable<string>,
   sourceCode: SourceCode,
-  inferValue: typeof inferPropValue = inferPropValue,
+  inferValue: typeof inferExpressionValueShape = inferExpressionValueShape,
 ): Map<string, ComponentPropBinding> {
   const bindings = new Map<string, ComponentPropBinding>()
   const explicitNames = new Set<string>()
@@ -37,7 +44,7 @@ export function analyzeComponentBindings(
   for (const name of propNames) {
     bindings.set(name, {
       presence: 'absent',
-      value: unknownPropValue(element.startTag),
+      value: createUnknownValueAnalysis(element.startTag),
       rawNames: new Set(),
     })
   }
@@ -51,7 +58,7 @@ export function analyzeComponentBindings(
    * raw keys.
    */
   function uncertain(
-    node: ComponentPropNode,
+    node: ExpressionValueNode,
     name?: string,
     canIntroduceMultipleKeys = false,
   ) {
@@ -71,7 +78,7 @@ export function analyzeComponentBindings(
       if (binding.presence !== 'present') {
         binding.presence = 'unknown'
       }
-      binding.value = unknownPropValue(node)
+      binding.value = createUnknownValueAnalysis(node)
     }
   }
 
@@ -81,7 +88,7 @@ export function analyzeComponentBindings(
    * @param rawName - The raw attribute or object property name.
    * @param value - The inferred value associated with the write.
    */
-  function write(rawName: string, value: PropValue) {
+  function write(rawName: string, value: ExpressionValueAnalysis) {
     const name = normalizePropName(rawName)
     const binding = bindings.get(name)
     if (!binding) {
@@ -92,7 +99,7 @@ export function analyzeComponentBindings(
     // Vue normalizes aliases after raw-key merging. Do not invent precedence.
     binding.value =
       binding.rawNames.size > 1 || uncertainAliases.has(name)
-        ? unknownPropValue(value.node)
+        ? createUnknownValueAnalysis(value.node)
         : value
   }
 
@@ -104,7 +111,11 @@ export function analyzeComponentBindings(
    * @param value - The value supplied by the explicit binding.
    * @param isStatic - Whether Vue deduplicates this key; defaults to true.
    */
-  function writeExplicit(rawName: string, value: PropValue, isStatic = true) {
+  function writeExplicit(
+    rawName: string,
+    value: ExpressionValueAnalysis,
+    isStatic = true,
+  ) {
     if (isStatic) {
       if (explicitNames.has(rawName)) {
         return
@@ -122,9 +133,9 @@ export function analyzeComponentBindings(
    * @returns The inferred value and its remaining uncertainty.
    */
   function infer(
-    node: ComponentPropNode,
+    node: ExpressionValueNode,
     container: AST.VExpressionContainer,
-  ): PropValue {
+  ): ExpressionValueAnalysis {
     return inferValue(
       node,
       /**
@@ -172,7 +183,7 @@ export function analyzeComponentBindings(
    * resolution.
    */
   function spread(
-    input: ComponentPropNode,
+    input: ExpressionValueNode,
     container: AST.VExpressionContainer,
   ) {
     const node = unwrapExpression(input)
@@ -225,7 +236,7 @@ export function analyzeComponentBindings(
           name,
           property.kind === 'init'
             ? infer(property.value, container)
-            : unknownPropValue(property.value),
+            : createUnknownValueAnalysis(property.value),
         )
       }
     }
@@ -235,7 +246,7 @@ export function analyzeComponentBindings(
     if (!attribute.directive) {
       writeExplicit(
         attribute.key.rawName,
-        stringPropValue(
+        createStringValueAnalysis(
           attribute.value?.value ?? '',
           attribute.value ?? attribute,
         ),
@@ -307,7 +318,7 @@ export function analyzeComponentBindings(
       name,
       attribute.value?.expression
         ? infer(attribute.value.expression, attribute.value)
-        : unknownPropValue(attribute),
+        : createUnknownValueAnalysis(attribute),
       !argument || argument.type === 'VIdentifier',
     )
     if (directive === 'model' && attribute.key.modifiers.length) {

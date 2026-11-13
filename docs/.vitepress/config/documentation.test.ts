@@ -2,6 +2,7 @@ import { readdir, readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { createMarkdownRenderer } from 'vitepress'
 import { describe, expect, it } from 'vitest'
+import { DOCUMENTATION_URL } from '../../../src/constants/documentation.ts'
 import plugin from '../../../src/index.ts'
 import { RULE_DOCS, RULE_GROUPS } from '../rules.ts'
 import { configureExamples, createExampleTransformers } from './examples.ts'
@@ -21,6 +22,18 @@ const markdown = await createMarkdownRenderer(docsRoot, {
 })
 
 describe('documentation contracts', () => {
+  it('uses the canonical documentation origin in rule metadata and generated links', () => {
+    for (const [name, rule] of Object.entries(registeredRules)) {
+      expect(rule.meta?.docs?.url).toBe(`${DOCUMENTATION_URL}/rules/${name}`)
+    }
+    for (const section of getGeneratedSections()) {
+      if (!section.file.startsWith('README')) {
+        continue
+      }
+      expect(section.content).toContain(`${DOCUMENTATION_URL}/`)
+      expect(section.content).not.toContain('vue-perfectionist.vercel.app')
+    }
+  })
   it('covers every registered rule exactly once with accurate fix capabilities', () => {
     expect(RULE_DOCS.map(rule => rule.name).toSorted()).toEqual(
       Object.keys(registeredRules).toSorted(),

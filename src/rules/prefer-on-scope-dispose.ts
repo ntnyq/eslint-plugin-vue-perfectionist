@@ -1,4 +1,7 @@
-import { unwrapExpression } from '../utils/ast/expressions.ts'
+import {
+  getFunctionBindingName,
+  unwrapExpression,
+} from '../utils/ast/expressions.ts'
 import { createRule } from '../utils/create-rule.ts'
 import { getCallIdentity } from '../utils/vue/call-identity.ts'
 import { resolveVueGlobals } from '../utils/vue/globals.ts'
@@ -26,29 +29,14 @@ function getComposableName(node: TSESTree.CallExpression): string | undefined {
     switch (ancestor.type) {
       case 'FunctionDeclaration':
       case 'FunctionExpression':
-      case 'ArrowFunctionExpression': {
+      case 'ArrowFunctionExpression':
         if (
           node.range[0] < ancestor.body.range[0] ||
           node.range[1] > ancestor.body.range[1]
         ) {
           return undefined
         }
-        if (ancestor.type === 'FunctionDeclaration') {
-          return ancestor.id?.name
-        }
-        const fn = ancestor
-        let binding: TSESTree.Node | undefined = fn.parent
-        // The variable's name defines the convention, not an inner function name.
-        while (binding && unwrapExpression(binding) === fn) {
-          binding = binding.parent
-        }
-        return binding?.type === 'VariableDeclarator' &&
-          binding.id.type === 'Identifier' &&
-          binding.init &&
-          unwrapExpression(binding.init) === fn
-          ? binding.id.name
-          : undefined
-      }
+        return getFunctionBindingName(ancestor)
     }
     ancestor = ancestor.parent
   }

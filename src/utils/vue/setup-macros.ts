@@ -4,26 +4,43 @@ import { getSetupRange, isInScriptRange } from './script-scope.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type { SourceCode } from '../../types/eslint.ts'
 
+type SetupMacroCall = TSESTree.CallExpression & {
+  callee: TSESTree.Identifier
+}
+
 /**
- * Collect unbound compiler macro calls in top-level setup positions.
+ * Preserve the original call node while narrowing its direct unbound callee.
+ */
+function isSetupMacroCandidate(
+  node: TSESTree.Node,
+  sourceCode: SourceCode,
+  setupRange: TSESTree.Range,
+): node is SetupMacroCall {
+  return (
+    node.type === 'CallExpression' &&
+    node.callee.type === 'Identifier' &&
+    isInScriptRange(node, setupRange) &&
+    getCallIdentity(node, sourceCode)?.isUnbound === true
+  )
+}
+
+/**
+ * Read direct unbound setup calls, unwrapping withDefaults only around
+ * defineProps. Consumers retain their macro and argument-shape policies.
  *
  * @param program - The merged SFC program.
- * @param sourceCode - The source providing parser services and lexical scopes.
- * @param filename - The filename used to exclude standalone scripts.
- * @returns Direct initializer and expression calls, unwrapping withDefaults
- * only around defineProps.
+ * @param sourceCode - The source providing lexical scope information.
+ * @param setupRange - The complete script setup content range.
+ * @param defaultsPolicy - Whether withDefaults must have exactly two arguments.
+ * @returns Candidate calls in source order, excluding nested execution contexts.
  */
-export function getSetupMacroCalls(
+export function getSetupMacroCandidates(
   program: TSESTree.Program,
   sourceCode: SourceCode,
-  filename: string,
-): TSESTree.CallExpression[] {
-  const range = getSetupRange(sourceCode)
-  if (!filename.endsWith('.vue') || !range) {
-    return []
-  }
-  const setupRange = range
-  const calls: TSESTree.CallExpression[] = []
+  setupRange: TSESTree.Range,
+  defaultsPolicy: 'any-arity' | 'two-arguments',
+): SetupMacroCall[] {
+  const calls: SetupMacroCall[] = []
 
   /**
    * Inspect a direct macro position without traversing arbitrary expressions.
@@ -33,19 +50,14 @@ export function getSetupMacroCalls(
    */
   function inspect(expression: TSESTree.Node, allowDefaults = true) {
     const call = unwrapExpression(expression)
-    if (
-      call.type !== 'CallExpression' ||
-      call.callee.type !== 'Identifier' ||
-      !isInScriptRange(call, setupRange) ||
-      !getCallIdentity(call, sourceCode)?.isUnbound
-    ) {
+    if (!isSetupMacroCandidate(call, sourceCode, setupRange)) {
       return
     }
     if (allowDefaults && call.callee.name === 'withDefaults') {
       const argument = call.arguments[0]
       const inner = argument && unwrapExpression(argument)
       if (
-        call.arguments.length === 2 &&
+        (defaultsPolicy === 'any-arity' || call.arguments.length === 2) &&
         inner?.type === 'CallExpression' &&
         inner.callee.type === 'Identifier' &&
         inner.callee.name === 'defineProps'
@@ -54,11 +66,7 @@ export function getSetupMacroCalls(
       }
       return
     }
-    if (
-      ['defineProps', 'defineEmits', 'defineModel'].includes(call.callee.name)
-    ) {
-      calls.push(call)
-    }
+    calls.push(call)
   }
 
   for (const statement of program.body) {
@@ -73,4 +81,31 @@ export function getSetupMacroCalls(
     }
   }
   return calls
+}
+
+/**
+ * Collect unbound model-contract macros in top-level setup positions.
+ *
+ * @param program - The merged SFC program.
+ * @param sourceCode - The source providing parser services and lexical scopes.
+ * @param filename - The filename used to exclude standalone scripts.
+ * @returns Props, emits, and model calls; withDefaults requires two arguments.
+ */
+export function getSetupMacroCalls(
+  program: TSESTree.Program,
+  sourceCode: SourceCode,
+  filename: string,
+): TSESTree.CallExpression[] {
+  const range = getSetupRange(sourceCode)
+  if (!filename.endsWith('.vue') || !range) {
+    return []
+  }
+  return getSetupMacroCandidates(
+    program,
+    sourceCode,
+    range,
+    'two-arguments',
+  ).filter(call =>
+    ['defineProps', 'defineEmits', 'defineModel'].includes(call.callee.name),
+  )
 }

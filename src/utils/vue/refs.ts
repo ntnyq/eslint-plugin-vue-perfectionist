@@ -14,7 +14,7 @@ import type { SourceCode } from '../../types/eslint.ts'
  * @returns The Vue export or enabled global name, or undefined when the call is
  * not recognized.
  */
-export function getVueRefApi(
+export function getVueRuntimeApiName(
   call: TSESTree.CallExpression,
   sourceCode: SourceCode,
   vueGlobals: readonly string[] = [],
@@ -111,7 +111,7 @@ export function isVueRefVariable(
   if (initializer.type !== 'CallExpression') {
     return false
   }
-  const api = getVueRefApi(initializer, sourceCode, vueGlobals)
+  const api = getVueRuntimeApiName(initializer, sourceCode, vueGlobals)
   return (
     api !== undefined && ['ref', 'shallowRef', 'useTemplateRef'].includes(api)
   )

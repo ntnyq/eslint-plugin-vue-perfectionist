@@ -156,3 +156,20 @@ export function getStaticStringValue(
   }
   return undefined
 }
+
+/**
+ * Read the declaration binding name, including wrapped variable initializers.
+ */
+export function getFunctionBindingName(node: FunctionNode): string | undefined {
+  if (node.type === 'FunctionDeclaration') {
+    return node.id?.name
+  }
+  let parent: TSESTree.Node | undefined = node.parent
+  while (parent && unwrapExpression(parent) === node) {
+    parent = parent.parent
+  }
+  return parent?.type === 'VariableDeclarator' &&
+    parent.id.type === 'Identifier'
+    ? parent.id.name
+    : undefined
+}

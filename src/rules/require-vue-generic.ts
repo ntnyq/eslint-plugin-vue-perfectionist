@@ -1,4 +1,4 @@
-import { PROP_VALUE_CONSTRAINT_SCHEMA } from '../constants/component-prop-values.ts'
+import { PROP_VALUE_CONSTRAINT_SCHEMA } from '../constants/component-prop-values-schema.ts'
 import { COMPONENT_NAMES_SCHEMA } from '../constants/component-schema.ts'
 import { analyzeComponentBindings } from '../utils/component-props/bindings.ts'
 import { inferStaticPropValue } from '../utils/component-props/static-value.ts'

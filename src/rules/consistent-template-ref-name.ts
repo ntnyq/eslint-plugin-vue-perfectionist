@@ -4,7 +4,7 @@ import {
 } from '../utils/ast/expressions.ts'
 import { createRule } from '../utils/create-rule.ts'
 import { resolveVueGlobals } from '../utils/vue/globals.ts'
-import { getVueRefApi } from '../utils/vue/refs.ts'
+import { getVueRuntimeApiName } from '../utils/vue/refs.ts'
 import type { ConsistentTemplateRefNameMessageId } from '../types/index.ts'
 
 export const consistentTemplateRefName = createRule<
@@ -35,7 +35,7 @@ export const consistentTemplateRefName = createRule<
         const initializer = unwrapExpression(node.init)
         if (
           initializer.type !== 'CallExpression' ||
-          getVueRefApi(initializer, context.sourceCode, vueGlobals) !==
+          getVueRuntimeApiName(initializer, context.sourceCode, vueGlobals) !==
             'useTemplateRef'
         ) {
           return

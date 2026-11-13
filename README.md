@@ -18,7 +18,7 @@ rules explicitly and configure their options for your project.
 > [!WARNING]
 > This project is under active development. The API is unstable and may introduce breaking changes before the first stable release.
 
-[Documentation](https://vue-perfectionist.vercel.app) · [Getting Started](https://vue-perfectionist.vercel.app/guide/) · [Rules](https://vue-perfectionist.vercel.app/rules/)
+[Documentation](https://vue-perfectionist.ntnyq.dev) · [Getting Started](https://vue-perfectionist.ntnyq.dev/guide/) · [Rules](https://vue-perfectionist.ntnyq.dev/rules/)
 
 ## See a Rule in Action
 
@@ -99,91 +99,91 @@ Some diagnostics need manual changes, including naming changes and statement
 moves whose safety cannot be established. `--fix` does not resolve every report;
 see each rule's documented boundaries.
 
-See the [setup guide](https://vue-perfectionist.vercel.app/guide/) for more configuration options.
+See the [setup guide](https://vue-perfectionist.ntnyq.dev/guide/) for more configuration options.
 
 ## Configuration
 
-- [File scopes and parsers](https://vue-perfectionist.vercel.app/guide/configuration): configure Vue SFCs and standalone JS/TS files.
-- [Auto-imported APIs](https://vue-perfectionist.vercel.app/guide/configuration#auto-imported-vue-apis): recognize Vue APIs supplied by auto-import tools.
-- [Rule composition](https://vue-perfectionist.vercel.app/guide/rule-composition): combine related checks and avoid overlapping sorting or padding rules.
-- [Public types](https://vue-perfectionist.vercel.app/guide/configuration#public-typescript-api): type your rule options and shared settings.
-- [Troubleshooting](https://vue-perfectionist.vercel.app/guide/troubleshooting): inactive rules, missing fixes, and type-service configuration.
+- [File scopes and parsers](https://vue-perfectionist.ntnyq.dev/guide/configuration): configure Vue SFCs and standalone JS/TS files.
+- [Auto-imported APIs](https://vue-perfectionist.ntnyq.dev/guide/configuration#auto-imported-vue-apis): recognize Vue APIs supplied by auto-import tools.
+- [Rule composition](https://vue-perfectionist.ntnyq.dev/guide/rule-composition): combine related checks and avoid overlapping sorting or padding rules.
+- [Public types](https://vue-perfectionist.ntnyq.dev/guide/configuration#public-typescript-api): type your rule options and shared settings.
+- [Troubleshooting](https://vue-perfectionist.ntnyq.dev/guide/troubleshooting): inactive rules, missing fixes, and type-service configuration.
 
 ## Rules
 
 Browse rules by purpose below. See the
-[rules overview](https://vue-perfectionist.vercel.app/rules/) for file scopes
+[rules overview](https://vue-perfectionist.ntnyq.dev/rules/) for file scopes
 and automatic fix support, and individual rule pages for options and defaults.
 
 <!-- rules:start -->
 
 ### Callbacks and Composables
 
-| Rule                                                                                                  | Description                                               |
-| ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| [callback-style](https://vue-perfectionist.vercel.app/rules/callback-style)                           | Enforce callback styles for Vue APIs.                     |
-| [max-lines-per-callback](https://vue-perfectionist.vercel.app/rules/max-lines-per-callback)           | Limit the length of inline callbacks for Vue APIs.        |
-| [prefer-composable-options](https://vue-perfectionist.vercel.app/rules/prefer-composable-options)     | Prefer a final options object for composable parameters.  |
-| [prefer-function-declaration](https://vue-perfectionist.vercel.app/rules/prefer-function-declaration) | Require function declarations in SFCs and composables.    |
-| [prefer-on-scope-dispose](https://vue-perfectionist.vercel.app/rules/prefer-on-scope-dispose)         | Prefer scope-based cleanup in named Vue composables.      |
-| [prefer-watch-effect-alias](https://vue-perfectionist.vercel.app/rules/prefer-watch-effect-alias)     | Prefer dedicated aliases for post and sync watch effects. |
-| [require-injection-key](https://vue-perfectionist.vercel.app/rules/require-injection-key)             | Disallow string keys in Vue provide and inject calls.     |
+| Rule                                                                                                 | Description                                               |
+| ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| [callback-style](https://vue-perfectionist.ntnyq.dev/rules/callback-style)                           | Enforce callback styles for Vue APIs.                     |
+| [max-lines-per-callback](https://vue-perfectionist.ntnyq.dev/rules/max-lines-per-callback)           | Limit the length of inline callbacks for Vue APIs.        |
+| [prefer-composable-options](https://vue-perfectionist.ntnyq.dev/rules/prefer-composable-options)     | Prefer a final options object for composable parameters.  |
+| [prefer-function-declaration](https://vue-perfectionist.ntnyq.dev/rules/prefer-function-declaration) | Require function declarations in SFCs and composables.    |
+| [prefer-on-scope-dispose](https://vue-perfectionist.ntnyq.dev/rules/prefer-on-scope-dispose)         | Prefer scope-based cleanup in named Vue composables.      |
+| [prefer-watch-effect-alias](https://vue-perfectionist.ntnyq.dev/rules/prefer-watch-effect-alias)     | Prefer dedicated aliases for post and sync watch effects. |
+| [require-injection-key](https://vue-perfectionist.ntnyq.dev/rules/require-injection-key)             | Disallow string keys in Vue provide and inject calls.     |
 
 ### Macros and Component Models
 
-| Rule                                                                                            | Description                                                          |
-| ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| [define-macros-newline](https://vue-perfectionist.vercel.app/rules/define-macros-newline)       | Require multiline inline Vue macro declarations.                     |
-| [define-macros-type-style](https://vue-perfectionist.vercel.app/rules/define-macros-type-style) | Enforce declaration styles for Vue macro types.                      |
-| [define-model-name-casing](https://vue-perfectionist.vercel.app/rules/define-model-name-casing) | Enforce casing for explicit defineModel names.                       |
-| [prefer-define-model](https://vue-perfectionist.vercel.app/rules/prefer-define-model)           | Prefer defineModel over matching prop and update event declarations. |
-| [require-macro-type-name](https://vue-perfectionist.vercel.app/rules/require-macro-type-name)   | Require exact call-site names for Vue macro types.                   |
+| Rule                                                                                           | Description                                                          |
+| ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| [define-macros-newline](https://vue-perfectionist.ntnyq.dev/rules/define-macros-newline)       | Require multiline inline Vue macro declarations.                     |
+| [define-macros-type-style](https://vue-perfectionist.ntnyq.dev/rules/define-macros-type-style) | Enforce declaration styles for Vue macro types.                      |
+| [define-model-name-casing](https://vue-perfectionist.ntnyq.dev/rules/define-model-name-casing) | Enforce casing for explicit defineModel names.                       |
+| [prefer-define-model](https://vue-perfectionist.ntnyq.dev/rules/prefer-define-model)           | Prefer defineModel over matching prop and update event declarations. |
+| [require-macro-type-name](https://vue-perfectionist.ntnyq.dev/rules/require-macro-type-name)   | Require exact call-site names for Vue macro types.                   |
 
 ### Refs and Result Names
 
-| Rule                                                                                                              | Description                                              |
-| ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| [consistent-template-ref-name](https://vue-perfectionist.vercel.app/rules/consistent-template-ref-name)           | Require template ref variable names to match their keys. |
-| [prefer-function-result-pattern](https://vue-perfectionist.vercel.app/rules/prefer-function-result-pattern)       | Enforce naming patterns for function result bindings.    |
-| [prefer-ref-pattern](https://vue-perfectionist.vercel.app/rules/prefer-ref-pattern)                               | Enforce naming patterns for template refs.               |
-| [prefer-use-template-ref-inference](https://vue-perfectionist.vercel.app/rules/prefer-use-template-ref-inference) | Prefer inferred types for static Vue template refs.      |
+| Rule                                                                                                             | Description                                              |
+| ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| [consistent-template-ref-name](https://vue-perfectionist.ntnyq.dev/rules/consistent-template-ref-name)           | Require template ref variable names to match their keys. |
+| [prefer-function-result-pattern](https://vue-perfectionist.ntnyq.dev/rules/prefer-function-result-pattern)       | Enforce naming patterns for function result bindings.    |
+| [prefer-ref-pattern](https://vue-perfectionist.ntnyq.dev/rules/prefer-ref-pattern)                               | Enforce naming patterns for template refs.               |
+| [prefer-use-template-ref-inference](https://vue-perfectionist.ntnyq.dev/rules/prefer-use-template-ref-inference) | Prefer inferred types for static Vue template refs.      |
 
 ### Component Usage Contracts
 
-| Rule                                                                                          | Description                                                 |
-| --------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| [component-prop-types](https://vue-perfectionist.vercel.app/rules/component-prop-types)       | Enforce configured component prop value types.              |
-| [component-prop-values](https://vue-perfectionist.vercel.app/rules/component-prop-values)     | Enforce configured component prop value constraints.        |
-| [require-component-props](https://vue-perfectionist.vercel.app/rules/require-component-props) | Require configured props at component usage sites.          |
-| [require-component-slots](https://vue-perfectionist.vercel.app/rules/require-component-slots) | Require configured slots at component usage sites.          |
-| [require-vue-generic](https://vue-perfectionist.vercel.app/rules/require-vue-generic)         | Require explicit generic comments on configured components. |
+| Rule                                                                                         | Description                                                 |
+| -------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| [component-prop-types](https://vue-perfectionist.ntnyq.dev/rules/component-prop-types)       | Enforce configured component prop value types.              |
+| [component-prop-values](https://vue-perfectionist.ntnyq.dev/rules/component-prop-values)     | Enforce configured component prop value constraints.        |
+| [require-component-props](https://vue-perfectionist.ntnyq.dev/rules/require-component-props) | Require configured props at component usage sites.          |
+| [require-component-slots](https://vue-perfectionist.ntnyq.dev/rules/require-component-slots) | Require configured slots at component usage sites.          |
+| [require-vue-generic](https://vue-perfectionist.ntnyq.dev/rules/require-vue-generic)         | Require explicit generic comments on configured components. |
 
 ### Template Conventions
 
-| Rule                                                                                                                            | Description                                                        |
-| ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| [no-complex-template-expression](https://vue-perfectionist.vercel.app/rules/no-complex-template-expression)                     | Limit logical operators and conditional nesting in Vue templates.  |
-| [no-complex-v-for-source](https://vue-perfectionist.vercel.app/rules/no-complex-v-for-source)                                   | Disallow complex expressions in Vue v-for sources.                 |
-| [no-restricted-html-elements](https://vue-perfectionist.vercel.app/rules/no-restricted-html-elements)                           | Disallow specified native HTML elements in Vue templates.          |
-| [no-template-type-assertion](https://vue-perfectionist.vercel.app/rules/no-template-type-assertion)                             | Disallow as type assertions in Vue templates.                      |
-| [padding-line-between-tags](https://vue-perfectionist.vercel.app/rules/padding-line-between-tags)                               | Enforce blank-line counts between consecutive template tags.       |
-| [prefer-simple-event-handler](https://vue-perfectionist.vercel.app/rules/prefer-simple-event-handler)                           | Require simple expressions in named template event handlers.       |
-| [prefer-template-literal-in-interpolation](https://vue-perfectionist.vercel.app/rules/prefer-template-literal-in-interpolation) | Prefer a single template literal for mixed text and interpolation. |
-| [require-props-prefix](https://vue-perfectionist.vercel.app/rules/require-props-prefix)                                         | Require explicit props object prefixes in Vue templates.           |
+| Rule                                                                                                                           | Description                                                        |
+| ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| [no-complex-template-expression](https://vue-perfectionist.ntnyq.dev/rules/no-complex-template-expression)                     | Limit logical operators and conditional nesting in Vue templates.  |
+| [no-complex-v-for-source](https://vue-perfectionist.ntnyq.dev/rules/no-complex-v-for-source)                                   | Disallow complex expressions in Vue v-for sources.                 |
+| [no-restricted-html-elements](https://vue-perfectionist.ntnyq.dev/rules/no-restricted-html-elements)                           | Disallow specified native HTML elements in Vue templates.          |
+| [no-template-type-assertion](https://vue-perfectionist.ntnyq.dev/rules/no-template-type-assertion)                             | Disallow as type assertions in Vue templates.                      |
+| [padding-line-between-tags](https://vue-perfectionist.ntnyq.dev/rules/padding-line-between-tags)                               | Enforce blank-line counts between consecutive template tags.       |
+| [prefer-simple-event-handler](https://vue-perfectionist.ntnyq.dev/rules/prefer-simple-event-handler)                           | Require simple expressions in named template event handlers.       |
+| [prefer-template-literal-in-interpolation](https://vue-perfectionist.ntnyq.dev/rules/prefer-template-literal-in-interpolation) | Prefer a single template literal for mixed text and interpolation. |
+| [require-props-prefix](https://vue-perfectionist.ntnyq.dev/rules/require-props-prefix)                                         | Require explicit props object prefixes in Vue templates.           |
 
 ### Statement Ordering
 
-| Rule                                                                                                  | Description                                                |
-| ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| [sort-composable-destructure](https://vue-perfectionist.vercel.app/rules/sort-composable-destructure) | Group destructured composable members by state and method. |
-| [sort-composable-return](https://vue-perfectionist.vercel.app/rules/sort-composable-return)           | Group composable return members by state and method.       |
-| [sort-script-setup](https://vue-perfectionist.vercel.app/rules/sort-script-setup)                     | Group and order top-level statements in `<script setup>`.  |
+| Rule                                                                                                 | Description                                                |
+| ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| [sort-composable-destructure](https://vue-perfectionist.ntnyq.dev/rules/sort-composable-destructure) | Group destructured composable members by state and method. |
+| [sort-composable-return](https://vue-perfectionist.ntnyq.dev/rules/sort-composable-return)           | Group composable return members by state and method.       |
+| [sort-script-setup](https://vue-perfectionist.ntnyq.dev/rules/sort-script-setup)                     | Group and order top-level statements in `<script setup>`.  |
 
 <!-- rules:end -->
 
 ## Development
 
-See [Contributing](https://vue-perfectionist.vercel.app/guide/contributing) for
+See [Contributing](https://vue-perfectionist.ntnyq.dev/guide/contributing) for
 local setup, testing, and documentation workflows.
 
 ## Credits

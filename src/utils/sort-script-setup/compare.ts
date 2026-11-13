@@ -10,7 +10,7 @@ import type { Group, ResolvedOptions, Statement } from './types.ts'
  * @param options - The case and special-character handling options.
  * @returns The normalized name with whitespace removed.
  */
-function formatName(name: string, options: ResolvedOptions): string {
+function normalizeSortName(name: string, options: ResolvedOptions): string {
   let formatted = options.ignoreCase ? name.toLowerCase() : name
   if (options.specialCharacters === 'trim') {
     formatted = formatted.replace(
@@ -62,8 +62,8 @@ function createComparator(
     if (type === 'line-length') {
       return (left.size - right.size) * direction
     }
-    const a = formatName(left.name, options)
-    const b = formatName(right.name, options)
+    const a = normalizeSortName(left.name, options)
+    const b = normalizeSortName(right.name, options)
     if (type === 'alphabetical') {
       return a.localeCompare(b, options.locales) * direction
     }

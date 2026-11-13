@@ -1,3 +1,4 @@
+import { DOCUMENTATION_URL } from '../../../src/constants/documentation.ts'
 import { RULE_DOCS, RULE_GROUPS } from '../rules.ts'
 import type { RuleDocumentation } from '../rules.ts'
 
@@ -35,7 +36,7 @@ function renderRuleList(locale: 'en' | 'zh', isReadme: boolean): string {
   return RULE_GROUPS.map(group => {
     const rows = RULE_DOCS.filter(rule => rule.group === group.id).map(rule => {
       const link = isReadme
-        ? `https://vue-perfectionist.vercel.app/${isChinese ? 'zh/' : ''}rules/${rule.name}`
+        ? `${DOCUMENTATION_URL}/${isChinese ? 'zh/' : ''}rules/${rule.name}`
         : `./${rule.name}.md`
       const cells = [`[${rule.name}](${link})`, rule.description[locale]]
       return isReadme

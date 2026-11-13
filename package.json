@@ -58,9 +58,10 @@
     "prepare": "husky",
     "prepublishOnly": "pnpm run build",
     "release": "run-s release:check release:version",
-    "release:check": "run-s format:check lint typecheck docs:typecheck test",
+    "release:check": "run-s format:check lint typecheck docs:typecheck test build test:package",
     "release:version": "bumpp",
     "test": "vitest",
+    "test:package": "node --test tests/package/package.test.mjs",
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {

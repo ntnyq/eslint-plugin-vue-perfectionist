@@ -21,7 +21,8 @@ pnpm install --frozen-lockfile
 ```
 
 The workspace installs documentation dependencies too. No package build is
-needed before running tests or serving the docs: both consume source files.
+needed before running `pnpm test` or serving the docs: both consume source files.
+Run `pnpm build` before `pnpm test:package`, which separately checks built output.
 
 ## Vue Compatibility
 
@@ -36,21 +37,22 @@ in release notes together with any changes to automatic fixes.
 
 Run these commands from the repository root:
 
-| Command                                                   | Purpose                                                                 |
-| --------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `pnpm dev`                                                | Rebuild the plugin when source files change.                            |
-| `pnpm build`                                              | Bundle the package and generate TypeScript declarations with tsdown.    |
-| `pnpm test`                                               | Run Vitest once; watch mode is disabled in configuration.               |
-| `pnpm exec vitest run tests/rules/callback-style.test.ts` | Run a focused rule suite.                                               |
-| `pnpm typecheck`                                          | Check TypeScript without emitting files.                                |
-| `pnpm lint`                                               | Run ESLint.                                                             |
-| `pnpm format`                                             | Apply Oxfmt formatting.                                                 |
-| `pnpm format:check`                                       | Check formatting.                                                       |
-| `pnpm docs:dev`                                           | Serve the VitePress site locally.                                       |
-| `pnpm docs:build`                                         | Build the documentation and check page links.                           |
-| `pnpm docs:sync`                                          | Regenerate rule catalogs and rule-page summaries.                       |
-| `pnpm docs:typecheck`                                     | Check documentation TypeScript and Vue components with vue-tsc.         |
-| `pnpm docs:check`                                         | Check bilingual coverage, catalogs, example diagnostics, and rendering. |
+| Command                                                   | Purpose                                                                  |
+| --------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `pnpm dev`                                                | Rebuild the plugin when source files change.                             |
+| `pnpm build`                                              | Bundle the package and generate TypeScript declarations with tsdown.     |
+| `pnpm test`                                               | Run Vitest once; watch mode is disabled in configuration.                |
+| `pnpm test:package`                                       | Check built runtime and public declarations with Node; requires a build. |
+| `pnpm exec vitest run tests/rules/callback-style.test.ts` | Run a focused rule suite.                                                |
+| `pnpm typecheck`                                          | Check TypeScript without emitting files.                                 |
+| `pnpm lint`                                               | Run ESLint.                                                              |
+| `pnpm format`                                             | Apply Oxfmt formatting.                                                  |
+| `pnpm format:check`                                       | Check formatting.                                                        |
+| `pnpm docs:dev`                                           | Serve the VitePress site locally.                                        |
+| `pnpm docs:build`                                         | Build the documentation and check page links.                            |
+| `pnpm docs:sync`                                          | Regenerate rule catalogs and rule-page summaries.                        |
+| `pnpm docs:typecheck`                                     | Check documentation TypeScript and Vue components with vue-tsc.          |
+| `pnpm docs:check`                                         | Check bilingual coverage, catalogs, example diagnostics, and rendering.  |
 
 `dist/` and `docs/.vitepress/dist/` are generated output. Edit their sources
 instead. The pre-commit hook runs nano-staged lint and formatting fixes.
@@ -147,6 +149,7 @@ pnpm lint
 pnpm typecheck
 pnpm build
 pnpm test
+pnpm test:package
 pnpm docs:typecheck
 pnpm docs:check
 pnpm docs:build

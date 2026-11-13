@@ -1,6 +1,13 @@
 import { unwrapExpression } from '../ast/expressions.ts'
-import { inferPropValue, unknownPropValue } from './value.ts'
-import type { ComponentPropNode, PropValue, PropValueVariant } from './value.ts'
+import {
+  createUnknownValueAnalysis,
+  inferExpressionValueShape,
+} from '../ast/value-analysis.ts'
+import type {
+  ExpressionValueAnalysis,
+  ExpressionValueNode,
+  ExpressionValueVariant,
+} from '../ast/value-analysis.ts'
 
 /**
  * Resolve scalar literals and numeric constant operations without executing
@@ -15,13 +22,13 @@ import type { ComponentPropNode, PropValue, PropValueVariant } from './value.ts'
  * variants per operation.
  */
 export function inferStaticPropValue(
-  input: ComponentPropNode,
-  isGlobalUndefined: (node: ComponentPropNode) => boolean,
+  input: ExpressionValueNode,
+  isGlobalUndefined: (node: ExpressionValueNode) => boolean,
   depth = 0,
-): PropValue {
+): ExpressionValueAnalysis {
   const node = unwrapExpression(input)
   if (depth > 32) {
-    return unknownPropValue(node)
+    return createUnknownValueAnalysis(node)
   }
   /**
    * Infer a child expression at the next recursion depth.
@@ -29,7 +36,7 @@ export function inferStaticPropValue(
    * @param child - The child expression to inspect.
    * @returns The child value with the same global undefined resolver.
    */
-  const infer = (child: ComponentPropNode) =>
+  const infer = (child: ExpressionValueNode) =>
     inferStaticPropValue(child, isGlobalUndefined, depth + 1)
   /**
    * Wrap a computed number as a concrete prop value variant.
@@ -37,7 +44,7 @@ export function inferStaticPropValue(
    * @param value - The computed numeric value.
    * @returns A numeric variant retaining the concrete value.
    */
-  const numeric = (value: number): PropValueVariant => ({
+  const numeric = (value: number): ExpressionValueVariant => ({
     type: 'number',
     value,
   })
@@ -46,7 +53,7 @@ export function inferStaticPropValue(
     const alternate = infer(node.alternate)
     const variants = [...consequent.variants, ...alternate.variants]
     return variants.length > 64
-      ? unknownPropValue(node)
+      ? createUnknownValueAnalysis(node)
       : {
           variants,
           hasUnknownVariants:
@@ -110,9 +117,9 @@ export function inferStaticPropValue(
     const left = infer(node.left)
     const right = infer(node.right)
     if (left.variants.length * right.variants.length > 64) {
-      return unknownPropValue(node)
+      return createUnknownValueAnalysis(node)
     }
-    const variants: PropValueVariant[] = []
+    const variants: ExpressionValueVariant[] = []
     let hasUnknownVariants = left.hasUnknownVariants || right.hasUnknownVariants
     for (const first of left.variants) {
       for (const second of right.variants) {
@@ -152,30 +159,23 @@ export function inferStaticPropValue(
       node,
     }
   }
-  const result = inferPropValue(node, isGlobalUndefined)
+  const result = inferExpressionValueShape(node, isGlobalUndefined)
   if (node.type === 'Literal' && !('regex' in node)) {
     const value = node.value
-    if (
-      value === null ||
-      typeof value === 'number' ||
-      typeof value === 'boolean' ||
-      typeof value === 'string'
-    ) {
+    let variant: ExpressionValueVariant | undefined
+    if (value === null) {
+      variant = { type: 'null', value }
+    } else if (typeof value === 'number') {
+      variant = { type: 'number', value }
+    } else if (typeof value === 'boolean') {
+      variant = { type: 'boolean', value }
+    } else if (typeof value === 'string') {
+      variant = { type: 'string', value }
+    }
+    if (variant) {
       return {
         ...result,
-        variants: result.variants.map(
-          /**
-           * Attach a concrete scalar literal to an inferred variant.
-           *
-           * @param variant - The structural value variant.
-           * @returns The variant with the literal value retained for constraint
-           * checks.
-           */
-          variant => ({
-            ...variant,
-            value,
-          }),
-        ),
+        variants: [variant],
       }
     }
   }

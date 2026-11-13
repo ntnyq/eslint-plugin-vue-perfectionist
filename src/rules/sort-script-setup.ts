@@ -1,7 +1,7 @@
 import { createRule } from '../utils/create-rule.ts'
 import { createStatementComparator } from '../utils/sort-script-setup/compare.ts'
 import {
-  buildDependencies,
+  createDependencyAnalyzer,
   sortByDependencies,
 } from '../utils/sort-script-setup/dependencies.ts'
 import {
@@ -66,6 +66,10 @@ export const sortScriptSetup = createRule<
       const nodes = program.body.filter(
         node => node.range[0] >= setupStart && node.range[1] <= setupEnd,
       )
+      const analyzeDependencies = createDependencyAnalyzer(
+        context.sourceCode,
+        options,
+      )
       for (const partition of collectPartitions(
         nodes,
         context.sourceCode,
@@ -73,11 +77,7 @@ export const sortScriptSetup = createRule<
         assignGroup,
         matchesPattern,
       )) {
-        const dependencies = buildDependencies(
-          partition,
-          context.sourceCode,
-          options,
-        )
+        const dependencies = analyzeDependencies(partition)
         reportPartition(
           partition,
           sortByDependencies(partition, dependencies, compare),

@@ -1,39 +1,42 @@
-import { unwrapExpression } from '../ast/expressions.ts'
+import { unwrapExpression } from './expressions.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type { AST } from 'vue-eslint-parser'
-import type { ComponentPropType } from '../../types/index.ts'
 
-export type ComponentPropNode = AST.Node | TSESTree.Node
+export type ExpressionValueNode = AST.Node | TSESTree.Node
 
-export interface PropValueVariant {
-  type: ComponentPropType
-  /**
-   * Concrete scalar retained by the value-constraint analyzer when available.
-   */
-  value?: string | number | boolean | null
-  /**
-   * Retained for Boolean casting and statically known dynamic names.
-   */
-  stringValue?: string
-}
+/**
+ * Concrete scalars must match their runtime category. Other categories retain
+ * shape evidence only; no object coercion or binding evaluation is performed.
+ */
+export type ExpressionValueVariant =
+  | { type: 'string'; value?: string }
+  | { type: 'number'; value?: number }
+  | { type: 'boolean'; value?: boolean }
+  | { type: 'null'; value?: null }
+  | {
+      type: 'array' | 'bigint' | 'function' | 'object' | 'symbol' | 'undefined'
+      value?: never
+    }
 
-export interface PropValue {
-  variants: PropValueVariant[]
+export interface ExpressionValueAnalysis {
+  variants: ExpressionValueVariant[]
   /**
    * Some possible values remain unresolved, even when known variants exist.
    */
   hasUnknownVariants: boolean
-  node: ComponentPropNode
+  node: ExpressionValueNode
 }
 
 /**
- * Represent a prop expression whose value cannot be inferred.
+ * Represent an expression whose value cannot be inferred.
  *
  * @param node - The node responsible for the unknown value.
  * @returns An unknown value with no known variants and the original diagnostic
  * node.
  */
-export function unknownPropValue(node: ComponentPropNode): PropValue {
+export function createUnknownValueAnalysis(
+  node: ExpressionValueNode,
+): ExpressionValueAnalysis {
   return {
     variants: [],
     hasUnknownVariants: true,
@@ -42,18 +45,18 @@ export function unknownPropValue(node: ComponentPropNode): PropValue {
 }
 
 /**
- * Represent a statically known string prop value.
+ * Represent a statically known string value.
  *
  * @param value - The decoded string value.
  * @param node - The node supplying the string.
  * @returns A certain string variant retaining its concrete text.
  */
-export function stringPropValue(
+export function createStringValueAnalysis(
   value: string,
-  node: ComponentPropNode,
-): PropValue {
+  node: ExpressionValueNode,
+): ExpressionValueAnalysis {
   return {
-    variants: [{ type: 'string', stringValue: value }],
+    variants: [{ type: 'string', value }],
     hasUnknownVariants: false,
     node,
   }
@@ -68,10 +71,10 @@ export function stringPropValue(
  * @returns Known structural variants, their remaining uncertainty, and the
  * unwrapped expression node.
  */
-export function inferPropValue(
-  input: ComponentPropNode,
-  isGlobalUndefined: (node: ComponentPropNode) => boolean,
-): PropValue {
+export function inferExpressionValueShape(
+  input: ExpressionValueNode,
+  isGlobalUndefined: (node: ExpressionValueNode) => boolean,
+): ExpressionValueAnalysis {
   const node = unwrapExpression(input)
   /**
    * Create a certain structural value for the current expression.
@@ -79,7 +82,9 @@ export function inferPropValue(
    * @param type - The runtime type established by the expression shape.
    * @returns A single known type variant associated with the current node.
    */
-  const known = (type: ComponentPropType): PropValue => ({
+  const known = (
+    type: ExpressionValueVariant['type'],
+  ): ExpressionValueAnalysis => ({
     variants: [{ type }],
     hasUnknownVariants: false,
     node,
@@ -93,7 +98,7 @@ export function inferPropValue(
         return known('null')
       }
       if (typeof node.value === 'string') {
-        return stringPropValue(node.value, node)
+        return createStringValueAnalysis(node.value, node)
       }
       if (typeof node.value === 'number') {
         return known('number')
@@ -108,7 +113,7 @@ export function inferPropValue(
     case 'TemplateLiteral':
       return node.expressions.length
         ? known('string')
-        : stringPropValue(node.quasis[0]?.value.cooked ?? '', node)
+        : createStringValueAnalysis(node.quasis[0]?.value.cooked ?? '', node)
     case 'ArrayExpression':
       return known('array')
     case 'ObjectExpression':
@@ -132,7 +137,10 @@ export function inferPropValue(
         return known('string')
       }
       if (['-', '+', '~'].includes(node.operator)) {
-        const argument = inferPropValue(node.argument, isGlobalUndefined)
+        const argument = inferExpressionValueShape(
+          node.argument,
+          isGlobalUndefined,
+        )
         if (
           !argument.hasUnknownVariants &&
           argument.variants.every(
@@ -156,8 +164,14 @@ export function inferPropValue(
       }
       break
     case 'ConditionalExpression': {
-      const consequent = inferPropValue(node.consequent, isGlobalUndefined)
-      const alternate = inferPropValue(node.alternate, isGlobalUndefined)
+      const consequent = inferExpressionValueShape(
+        node.consequent,
+        isGlobalUndefined,
+      )
+      const alternate = inferExpressionValueShape(
+        node.alternate,
+        isGlobalUndefined,
+      )
       return {
         variants: [...consequent.variants, ...alternate.variants],
         hasUnknownVariants:
@@ -166,5 +180,5 @@ export function inferPropValue(
       }
     }
   }
-  return unknownPropValue(node)
+  return createUnknownValueAnalysis(node)
 }

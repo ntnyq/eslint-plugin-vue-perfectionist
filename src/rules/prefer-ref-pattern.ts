@@ -7,7 +7,7 @@ import { findScopeReference } from '../utils/ast/scope.ts'
 import { createRule } from '../utils/create-rule.ts'
 import { resolveVueGlobals } from '../utils/vue/globals.ts'
 import { hasTemplateVisitor } from '../utils/vue/parser-services.ts'
-import { getVueRefApi, isVueRefVariable } from '../utils/vue/refs.ts'
+import { getVueRuntimeApiName, isVueRefVariable } from '../utils/vue/refs.ts'
 import {
   getScriptVariableDefinitions,
   getSetupRange,
@@ -107,7 +107,7 @@ export const preferRefPattern = createRule<
     }
 
     function checkCall(node: TSESTree.CallExpression) {
-      const api = getVueRefApi(node, sourceCode, vueGlobals)
+      const api = getVueRuntimeApiName(node, sourceCode, vueGlobals)
       if (api === 'useTemplateRef' && targets.has('useTemplateRef')) {
         const argument = node.arguments[0]
         const name = argument && getStaticStringValue(argument)

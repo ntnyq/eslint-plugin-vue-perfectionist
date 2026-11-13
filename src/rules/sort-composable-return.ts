@@ -1,9 +1,9 @@
-import { unwrapExpression } from '../utils/ast/expressions.ts'
-import { createRule } from '../utils/create-rule.ts'
 import {
   getFunctionBindingName,
-  getReturnOwner,
-} from '../utils/sort-composable/ast.ts'
+  unwrapExpression,
+} from '../utils/ast/expressions.ts'
+import { createRule } from '../utils/create-rule.ts'
+import { getReturnOwner } from '../utils/sort-composable/ast.ts'
 import { createMemberClassifier } from '../utils/sort-composable/classify.ts'
 import {
   createComposableReporter,

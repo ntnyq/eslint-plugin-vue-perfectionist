@@ -34,43 +34,48 @@ import { sortScriptSetup } from './rules/sort-script-setup.ts'
 import type { ESLint } from 'eslint'
 import type { VuePerfectionistPlugin } from './types/index.ts'
 
+/**
+ * Keep exact rule names and module types until the ESLint host boundary.
+ */
+export const rules = {
+  'callback-style': callbackStyle,
+  'component-prop-types': componentPropTypes,
+  'component-prop-values': componentPropValues,
+  'consistent-template-ref-name': consistentTemplateRefName,
+  'define-macros-newline': defineMacrosNewline,
+  'define-macros-type-style': defineMacrosTypeStyle,
+  'define-model-name-casing': defineModelNameCasing,
+  'max-lines-per-callback': maxLinesPerCallback,
+  'no-complex-template-expression': noComplexTemplateExpression,
+  'no-complex-v-for-source': noComplexVForSource,
+  'no-restricted-html-elements': noRestrictedHtmlElements,
+  'no-template-type-assertion': noTemplateTypeAssertion,
+  'padding-line-between-tags': paddingLineBetweenTags,
+  'prefer-composable-options': preferComposableOptions,
+  'prefer-define-model': preferDefineModel,
+  'prefer-function-declaration': preferFunctionDeclaration,
+  'prefer-function-result-pattern': preferFunctionResultPattern,
+  'prefer-on-scope-dispose': preferOnScopeDispose,
+  'prefer-ref-pattern': preferRefPattern,
+  'prefer-simple-event-handler': preferSimpleEventHandler,
+  'prefer-template-literal-in-interpolation':
+    preferTemplateLiteralInInterpolation,
+  'prefer-use-template-ref-inference': preferUseTemplateRefInference,
+  'prefer-watch-effect-alias': preferWatchEffectAlias,
+  'require-component-props': requireComponentProps,
+  'require-component-slots': requireComponentSlots,
+  'require-injection-key': requireInjectionKey,
+  'require-macro-type-name': requireMacroTypeName,
+  'require-props-prefix': requirePropsPrefix,
+  'require-vue-generic': requireVueGeneric,
+  'sort-composable-destructure': sortComposableDestructure,
+  'sort-composable-return': sortComposableReturn,
+  'sort-script-setup': sortScriptSetup,
+}
+
 export const plugin: VuePerfectionistPlugin = {
   meta,
   // typescript-eslint still exposes deprecated context methods in its types.
   // Our rules use only the shared sourceCode/report API, exercised with ESLint 10.
-  rules: {
-    'callback-style': callbackStyle,
-    'component-prop-types': componentPropTypes,
-    'component-prop-values': componentPropValues,
-    'consistent-template-ref-name': consistentTemplateRefName,
-    'define-macros-newline': defineMacrosNewline,
-    'define-macros-type-style': defineMacrosTypeStyle,
-    'define-model-name-casing': defineModelNameCasing,
-    'max-lines-per-callback': maxLinesPerCallback,
-    'no-complex-template-expression': noComplexTemplateExpression,
-    'no-complex-v-for-source': noComplexVForSource,
-    'no-restricted-html-elements': noRestrictedHtmlElements,
-    'no-template-type-assertion': noTemplateTypeAssertion,
-    'padding-line-between-tags': paddingLineBetweenTags,
-    'prefer-composable-options': preferComposableOptions,
-    'prefer-define-model': preferDefineModel,
-    'prefer-function-declaration': preferFunctionDeclaration,
-    'prefer-function-result-pattern': preferFunctionResultPattern,
-    'prefer-on-scope-dispose': preferOnScopeDispose,
-    'prefer-ref-pattern': preferRefPattern,
-    'prefer-simple-event-handler': preferSimpleEventHandler,
-    'prefer-template-literal-in-interpolation':
-      preferTemplateLiteralInInterpolation,
-    'prefer-use-template-ref-inference': preferUseTemplateRefInference,
-    'prefer-watch-effect-alias': preferWatchEffectAlias,
-    'require-component-props': requireComponentProps,
-    'require-component-slots': requireComponentSlots,
-    'require-injection-key': requireInjectionKey,
-    'require-macro-type-name': requireMacroTypeName,
-    'require-props-prefix': requirePropsPrefix,
-    'require-vue-generic': requireVueGeneric,
-    'sort-composable-destructure': sortComposableDestructure,
-    'sort-composable-return': sortComposableReturn,
-    'sort-script-setup': sortScriptSetup,
-  } as unknown as NonNullable<ESLint.Plugin['rules']>,
+  rules: rules as unknown as NonNullable<ESLint.Plugin['rules']>,
 }

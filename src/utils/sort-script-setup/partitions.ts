@@ -141,6 +141,9 @@ export function collectPartitions(
       nameCounts.set(name, (nameCounts.get(name) ?? 0) + 1)
     }
   }
+  const protectedLines = [...protectedSet].sort((left, right) => left - right)
+  let protectedCursor = 0
+  let commentCursor = 0
   const partitions: Statement[][] = []
   let partition: Statement[] = []
   /**
@@ -173,16 +176,22 @@ export function collectPartitions(
        */
       comment => comment.loc.start.line === node.loc.end.line,
     )
-    const ownComments = comments.filter(
-      /**
-       * Select comments wholly contained in the current statement.
-       *
-       * @param comment - The source comment.
-       * @returns Whether its range lies within the statement range.
-       */
-      comment =>
-        comment.range[0] >= node.range[0] && comment.range[1] <= node.range[1],
-    )
+    // Top-level statements and comments are ordered and non-overlapping.
+    // Advance once through comments while preserving leading/trailing ownership.
+    const ownComments: TSESTree.Comment[] = []
+    while (true) {
+      const comment = comments[commentCursor]
+      if (!comment || comment.range[0] >= node.range[1]) {
+        break
+      }
+      commentCursor++
+      if (
+        comment.range[0] >= node.range[0] &&
+        comment.range[1] <= node.range[1]
+      ) {
+        ownComments.push(comment)
+      }
+    }
     const adjacent = [...before, ...ownComments, ...trailing]
     const hasDirective = adjacent.some(
       /**
@@ -197,18 +206,19 @@ export function collectPartitions(
           comment.value,
         ),
     )
+    while (true) {
+      const line = protectedLines[protectedCursor]
+      if (line === undefined || line >= node.loc.start.line) {
+        break
+      }
+      protectedCursor++
+    }
+    const protectedLine = protectedLines[protectedCursor]
     const isProtected =
       (openDisableStart !== undefined &&
         node.loc.end.line >= openDisableStart) ||
-      [...protectedSet].some(
-        /**
-         * Check whether a protected line intersects the current statement.
-         *
-         * @param line - The protected line number.
-         * @returns Whether the line lies within the statement line span.
-         */
-        line => line >= node.loc.start.line && line <= node.loc.end.line,
-      )
+      (protectedLine !== undefined && protectedLine <= node.loc.end.line)
+
     if (
       !statement ||
       hasDirective ||

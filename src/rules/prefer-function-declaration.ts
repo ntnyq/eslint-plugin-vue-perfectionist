@@ -1,5 +1,7 @@
 import { ASTUtils } from '@typescript-eslint/utils'
 import {
+  getFunctionBindingName,
+  getOuterExpression,
   getStaticStringValue,
   unwrapExpression,
 } from '../utils/ast/expressions.ts'
@@ -13,25 +15,7 @@ import type {
   PreferFunctionDeclarationMessageId,
   PreferFunctionDeclarationOptions,
 } from '../types/index.ts'
-
-type FunctionContainer =
-  | TSESTree.ArrowFunctionExpression
-  | TSESTree.FunctionDeclaration
-  | TSESTree.FunctionExpression
-
-/**
- * Locate the owner of an expression through TypeScript wrappers.
- *
- * @param node - The unwrapped expression.
- * @returns The first parent outside the expression's wrappers.
- */
-function getExpressionParent(node: TSESTree.Node): TSESTree.Node | undefined {
-  let outer = node
-  while (outer.parent && unwrapExpression(outer.parent) === node) {
-    outer = outer.parent
-  }
-  return outer.parent
-}
+import type { FunctionNode } from '../utils/ast/expressions.ts'
 
 export const preferFunctionDeclaration = createRule<
   [PreferFunctionDeclarationOptions],
@@ -116,7 +100,7 @@ export const preferFunctionDeclaration = createRule<
     }
 
     function isComponentObject(node: TSESTree.ObjectExpression) {
-      const parent = getExpressionParent(node)
+      const parent = getOuterExpression(node).parent
       return (
         parent?.type === 'ExportDefaultDeclaration' ||
         (parent?.type === 'CallExpression' &&
@@ -126,8 +110,8 @@ export const preferFunctionDeclaration = createRule<
       )
     }
 
-    function isComponentSetup(node: FunctionContainer) {
-      const parent = getExpressionParent(node)
+    function isComponentSetup(node: FunctionNode) {
+      const parent = getOuterExpression(node).parent
       if (parent?.type === 'CallExpression') {
         return (
           parent.arguments[0] &&
@@ -145,17 +129,8 @@ export const preferFunctionDeclaration = createRule<
       )
     }
 
-    function isComposable(node: FunctionContainer) {
-      const parent = getExpressionParent(node)
-      const name =
-        node.type === 'FunctionDeclaration'
-          ? node.id?.name
-          : parent?.type === 'VariableDeclarator' &&
-              parent.id.type === 'Identifier' &&
-              parent.init &&
-              unwrapExpression(parent.init) === node
-            ? parent.id.name
-            : undefined
+    function isComposable(node: FunctionNode) {
+      const name = getFunctionBindingName(node)
       return name !== undefined && pattern.test(name) && !ignored.has(name)
     }
 

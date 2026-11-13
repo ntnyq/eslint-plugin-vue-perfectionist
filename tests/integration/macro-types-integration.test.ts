@@ -6,6 +6,37 @@ import { createVueSFC } from '../helpers/create-vue-sfc.ts'
 import { vueLanguageOptions } from '../helpers/rule-tester.ts'
 
 it.each([
+  { defaults: '{}', prefixMessages: ['requirePropsPrefix'] },
+  { defaults: '{}, extra', prefixMessages: [] },
+])(
+  'preserves separate defaults-arity policies: $defaults',
+  ({ defaults, prefixMessages }) => {
+    const source = `<script setup lang="ts">
+const props = withDefaults(defineProps<{ title: string }>(), ${defaults})
+</script><template>{{ title }}</template>`
+    const messages = new Linter().verify(
+      source,
+      {
+        files: ['**/*.vue'],
+        languageOptions: vueLanguageOptions,
+        plugins: { vp: plugin },
+        rules: {
+          'vp/define-macros-type-style': 'error',
+          'vp/require-macro-type-name': 'error',
+          'vp/require-props-prefix': 'error',
+        },
+      },
+      'Test.vue',
+    )
+    expect(messages.map(message => message.messageId)).toEqual([
+      'unexpectedTypeStyle',
+      'expectedNamedType',
+      ...prefixMessages,
+    ])
+  },
+)
+
+it.each([
   {
     script: 'interface Props { title: string }; defineProps<Props>()',
     style: 'error',

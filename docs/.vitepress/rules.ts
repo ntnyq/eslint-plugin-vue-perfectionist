@@ -1,3 +1,5 @@
+import type { rules } from '../../src/plugin.ts'
+
 export interface LocalizedText {
   en: string
   zh: string
@@ -8,7 +10,7 @@ export interface RuleGroup extends LocalizedText {
 }
 
 export interface RuleDocumentation {
-  name: string
+  name: keyof typeof rules
   group: string
   description: LocalizedText
   scope:

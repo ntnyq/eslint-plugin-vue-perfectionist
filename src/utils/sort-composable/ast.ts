@@ -5,23 +5,6 @@ import type { SourceCode } from '../../types/eslint.ts'
 import type { FunctionNode } from '../ast/expressions.ts'
 
 /**
- * Read the declaration binding name, including wrapped variable initializers.
- */
-export function getFunctionBindingName(node: FunctionNode): string | undefined {
-  if (node.type === 'FunctionDeclaration') {
-    return node.id?.name
-  }
-  let parent: TSESTree.Node | undefined = node.parent
-  while (parent && unwrapExpression(parent) === node) {
-    parent = parent.parent
-  }
-  return parent?.type === 'VariableDeclarator' &&
-    parent.id.type === 'Identifier'
-    ? parent.id.name
-    : undefined
-}
-
-/**
  * Find the owning function, stopping before callbacks can leak into an API.
  */
 export function getReturnOwner(

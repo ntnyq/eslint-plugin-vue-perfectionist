@@ -5,7 +5,7 @@ import type {
   ComponentPropValueConstraint,
   ComponentPropValuesTarget,
 } from '../../types/rules/component-prop-values.ts'
-import type { PropValueVariant } from './value.ts'
+import type { ExpressionValueVariant } from '../ast/value-analysis.ts'
 
 interface ValueCheck {
   expected: string
@@ -312,7 +312,7 @@ export function compilePropValues(
  * the scalar is unknown.
  */
 export function getValueFailures(
-  variant: PropValueVariant,
+  variant: ExpressionValueVariant,
   constraint: CompiledValueConstraint,
 ): string[] | undefined {
   const { kind, checks } = constraint
@@ -330,7 +330,7 @@ export function getValueFailures(
       check => check.expected,
     )
   }
-  const value = variant.value ?? variant.stringValue
+  const value = variant.value
   // Null is a known enum candidate, not an unresolved value.
   const scalar = variant.type === 'null' ? null : value
   if (scalar === undefined) {
@@ -380,11 +380,11 @@ export function getValueFailures(
  * @returns The concrete scalar representation when known, otherwise the variant
  * type.
  */
-export function describePropVariant(variant: PropValueVariant): string {
+export function describePropVariant(variant: ExpressionValueVariant): string {
   if (variant.type === 'null') {
     return 'null'
   }
-  const value = variant.value ?? variant.stringValue
+  const value = variant.value
   return value === undefined
     ? variant.type
     : typeof value === 'number'

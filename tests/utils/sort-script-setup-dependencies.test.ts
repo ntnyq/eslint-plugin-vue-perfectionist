@@ -1,6 +1,12 @@
 import { parse } from '@typescript-eslint/parser'
 import { expect, it } from 'vitest'
-import { sortByDependencies } from '../../src/utils/sort-script-setup/dependencies.ts'
+import { classifyStatement } from '../../src/utils/sort-script-setup/classify.ts'
+import { DEFAULT_OPTIONS } from '../../src/utils/sort-script-setup/constants.ts'
+import {
+  createDependencyAnalyzer,
+  sortByDependencies,
+} from '../../src/utils/sort-script-setup/dependencies.ts'
+import { createSourceCode } from '../helpers/source-code.ts'
 import type { Statement } from '../../src/utils/sort-script-setup/types.ts'
 
 function createStatements(names: string[]): Statement[] {
@@ -23,6 +29,60 @@ function createStatements(names: string[]): Statement[] {
     size: 0,
   }))
 }
+
+it.each([1, 150])(
+  'indexes declarations without quadratic name lookups across %i partitions',
+  partitionCount => {
+    const size = 300
+    const sourceCode = createSourceCode(
+      Array.from(
+        { length: size / 2 },
+        (_, index) => `const a${index} = 0\nconst b${index} = a${index}`,
+      ).join('\n'),
+    )
+    const statements = sourceCode.ast.body.flatMap((node, index) => {
+      const statement = classifyStatement(
+        node,
+        sourceCode,
+        DEFAULT_OPTIONS,
+        index,
+      )
+      return statement ? [statement] : []
+    })
+    let nameReads = 0
+    let variableCount = 0
+    for (const scope of sourceCode.scopeManager?.scopes ?? []) {
+      for (const variable of scope.variables) {
+        const name = variable.name
+        variableCount++
+        Object.defineProperty(variable, 'name', {
+          configurable: true,
+          get() {
+            nameReads++
+            return name
+          },
+        })
+      }
+    }
+    const analyze = createDependencyAnalyzer(sourceCode, DEFAULT_OPTIONS)
+    const partitionSize = size / partitionCount
+    for (let offset = 0; offset < size; offset += partitionSize) {
+      const partition = statements.slice(offset, offset + partitionSize)
+      const dependencies = analyze(partition)
+      for (let index = 1; index < partition.length; index += 2) {
+        const declaration = partition[index - 1]
+        const consumer = partition[index]
+        expect(consumer && dependencies.get(consumer)).toEqual(
+          new Set([declaration]),
+        )
+      }
+    }
+    // Count work rather than elapsed time so this remains stable across CI hosts.
+    expect(nameReads).toBeLessThan(variableCount * 5 + size * 5)
+    const consumer = statements[1]
+    expect(consumer && analyze([consumer]).get(consumer)).toEqual(new Set())
+  },
+)
 
 it.each([
   {

@@ -32,9 +32,9 @@ description: 仓库布局、源码职责、共享分析约定及行为边界。
 | 位置                                  | 职责                                                                                          |
 | ------------------------------------- | --------------------------------------------------------------------------------------------- |
 | `src/rules/`                          | 规则元信息、schema、访问器组合、诊断选择及报告                                                |
-| `src/utils/ast/`                      | 表达式解包、静态字符串、遍历、绑定和精确作用域引用查找                                        |
+| `src/utils/ast/`                      | 表达式解包、值形状证据、函数绑定名、遍历及精确作用域引用查找                                  |
 | `src/utils/vue/`                      | 解析器服务守卫、脚本范围、合并 SFC 作用域、运行时导入、组件身份、名称转换、回调、ref 和宏类型 |
-| `src/utils/component-props/`          | prop 绑定、配置、保守值分析、布尔转换及值约束                                                 |
+| `src/utils/component-props/`          | prop 绑定、配置、具体标量分析、布尔转换及值约束                                               |
 | `src/utils/sort-script-setup/`        | 语句排序常量、schema、分类、分组、比较、依赖、分区、报告及内部模型                            |
 | `src/utils/sort-composable/`          | 组合式函数返回值和解构规则共享的 schema、配置编译、成员分类缓存、AST 分析及报告               |
 | `src/utils/injection-key.ts`          | 注入键识别及严格模式下的 TypeScript 符号来源分析                                              |
@@ -52,6 +52,14 @@ description: 仓库布局、源码职责、共享分析约定及行为边界。
 组件身份识别位于 `utils/vue/component.ts`，名称转换位于 `utils/vue/names.ts`。prop、slot、generic 和 model 规则共享这些 Vue 边界。回调 API 参数位置位于 `constants/callback-apis.ts`，与 `constants/callback-schema.ts` 中的配置结构分开维护。
 
 组合式函数排序在自己的 `options.ts` 中编译分组和成员模式。分类器在每个规则实例内缓存局部函数解析、返回成员索引及属性分类。直接调用和 awaited 调用保留独立的 async 与 thenable 安全策略，不支持的返回分支仍保持未知。
+
+语句依赖分析在每个文件内只索引一次词法引用和变量，再映射各分区中的声明。注释归属及受保护行检查通过有序索引向前推进，避免为每条语句重新扫描整个文档。性能测试统计操作次数，不依赖机器执行时间。
+
+共享值形状证据位于 `utils/ast/value-analysis.ts`，`ExpressionValueVariant` 联合类型将具体标量绑定到对应的运行时类别。prop 约束在 `component-props/static-value.ts` 中增加有界标量算术分析；布尔转换和 prop 合并继续由组件领域负责。插值只使用共享形状证据，保留自己的保守转换策略。
+
+`utils/vue/setup-macros.ts` 共享直接 setup 调用的发现过程。宏类型规则保留原有宽松的 `withDefaults` 参数数量策略，model 契约使用方要求恰好两个参数，均保留原始 AST 节点身份。`getFunctionBindingName()` 读取声明或包装初始化表达式的绑定名；执行边界和组合式函数筛选策略仍由使用方负责。
+
+`utils/watch-effect-alias.ts` 规划调用名称、导入及 flush 移除的文本修改，或返回不提供修复的内部原因。规则负责匹配和诊断，仅应用完整的安全修改方案。
 
 ## 测试归属 {#test-ownership}
 
@@ -74,16 +82,20 @@ description: 仓库布局、源码职责、共享分析约定及行为边界。
 
 详细诊断和修复预期留在规则测试中。若用例同时断言编译结果、运行时行为或 TypeScript 语义，则将完整用例及断言放在相应集成测试中；这些用例可以继续使用共享规则测试器，保留修复稳定性检查。
 
+`tests/package/package.test.mjs` 在 `pnpm build` 后通过 `pnpm test:package` 使用 Node 测试运行器单独执行。它通过公共导出映射加载包，从构建产物执行规则，并在 NodeNext 和 Bundler 解析模式下检查全部公共类型。源码测试和文档开发不需要预先构建；CI 同时执行源码及构建产物检查。
+
 ## 文档实现 {#documentation-implementation}
 
 用户内容保留在 `guide/`、`rules/` 和 `design/`，并在 `zh/` 下保持对应路径。站点配置由 `docs/.vitepress/config.ts` 组合：`config/example-rules.ts` 保存默认示例规则选项，`config/examples.ts` 负责示例配置变体、Markdown 容器校验和诊断渲染。`pnpm docs:typecheck` 使用 `docs/tsconfig.json` 检查 TypeScript 及 Vue 组件，与包的 TypeScript 检查分开运行。排序演示实现及测试继续放在 `docs/.vitepress/components/demos/sort-script-setup/`。
+
+规则元信息和生成的 README 链接共享 `src/constants/documentation.ts` 中的规范站点地址。`src/plugin.ts` 保留精确推断的内部规则注册表，供规则目录约束名称；公共插件继续保留原有 ESLint 宿主类型及导出。
 
 ## 共享约定 {#shared-contracts}
 
 - `unwrapExpression()` 接受脚本及模板 AST 节点，为脚本调用方保留脚本 AST 返回类型。仅移除现有 TypeScript 包装，不解包可选链或求值。
 - `isFunctionNode()` 收窄三种运行时函数节点，不负责判断绑定名称是否符合组合式函数约定。
 - `resolveComponentName()` 返回归一化的组件身份，排除原生标签、slot outlet 及 v-pre 内容。
-- `PropValue.hasUnknownVariants` 独立记录尚未解析的可能值，可与已知分支同时存在。
+- `ExpressionValueAnalysis.hasUnknownVariants` 独立记录尚未解析的可能值，可与已知分支同时存在。
 - `isRuntimeNode()` 排除擦除的类型分支，保留 TypeScript 包装内的值表达式，供模板复杂度检查使用。
 - `utils/vue/global-writes.ts` 中的 `hasGlobalWrite()` 检测直接写入及通过未被遮蔽的全局对象进行的属性目标写入。watch-effect 别名修复与被动 model 识别共享此分析，各自保留独立的 `eval` 策略。
 - `getStaticStringValue()` 读取字符串和无表达式模板字面量，不解析绑定或求值拼接。

@@ -1,7 +1,7 @@
 import { hyphenateName } from '../vue/names.ts'
 import type { ComponentPropType } from '../../types/rules/component-prop-types.ts'
+import type { ExpressionValueAnalysis } from '../ast/value-analysis.ts'
 import type { CompiledPropConstraint } from './config.ts'
-import type { PropValue } from './value.ts'
 
 interface PropTypeAnalysis {
   actual: ComponentPropType[]
@@ -19,7 +19,7 @@ interface PropTypeAnalysis {
  * constraint.
  */
 export function analyzePropTypes(
-  value: PropValue,
+  value: ExpressionValueAnalysis,
   propName: string,
   constraint: CompiledPropConstraint,
 ): PropTypeAnalysis {
@@ -37,12 +37,11 @@ export function analyzePropTypes(
           if (!constraint.booleanCasting || variant.type !== 'string') {
             return [variant.type]
           }
-          if (variant.stringValue === undefined) {
+          if (variant.value === undefined) {
             return ['string', 'boolean'] as const
           }
           return [
-            variant.stringValue === '' ||
-            variant.stringValue === hyphenateName(propName)
+            variant.value === '' || variant.value === hyphenateName(propName)
               ? ('boolean' as const)
               : ('string' as const),
           ]

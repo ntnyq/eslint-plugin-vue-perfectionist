@@ -1,4 +1,4 @@
-import { inferPropValue } from './component-props/value.ts'
+import { inferExpressionValueShape } from './ast/value-analysis.ts'
 import type { AST } from 'vue-eslint-parser'
 import type { SourceCode } from '../types/eslint.ts'
 
@@ -199,7 +199,7 @@ export function createInterpolationReplacement(
     }
     // Even `undefined` can be a template-local or component binding. Do not
     // infer identifiers without a reliable template-to-script type mapping.
-    const value = inferPropValue(
+    const value = inferExpressionValueShape(
       node.expression,
       /**
        * Keep identifier values unresolved without a reliable template scope

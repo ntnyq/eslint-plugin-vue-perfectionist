@@ -1,4 +1,5 @@
 import { ESLintUtils } from '@typescript-eslint/utils'
+import { DOCUMENTATION_URL } from '../constants/documentation.ts'
 
 export interface PluginDocs {
   recommended?: boolean
@@ -19,5 +20,5 @@ export const createRule = ESLintUtils.RuleCreator<PluginDocs>(
    * @param name - The rule name matching its Markdown filename.
    * @returns The documentation site URL of the rule.
    */
-  name => `https://vue-perfectionist.ntnyq.dev/rules/${name}`,
+  name => `${DOCUMENTATION_URL}/rules/${name}`,
 )

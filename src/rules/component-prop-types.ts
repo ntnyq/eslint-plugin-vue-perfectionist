@@ -1,4 +1,4 @@
-import { PROP_TYPES_SCHEMA } from '../constants/component-props.ts'
+import { PROP_TYPES_SCHEMA } from '../constants/component-prop-types-schema.ts'
 import { COMPONENT_NAMES_SCHEMA } from '../constants/component-schema.ts'
 import { analyzeComponentBindings } from '../utils/component-props/bindings.ts'
 import { compilePropTypes } from '../utils/component-props/config.ts'
