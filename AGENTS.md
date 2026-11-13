@@ -51,6 +51,6 @@ Use the repository's [add-eslint-rule skill](.agents/skills/add-eslint-rule/SKIL
 
 ## Commit & Pull Request Guidelines
 
-History currently contains only `chore: init commit`; follow that conventional prefix style with concise messages such as `fix: preserve watcher order`.
+Use Conventional Commits with concise messages such as `fix: preserve watcher order`. When committing a new rule, use `feat: add <rule-name> rule`, where `<rule-name>` is the unprefixed kebab-case rule name, for example `feat: add require-composable-return-bindings rule`.
 
 Keep pull requests focused. Describe the behavior change, link relevant issues, and report validation commands. Update rule documentation when options or behavior change. Before submitting, run formatting checks, lint, typecheck, build, and tests; CI tests Node 22, 24, and 26 on Linux, Windows, and macOS.

@@ -256,4 +256,6 @@ If formatting fails, format only files changed for the task, then check again. A
 - [ ] Formatting, lint, type checking, build, and the full test suite pass. Clearly record any checks blocked by the environment and why.
 - [ ] The diff contains only task-related changes, with no manually edited generated output or unintended dependency or version changes.
 
+When committing a new rule, use `feat: add <rule-name> rule`, where `<rule-name>` is the unprefixed kebab-case rule name, for example `feat: add require-composable-return-bindings rule`.
+
 When delivering, briefly describe the rule's behavior, options, fix limitations, changed files, and validation results. Adding a rule does not include releasing a version or pushing changes.
