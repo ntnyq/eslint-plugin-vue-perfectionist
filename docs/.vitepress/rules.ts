@@ -541,6 +541,22 @@ export const RULE_DOCS: RuleDocumentation[] = [
     typeInformation: false,
   },
   {
+    name: 'sort-composable-body',
+    group: 'statement-ordering',
+    description: {
+      en: 'Group and order direct statements in named composable functions.',
+      zh: '对具名组合式函数体的直接语句进行分组和排序。',
+    },
+    scope: 'Scripts',
+    fix: 'Supported cases',
+    defaults: {
+      en: 'Select ^use[A-Z] bindings; preserve within-group order; apply proven-safe fixes only.',
+      zh: '匹配 ^use[A-Z] 绑定；保留组内顺序；仅应用已证明安全的修复。',
+    },
+    requiresOptions: false,
+    typeInformation: false,
+  },
+  {
     name: 'sort-composable-destructure',
     group: 'statement-ordering',
     description: {

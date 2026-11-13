@@ -29,6 +29,7 @@ description: 配置解析器、文件范围、自动导入识别和公共 TypeSc
 - [`consistent-template-ref-name`](/zh/rules/consistent-template-ref-name)
 - [`prefer-function-result-pattern`](/zh/rules/prefer-function-result-pattern)
 - [`prefer-ref-pattern`](/zh/rules/prefer-ref-pattern)
+- [`sort-composable-body`](/zh/rules/sort-composable-body)
 - [`sort-composable-destructure`](/zh/rules/sort-composable-destructure)
 - [`sort-composable-return`](/zh/rules/sort-composable-return)
 

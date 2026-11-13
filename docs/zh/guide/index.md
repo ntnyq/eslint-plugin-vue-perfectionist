@@ -103,6 +103,9 @@ pnpm exec eslint . --fix
 使用 [require-composable-return-bindings](/zh/rules/require-composable-return-bindings)
 要求返回字段显式暴露本地绑定。默认允许改名，对内联表达式只报告、不修复。
 
+使用 [sort-composable-body](/zh/rules/sort-composable-body) 检查具名组合式函数体的
+直接语句。它沿用 setup 排序偏好，独立于成员排序应用保守的移动修复。
+
 ## 后续步骤 {#next-steps}
 
 - [选择规则](/zh/rules/)：按用途浏览规则，查看适用文件范围、默认行为和自动修复支持情况。

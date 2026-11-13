@@ -29,6 +29,7 @@ import { requireInjectionKey } from './rules/require-injection-key.ts'
 import { requireMacroTypeName } from './rules/require-macro-type-name.ts'
 import { requirePropsPrefix } from './rules/require-props-prefix.ts'
 import { requireVueGeneric } from './rules/require-vue-generic.ts'
+import { sortComposableBody } from './rules/sort-composable-body.ts'
 import { sortComposableDestructure } from './rules/sort-composable-destructure.ts'
 import { sortComposableReturn } from './rules/sort-composable-return.ts'
 import { sortScriptSetup } from './rules/sort-script-setup.ts'
@@ -70,6 +71,7 @@ export const rules = {
   'require-macro-type-name': requireMacroTypeName,
   'require-props-prefix': requirePropsPrefix,
   'require-vue-generic': requireVueGeneric,
+  'sort-composable-body': sortComposableBody,
   'sort-composable-destructure': sortComposableDestructure,
   'sort-composable-return': sortComposableReturn,
   'sort-script-setup': sortScriptSetup,

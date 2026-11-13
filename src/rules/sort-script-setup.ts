@@ -1,18 +1,22 @@
 import { createRule } from '../utils/create-rule.ts'
-import { createStatementComparator } from '../utils/sort-script-setup/compare.ts'
+import { createMacroClassifier } from '../utils/sort-script-setup/classify.ts'
+import { resolveOptions } from '../utils/sort-script-setup/options.ts'
+import { OPTIONS_SCHEMA } from '../utils/sort-script-setup/schema.ts'
+import { createStatementComparator } from '../utils/sort-statements/compare.ts'
 import {
   createDependencyAnalyzer,
   sortByDependencies,
-} from '../utils/sort-script-setup/dependencies.ts'
+} from '../utils/sort-statements/dependencies.ts'
 import {
   createGroupMatcher,
   resolveGroups,
-} from '../utils/sort-script-setup/groups.ts'
-import { resolveOptions } from '../utils/sort-script-setup/options.ts'
-import { collectPartitions } from '../utils/sort-script-setup/partitions.ts'
-import { reportPartition } from '../utils/sort-script-setup/report.ts'
-import { OPTIONS_SCHEMA } from '../utils/sort-script-setup/schema.ts'
-import { createPatternMatcher } from '../utils/sort-script-setup/validation.ts'
+} from '../utils/sort-statements/groups.ts'
+import { createPartitionCollector } from '../utils/sort-statements/partitions.ts'
+import {
+  reportPartition,
+  STATEMENT_MESSAGES,
+} from '../utils/sort-statements/report.ts'
+import { createPatternMatcher } from '../utils/sort-statements/validation.ts'
 import { getSetupRange } from '../utils/vue/script-scope.ts'
 import type { TSESTree } from '@typescript-eslint/utils'
 import type {
@@ -35,17 +39,7 @@ export const sortScriptSetup = createRule<
     fixable: 'code',
     schema: [OPTIONS_SCHEMA],
     defaultOptions: [{}],
-    messages: {
-      unexpectedGroupOrder:
-        'Expected "{{name}}" ({{group}}) to come before "{{before}}".',
-      unexpectedOrder: 'Expected "{{name}}" to come before "{{before}}".',
-      unsafeReorder:
-        'Expected "{{name}}" ({{group}}) to come before "{{before}}"; this move cannot be safely fixed automatically.',
-      unexpectedNewlinesBetween:
-        'Expected {{count}} empty lines between groups.',
-      unexpectedNewlinesInside:
-        'Expected {{count}} empty lines inside the group.',
-    },
+    messages: STATEMENT_MESSAGES,
   },
   defaultOptions: [{}],
   create(context) {
@@ -70,13 +64,14 @@ export const sortScriptSetup = createRule<
         context.sourceCode,
         options,
       )
-      for (const partition of collectPartitions(
-        nodes,
+      const collectPartitions = createPartitionCollector(
         context.sourceCode,
         options,
         assignGroup,
         matchesPattern,
-      )) {
+        createMacroClassifier(context.sourceCode),
+      )
+      for (const partition of collectPartitions(nodes)) {
         const dependencies = analyzeDependencies(partition)
         reportPartition(
           partition,

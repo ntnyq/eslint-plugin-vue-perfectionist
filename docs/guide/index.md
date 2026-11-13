@@ -115,6 +115,10 @@ Require explicit local fields with
 [require-composable-return-bindings](/rules/require-composable-return-bindings).
 It allows aliases by default and reports inline expressions without fixes.
 
+For direct statements inside named composables, enable
+[sort-composable-body](/rules/sort-composable-body). It shares setup sorting
+preferences and applies conservative movement fixes independently of member sorting.
+
 ## Next Steps
 
 - [Choose rules](/rules/): browse by purpose and check file scopes, defaults, and automatic fix support.

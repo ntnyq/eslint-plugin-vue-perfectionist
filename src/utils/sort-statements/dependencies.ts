@@ -67,37 +67,43 @@ export function createDependencyAnalyzer(
   options: ResolvedOptions,
 ): (statements: Statement[]) => Map<Statement, Set<Statement>> {
   const references = new Map<TSESTree.Node, TSESLint.Scope.Reference>()
-  const variablesByName = new Map<string, TSESLint.Scope.Variable[]>()
+  const variablesByDeclaration = new Map<
+    TSESTree.Node,
+    Set<TSESLint.Scope.Variable>
+  >()
   for (const scope of sourceCode.scopeManager?.scopes ?? []) {
     for (const reference of scope.references) {
       references.set(reference.identifier, reference)
     }
     for (const variable of scope.variables) {
-      const variables = variablesByName.get(variable.name) ?? []
-      variables.push(variable)
-      variablesByName.set(variable.name, variables)
+      for (const definition of variable.defs) {
+        if (definition.type === 'Parameter') {
+          continue
+        }
+        const declaration =
+          definition.type === 'Variable'
+            ? definition.node.parent
+            : definition.node
+        if (!declaration) {
+          continue
+        }
+        const variables = variablesByDeclaration.get(declaration) ?? new Set()
+        variables.add(variable)
+        variablesByDeclaration.set(declaration, variables)
+      }
     }
   }
 
   return function buildDependencies(statements) {
     const declarations = new Map<TSESLint.Scope.Variable, Statement>()
     for (const statement of statements) {
-      for (const name of statement.names) {
-        for (const variable of variablesByName.get(name) ?? []) {
-          if (
-            !declarations.has(variable) &&
-            variable.defs.some(
-              definition =>
-                definition.name.range[0] >= statement.node.range[0] &&
-                definition.name.range[1] <= statement.node.range[1],
-            )
-          ) {
-            // Keep the first matching statement, including merged definitions.
-            declarations.set(variable, statement)
-          }
+      for (const variable of variablesByDeclaration.get(statement.node) ?? []) {
+        if (!declarations.has(variable)) {
+          declarations.set(variable, statement)
         }
       }
     }
+
     const dependencies = new Map<Statement, Set<Statement>>()
     for (const statement of statements) {
       const required = new Set<Statement>()

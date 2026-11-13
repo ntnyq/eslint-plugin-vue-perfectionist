@@ -92,6 +92,7 @@ description: 按用途、文件范围及自动修复支持情况浏览所有 Vue
 
 | 规则                                                            | 描述                                           | 范围  | 自动修复     |
 | --------------------------------------------------------------- | ---------------------------------------------- | ----- | ------------ |
+| [sort-composable-body](./sort-composable-body.md)               | 对具名组合式函数体的直接语句进行分组和排序。   | 脚本  | 支持部分情况 |
 | [sort-composable-destructure](./sort-composable-destructure.md) | 按状态和方法对组合式函数的解构成员分组。       | 脚本  | 仅空白       |
 | [sort-composable-return](./sort-composable-return.md)           | 按状态和方法对组合式函数的返回成员分组。       | 脚本  | 仅空白       |
 | [sort-script-setup](./sort-script-setup.md)                     | 对 `<script setup>` 的顶层语句进行分组和排序。 | Setup | 支持部分情况 |

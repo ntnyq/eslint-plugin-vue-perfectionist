@@ -407,7 +407,23 @@ export function createGroupMatcher(
  * @throws {Error} If groups are unknown, duplicated, unreferenced, invalid, or
  * separated incorrectly.
  */
-export function validateGroups(options: ResolvedOptions) {
+export function validateGroups(
+  options: ResolvedOptions,
+  selectors: readonly Selector[] = SELECTORS,
+) {
+  const acceptsGroup = (name: string) => {
+    const parsed = parsePredefinedGroup(name)
+    return parsed && selectors.includes(parsed.selector)
+  }
+  for (const custom of options.customGroups) {
+    const conditions =
+      'anyOf' in custom && custom.anyOf ? custom.anyOf : [custom]
+    for (const condition of conditions) {
+      if (condition.selector && !selectors.includes(condition.selector)) {
+        invalid(`Unknown selector: ${condition.selector}`)
+      }
+    }
+  }
   const customNames = new Set<string>()
   for (const custom of options.customGroups) {
     if (
@@ -445,11 +461,7 @@ export function validateGroups(options: ResolvedOptions) {
     }
     previousWasSeparator = false
     for (const name of names) {
-      if (
-        name !== 'unknown' &&
-        !customNames.has(name) &&
-        !parsePredefinedGroup(name)
-      ) {
+      if (name !== 'unknown' && !customNames.has(name) && !acceptsGroup(name)) {
         invalid(`Unknown group: ${name}`)
       }
       const normalized = normalizeGroupName(name)

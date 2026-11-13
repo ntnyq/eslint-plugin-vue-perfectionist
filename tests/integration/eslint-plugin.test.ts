@@ -41,6 +41,7 @@ describe('plugin contract', () => {
       'require-macro-type-name',
       'require-props-prefix',
       'require-vue-generic',
+      'sort-composable-body',
       'sort-composable-destructure',
       'sort-composable-return',
       'sort-script-setup',

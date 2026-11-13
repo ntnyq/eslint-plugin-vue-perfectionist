@@ -131,6 +131,7 @@ export default defineConfig([
 | [`prefer-template-literal-in-interpolation`](/zh/rules/prefer-template-literal-in-interpolation#automatic-fixes-and-formatting) | 合并静态安全的原始值表达式与相邻文本，保留 nullish 值的显示行为。            |
 | [`prefer-watch-effect-alias`](/zh/rules/prefer-watch-effect-alias#automatic-fixes-and-formatting)                               | 在目标绑定及静态选项可安全修改时，改用专用的副作用 API。                     |
 | [`require-props-prefix`](/zh/rules/require-props-prefix#automatic-fixes-and-formatting)                                         | 仅在 `autofix: true` 时为安全模板引用补上现有 props 绑定前缀，默认 `false`。 |
+| [`sort-composable-body`](/zh/rules/sort-composable-body#automatic-fixes-and-formatting)                                         | 重排已证明安全的函数体声明并调整相邻语句间距；可能改变运行行为的移动仅报告。 |
 | [`sort-composable-destructure`](/zh/rules/sort-composable-destructure#automatic-fixes-and-formatting)                           | 仅调整组间及组内空白；成员顺序问题需手动修改。                               |
 | [`sort-composable-return`](/zh/rules/sort-composable-return#automatic-fixes-and-formatting)                                     | 仅调整组间及组内空白；成员顺序问题需手动修改。                               |
 | [`sort-script-setup`](/zh/rules/sort-script-setup#partitions-and-automatic-fixes)                                               | 在安全的连续片段内重排符合条件的声明，并调整支持的间距。                     |

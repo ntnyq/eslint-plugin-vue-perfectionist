@@ -89,6 +89,7 @@ export const EXAMPLE_RULES: Record<string, Linter.RuleEntry> = {
       ],
     },
   ],
+  'vue-perfectionist/sort-composable-body': 'error',
   'vue-perfectionist/sort-composable-destructure': 'error',
   'vue-perfectionist/sort-composable-return': 'error',
   'vue-perfectionist/sort-script-setup': 'error',

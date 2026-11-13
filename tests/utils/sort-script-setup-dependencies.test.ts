@@ -1,13 +1,13 @@
 import { parse } from '@typescript-eslint/parser'
 import { expect, it } from 'vitest'
-import { classifyStatement } from '../../src/utils/sort-script-setup/classify.ts'
 import { DEFAULT_OPTIONS } from '../../src/utils/sort-script-setup/constants.ts'
+import { classifyStatement } from '../../src/utils/sort-statements/classify.ts'
 import {
   createDependencyAnalyzer,
   sortByDependencies,
-} from '../../src/utils/sort-script-setup/dependencies.ts'
+} from '../../src/utils/sort-statements/dependencies.ts'
 import { createSourceCode } from '../helpers/source-code.ts'
-import type { Statement } from '../../src/utils/sort-script-setup/types.ts'
+import type { Statement } from '../../src/utils/sort-statements/types.ts'
 
 function createStatements(names: string[]): Statement[] {
   const node = parse('const value = 0').body[0]

@@ -181,6 +181,10 @@ export function getThemeConfig(
             link: `${base}/design/sort-script-setup`,
             text: 'sort-script-setup',
           },
+          {
+            link: `${base}/design/sort-composable-body`,
+            text: 'sort-composable-body',
+          },
         ],
       },
     ],

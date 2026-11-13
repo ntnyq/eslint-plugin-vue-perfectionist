@@ -174,11 +174,12 @@ and automatic fix support, and individual rule pages for options and defaults.
 
 ### Statement Ordering
 
-| Rule                                                                                                 | Description                                                |
-| ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| [sort-composable-destructure](https://vue-perfectionist.ntnyq.dev/rules/sort-composable-destructure) | Group destructured composable members by state and method. |
-| [sort-composable-return](https://vue-perfectionist.ntnyq.dev/rules/sort-composable-return)           | Group composable return members by state and method.       |
-| [sort-script-setup](https://vue-perfectionist.ntnyq.dev/rules/sort-script-setup)                     | Group and order top-level statements in `<script setup>`.  |
+| Rule                                                                                                 | Description                                                      |
+| ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| [sort-composable-body](https://vue-perfectionist.ntnyq.dev/rules/sort-composable-body)               | Group and order direct statements in named composable functions. |
+| [sort-composable-destructure](https://vue-perfectionist.ntnyq.dev/rules/sort-composable-destructure) | Group destructured composable members by state and method.       |
+| [sort-composable-return](https://vue-perfectionist.ntnyq.dev/rules/sort-composable-return)           | Group composable return members by state and method.             |
+| [sort-script-setup](https://vue-perfectionist.ntnyq.dev/rules/sort-script-setup)                     | Group and order top-level statements in `<script setup>`.        |
 
 <!-- rules:end -->
 

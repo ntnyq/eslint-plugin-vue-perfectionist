@@ -3,6 +3,7 @@ import * as tsParser from '@typescript-eslint/parser'
 import { Linter } from 'eslint'
 import { format } from 'oxfmt'
 import { describe, expect, it } from 'vitest'
+import * as vueParser from 'vue-eslint-parser'
 import plugin from '../../src/index.ts'
 
 describe('composable sorting composition and formatter stability', () => {
@@ -288,5 +289,65 @@ JSON.stringify([events, Object.keys(useOther())])`
     expect(runInNewContext(result.output)).toBe(
       '[["get","default"],["submit","state"]]',
     )
+  })
+})
+
+it('composes body, setup, return, and destructuring fixes without changing runtime results', async () => {
+  const linter = new Linter()
+  const config: Linter.Config = {
+    files: ['**/*.vue'],
+    languageOptions: { parser: vueParser, parserOptions: { parser: tsParser } },
+    plugins: { vp: plugin },
+    rules: {
+      'vp/sort-script-setup': [
+        'error',
+        { groups: ['constant', 'function', 'variable'] },
+      ],
+      'vp/sort-composable-body': 'error',
+      'vp/sort-composable-return': 'error',
+      'vp/sort-composable-destructure': 'error',
+    },
+  }
+  const source = `<script setup>
+function useCounter() {
+  function reset() { return step }
+  const step = 1
+  return {
+    step,
+    reset,
+  }
+}
+const outer = 2
+const {
+  step,
+  reset,
+} = useCounter()
+JSON.stringify([step, reset(), outer])
+</script>`
+  const result = linter.verifyAndFix(source, config, 'Test.vue')
+  expect(result.fixed).toBe(true)
+  expect(result.messages).toEqual([])
+  expect(result.output).toContain('const outer = 2\nfunction useCounter()')
+  expect(result.output).toContain('  const step = 1\n  function reset()')
+  expect(result.output).toContain('    step,\n\n    reset,')
+  expect(result.output).toContain('  step,\n\n  reset,')
+  const script = (value: string) =>
+    value.slice(value.indexOf('>') + 1, value.lastIndexOf('</script>'))
+  expect(runInNewContext(script(result.output))).toBe(
+    runInNewContext(script(source)),
+  )
+  expect(linter.verifyAndFix(result.output, config, 'Test.vue')).toEqual({
+    ...result,
+    fixed: false,
+  })
+  const formatted = await format('Test.vue', result.output, {
+    semi: false,
+    singleQuote: true,
+  })
+  expect(formatted.errors).toEqual([])
+  expect(linter.verifyAndFix(formatted.code, config, 'Test.vue')).toEqual({
+    fixed: false,
+    messages: [],
+    output: formatted.code,
   })
 })

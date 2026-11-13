@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 import { DEFAULT_OPTIONS } from '../../src/utils/sort-script-setup/constants.ts'
-import { collectPartitions } from '../../src/utils/sort-script-setup/partitions.ts'
+import { createPartitionCollector } from '../../src/utils/sort-statements/partitions.ts'
 import { createSourceCode } from '../helpers/source-code.ts'
 
 it('indexes contained comments without rescanning every comment for each statement', () => {
@@ -22,13 +22,12 @@ it('indexes contained comments without rescanning every comment for each stateme
       },
     })
   }
-  const partitions = collectPartitions(
-    sourceCode.ast.body,
+  const partitions = createPartitionCollector(
     sourceCode,
     DEFAULT_OPTIONS,
     () => true,
     () => false,
-  )
+  )(sourceCode.ast.body)
   expect(partitions).toHaveLength(1)
   expect(
     partitions

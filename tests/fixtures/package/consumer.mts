@@ -64,6 +64,10 @@ import type {
   RequireVueGenericOptions,
   RequireVueGenericTarget,
   RestrictedHtmlElement,
+  SortComposableBodyOptions,
+  SortComposableBodySelector,
+  SortComposableBodyMatchCondition,
+  SortComposableBodyCustomGroup,
   SortComposableDestructureOptions,
   SortComposableOptions,
   SortComposableReturnOptions,
@@ -138,6 +142,10 @@ export interface PublicTypes {
   RequireVueGenericOptions: RequireVueGenericOptions
   RequireVueGenericTarget: RequireVueGenericTarget
   RestrictedHtmlElement: RestrictedHtmlElement
+  SortComposableBodyOptions: SortComposableBodyOptions
+  SortComposableBodySelector: SortComposableBodySelector
+  SortComposableBodyMatchCondition: SortComposableBodyMatchCondition
+  SortComposableBodyCustomGroup: SortComposableBodyCustomGroup
   SortComposableDestructureOptions: SortComposableDestructureOptions
   SortComposableOptions: SortComposableOptions
   SortComposableReturnOptions: SortComposableReturnOptions
@@ -173,3 +181,16 @@ export const invalidReturnBindings: RequireComposableReturnBindingsOptions = { a
 
 // @ts-expect-error Internal registry types are not package exports.
 export type { RuleName } from 'eslint-plugin-vue-perfectionist'
+
+export const bodySorting = {
+  functionPattern: '^use[A-Z]',
+  ignoreNames: ['useLegacy'],
+  groups: ['constant', 'router', 'function'],
+  customGroups: [{ groupName: 'router', callNamePattern: '^useRouter$', selector: 'composable' }],
+} satisfies SortComposableBodyOptions
+
+// @ts-expect-error Compiler macro selectors are unavailable inside functions.
+export const invalidBodySelector: SortComposableBodySelector = 'define-props'
+
+// @ts-expect-error Body sorting does not use name-length member comparison.
+export const invalidBodyComparison: SortComposableBodyOptions = { type: 'name-length' }

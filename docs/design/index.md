@@ -8,11 +8,12 @@ These pages describe how the plugin is organized and why complex rule behavior
 has specific boundaries. For installation and user configuration, start with
 the [guide](/guide/); public rule options live in the [rule reference](/rules/).
 
-| Document                                          | Focus                                                                                                 |
-| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| [Source Structure](./source-structure.md)         | Package entry points, analysis ownership, shared contracts, and behavior boundaries.                  |
-| [Macro Type Rules](./define-macros-types.md)      | The split between type declaration style and call-site naming, including composition and diagnostics. |
-| [Setup Statement Sorting](./sort-script-setup.md) | Group classification, option resolution, dependency analysis, and safe movement.                      |
+| Document                                             | Focus                                                                                                 |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| [Source Structure](./source-structure.md)            | Package entry points, analysis ownership, shared contracts, and behavior boundaries.                  |
+| [Macro Type Rules](./define-macros-types.md)         | The split between type declaration style and call-site naming, including composition and diagnostics. |
+| [Setup Statement Sorting](./sort-script-setup.md)    | Group classification, option resolution, dependency analysis, and safe movement.                      |
+| [Composable Body Sorting](./sort-composable-body.md) | Function selection, statement groups, execution boundaries, and safe fixes.                           |
 
 ## Package Contract
 

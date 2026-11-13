@@ -8,7 +8,7 @@ import type { RegexOption } from '../../types/rules/sort-script-setup.ts'
  * @throws {Error} Always, with the rule-prefixed message.
  */
 export function invalid(message: string): never {
-  throw new Error(`sort-script-setup: ${message}`)
+  throw new Error(`Statement sorting: ${message}`)
 }
 
 /**

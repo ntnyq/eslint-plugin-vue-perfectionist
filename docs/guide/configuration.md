@@ -36,6 +36,7 @@ The following rules also work in standalone scripts:
 - [`consistent-template-ref-name`](/rules/consistent-template-ref-name)
 - [`prefer-function-result-pattern`](/rules/prefer-function-result-pattern)
 - [`prefer-ref-pattern`](/rules/prefer-ref-pattern)
+- [`sort-composable-body`](/rules/sort-composable-body)
 - [`sort-composable-destructure`](/rules/sort-composable-destructure)
 - [`sort-composable-return`](/rules/sort-composable-return)
 

@@ -35,7 +35,9 @@ description: 仓库布局、源码职责、共享分析约定及行为边界。
 | `src/utils/ast/`                      | 表达式解包、值形状证据、函数绑定名、遍历及精确作用域引用查找                                  |
 | `src/utils/vue/`                      | 解析器服务守卫、脚本范围、合并 SFC 作用域、运行时导入、组件身份、名称转换、回调、ref 和宏类型 |
 | `src/utils/component-props/`          | prop 绑定、配置、具体标量分析、布尔转换及值约束                                               |
-| `src/utils/sort-script-setup/`        | 语句排序常量、schema、分类、分组、比较、依赖、分区、报告及内部模型                            |
+| `src/utils/sort-script-setup/`        | setup 默认值、编译宏分类、选项解析和 schema 组合                                              |
+| `src/utils/sort-composable-body/`     | 函数体默认值、排除宏的选择器策略、选项和 schema 组合                                          |
+| `src/utils/sort-statements/`          | 共享语句分类、分组、比较、依赖、分区索引、报告、schema 片段及内部模型                         |
 | `src/utils/sort-composable/`          | 组合式函数返回值和解构规则共享的 schema、配置编译、成员分类缓存、AST 分析及报告               |
 | `src/utils/injection-key.ts`          | 注入键识别及严格模式下的 TypeScript 符号来源分析                                              |
 | `src/utils/vue-generic.ts`            | 泛型指令匹配及配置的组件豁免条件                                                              |
@@ -45,7 +47,7 @@ description: 仓库布局、源码职责、共享分析约定及行为边界。
 | `src/types/rules/`                    | 规则配置及诊断类型；公共配置仍在 `src/index.ts` 显式导出                                      |
 | `src/constants/`                      | 其余有限值和 schema；已有排序领域在自身目录中维护常量和 schema                                |
 
-按明确文件路径导入内部工具，不提供根工具或常量聚合入口。排序的 `Statement`、`Group`、`ResolvedOptions` 模型放在使用方旁的 `utils/sort-script-setup/types.ts`。排序常量和默认值位于该目录的 `constants.ts`；两个排序领域各自在 `schema.ts` 中维护选项 schema。公共配置类型仍位于 `src/types/rules/`，两套排序逻辑保留各自的语义。
+按明确文件路径导入内部工具，不提供根工具或常量聚合入口。排序的 `Statement`、`Group`、`ResolvedOptions` 模型位于使用方旁的 `utils/sort-statements/types.ts`。setup 与函数体容器负责各自的默认值和 schema 组合；共享引擎接收已解析的选项及容器分类策略，不读取脚本范围或导入规则上下文。公共配置类型仍位于 `src/types/rules/`，组合式函数成员排序保持独立语义。
 
 语句排序内部，`options.ts` 解析默认值及选项交互，`groups.ts` 验证和解析分组并准备匹配器，`validation.ts` 每个规则实例仅编译一次正则。ESLint 通过公共 schema 验证选项结构，包括空行数安全整数边界。内部保留分组冲突、区域、模式、选项交互及 schema 视为缺失的显式 `undefined` 属性等语义约束。编译正则每次匹配前重置 `lastIndex`，确保全局和粘连标志确定性。
 
@@ -63,7 +65,7 @@ description: 仓库布局、源码职责、共享分析约定及行为边界。
 
 ## 测试归属 {#test-ownership}
 
-语句排序测试在 `tests/rules/sort-script-setup/` 按职责拆分。组合式函数排序测试集中在 `tests/rules/sort-composable/`：`return.test.ts`、`destructure.test.ts` 和 `types.test.ts` 分别验证对应规则行为，`policy-cases.ts` 提供由返回值和解构测试调用的共享行为用例。运行器、构建器和可复用断言放在 `tests/helpers/`，共享行为用例与规则测试放在一起。语句排序运行器还验证仅报告用例没有修复或建议。
+语句排序测试在 `tests/rules/sort-script-setup/` 和 `tests/rules/sort-composable-body/` 按职责拆分。组合式函数排序测试集中在 `tests/rules/sort-composable/`：`return.test.ts`、`destructure.test.ts` 和 `types.test.ts` 分别验证对应规则行为，`policy-cases.ts` 提供由返回值和解构测试调用的共享行为用例。运行器、构建器和可复用断言放在 `tests/helpers/`，共享行为用例与规则测试放在一起。语句排序运行器还验证仅报告用例没有修复或建议。
 
 `tests/rules/require-injection-key/` 将 `syntax.test.ts` 与使用类型信息的 `strict.test.ts` 分开。共享宏类型源码样例位于 `tests/fixtures/macro-types.ts`。
 

@@ -81,3 +81,25 @@ for (const resolution of ['NodeNext', 'Bundler']) {
     )
   })
 }
+
+test('runs composable body sorting through the built public plugin', () => {
+  const config = {
+    plugins: { vp: plugin },
+    rules: { 'vp/sort-composable-body': 'error' },
+  }
+  const linter = new Linter()
+  const result = linter.verifyAndFix(
+    'function useCounter() {\n  function reset() {}\n  const step = 1\n}',
+    config,
+  )
+  assert.deepEqual(result, {
+    fixed: true,
+    messages: [],
+    output:
+      'function useCounter() {\n  const step = 1\n  function reset() {}\n}',
+  })
+  assert.deepEqual(linter.verifyAndFix(result.output, config), {
+    ...result,
+    fixed: false,
+  })
+})

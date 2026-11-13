@@ -39,7 +39,9 @@ The root package is published; `docs/` is a private pnpm workspace. See
 | `src/utils/ast/`                      | Expression unwrapping, value-shape evidence, function binding names, traversal, and exact scope reference lookup                         |
 | `src/utils/vue/`                      | Parser service guards, script ranges, merged SFC scopes, runtime imports, component identity, names, callbacks, refs, and macro types    |
 | `src/utils/component-props/`          | Prop bindings, configuration, concrete scalar analysis, Boolean casting, and value constraints                                           |
-| `src/utils/sort-script-setup/`        | Statement sorting constants, schema, classification, groups, comparisons, dependencies, partitions, reports, and internal models         |
+| `src/utils/sort-script-setup/`        | Setup defaults, compiler macro classification, option resolution, and schema composition                                                 |
+| `src/utils/sort-composable-body/`     | Function-body defaults, macro-free selector policy, options, and schema composition                                                      |
+| `src/utils/sort-statements/`          | Shared statement classification, groups, comparisons, dependencies, indexed partitions, reports, schema fragments, and internal models   |
 | `src/utils/sort-composable/`          | Shared schema, compiled options, cached member classification, AST analysis, and reporting for composable return and destructuring rules |
 | `src/utils/injection-key.ts`          | Injection key recognition and TypeScript symbol provenance for strict mode                                                               |
 | `src/utils/vue-generic.ts`            | Generic directive matching and configured component exemptions                                                                           |
@@ -51,10 +53,11 @@ The root package is published; `docs/` is a private pnpm workspace. See
 
 Import internal utilities from their explicit file paths. There is no root utility
 or constants barrel. Keep sorting's `Statement`, `Group`, and `ResolvedOptions`
-models beside their consumers in `utils/sort-script-setup/types.ts`. Sorting
-constants and defaults live in that directory's `constants.ts`; both sorting
-domains keep their option schemas in `schema.ts`. Public configuration types
-remain in `src/types/rules/`. The two sorting domains retain separate semantics.
+models beside their consumers in `utils/sort-statements/types.ts`. Setup and
+composable-body containers own their defaults and schema composition; the shared
+engine receives resolved options and a container classification policy without
+reading script ranges or importing rule contexts. Public configuration types
+remain in `src/types/rules/`. Composable member sorting retains separate semantics.
 
 Within statement sorting, `options.ts` resolves defaults and option interactions, `groups.ts`
 validates and resolves groups and prepares statement matchers, and `validation.ts`
@@ -100,7 +103,7 @@ diagnostics and applies only complete safe plans.
 ## Test ownership
 
 Statement sorting tests are split by responsibility under
-`tests/rules/sort-script-setup/`. Composable sorting tests live together in
+`tests/rules/sort-script-setup/` and `tests/rules/sort-composable-body/`. Composable member sorting tests live together in
 `tests/rules/sort-composable/`: `return.test.ts`, `destructure.test.ts`, and
 `types.test.ts` exercise their respective rule surfaces, while `policy-cases.ts`
 provides shared behavior cases invoked by the return and destructuring suites.

@@ -168,6 +168,7 @@ pnpm exec eslint . --fix
 
 | 规则                                                                                                    | 描述                                           |
 | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| [sort-composable-body](https://vue-perfectionist.ntnyq.dev/zh/rules/sort-composable-body)               | 对具名组合式函数体的直接语句进行分组和排序。   |
 | [sort-composable-destructure](https://vue-perfectionist.ntnyq.dev/zh/rules/sort-composable-destructure) | 按状态和方法对组合式函数的解构成员分组。       |
 | [sort-composable-return](https://vue-perfectionist.ntnyq.dev/zh/rules/sort-composable-return)           | 按状态和方法对组合式函数的返回成员分组。       |
 | [sort-script-setup](https://vue-perfectionist.ntnyq.dev/zh/rules/sort-script-setup)                     | 对 `<script setup>` 的顶层语句进行分组和排序。 |

@@ -1,7 +1,17 @@
 import { getNewlines } from './compare.ts'
-import type { TSESTree } from '@typescript-eslint/utils'
-import type { SortScriptSetupRuleContext } from '../../types/index.ts'
-import type { Group, ResolvedOptions, Statement } from './types.ts'
+import type { TSESLint, TSESTree } from '@typescript-eslint/utils'
+import type { SourceCode } from '../../types/eslint.ts'
+import type {
+  Group,
+  ResolvedOptions,
+  Statement,
+  StatementMessageId,
+} from './types.ts'
+
+type ReportContext = {
+  sourceCode: SourceCode
+  report: TSESLint.RuleContext<StatementMessageId, []>['report']
+}
 
 /** Bound generated whitespace before allocating a replacement string. */
 const MAX_WHITESPACE_LENGTH = 65_536
@@ -20,7 +30,7 @@ const MAX_WHITESPACE_LENGTH = 65_536
 function createReplacement(
   original: Statement[],
   ordered: Statement[],
-  context: SortScriptSetupRuleContext,
+  context: ReportContext,
 ): { range: TSESTree.Range; text: string } | undefined {
   const first = original[0]
   const last = original.at(-1)
@@ -107,7 +117,7 @@ function createReplacement(
 export function reportPartition(
   original: Statement[],
   ordered: Statement[],
-  context: SortScriptSetupRuleContext,
+  context: ReportContext,
   options: ResolvedOptions,
   groups: Group[],
 ) {
@@ -226,4 +236,17 @@ export function reportPartition(
           : null,
     })
   }
+}
+
+/**
+ * Shared ordering and spacing diagnostics for statement containers.
+ */
+export const STATEMENT_MESSAGES = {
+  unexpectedGroupOrder:
+    'Expected "{{name}}" ({{group}}) to come before "{{before}}".',
+  unexpectedOrder: 'Expected "{{name}}" to come before "{{before}}".',
+  unsafeReorder:
+    'Expected "{{name}}" ({{group}}) to come before "{{before}}"; this move cannot be safely fixed automatically.',
+  unexpectedNewlinesBetween: 'Expected {{count}} empty lines between groups.',
+  unexpectedNewlinesInside: 'Expected {{count}} empty lines inside the group.',
 }

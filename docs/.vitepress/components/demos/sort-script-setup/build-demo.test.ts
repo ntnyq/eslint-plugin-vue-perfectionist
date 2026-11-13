@@ -1,7 +1,7 @@
 import { Linter } from 'eslint'
 import { beforeAll, describe, expect, it, vi } from 'vitest'
-import * as classification from '../../../../../src/utils/sort-script-setup/classify'
 import { DEFAULT_OPTIONS } from '../../../../../src/utils/sort-script-setup/constants'
+import * as classification from '../../../../../src/utils/sort-statements/classify'
 import { buildDemo, createDemoConfig } from './build-demo'
 import { SORT_MODES } from './examples'
 import type { DemoData } from './build-demo'
