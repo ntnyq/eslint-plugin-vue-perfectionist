@@ -224,6 +224,23 @@ export function analyzeComponentBindings(
       return
     }
 
+    if (
+      node.properties.some(
+        property => property.type === 'Property' && property.kind === 'get',
+      )
+    ) {
+      // Vue's merge and object spreads read getters during enumeration. A
+      // getter can change or delete sibling keys before they are copied, so
+      // declaration order cannot establish this object's presence or values.
+      uncertain(node, undefined, true)
+
+      // A sole getter's own key is read before its body can modify the object.
+      // Keep that key's presence; its value remains unknown below.
+      if (node.properties.length !== 1) {
+        return
+      }
+    }
+
     for (const property of node.properties) {
       if (property.type !== 'Property') {
         spread(property.argument, container)

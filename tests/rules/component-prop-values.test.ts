@@ -77,6 +77,7 @@ await run<ComponentPropValuesOptions, ComponentPropValuesMessageId>({
       'v-bind="{ ...extra, count: 20 }"',
       'v-bind="{ ...{ count: 20 } }"',
       'v-bind="{ count: 20, ...null, ...false, ...1 }"',
+      'v-bind="{ get before() { this.count = 20; return 0 }, count: 25 }"',
       'count="wrong" v-bind="{ count: 20 }"',
       'v-bind="extra"',
     ].map(attributes => ({
@@ -305,6 +306,7 @@ await run<ComponentPropValuesOptions, ComponentPropValuesMessageId>({
       ':count="20" :[key]="25"',
       'v-bind="{ count: 20, ...extra }"',
       'v-bind="{ get count() { return 20 } }"',
+      ':count="20" v-bind="{ get before() { this.count = 25; return 0 }, count: 20 }"',
       'v-bind="{ count: 20, [key]: 25 }"',
       ':count="+\'20\'"',
     ].map(attributes => ({

@@ -266,6 +266,9 @@ value when raw aliases cannot interfere; a later unknown spread can invalidate
 it. An unknown spread can retain both `fieldName` and `field-name`, so a later
 explicit write cannot establish that prop's exemption. Dynamic argument names and
 `v-bind` `.prop` / `.attr` bindings introduce uncertainty for affected props.
+Object bindings and nested object spreads containing getters also leave sibling
+prop presence and values uncertain, so their literal fields cannot prove an
+exemption. See [getter presence handling](./require-component-props.md#scope).
 `v-model` modifiers generate object-valued `modelModifiers` or
 `<argument>Modifiers` props. These writes follow the same deduplication and
 override order as explicit bindings and cannot satisfy scalar exemptions.

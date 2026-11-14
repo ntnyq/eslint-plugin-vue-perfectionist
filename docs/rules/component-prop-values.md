@@ -296,6 +296,9 @@ Combine the two rules for required props with strict value checking.
   normalized prop leave affected values uncertain. Raw keys follow Vue's
   deduplication and merge order; getters are never executed. Reserved attributes
   and event listener names cannot be configured as prop contracts.
+- Object bindings and nested object spreads containing getters leave sibling
+  prop presence and values uncertain. Previously established presence is kept,
+  but values become unknown; see [presence handling](./require-component-props.md#scope).
 - Recognizes scalar literals, interpolation-free template strings, conditional
   branches, numeric unary `+`, `-`, `~`, and numeric binary `+`, `-`, `*`, `/`, `%`,
   `**`. Both conditional branches are checked conservatively. TypeScript assertions,

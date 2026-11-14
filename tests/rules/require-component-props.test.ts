@@ -109,6 +109,14 @@ await run<RequireComponentPropsOptions, RequireComponentPropsMessageId>({
       options: { ...options, unknownBindings: 'ignore' },
     },
     {
+      description: 'can ignore presence made uncertain by getter side effects',
+      code: createVueSFC({
+        template:
+          '<template><AppCounter v-bind="{ get before() { delete this.count; return 0 }, count: 1 }" /></template>',
+      }),
+      options: { ...options, unknownBindings: 'ignore' },
+    },
+    {
       code: createVueSFC({
         template:
           '<template><AppCounter page-size="1" v-model="value" /></template>',
@@ -182,6 +190,8 @@ await run<RequireComponentPropsOptions, RequireComponentPropsMessageId>({
       '<AppCounter :count.prop="1" />',
       '<AppCounter :count.attr="1" />',
       '<AppCounter v-model:[key]="value" />',
+      '<AppCounter v-bind="{ get before() { delete this.count; return 0 }, count: 1 }" />',
+      '<AppCounter v-bind="{ ...{ get before() { delete this.count; return 0 }, count: 1 } }" />',
     ].map(content => ({
       code: createVueSFC({ template: `<template>${content}</template>` }),
       options,

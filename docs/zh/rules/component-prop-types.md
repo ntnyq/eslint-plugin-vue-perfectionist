@@ -254,6 +254,10 @@ TypeScript 断言、`satisfies` 和非空断言仅被移除包装，不作为运
 
 默认和具名 `v-model` 会提供相应 prop，但 `.number` 和 `.trim` 不能确定父级当前表达式的类型。修饰符还会提供对象类型的 `modelModifiers` 或 `<参数名>Modifiers` prop，遵循 Vue 的正常去重和合并顺序。对象 getter/setter 的值无法确定。不支持的 `v-bind` `.prop` 和 `.attr` 绑定会使对应 prop 的值无法确定。
 
+包含 getter 的对象绑定或嵌套对象展开无法确定其他 prop 的存在性和值，因为读取 getter 时可能修改它们。
+此前已确定的存在性仍会保留，但值变为未知。详见[getter 存在性处理](./require-component-props.md#scope)；
+类型检查仍仅针对确定已提供的 prop。
+
 ### 诊断与修复 {#diagnostics-and-fixes}
 
 - `invalidPropType`：已知类别不被允许。

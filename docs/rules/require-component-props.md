@@ -118,6 +118,14 @@ Once a key is definitely provided, a later unknown spread can change its value b
 
 :::
 
+An object binding or nested object spread containing a getter is treated as an
+unknown object: reading the getter can change or delete sibling keys before Vue
+copies them. Fields declared in that object do not prove presence. A sole getter
+still proves its own static key is present, while its value remains unknown.
+Keys provided by earlier bindings outside that object remain present; later
+explicit bindings can establish presence again. Getters are never executed by
+the rule.
+
 ## :wrench: Options
 
 Defaults:
@@ -164,7 +172,7 @@ Type: `'report' | 'ignore'`. Default: `'report'`.
 - Skips native HTML, SVG, and MathML tags and `v-pre` subtrees. Custom-element compiler settings are not resolved; a custom tag explicitly listed in `targets` is checked.
 - Skips lowercase `<slot>` outlets even when `Slot` is configured. Capitalized `<Slot>` components and components in slot fallback content are still checked.
 - Supports `<component is="AppCounter">` and `<component :is="'AppCounter'">`. A dynamic component identity such as `:is="current"` is skipped. The `is` selector must be explicit, not supplied through an object binding.
-- Recognizes static attributes, `v-bind:prop`, same-name `:prop`, object literal bindings, static computed string keys, and nested object literal spreads. Unknown spreads and computed names make the affected presence uncertain. Accessors and methods with known keys still provide those keys.
+- Recognizes static attributes, `v-bind:prop`, same-name `:prop`, object literal bindings, static computed string keys, and nested object literal spreads. Unknown spreads, computed names, and getter side effects make the affected presence uncertain. Methods, setters, and a sole getter with a known key still provide their keys.
 - Recognizes default `v-model` as `modelValue` and named `v-model:count` as `count`. With modifiers, also recognizes the generated `modelModifiers` or `<argument>Modifiers` prop. Update listeners are not inferred.
 - Resolves string-valued dynamic arguments such as `:['count']`, and supports `v-bind`'s `.camel`. `v-bind`'s `.prop` and `.attr` bindings are uncertain for the named prop rather than assumed to supply ordinary component props.
 - Rejects contracts for `class`, `style`, `key`, `ref`, `refFor`, `refKey`, `ref_for`, `ref_key`, `is`, and event listener keys such as `onClick`. Their merge or framework semantics are outside these contracts.

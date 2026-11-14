@@ -220,6 +220,158 @@ describe('component prop contracts with Vue compilation and runtime', () => {
   )
 
   it.each([
+    {
+      attributes:
+        'v-bind="{ get before() { this.count = \'wrong\'; return 0 }, count: 1 }" title="counter"',
+      expected: 'wrong',
+      uncertainPresence: true,
+      uncertainValue: true,
+    },
+    {
+      attributes:
+        'v-bind="{ get before() { delete this.count; return 0 }, count: 1 }" title="counter"',
+      expected: undefined,
+      uncertainPresence: true,
+      uncertainValue: true,
+    },
+    {
+      attributes:
+        'v-bind="{ get before() { this.count = 1; return 0 }, count: \'wrong\' }" title="counter"',
+      expected: 1,
+      uncertainPresence: true,
+      uncertainValue: true,
+    },
+    {
+      attributes:
+        'v-bind="{ count: 1, get 0() { this.count = \'wrong\'; return 0 } }" title="counter"',
+      expected: 'wrong',
+      uncertainPresence: true,
+      uncertainValue: true,
+    },
+    {
+      attributes:
+        'v-bind="{ ...{ get before() { this.count = \'wrong\'; return 0 }, count: 1 } }"',
+      expected: 'wrong',
+      uncertainPresence: true,
+      uncertainValue: true,
+    },
+    {
+      attributes:
+        ':count="1" v-bind="{ get before() { this.count = \'wrong\'; return 0 }, count: 1 }"',
+      expected: 'wrong',
+      uncertainPresence: false,
+      uncertainValue: true,
+    },
+    {
+      attributes:
+        ':count="1" v-bind="{ get before() { delete this.count; return 0 }, count: 2 }"',
+      expected: 1,
+      uncertainPresence: false,
+      uncertainValue: true,
+    },
+    {
+      attributes:
+        'v-bind="{ get before() { this.count = \'wrong\'; return 0 }, count: 2 }" :count="1"',
+      expected: 1,
+      uncertainPresence: false,
+      uncertainValue: false,
+    },
+    {
+      attributes:
+        'v-bind="{ ...{ get before() { this.count = \'wrong\'; return 0 }, count: 2 }, count: 1 }"',
+      expected: 1,
+      uncertainPresence: false,
+      uncertainValue: false,
+    },
+    {
+      attributes: 'v-bind="{ get count() { return 1 } }"',
+      expected: 1,
+      uncertainPresence: false,
+      uncertainValue: true,
+    },
+    {
+      attributes: 'v-bind="{ set before(value) {}, count: 1 }"',
+      expected: 1,
+      uncertainPresence: false,
+      uncertainValue: false,
+    },
+    {
+      attributes: 'v-bind="{ before: { get value() { return 0 } }, count: 1 }"',
+      expected: 1,
+      uncertainPresence: false,
+      uncertainValue: false,
+    },
+  ])(
+    'keeps getter side effects conservative for $attributes',
+    ({ attributes, expected, uncertainPresence, uncertainValue }) => {
+      const template = `<AppCounter ${attributes} />`
+      expect(resolveRuntimeProps(template).count).toBe(expected)
+      const code = `<template>${template}</template>`
+      const config: Linter.Config = {
+        files: ['**/*.vue'],
+        languageOptions: vueLanguageOptions,
+        plugins: { vp: plugin },
+        rules: {
+          'vp/require-component-props': [
+            'error',
+            { targets: [{ components: ['AppCounter'], props: ['count'] }] },
+          ],
+          'vp/component-prop-types': [
+            'error',
+            {
+              targets: [
+                { components: ['AppCounter'], props: { count: 'number' } },
+              ],
+              unknownValues: 'report',
+            },
+          ],
+          'vp/component-prop-values': [
+            'error',
+            {
+              targets: [
+                { components: ['AppCounter'], props: { count: { enum: [1] } } },
+              ],
+              unknownValues: 'report',
+            },
+          ],
+          'vp/require-vue-generic': [
+            'error',
+            {
+              targets: [
+                {
+                  components: ['AppCounter'],
+                  ignoreWhen: [{ props: { count: { enum: [1] } } }],
+                },
+              ],
+            },
+          ],
+        },
+      }
+      const linter = new Linter()
+      const result = linter.verifyAndFix(code, config, 'Test.vue')
+      expect(result.messages.map(message => message.messageId).sort()).toEqual(
+        uncertainPresence
+          ? ['missingVueGeneric', 'unverifiableRequiredProp']
+          : uncertainValue
+            ? [
+                'missingVueGeneric',
+                'unverifiablePropType',
+                'unverifiablePropValue',
+              ]
+            : [],
+      )
+      expect(result.fixed).toBe(false)
+      expect(result.output).toBe(code)
+      expect(
+        result.messages.every(message => !message.fix && !message.suggestions),
+      ).toBe(true)
+      expect(linter.verifyAndFix(result.output, config, 'Test.vue')).toEqual(
+        result,
+      )
+    },
+  )
+
+  it.each([
     ['fieldName', 'field-name'],
     ['count1', 'count-1'],
     ['value_', 'value-_'],

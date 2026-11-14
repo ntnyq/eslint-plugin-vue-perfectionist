@@ -89,6 +89,7 @@ await run<ComponentPropTypesOptions, ComponentPropTypesMessageId>({
       ':count="1" :[key]="\'wrong\'"',
       'v-bind="{ ...{ count: 1 } }"',
       'v-bind="{ count: 1, ...null, ...true, ...42 }"',
+      'v-bind="{ get before() { this.count = 1; return 0 }, count: \'wrong\' }"',
     ].map(attributes => ({
       code: counter(attributes),
       options,
@@ -344,6 +345,7 @@ await run<ComponentPropTypesOptions, ComponentPropTypesMessageId>({
       'v-bind="{ count: 1, [key]: 2 }"',
       ':count="1" :[key]="2"',
       'v-bind="{ get count() { return 1 } }"',
+      ':count="1" v-bind="{ get before() { this.count = \'wrong\'; return 0 }, count: 1 }"',
     ].map(attributes => ({
       code: counter(attributes),
       options: optionsFor('number', 'report'),

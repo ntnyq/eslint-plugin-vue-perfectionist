@@ -262,6 +262,12 @@ TypeScript assertions, `satisfies`, and non-null assertions are unwrapped rather
 
 Default and named `v-model` supply their corresponding props, but `.number` and `.trim` do not establish the current parent expression's type. Modifiers also supply an object-valued `modelModifiers` or `<argument>Modifiers` prop, subject to Vue's normal deduplication and merge order. Object getter/setter values are unknown. Unsupported `v-bind` `.prop` and `.attr` bindings introduce uncertainty for the named prop.
 
+An object binding or nested object spread containing a getter cannot establish
+sibling prop presence or values, because reading the getter can modify them.
+Previously established presence is retained, but values become unknown. See
+[getter presence handling](./require-component-props.md#scope); type checks still
+apply only to definitely supplied props.
+
 ### Diagnostics and fixes
 
 - `invalidPropType`: one known category is not allowed.
