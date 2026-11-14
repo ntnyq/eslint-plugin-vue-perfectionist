@@ -33,13 +33,16 @@ export function validateDefinedOptions(value: unknown) {
     value.forEach(validateDefinedOptions)
     return
   }
+
   if (!isRecord(value)) {
     return
   }
+
   for (const [key, entry] of Object.entries(value)) {
     if (entry === undefined) {
       invalid(`Invalid option: ${key}`)
     }
+
     validateDefinedOptions(entry)
   }
 }
@@ -85,24 +88,31 @@ export type PatternMatcher = (value: string, pattern: RegexOption) => boolean
  */
 export function createPatternMatcher(options: unknown): PatternMatcher {
   const cache = new Map<RegexOption, RegExp[]>()
+
   function getPatterns(pattern: RegexOption): RegExp[] {
     let expressions = cache.get(pattern)
+
     if (!expressions) {
       expressions = compilePatterns(pattern)
       cache.set(pattern, expressions)
     }
+
     return expressions
   }
+
   function visitComments(value: unknown) {
     if (isBoolean(value)) {
       return
     }
+
     if (isRecord(value) && !('pattern' in value)) {
       Object.values(value).forEach(visitComments)
       return
     }
+
     getPatterns(value as RegexOption)
   }
+
   function visit(value: unknown) {
     if (isArray(value)) {
       value.forEach(visit)
@@ -118,11 +128,14 @@ export function createPatternMatcher(options: unknown): PatternMatcher {
       }
     }
   }
+
   visit(options)
+
   return (value, pattern) =>
     getPatterns(pattern).some(regex => {
       // Both g and y mutate lastIndex, including after successful matches.
       regex.lastIndex = 0
+
       return regex.test(value)
     })
 }

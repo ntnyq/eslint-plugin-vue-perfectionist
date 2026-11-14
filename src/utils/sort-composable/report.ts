@@ -54,6 +54,7 @@ export function createComposableReporter(
       group => group.selector === kind && group.pattern.test(name),
     )
     const groupName = custom?.groupName ?? kind
+
     return groups.findIndex(group => group.names.includes(groupName))
   }
 
@@ -61,16 +62,20 @@ export function createComposableReporter(
     if (left.group !== right.group) {
       return left.group - right.group
     }
+
     const group = groups[left.group]
+
     if (!group || group.type === 'unsorted') {
       return 0
     }
+
     const result =
       group.type === 'name-length'
         ? [...left.name].length - [...right.name].length
         : group.type === 'natural'
           ? natural(left.name, right.name)
           : left.name.localeCompare(right.name, 'en')
+
     return result * (group.order === 'desc' ? -1 : 1)
   }
 
@@ -78,12 +83,14 @@ export function createComposableReporter(
     if (left.group === right.group) {
       return groups[left.group]?.newlinesInside ?? 'ignore'
     }
+
     const values = groups
       .slice(left.group + 1, right.group + 1)
       .map(group => group.before)
     const positive = values.filter(
       (value): value is number => typeof value === 'number' && value > 0,
     )
+
     return positive.length
       ? Math.max(...positive)
       : values.includes('ignore')
@@ -93,26 +100,34 @@ export function createComposableReporter(
 
   function checkSpacing(left: Member, right: Member) {
     const count = newlines(left, right)
+
     if (count === 'ignore') {
       return
     }
+
     const comma = sourceCode.getTokenAfter(left.node)
+
     if (comma?.value !== ',') {
       return
     }
+
     const range: TSESTree.Range = [comma.range[1], right.node.range[0]]
     const beforeRange: TSESTree.Range = [left.node.range[1], comma.range[0]]
     const before = sourceCode.text.slice(...beforeRange)
     const gap = sourceCode.text.slice(...range)
+
     // Comments make ownership ambiguous. Leave the entire gap untouched.
     if (!/^\s*$/u.test(before) || !/^\s*$/u.test(gap)) {
       return
     }
+
     const breaks = gap.match(/\r\n|[\n\r\u{2028}\u{2029}]/gu)?.length ?? 0
     const beforeBreaks = before.match(/\r\n|[\n\r\u{2028}\u{2029}]/gu) ?? []
+
     if (beforeBreaks.length <= 1 && Math.max(0, breaks - 1) === count) {
       return
     }
+
     const indent = breaks
       ? (gap.match(/[^\S\r\n\u{2028}\u{2029}]*$/u)?.[0] ?? '')
       : (sourceCode.lines[right.node.loc.start.line - 1]?.match(
@@ -123,6 +138,7 @@ export function createComposableReporter(
       !breaks && count === 0
         ? gap.length
         : newline.length * (count + 1) + indent.length
+
     context.report({
       node: right.node,
       messageId:
@@ -139,6 +155,7 @@ export function createComposableReporter(
                   ? gap
                   : newline.repeat(count + 1) + indent
               const fixes: TSESLint.RuleFix[] = []
+
               if (beforeBreaks.length > 1) {
                 fixes.push(
                   fixer.replaceTextRange(
@@ -148,9 +165,11 @@ export function createComposableReporter(
                   ),
                 )
               }
+
               if (replacement !== gap) {
                 fixes.push(fixer.replaceTextRange(range, replacement))
               }
+
               return fixes
             },
     })
@@ -158,11 +177,14 @@ export function createComposableReporter(
 
   function checkPartition(members: Member[]) {
     let ordered = true
+
     for (let index = 1; index < members.length; index++) {
       const left = members[index - 1]
       const right = members[index]
+
       if (left && right && compareMembers(left, right) > 0) {
         ordered = false
+
         context.report({
           node: right.node,
           messageId:
@@ -173,10 +195,12 @@ export function createComposableReporter(
         })
       }
     }
+
     if (ordered) {
       for (let index = 1; index < members.length; index++) {
         const left = members[index - 1]
         const right = members[index]
+
         if (left && right) {
           checkSpacing(left, right)
         }
@@ -192,10 +216,13 @@ export function createComposableReporter(
     if (object.type === 'ObjectExpression' && hasDuplicateMembers(object)) {
       return
     }
+
     let members: Member[] = []
+
     for (const property of object.properties) {
       const name =
         property.type === 'Property' ? getMemberName(property) : undefined
+
       if (
         property.type !== 'Property' ||
         name === undefined ||
@@ -209,7 +236,9 @@ export function createComposableReporter(
         members = []
         continue
       }
+
       let kind = classify(property, name)
+
       if (kind === 'unknown') {
         kind =
           memberKinds.find(
@@ -218,6 +247,7 @@ export function createComposableReporter(
               member.nameRegex.test(name),
           )?.kind ?? 'unknown'
       }
+
       if (kind === 'unknown' && options.unknownMembers === 'report') {
         context.report({
           node: property,
@@ -225,7 +255,9 @@ export function createComposableReporter(
           data: { name, functionName },
         })
       }
+
       const group = kind === 'unknown' ? -1 : groupOf(name, kind)
+
       if (group < 0) {
         checkPartition(members)
         members = []
@@ -233,6 +265,7 @@ export function createComposableReporter(
         members.push({ node: property, name, group })
       }
     }
+
     checkPartition(members)
   }
 }

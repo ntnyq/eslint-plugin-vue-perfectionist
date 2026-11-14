@@ -18,9 +18,11 @@ function resolveFunctionNode(node: TSESTree.Node): TSESTree.Node | undefined {
   if (isFunctionNode(node)) {
     return node
   }
+
   if (node.type === 'VariableDeclarator' && node.init) {
     return resolveFunctionNode(unwrapExpression(node.init))
   }
+
   return undefined
 }
 
@@ -41,16 +43,20 @@ function getCallOptions(
   if (!node) {
     return {}
   }
+
   const result = ASTUtils.getStaticValue(
     unwrapExpression(node),
     sourceCode.getScope(node),
   )
+
   if (!result) {
     return undefined
   }
+
   if (isNil(result.value)) {
     return {}
   }
+
   return typeof result.value === 'object' ? result.value : undefined
 }
 
@@ -71,22 +77,27 @@ export function createDependencyAnalyzer(
     TSESTree.Node,
     Set<TSESLint.Scope.Variable>
   >()
+
   for (const scope of sourceCode.scopeManager?.scopes ?? []) {
     for (const reference of scope.references) {
       references.set(reference.identifier, reference)
     }
+
     for (const variable of scope.variables) {
       for (const definition of variable.defs) {
         if (definition.type === 'Parameter') {
           continue
         }
+
         const declaration =
           definition.type === 'Variable'
             ? definition.node.parent
             : definition.node
+
         if (!declaration) {
           continue
         }
+
         const variables = variablesByDeclaration.get(declaration) ?? new Set()
         variables.add(variable)
         variablesByDeclaration.set(declaration, variables)
@@ -96,6 +107,7 @@ export function createDependencyAnalyzer(
 
   return function buildDependencies(statements) {
     const declarations = new Map<TSESLint.Scope.Variable, Statement>()
+
     for (const statement of statements) {
       for (const variable of variablesByDeclaration.get(statement.node) ?? []) {
         if (!declarations.has(variable)) {
@@ -105,12 +117,15 @@ export function createDependencyAnalyzer(
     }
 
     const dependencies = new Map<Statement, Set<Statement>>()
+
     for (const statement of statements) {
       const required = new Set<Statement>()
       dependencies.set(statement, required)
+
       if (statement.selector === 'type' || statement.selector === 'interface') {
         continue
       }
+
       const visitedFunctions = new Set<TSESTree.Node>()
       /**
        * Visit a called function directly or through its resolved local
@@ -123,22 +138,29 @@ export function createDependencyAnalyzer(
         if (!node) {
           return
         }
+
         const expression = unwrapExpression(node)
+
         if (isFunctionNode(expression)) {
           visit(expression, true)
           return
         }
+
         const variable = references.get(expression)?.resolved
+
         for (const definition of variable?.defs ?? []) {
           if (!['FunctionName', 'Variable'].includes(definition.type)) {
             continue
           }
+
           const fn = resolveFunctionNode(definition.node)
+
           if (fn) {
             visit(fn, true)
           }
         }
       }
+
       /**
        * Collect immediate runtime reads while avoiding deferred and recursive
        * functions.
@@ -151,19 +173,24 @@ export function createDependencyAnalyzer(
         if (isFunctionNode(node) && !executeFunction) {
           return
         }
+
         if (isFunctionNode(node)) {
           if (visitedFunctions.has(node)) {
             return
           }
+
           visitedFunctions.add(node)
         }
+
         const reference = references.get(node)
+
         if (
           reference?.resolved &&
           reference.isRead() &&
           reference.isValueReference !== false
         ) {
           const dependency = declarations.get(reference.resolved)
+
           if (
             dependency &&
             dependency !== statement &&
@@ -172,8 +199,10 @@ export function createDependencyAnalyzer(
             required.add(dependency)
           }
         }
+
         if (node.type === 'CallExpression') {
           visitFunction(node.callee)
+
           const identity = getCallIdentity(node, sourceCode)
           const isVueCall =
             identity &&
@@ -181,10 +210,13 @@ export function createDependencyAnalyzer(
               options.vueImportSources.includes(identity.source)) ||
               (identity.isUnbound &&
                 options.vueGlobals.includes(identity.classificationName)))
+
           if (isVueCall) {
             const first = node.arguments[0]
+
             if (identity.classificationName === 'watch') {
               const source = first ? unwrapExpression(first) : undefined
+
               if (source?.type === 'ArrayExpression') {
                 source.elements.forEach(
                   /**
@@ -198,7 +230,9 @@ export function createDependencyAnalyzer(
               } else {
                 visitFunction(source)
               }
+
               const callOptions = getCallOptions(node.arguments[2], sourceCode)
+
               if (
                 !callOptions ||
                 ('immediate' in callOptions && callOptions.immediate)
@@ -207,6 +241,7 @@ export function createDependencyAnalyzer(
               }
             } else if (identity.classificationName === 'watchEffect') {
               const callOptions = getCallOptions(node.arguments[1], sourceCode)
+
               if (
                 !callOptions ||
                 !('flush' in callOptions) ||
@@ -223,12 +258,15 @@ export function createDependencyAnalyzer(
             }
           }
         }
+
         for (const child of getChildren(node, sourceCode)) {
           visit(child)
         }
       }
+
       visit(statement.node)
     }
+
     return dependencies
   }
 }
@@ -262,9 +300,11 @@ export function sortByDependencies(
     ]),
   )
   let edgeCount = 0
+
   for (const entry of entries.values()) {
     for (const dependency of dependencies.get(entry.statement) ?? []) {
       const prerequisite = entries.get(dependency)
+
       // Dependencies outside this partition are already satisfied.
       if (prerequisite) {
         entry.remaining++
@@ -273,6 +313,7 @@ export function sortByDependencies(
       }
     }
   }
+
   if (!edgeCount) {
     return ordered
   }
@@ -280,64 +321,86 @@ export function sortByDependencies(
   // Numeric ranks encode the stable style order. The heap only contains ready
   // statements, including newly unblocked ones before the next selection.
   const ready: RankedStatement[] = []
+
   function push(entry: RankedStatement) {
     let position = ready.length
     ready.push(entry)
+
     while (position > 0) {
       const parent = Math.floor((position - 1) / 2)
       const previous = ready[parent]
+
       if (!previous || previous.rank <= entry.rank) {
         break
       }
+
       ready[position] = previous
       position = parent
     }
+
     ready[position] = entry
   }
+
   function pop(): RankedStatement | undefined {
     const first = ready[0]
     const last = ready.pop()
+
     if (ready.length && last) {
       let position = 0
+
       while (position * 2 + 1 < ready.length) {
         const leftIndex = position * 2 + 1
         const left = ready[leftIndex]
         const right = ready[leftIndex + 1]
+
         if (!left) {
           break
         }
+
         const useRight = right && right.rank < left.rank
         const child = useRight ? right : left
+
         if (last.rank <= child.rank) {
           break
         }
+
         ready[position] = child
         position = useRight ? leftIndex + 1 : leftIndex
       }
+
       ready[position] = last
     }
+
     return first
   }
+
   for (const entry of entries.values()) {
     if (entry.remaining === 0) {
       push(entry)
     }
   }
+
   const pending = new Set(statements)
   const sorted: Statement[] = []
+
   while (ready.length) {
     const entry = pop()
+
     if (!entry) {
       break
     }
+
     sorted.push(entry.statement)
     pending.delete(entry.statement)
+
     for (const dependent of entry.dependents) {
       dependent.remaining--
+
       if (dependent.remaining === 0) {
         push(dependent)
       }
     }
   }
+
   return [...sorted, ...statements.filter(statement => pending.has(statement))]
 }

@@ -8,7 +8,9 @@ export function getMemberName(node: TSESTree.Property): string | undefined {
   if (!node.computed && node.key.type === 'Identifier') {
     return node.key.name
   }
+
   const key = unwrapExpression(node.key)
+
   if (
     key.type === 'Literal' &&
     (key.value === null ||
@@ -16,20 +18,25 @@ export function getMemberName(node: TSESTree.Property): string | undefined {
   ) {
     return String(key.value)
   }
+
   if (key.type === 'UnaryExpression' && ['+', '-'].includes(key.operator)) {
     const argument = unwrapExpression(key.argument)
+
     if (argument.type === 'Literal') {
       if (typeof argument.value === 'number') {
         return String(key.operator === '-' ? -argument.value : argument.value)
       }
+
       if (typeof argument.value === 'bigint' && key.operator === '-') {
         return String(-argument.value)
       }
     }
   }
+
   if (key.type === 'TemplateLiteral' && !key.expressions.length) {
     return key.quasis[0]?.value.cooked ?? undefined
   }
+
   return undefined
 }
 

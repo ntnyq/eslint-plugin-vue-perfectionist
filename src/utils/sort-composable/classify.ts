@@ -63,6 +63,7 @@ function classifyType(
   ) {
     return 'unknown'
   }
+
   if (type.isUnion()) {
     const parts = type.types.filter(
       part =>
@@ -76,10 +77,12 @@ function classifyType(
         classifyType(part, checker, functionType),
       ),
     )
+
     return kinds.size === 1
       ? (kinds.values().next().value ?? 'unknown')
       : 'unknown'
   }
+
   if (
     [
       checker.getNullType().flags,
@@ -89,9 +92,11 @@ function classifyType(
   ) {
     return 'state'
   }
+
   if (type.getCallSignatures().length) {
     return 'method'
   }
+
   // TypeScript permits untyped calls through Function even though it has no
   // call signatures. Construct-only types must not enter that fallback.
   if (
@@ -101,6 +106,7 @@ function classifyType(
   ) {
     return 'method'
   }
+
   // The primitive object type and an empty structural object can contain functions.
   if (
     type.isIntersection() &&
@@ -110,6 +116,7 @@ function classifyType(
   ) {
     return 'unknown'
   }
+
   if (
     checker.typeToString(type) === 'object' ||
     ('objectFlags' in type &&
@@ -120,6 +127,7 @@ function classifyType(
   ) {
     return 'unknown'
   }
+
   return 'state'
 }
 
@@ -172,6 +180,7 @@ export function createMemberClassifier(
   function resolveDefinitions(node: TSESTree.Identifier) {
     const definitions = getScriptVariableDefinitions(node, sourceCode)
     const variable = findScopeReference(node, sourceCode)?.resolved
+
     if (
       variable?.references.some(
         reference =>
@@ -185,6 +194,7 @@ export function createMemberClassifier(
     ) {
       return []
     }
+
     return definitions
   }
 
@@ -193,11 +203,15 @@ export function createMemberClassifier(
     visiting = new Set<TSESTree.Node>(),
   ): MemberKind {
     const node = unwrapExpression(input)
+
     if (visiting.has(node)) {
       return 'unknown'
     }
+
     visiting.add(node)
+
     let kind: MemberKind = 'unknown'
+
     if (isFunctionNode(node)) {
       kind = 'method'
     } else if (
@@ -214,6 +228,7 @@ export function createMemberClassifier(
     } else if (node.type === 'Identifier') {
       const definitions = resolveDefinitions(node)
       const definition = definitions.length === 1 ? definitions[0] : undefined
+
       if (
         definitions.length &&
         definitions.every(definition => definition.type === 'FunctionName')
@@ -229,12 +244,14 @@ export function createMemberClassifier(
       }
     } else if (node.type === 'CallExpression' && !node.optional) {
       const identity = getCallIdentity(node, sourceCode)
+
       if (
         identity &&
         (identity.source === 'vue' ||
           (identity.isUnbound && globals.includes(identity.classificationName)))
       ) {
         const api = identity.exportedName ?? identity.classificationName
+
         if (REF_APIS.has(api)) {
           kind = 'state'
         } else if (
@@ -250,17 +267,21 @@ export function createMemberClassifier(
       const right = expressionKind(node.alternate, visiting)
       kind = left === right ? left : 'unknown'
     }
+
     visiting.delete(node)
+
     return kind === 'unknown' ? typeOf(input) : kind
   }
 
   function propertyKind(node: TSESTree.Property): MemberKind {
     // Accessors expose their result, not the getter/setter function itself.
     let kind = propertyKinds.get(node)
+
     if (kind === undefined) {
       kind = node.kind === 'init' ? expressionKind(node.value) : 'unknown'
       propertyKinds.set(node, kind)
     }
+
     return kind
   }
 
@@ -272,17 +293,23 @@ export function createMemberClassifier(
     call: TSESTree.CallExpression,
   ): FunctionNode | null {
     const cached = localFunctions.get(call)
+
     if (cached !== undefined) {
       return cached
     }
+
     const callee = unwrapExpression(call.callee)
+
     if (callee.type !== 'Identifier') {
       localFunctions.set(call, null)
+
       return null
     }
+
     const definitions = resolveDefinitions(callee)
     const definition = definitions.length === 1 ? definitions[0] : undefined
     let fn: TSESTree.Node | undefined
+
     if (definition?.type === 'FunctionName') {
       fn = definition.node
     } else if (
@@ -293,8 +320,10 @@ export function createMemberClassifier(
     ) {
       fn = unwrapExpression(definition.node.init)
     }
+
     const resolved = fn && isFunctionNode(fn) && !fn.generator ? fn : null
     localFunctions.set(call, resolved)
+
     return resolved
   }
 
@@ -304,27 +333,36 @@ export function createMemberClassifier(
    */
   function getReturnedMembers(fn: FunctionNode): ReturnedMembers[] {
     let cached = returnedMembers.get(fn)
+
     if (cached) {
       return cached
     }
+
     cached = getReturnedObjects(fn, sourceCode).map(object => {
       if (!object) {
         return undefined
       }
+
       const properties = new Map<string, TSESTree.Property>()
+
       for (const property of object.properties) {
         if (property.type !== 'Property' || isPrototypeSetter(property)) {
           return undefined
         }
+
         const name = getMemberName(property)
+
         if (name === undefined || properties.has(name)) {
           return undefined
         }
+
         properties.set(name, property)
       }
+
       return properties
     })
     returnedMembers.set(fn, cached)
+
     return cached
   }
 
@@ -334,20 +372,27 @@ export function createMemberClassifier(
     awaited: boolean,
   ): MemberKind {
     const fn = resolveLocalFunction(call)
+
     if (!fn || (fn.async && !awaited)) {
       return 'unknown'
     }
+
     const kinds = getReturnedMembers(fn).map(properties => {
       if (!properties) {
         return 'unknown'
       }
+
       const then = properties.get('then')
+
       if (awaited && then && propertyKind(then) !== 'state') {
         return 'unknown'
       }
+
       const property = properties.get(name)
+
       return property ? propertyKind(property) : 'unknown'
     })
+
     return kinds.length && kinds.every(kind => kind === kinds[0])
       ? (kinds[0] ?? 'unknown')
       : 'unknown'
@@ -359,18 +404,25 @@ export function createMemberClassifier(
     awaited: boolean,
   ): MemberKind {
     const local = localPropertyKind(call, name, awaited)
+
     if (local !== 'unknown' || !services || !checker) {
       return local
     }
+
     let type = services.getTypeAtLocation(call)
+
     if (awaited) {
       const awaitedType = checker.getAwaitedType(type)
+
       if (!awaitedType) {
         return 'unknown'
       }
+
       type = awaitedType
     }
+
     const property = checker.getPropertyOfType(type, name)
+
     return property
       ? classifyType(
           checker.getTypeOfSymbolAtLocation(

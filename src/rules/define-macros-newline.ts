@@ -62,9 +62,11 @@ export const defineMacrosNewline = createRule<
         'defineExpose',
       ],
     )
+
     if (!context.filename.endsWith('.vue') || !setupRange || !macros.size) {
       return {}
     }
+
     const newline = sourceCode.text.includes('\r\n') ? '\r\n' : '\n'
 
     function checkDeclaration(
@@ -73,14 +75,18 @@ export const defineMacrosNewline = createRule<
     ) {
       const members =
         node.type === 'ObjectExpression' ? node.properties : node.members
+
       if (!members.length) {
         return
       }
+
       const open = sourceCode.getFirstToken(node)
       const close = sourceCode.getLastToken(node)
+
       if (!open || !close) {
         return
       }
+
       const ranges: TSESTree.Range[] = []
 
       function breakBefore(target: TSESTree.Node | TSESTree.Token) {
@@ -88,25 +94,32 @@ export const defineMacrosNewline = createRule<
         const previous = sourceCode.getTokenBefore(target, {
           includeComments: true,
         })
+
         if (previous && previous.loc.end.line === target.loc.start.line) {
           ranges.push([previous.range[1], target.range[0]])
         }
       }
 
       const first = sourceCode.getTokenAfter(open, { includeComments: true })
+
       if (first) {
         breakBefore(first)
       }
+
       for (const [index, member] of members.entries()) {
         const previous = members[index - 1]
+
         if (previous?.loc.end.line === member.loc.start.line) {
           breakBefore(member)
         }
       }
+
       breakBefore(close)
+
       if (!ranges.length) {
         return
       }
+
       context.report({
         node,
         messageId: 'expectedNewlines',
@@ -128,15 +141,19 @@ export const defineMacrosNewline = createRule<
         ) {
           return
         }
+
         const name = node.callee.name
         const type = node.typeArguments?.params[0]
+
         if (
           ['defineProps', 'defineEmits', 'defineSlots'].includes(name) &&
           type?.type === 'TSTypeLiteral'
         ) {
           checkDeclaration(type, name)
         }
+
         const argument = node.arguments[0]
+
         if (
           [
             'defineProps',

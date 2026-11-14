@@ -22,10 +22,12 @@ import type {
  */
 function getComposableName(node: TSESTree.CallExpression): string | undefined {
   let ancestor: TSESTree.Node | undefined = node.parent
+
   while (ancestor) {
     if (ancestor.type === 'ClassBody' || ancestor.type === 'StaticBlock') {
       return undefined
     }
+
     switch (ancestor.type) {
       case 'FunctionDeclaration':
       case 'FunctionExpression':
@@ -36,10 +38,13 @@ function getComposableName(node: TSESTree.CallExpression): string | undefined {
         ) {
           return undefined
         }
+
         return getFunctionBindingName(ancestor)
     }
+
     ancestor = ancestor.parent
   }
+
   return undefined
 }
 
@@ -52,9 +57,11 @@ function getComposableName(node: TSESTree.CallExpression): string | undefined {
  */
 function isDefaultTarget(node: TSESTree.Node, sourceCode: SourceCode): boolean {
   const target = unwrapExpression(node)
+
   if (target.type === 'UnaryExpression' && target.operator === 'void') {
     return true
   }
+
   return (
     target.type === 'Identifier' &&
     target.name === 'undefined' &&
@@ -134,11 +141,13 @@ export const preferOnScopeDispose = createRule<
         options.vueGlobals,
       ),
     )
+
     return {
       CallExpression(node) {
         // Unknown targets may select another component. Explicit undefined
         // still selects Vue's default current instance.
         const target = node.arguments[1]
+
         if (
           node.arguments.length < 1 ||
           node.arguments.length > 2 ||
@@ -147,11 +156,15 @@ export const preferOnScopeDispose = createRule<
         ) {
           return
         }
+
         const identity = getCallIdentity(node, sourceCode)
+
         if (!identity) {
           return
         }
+
         const hook = identity.exportedName ?? identity.classificationName
+
         if (
           !hooks.has(hook) ||
           !(identity.source
@@ -160,7 +173,9 @@ export const preferOnScopeDispose = createRule<
         ) {
           return
         }
+
         const name = getComposableName(node)
+
         if (name && pattern.test(name) && !ignored.has(name)) {
           context.report({
             node: node.callee,

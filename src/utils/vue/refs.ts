@@ -20,16 +20,20 @@ export function getVueRuntimeApiName(
   vueGlobals: readonly string[] = [],
 ): string | undefined {
   const callee = unwrapExpression(call.callee)
+
   if (callee.type === 'Identifier') {
     const definitions = getScriptVariableDefinitions(callee, sourceCode)
     const binding = getRuntimeImportBinding(definitions[0])
+
     if (!definitions.length && vueGlobals.includes(callee.name)) {
       return callee.name
     }
+
     if (binding?.source === 'vue' && binding.kind === 'named') {
       return binding.exportedName
     }
   }
+
   if (
     callee.type === 'MemberExpression' &&
     callee.object.type === 'Identifier'
@@ -37,12 +41,14 @@ export function getVueRuntimeApiName(
     const binding = getRuntimeImportBinding(
       getScriptVariableDefinitions(callee.object, sourceCode)[0],
     )
+
     if (binding?.source === 'vue' && binding.kind === 'namespace') {
       return !callee.computed && callee.property.type === 'Identifier'
         ? callee.property.name
         : getStaticStringValue(callee.property)
     }
   }
+
   return undefined
 }
 
@@ -72,6 +78,7 @@ export function isVueRefVariable(
      */
     definition => definition.isVariableDefinition !== false,
   )
+
   if (
     !variable ||
     definitions.length !== 1 ||
@@ -99,7 +106,9 @@ export function isVueRefVariable(
   ) {
     return false
   }
+
   const definition = definitions[0]
+
   if (
     definition?.type !== 'Variable' ||
     definition.node.id.type !== 'Identifier' ||
@@ -107,11 +116,15 @@ export function isVueRefVariable(
   ) {
     return false
   }
+
   const initializer = unwrapExpression(definition.node.init)
+
   if (initializer.type !== 'CallExpression') {
     return false
   }
+
   const api = getVueRuntimeApiName(initializer, sourceCode, vueGlobals)
+
   return (
     api !== undefined && ['ref', 'shallowRef', 'useTemplateRef'].includes(api)
   )

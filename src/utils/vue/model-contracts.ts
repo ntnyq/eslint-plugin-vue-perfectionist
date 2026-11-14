@@ -26,6 +26,7 @@ function getMember(
     !member.computed && key.type === 'Identifier'
       ? key.name
       : getStaticStringValue(key)
+
   return name === undefined ? undefined : { name, node: key }
 }
 
@@ -39,10 +40,13 @@ function getEventNames(type: TSESTree.TypeNode): ContractMember[] {
   if (type.type === 'TSUnionType') {
     return type.types.flatMap(getEventNames)
   }
+
   if (type.type === 'TSLiteralType') {
     const name = getStaticStringValue(type.literal)
+
     return name === undefined ? [] : [{ name, node: type.literal }]
   }
+
   return []
 }
 
@@ -71,10 +75,13 @@ export function getModelContractMembers(
     if (seen.has(type)) {
       return []
     }
+
     seen.add(type)
+
     if (type.type === 'TSIntersectionType') {
       return type.types.flatMap(readType)
     }
+
     if (
       type.type === 'TSTypeReference' &&
       type.typeName.type === 'Identifier' &&
@@ -82,6 +89,7 @@ export function getModelContractMembers(
     ) {
       return readType(type.typeName)
     }
+
     if (type.type === 'Identifier') {
       const definitions = filterScriptDefinitions(
         findScopeReference(type, sourceCode)?.resolved?.defs.filter(
@@ -90,8 +98,10 @@ export function getModelContractMembers(
         type,
         sourceCode,
       )
+
       return definitions.flatMap(definition => {
         const declaration = definition.node
+
         if (
           (declaration.type !== 'TSTypeAliasDeclaration' &&
             declaration.type !== 'TSInterfaceDeclaration') ||
@@ -100,12 +110,15 @@ export function getModelContractMembers(
         ) {
           return []
         }
+
         return readType(declaration)
       })
     }
+
     if (type.type === 'TSTypeAliasDeclaration') {
       return readType(type.typeAnnotation)
     }
+
     if (type.type === 'TSInterfaceDeclaration') {
       return [
         ...readType(type.body),
@@ -116,54 +129,70 @@ export function getModelContractMembers(
         ),
       ]
     }
+
     if (type.type === 'TSTypeLiteral' || type.type === 'TSInterfaceBody') {
       const members = type.type === 'TSTypeLiteral' ? type.members : type.body
+
       return members.flatMap(member => {
         if (
           member.type === 'TSPropertySignature' ||
           member.type === 'TSMethodSignature'
         ) {
           const property = getMember(member)
+
           return property ? [property] : []
         }
+
         return kind === 'emits' ? readType(member) : []
       })
     }
+
     if (
       kind === 'emits' &&
       (type.type === 'TSCallSignatureDeclaration' ||
         type.type === 'TSFunctionType')
     ) {
       const parameter = type.params[0]
+
       return parameter?.type === 'Identifier' && parameter.typeAnnotation
         ? getEventNames(parameter.typeAnnotation.typeAnnotation)
         : []
     }
+
     return []
   }
 
   const types = call.typeArguments?.params ?? []
+
   if (types.length === 1 && types[0] && call.arguments.length === 0) {
     return readType(types[0])
   }
+
   const argument = call.arguments[0]
+
   if (types.length || call.arguments.length !== 1 || !argument) {
     return []
   }
+
   const value = unwrapExpression(argument)
+
   if (value.type === 'ArrayExpression') {
     return value.elements.flatMap(element => {
       const name = element && getStaticStringValue(element)
+
       return typeof name === 'string' && element
         ? [{ name, node: element }]
         : []
     })
   }
+
   if (value.type === 'ObjectExpression') {
     return value.properties.flatMap(property => {
       const member = property.type === 'Property' && getMember(property)
+
       return member ? [member] : []
     })
   }
+
   return []
 }

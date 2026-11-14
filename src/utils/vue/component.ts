@@ -24,9 +24,11 @@ export function resolveComponentName(
   ) {
     return undefined
   }
+
   if (element.rawName !== 'component' && element.rawName !== 'Component') {
     return hyphenateName(element.rawName)
   }
+
   // Dynamic component identity must be explicitly written as a static string.
   const identities = element.startTag.attributes.filter(
     /**
@@ -43,18 +45,23 @@ export function resolveComponentName(
           getStaticDirectiveArgument(attribute.key.argument) === 'is'
         : attribute.key.name === 'is',
   )
+
   if (identities.length !== 1) {
     return undefined
   }
+
   const identity = identities[0]
+
   if (!identity) {
     return undefined
   }
+
   const name = identity.directive
     ? !identity.key.modifiers.length && identity.value?.expression
       ? getStaticStringValue(identity.value.expression)
       : undefined
     : identity.value?.value
+
   return name && !COMPONENT_NATIVE_TAGS.has(name)
     ? hyphenateName(name)
     : undefined

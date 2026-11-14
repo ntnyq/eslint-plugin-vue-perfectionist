@@ -5,7 +5,7 @@ import { inferStaticPropValue } from '../utils/component-props/static-value.ts'
 import { createRule } from '../utils/create-rule.ts'
 import {
   compileGenericTargets,
-  hasVueGenericComment,
+  createVueGenericCommentMatcher,
   matchGenericExemptions,
 } from '../utils/vue-generic.ts'
 import { resolveComponentName } from '../utils/vue/component.ts'
@@ -82,17 +82,28 @@ export const requireVueGeneric = createRule<
   create(context, [options]) {
     const targets = compileGenericTargets(options.targets ?? [])
     const services = context.sourceCode.parserServices
-    if (!hasTemplateVisitor(services) || !hasVueServices(services)) {
+
+    if (
+      !targets.size ||
+      !hasTemplateVisitor(services) ||
+      !hasVueServices(services)
+    ) {
       return {}
     }
-    const comments = services.getDocumentFragment()?.comments ?? []
+
+    const hasVueGenericComment = createVueGenericCommentMatcher(
+      services.getDocumentFragment(),
+    )
+
     return services.defineTemplateBodyVisitor({
       VElement(node) {
         const component = resolveComponentName(node)
         const conditions = component && targets.get(component)
-        if (!conditions || hasVueGenericComment(node, comments)) {
+
+        if (!conditions || hasVueGenericComment(node)) {
           return
         }
+
         const names = new Set(
           conditions.flatMap(condition => [...condition.keys()]),
         )
@@ -103,12 +114,14 @@ export const requireVueGeneric = createRule<
           inferStaticPropValue,
         )
         const exemption = matchGenericExemptions(conditions, bindings)
+
         if (
           exemption === 'match' ||
           (exemption === 'unknown' && options.unknownValues === 'ignore')
         ) {
           return
         }
+
         context.report({
           loc: {
             start: {

@@ -30,29 +30,38 @@ function classifyCall(
   classifySpecialCall?: SpecialCallClassifier,
 ): Selector | undefined {
   const identity = getCallIdentity(call, sourceCode)
+
   if (!identity) {
     return undefined
   }
+
   statement.callName = identity.classificationName
   statement.importSource = identity.source
+
   const special = classifySpecialCall?.(call, identity)
+
   if (special) {
     statement.callName = special.callName ?? statement.callName
+
     return special.selector
   }
+
   if (
     (identity.source && options.vueImportSources.includes(identity.source)) ||
     (identity.isUnbound &&
       options.vueGlobals.includes(identity.classificationName))
   ) {
     const selector = VUE_APIS.get(identity.classificationName)
+
     if (selector) {
       return selector
     }
   }
+
   if (identity.source && /^use[A-Z0-9]/u.test(identity.classificationName)) {
     return 'composable'
   }
+
   return undefined
 }
 
@@ -77,6 +86,7 @@ export function classifyStatement(
   if (containsTopLevelAwait(node, sourceCode)) {
     return undefined
   }
+
   const statement: Statement = {
     node,
     selector: 'variable',
@@ -93,6 +103,7 @@ export function classifyStatement(
     subgroup: -1,
     index,
   }
+
   switch (node.type) {
     case 'TSInterfaceDeclaration':
       statement.selector = 'interface'
@@ -116,12 +127,15 @@ export function classifyStatement(
     case 'FunctionDeclaration':
       statement.selector = 'function'
       statement.names = node.id ? [node.id.name] : []
+
       if (node.async) {
         statement.modifiers.push('async')
       }
+
       if (node.type === 'FunctionDeclaration' && node.body) {
         statement.safeKind = 'function'
       }
+
       break
     case 'VariableDeclaration': {
       if (
@@ -130,20 +144,27 @@ export function classifyStatement(
       ) {
         return undefined
       }
+
       const declaration = node.declarations[0]
+
       if (!declaration) {
         return undefined
       }
+
       if (node.kind !== 'using' && node.kind !== 'await using') {
         statement.modifiers.push(node.kind)
       }
+
       statement.names = getBindingNames(declaration.id)
+
       if (declaration.id.type !== 'Identifier') {
         statement.modifiers.push('destructured')
       }
+
       const init = declaration.init
         ? unwrapExpression(declaration.init)
         : undefined
+
       if (init?.type === 'CallExpression') {
         statement.selector =
           classifyCall(
@@ -158,6 +179,7 @@ export function classifyStatement(
         init?.type === 'FunctionExpression'
       ) {
         statement.selector = 'function'
+
         if (init.async) {
           statement.modifiers.push('async')
         }
@@ -170,13 +192,16 @@ export function classifyStatement(
         statement.selector = 'constant'
         statement.safeKind = 'constant'
       }
+
       break
     }
     case 'ExpressionStatement': {
       const expression = unwrapExpression(node.expression)
+
       if (expression.type !== 'CallExpression' || expression.optional) {
         return undefined
       }
+
       statement.selector =
         classifyCall(
           expression,
@@ -190,11 +215,14 @@ export function classifyStatement(
     default:
       return undefined
   }
+
   if ('declare' in node && node.declare) {
     statement.modifiers.push('declare')
     statement.safeKind = undefined
   }
+
   statement.name =
     statement.names[0] ?? statement.callName ?? sourceCode.getText(node)
+
   return statement
 }

@@ -55,19 +55,24 @@ export const preferTemplateLiteralInInterpolation = createRule<
         if (!isInterpolationContext(node)) {
           return
         }
+
         for (const fragment of getTextFragments(node)) {
           const first = fragment[0]
           const last = fragment.at(-1)
+
           if (!first || !last) {
             continue
           }
+
           const replacement = createInterpolationReplacement(
             fragment,
             sourceCode,
           )
+
           if (replacement === undefined && !options.reportUnfixable) {
             continue
           }
+
           context.report({
             loc: {
               start: first.loc.start,

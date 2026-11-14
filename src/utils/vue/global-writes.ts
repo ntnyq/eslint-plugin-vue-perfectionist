@@ -12,8 +12,10 @@ import type { SourceCode } from '../../types/eslint.ts'
  */
 function isWriteTarget(node: TSESTree.Node): boolean {
   let current = getOuterExpression(node)
+
   while (current.parent) {
     const parent = current.parent
+
     switch (parent.type) {
       case 'AssignmentExpression':
       case 'ForInStatement':
@@ -27,6 +29,7 @@ function isWriteTarget(node: TSESTree.Node): boolean {
         if (parent.left !== current) {
           return false
         }
+
         break
       case 'Property':
         if (
@@ -35,6 +38,7 @@ function isWriteTarget(node: TSESTree.Node): boolean {
         ) {
           return false
         }
+
         break
       case 'ArrayPattern':
       case 'ObjectPattern':
@@ -43,8 +47,10 @@ function isWriteTarget(node: TSESTree.Node): boolean {
       default:
         return false
     }
+
     current = getOuterExpression(parent)
   }
+
   return false
 }
 
@@ -61,6 +67,7 @@ export function hasGlobalWrite(sourceCode: SourceCode, name: string): boolean {
     sourceCode.scopeManager?.scopes.some(scope =>
       scope.references.some(reference => {
         const identifier = reference.identifier
+
         if (
           identifier.type !== 'Identifier' ||
           ![name, 'globalThis', 'window', 'self', 'global'].includes(
@@ -72,16 +79,20 @@ export function hasGlobalWrite(sourceCode: SourceCode, name: string): boolean {
         ) {
           return false
         }
+
         if (identifier.name === name && reference.isWrite()) {
           return true
         }
+
         if (
           !['globalThis', 'window', 'self', 'global'].includes(identifier.name)
         ) {
           return false
         }
+
         const expression = getOuterExpression(identifier)
         const parent = expression.parent
+
         if (
           parent?.type !== 'MemberExpression' ||
           parent.object !== expression ||
@@ -89,7 +100,9 @@ export function hasGlobalWrite(sourceCode: SourceCode, name: string): boolean {
         ) {
           return false
         }
+
         const key = ASTUtils.getPropertyName(parent)
+
         return key === null || key === name
       }),
     ) ?? true

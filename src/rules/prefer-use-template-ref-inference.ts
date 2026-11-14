@@ -23,6 +23,7 @@ import type {
 function isTopLevelCall(node: TSESTree.CallExpression): boolean {
   let expression: TSESTree.Node = node
   let parent: TSESTree.Node | undefined = expression.parent
+
   while (
     parent &&
     ['TSAsExpression', 'TSSatisfiesExpression', 'TSNonNullExpression'].includes(
@@ -32,6 +33,7 @@ function isTopLevelCall(node: TSESTree.CallExpression): boolean {
     expression = parent
     parent = parent.parent
   }
+
   return (
     (parent?.type === 'ExpressionStatement' &&
       parent.parent?.type === 'Program') ||
@@ -50,6 +52,7 @@ function isTopLevelCall(node: TSESTree.CallExpression): boolean {
  */
 function getConditionalRoot(node: AST.VElement): AST.VElement {
   let current = node
+
   while (
     current.startTag.attributes.some(
       attribute =>
@@ -62,6 +65,7 @@ function getConditionalRoot(node: AST.VElement): AST.VElement {
         sibling.range[1] <= current.range[0] &&
         (sibling.type !== 'VText' || /[^\t\r\n\f ]/u.test(sibling.value)),
     )
+
     if (
       previous?.type !== 'VElement' ||
       !previous.startTag.attributes.some(
@@ -72,8 +76,10 @@ function getConditionalRoot(node: AST.VElement): AST.VElement {
     ) {
       return node
     }
+
     current = previous
   }
+
   return current
 }
 
@@ -88,15 +94,19 @@ function hasVueSkipComment(node: AST.VElement, comments: AST.Token[]): boolean {
   if (node.parent.type !== 'VElement' || !comments.length) {
     return false
   }
+
   let ancestor: AST.VElement | AST.VDocumentFragment = node.parent
   let preservesWhitespace = false
+
   while (ancestor.type === 'VElement') {
     if (ancestor.rawName === 'pre') {
       preservesWhitespace = true
       break
     }
+
     ancestor = ancestor.parent
   }
+
   const previous = node.parent.children.findLast(
     sibling =>
       sibling.range[1] <= node.range[0] &&
@@ -105,6 +115,7 @@ function hasVueSkipComment(node: AST.VElement, comments: AST.Token[]): boolean {
         /[^\t\r\n\f ]/u.test(sibling.value)),
   )
   const start = previous?.range[1] ?? node.parent.startTag.range[1]
+
   if (
     comments.some(
       comment => comment.range[0] >= start && comment.range[1] <= node.range[0],
@@ -112,8 +123,10 @@ function hasVueSkipComment(node: AST.VElement, comments: AST.Token[]): boolean {
   ) {
     return true
   }
+
   // A directive before v-if skips the whole compiler-generated branch chain.
   const conditionalRoot = getConditionalRoot(node)
+
   return (
     conditionalRoot !== node && hasVueSkipComment(conditionalRoot, comments)
   )
@@ -156,6 +169,7 @@ export const preferUseTemplateRefInference = createRule<
     const services = sourceCode.parserServices
     const vueGlobals = resolveVueGlobals(context.settings, ['useTemplateRef'])
     const setupRange = getSetupRange(sourceCode)
+
     if (
       !setupRange ||
       !hasVueServices(services) ||
@@ -163,11 +177,13 @@ export const preferUseTemplateRefInference = createRule<
     ) {
       return {}
     }
+
     const fragment = services.getDocumentFragment()
     const setup = fragment?.children.find(
       node =>
         node.type === 'VElement' && node.startTag.range[1] === setupRange[0],
     )
+
     if (
       setup?.type !== 'VElement' ||
       !setup.startTag.attributes.some(
@@ -179,6 +195,7 @@ export const preferUseTemplateRefInference = createRule<
     ) {
       return {}
     }
+
     const skipComments =
       fragment?.comments.filter(
         comment =>
@@ -198,6 +215,7 @@ export const preferUseTemplateRefInference = createRule<
           // v-pre content is literal markup, including ref attributes.
           let ancestor: AST.VElement | AST.VDocumentFragment = node
           let isSkipped = false
+
           while (ancestor.type === 'VElement') {
             if (
               ancestor.startTag.attributes.some(
@@ -207,9 +225,11 @@ export const preferUseTemplateRefInference = createRule<
             ) {
               return
             }
+
             isSkipped ||= hasVueSkipComment(ancestor, skipComments)
             ancestor = ancestor.parent
           }
+
           const attributes = node.startTag.attributes
           const isStaticElement =
             !isSkipped &&
@@ -221,6 +241,7 @@ export const preferUseTemplateRefInference = createRule<
                     ['ref', 'is'].includes(attribute.key.argument.name))
                 : attribute.key.name === 'is',
             )
+
           for (const attribute of attributes) {
             // Bound literal refs cannot establish a match, but can make an
             // otherwise static key ambiguous elsewhere in the template.
@@ -234,6 +255,7 @@ export const preferUseTemplateRefInference = createRule<
               : attribute.key.name === 'ref'
                 ? attribute.value?.value
                 : undefined
+
             if (key !== undefined) {
               // Language tooling retains raw attribute text in inferred keys.
               // Keep decoded keys in the map to detect runtime duplicates.
@@ -254,6 +276,7 @@ export const preferUseTemplateRefInference = createRule<
           if (node.parent.type !== 'VDocumentFragment') {
             return
           }
+
           for (const { key, node: typeArguments } of calls) {
             if (refs.get(key)) {
               context.report({
@@ -278,20 +301,24 @@ export const preferUseTemplateRefInference = createRule<
           ) {
             return
           }
+
           const identity = getCallIdentity(node, sourceCode)
           const isSupportedApi =
             (identity?.source === 'vue' &&
               identity.exportedName === 'useTemplateRef') ||
             (identity?.isUnbound && vueGlobals.includes('useTemplateRef'))
+
           if (!isSupportedApi) {
             return
           }
+
           const argument = node.arguments[0]
           const key =
             argument &&
             (argument.type === 'Literal' || argument.type === 'TemplateLiteral')
               ? getStaticStringValue(argument)
               : undefined
+
           if (key !== undefined && !ignored.has(key)) {
             calls.push({ key, node: node.typeArguments })
           }

@@ -20,17 +20,21 @@ import type {
  */
 function getFlush(node: TSESTree.ObjectExpression): string | undefined {
   let flush: string | undefined
+
   for (const property of node.properties) {
     if (property.type === 'SpreadElement') {
       return undefined
     }
+
     const key =
       !property.computed && property.key.type === 'Identifier'
         ? property.key.name
         : getStaticStringValue(property.key)
+
     if (key === undefined) {
       return undefined
     }
+
     if (key === 'flush') {
       flush =
         property.kind === 'init' && !property.method
@@ -38,6 +42,7 @@ function getFlush(node: TSESTree.ObjectExpression): string | undefined {
           : undefined
     }
   }
+
   return flush
 }
 
@@ -102,7 +107,9 @@ export const preferWatchEffectAlias = createRule<
         ) {
           return
         }
+
         const identity = getCallIdentity(node, sourceCode)
+
         if (
           !identity ||
           (identity.exportedName ?? identity.classificationName) !==
@@ -110,22 +117,30 @@ export const preferWatchEffectAlias = createRule<
         ) {
           return
         }
+
         const isVueApi =
           (identity.source !== undefined && sources.has(identity.source)) ||
           (identity.isUnbound && globals.has('watchEffect'))
+
         if (!isVueApi) {
           return
         }
+
         const argument = node.arguments[1]
         const object = argument && unwrapExpression(argument)
+
         if (object?.type !== 'ObjectExpression') {
           return
         }
+
         const flush = getFlush(object)
+
         if (flush !== 'post' && flush !== 'sync') {
           return
         }
+
         const alias = flush === 'post' ? 'watchPostEffect' : 'watchSyncEffect'
+
         context.report({
           node: node.callee,
           messageId: 'preferredAlias',
@@ -135,6 +150,7 @@ export const preferWatchEffectAlias = createRule<
           },
           fix(fixer) {
             const plan = planFix(node, object, identity, alias)
+
             return plan.safe
               ? plan.edits.map(edit =>
                   fixer.replaceTextRange(edit.range, edit.text),

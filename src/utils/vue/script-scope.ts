@@ -15,6 +15,7 @@ export function getSetupRange(
   if (!hasVueServices(sourceCode.parserServices)) {
     return undefined
   }
+
   const fragment = sourceCode.parserServices.getDocumentFragment()
   const setup = fragment?.children.find(
     /**
@@ -36,9 +37,11 @@ export function getSetupRange(
         attribute => !attribute.directive && attribute.key.name === 'setup',
       ),
   )
+
   if (setup?.type !== 'VElement' || !setup.endTag) {
     return undefined
   }
+
   return [setup.startTag.range[1], setup.endTag.range[0]]
 }
 
@@ -74,6 +77,7 @@ export function getScriptVariableDefinitions(
 ): TSESLint.Scope.Definition[] {
   let scope: TSESLint.Scope.Scope | null = sourceCode.getScope(identifier)
   let candidates: TSESLint.Scope.Definition[] = []
+
   while (scope) {
     const definitions = scope.set.get(name)?.defs ?? []
     const runtimeDefinitions = definitions.filter(
@@ -85,21 +89,27 @@ export function getScriptVariableDefinitions(
        */
       definition => definition.isVariableDefinition !== false,
     )
+
     if (runtimeDefinitions.length) {
       candidates = runtimeDefinitions
       break
     }
+
     // A type-only binding does not shadow an outer value. Retain the nearest
     // type definitions as a fallback so they cannot opt into auto-imports.
     if (!candidates.length) {
       candidates = definitions
     }
+
     scope = scope.upper
   }
+
   const setupRange = getSetupRange(sourceCode)
+
   if (!setupRange) {
     return candidates
   }
+
   /**
    * Check whether a node belongs to the current script setup block.
    *
@@ -107,6 +117,7 @@ export function getScriptVariableDefinitions(
    * @returns Whether the node is contained in the script setup range.
    */
   const isSetup = (node: TSESTree.Node) => isInScriptRange(node, setupRange)
+
   if (isSetup(identifier)) {
     const local = candidates.filter(
       /**
@@ -118,10 +129,12 @@ export function getScriptVariableDefinitions(
       definition =>
         definition.type !== 'ImportBinding' && isSetup(definition.node),
     )
+
     if (local.length) {
       return local
     }
   }
+
   return candidates.filter(
     /**
      * Keep hoisted imports and ordinary script definitions.
@@ -154,9 +167,11 @@ export function filterScriptDefinitions<
   sourceCode: SourceCode,
 ): Definition[] {
   const setupRange = getSetupRange(sourceCode)
+
   if (!setupRange) {
     return definitions
   }
+
   /**
    * Check whether a node belongs to the current script setup block.
    *
@@ -173,9 +188,11 @@ export function filterScriptDefinitions<
      */
     definition => isSetup(definition.node),
   )
+
   if (isSetup(reference) && setupDefinitions.length) {
     return setupDefinitions
   }
+
   return definitions.filter(
     /**
      * Select definitions declared outside script setup.

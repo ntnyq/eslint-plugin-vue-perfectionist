@@ -85,32 +85,40 @@ export const componentPropTypes = createRule<
   create(context, [options]) {
     const targets = compilePropTypes(options.targets ?? [])
     const services = context.sourceCode.parserServices
+
     if (!hasTemplateVisitor(services)) {
       return {}
     }
+
     return services.defineTemplateBodyVisitor({
       VElement(node) {
         const component = resolveComponentName(node)
         const props = component && targets.get(component)
+
         if (!props) {
           return
         }
+
         const bindings = analyzeComponentBindings(
           node,
           props.keys(),
           context.sourceCode,
         )
+
         for (const [name, binding] of bindings) {
           const constraint = props.get(name)
+
           if (!constraint || binding.presence !== 'present') {
             continue
           }
+
           const { actual, invalid } = analyzePropTypes(
             binding.value,
             name,
             constraint,
           )
           let messageId: ComponentPropTypesMessageId
+
           if (invalid.length) {
             messageId =
               actual.length > 1 || binding.value.hasUnknownVariants
@@ -124,6 +132,7 @@ export const componentPropTypes = createRule<
           } else {
             continue
           }
+
           context.report({
             loc: binding.value.node.loc,
             messageId,

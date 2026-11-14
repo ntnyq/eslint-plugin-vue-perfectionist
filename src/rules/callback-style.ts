@@ -56,6 +56,7 @@ export const callbackStyle = createRule<
 
     function checkCallback(argument: TSESTree.Node, name: string) {
       const callback = unwrapExpression(argument)
+
       if (callback.type === 'FunctionExpression') {
         if (functionStyle === 'arrow') {
           context.report({
@@ -64,8 +65,10 @@ export const callbackStyle = createRule<
             data: { name },
           })
         }
+
         return
       }
+
       if (callback.type !== 'ArrowFunctionExpression') {
         context.report({
           node: callback,
@@ -74,9 +77,11 @@ export const callbackStyle = createRule<
         })
         return
       }
+
       if (bodyStyle === 'any' || callback.body.type === 'BlockStatement') {
         return
       }
+
       context.report({
         node: callback.body,
         messageId: 'expectedBlockBody',
@@ -86,13 +91,16 @@ export const callbackStyle = createRule<
             callback.body,
             token => token.value === '=>',
           )
+
           if (!arrow) {
             return null
           }
+
           // Include parentheses and comments outside the expression's AST range.
           // Parenthesizing the returned text prevents ASI and preserves sequences.
           const range: TSESTree.Range = [arrow.range[1], callback.range[1]]
           const body = sourceCode.text.slice(...range).trim()
+
           return fixer.replaceTextRange(range, ` { return (${body}) }`)
         },
       })

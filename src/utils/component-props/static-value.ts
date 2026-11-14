@@ -27,9 +27,11 @@ export function inferStaticPropValue(
   depth = 0,
 ): ExpressionValueAnalysis {
   const node = unwrapExpression(input)
+
   if (depth > 32) {
     return createUnknownValueAnalysis(node)
   }
+
   /**
    * Infer a child expression at the next recursion depth.
    *
@@ -48,10 +50,12 @@ export function inferStaticPropValue(
     type: 'number',
     value,
   })
+
   if (node.type === 'ConditionalExpression') {
     const consequent = infer(node.consequent)
     const alternate = infer(node.alternate)
     const variants = [...consequent.variants, ...alternate.variants]
+
     return variants.length > 64
       ? createUnknownValueAnalysis(node)
       : {
@@ -61,11 +65,13 @@ export function inferStaticPropValue(
           node,
         }
   }
+
   if (
     node.type === 'UnaryExpression' &&
     ['+', '-', '~'].includes(node.operator)
   ) {
     const argument = infer(node.argument)
+
     return {
       variants: argument.variants.flatMap(
         /**
@@ -79,9 +85,11 @@ export function inferStaticPropValue(
           if (variant.type === 'bigint' && node.operator !== '+') {
             return [variant]
           }
+
           if (typeof variant.value !== 'number') {
             return []
           }
+
           return [
             numeric(
               node.operator === '-'
@@ -110,17 +118,21 @@ export function inferStaticPropValue(
       node,
     }
   }
+
   if (
     node.type === 'BinaryExpression' &&
     ['+', '-', '*', '/', '%', '**'].includes(node.operator)
   ) {
     const left = infer(node.left)
     const right = infer(node.right)
+
     if (left.variants.length * right.variants.length > 64) {
       return createUnknownValueAnalysis(node)
     }
+
     const variants: ExpressionValueVariant[] = []
     let hasUnknownVariants = left.hasUnknownVariants || right.hasUnknownVariants
+
     for (const first of left.variants) {
       for (const second of right.variants) {
         if (
@@ -130,7 +142,9 @@ export function inferStaticPropValue(
           hasUnknownVariants = true
           continue
         }
+
         let value: number
+
         switch (node.operator) {
           case '+':
             value = first.value + second.value
@@ -150,19 +164,24 @@ export function inferStaticPropValue(
           default:
             value = first.value ** second.value
         }
+
         variants.push(numeric(value))
       }
     }
+
     return {
       variants,
       hasUnknownVariants,
       node,
     }
   }
+
   const result = inferExpressionValueShape(node, isGlobalUndefined)
+
   if (node.type === 'Literal' && !('regex' in node)) {
     const value = node.value
     let variant: ExpressionValueVariant | undefined
+
     if (value === null) {
       variant = { type: 'null', value }
     } else if (typeof value === 'number') {
@@ -172,6 +191,7 @@ export function inferStaticPropValue(
     } else if (typeof value === 'string') {
       variant = { type: 'string', value }
     }
+
     if (variant) {
       return {
         ...result,
@@ -179,5 +199,6 @@ export function inferStaticPropValue(
       }
     }
   }
+
   return result
 }

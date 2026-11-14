@@ -89,26 +89,33 @@ export function inferExpressionValueShape(
     hasUnknownVariants: false,
     node,
   })
+
   switch (node.type) {
     case 'Literal':
       if ('regex' in node) {
         return known('object')
       }
+
       if (node.value === null) {
         return known('null')
       }
+
       if (typeof node.value === 'string') {
         return createStringValueAnalysis(node.value, node)
       }
+
       if (typeof node.value === 'number') {
         return known('number')
       }
+
       if (typeof node.value === 'boolean') {
         return known('boolean')
       }
+
       if (typeof node.value === 'bigint') {
         return known('bigint')
       }
+
       break
     case 'TemplateLiteral':
       return node.expressions.length
@@ -125,22 +132,27 @@ export function inferExpressionValueShape(
       if (node.name === 'undefined' && isGlobalUndefined(node)) {
         return known('undefined')
       }
+
       break
     case 'UnaryExpression':
       if (node.operator === 'void') {
         return known('undefined')
       }
+
       if (node.operator === '!') {
         return known('boolean')
       }
+
       if (node.operator === 'typeof') {
         return known('string')
       }
+
       if (['-', '+', '~'].includes(node.operator)) {
         const argument = inferExpressionValueShape(
           node.argument,
           isGlobalUndefined,
         )
+
         if (
           !argument.hasUnknownVariants &&
           argument.variants.every(
@@ -162,6 +174,7 @@ export function inferExpressionValueShape(
           }
         }
       }
+
       break
     case 'ConditionalExpression': {
       const consequent = inferExpressionValueShape(
@@ -172,6 +185,7 @@ export function inferExpressionValueShape(
         node.alternate,
         isGlobalUndefined,
       )
+
       return {
         variants: [...consequent.variants, ...alternate.variants],
         hasUnknownVariants:
@@ -180,5 +194,6 @@ export function inferExpressionValueShape(
       }
     }
   }
+
   return createUnknownValueAnalysis(node)
 }

@@ -37,6 +37,7 @@ function getModelPropNames(name: string): string[] {
     name === 'modelValue' ? 'modelModifiers' : `${name}Modifiers`,
   ].map(normalizePropName)
   const modelName = normalizePropName(name)
+
   if (modelName === 'modelValue') {
     props.push('modelModifiers')
   } else {
@@ -49,6 +50,7 @@ function getModelPropNames(name: string): string[] {
       ...lookups.filter(property => normalizePropName(property) === property),
     )
   }
+
   return props
 }
 
@@ -64,12 +66,15 @@ function hasSatisfiesConstraint(
   argument: TSESTree.Node,
 ): boolean {
   let current: TSESTree.Node | undefined = node
+
   while (current && current !== argument) {
     current = current.parent
+
     if (current?.type === 'TSSatisfiesExpression') {
       return true
     }
   }
+
   return false
 }
 
@@ -113,6 +118,7 @@ export const defineModelNameCasing = createRule<
   create(context, [options]) {
     const casing = options.casing ?? 'camelCase'
     const convert = getCaseConverter(casing)
+
     return {
       Program(program) {
         const models = getSetupMacroCalls(
@@ -144,6 +150,7 @@ export const defineModelNameCasing = createRule<
                 result.output === 'modelValue')
                 ? result.output
                 : undefined
+
             return {
               node,
               name,
@@ -154,9 +161,11 @@ export const defineModelNameCasing = createRule<
 
         for (const model of models) {
           const { node, name, result, replacement } = model
+
           if (!node || name === undefined || !result?.changed) {
             continue
           }
+
           const targetProps = getModelPropNames(result.output)
           const hasReservedProp = targetProps.some(property =>
             reservedProps.has(property),
@@ -171,6 +180,7 @@ export const defineModelNameCasing = createRule<
                 ),
               ].some(property => targetProps.includes(property)),
           )
+
           context.report({
             node,
             messageId: 'unexpectedNameCasing',
@@ -184,18 +194,25 @@ export const defineModelNameCasing = createRule<
               ) {
                 return null
               }
+
               const quote = context.sourceCode.text[node.range[0]]
+
               if (!quote || !["'", '"', '`'].includes(quote)) {
                 return null
               }
+
               let text = JSON.stringify(replacement)
+
               if (quote !== '"') {
                 text = text.slice(1, -1).replaceAll(quote, () => `\\${quote}`)
+
                 if (quote === '`') {
                   text = text.replaceAll('${', '\\${')
                 }
+
                 text = `${quote}${text}${quote}`
               }
+
               return fixer.replaceText(node, text)
             },
           })

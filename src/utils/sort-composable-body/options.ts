@@ -27,7 +27,9 @@ export function resolveOptions(
       context.options[0]?.vueGlobals,
     ),
   }
+
   validateOptions(options)
   validateGroups(options, BODY_SELECTORS)
+
   return options
 }

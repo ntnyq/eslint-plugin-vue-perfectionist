@@ -68,13 +68,16 @@ export const defineMacrosTypeStyle = createRule<
       context.filename,
       (macro, node) => {
         const allowed = options.macros?.[macro] ?? 'local'
+
         if (allowed === false) {
           return
         }
+
         const actual = getMacroTypeStyle(node, context.sourceCode)
         const expected = styles
           .filter(style => allowed.includes(style))
           .join(', ')
+
         if (actual === 'unknown') {
           context.report({
             node,

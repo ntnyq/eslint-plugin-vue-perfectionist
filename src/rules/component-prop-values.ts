@@ -73,32 +73,41 @@ export const componentPropValues = createRule<
   create(context, [options]) {
     const targets = compilePropValues(options.targets ?? [])
     const services = context.sourceCode.parserServices
+
     if (!hasTemplateVisitor(services)) {
       return {}
     }
+
     return services.defineTemplateBodyVisitor({
       VElement(node) {
         const component = resolveComponentName(node)
         const props = component && targets.get(component)
+
         if (!props) {
           return
         }
+
         const bindings = analyzeComponentBindings(
           node,
           props.keys(),
           context.sourceCode,
           inferStaticPropValue,
         )
+
         for (const [name, binding] of bindings) {
           const constraint = props.get(name)
+
           if (!constraint || binding.presence !== 'present') {
             continue
           }
+
           const expected = new Set<string>()
           const actual = new Set<string>()
           let unknown = binding.value.hasUnknownVariants
+
           for (const variant of binding.value.variants) {
             const failures = getValueFailures(variant, constraint)
+
             if (failures === undefined) {
               unknown = true
             } else if (failures.length) {
@@ -106,12 +115,14 @@ export const componentPropValues = createRule<
               actual.add(describePropVariant(variant))
             }
           }
+
           if (
             !actual.size &&
             (!unknown || options.unknownValues !== 'report')
           ) {
             continue
           }
+
           context.report({
             loc: binding.value.node.loc,
             messageId: actual.size

@@ -15,23 +15,29 @@ import type { ResolvedOptions } from './types.ts'
  */
 export function validateOptions(options: ResolvedOptions): ResolvedOptions {
   validateDefinedOptions(options)
+
   try {
     Intl.Collator.supportedLocalesOf(options.locales)
   } catch {
     invalid('Invalid locales.')
   }
+
   if (new Set([...options.alphabet]).size !== [...options.alphabet].length) {
     invalid('alphabet must not contain duplicate characters.')
   }
+
   for (const name of options.vueGlobals) {
     if (!VUE_APIS.has(name)) {
       invalid(`Unknown Vue global: ${name}`)
     }
   }
+
   validateGroups(options)
+
   if (options.newlinesInside === 'newlinesBetween') {
     options.newlinesInside = options.newlinesBetween === 'ignore' ? 'ignore' : 0
   }
+
   for (const candidate of [
     options,
     ...options.groups.filter(
@@ -58,6 +64,7 @@ export function validateOptions(options: ResolvedOptions): ResolvedOptions {
       }
     }
   }
+
   if (
     (options.type === 'custom' ||
       (options.type !== 'unsorted' &&
@@ -66,5 +73,6 @@ export function validateOptions(options: ResolvedOptions): ResolvedOptions {
   ) {
     invalid('custom sorting requires a non-empty alphabet.')
   }
+
   return options
 }

@@ -120,6 +120,7 @@ export const requireMacroTypeName = createRule<
       defineSlots: 'Slots',
       ...options.macros,
     }
+
     for (const [macro, name] of Object.entries(names)) {
       if (
         name !== false &&
@@ -131,14 +132,17 @@ export const requireMacroTypeName = createRule<
         )
       }
     }
+
     return createMacroTypeVisitor(
       context.sourceCode,
       context.filename,
       (macro, node) => {
         const expected = names[macro]
+
         if (expected === false) {
           return
         }
+
         if (
           node.type !== 'TSTypeReference' ||
           node.typeName.type !== 'Identifier'

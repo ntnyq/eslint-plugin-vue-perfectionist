@@ -8,6 +8,7 @@ import type { AST } from 'vue-eslint-parser'
  */
 export function isInVPre(element: AST.VElement): boolean {
   let current: AST.VElement | AST.VDocumentFragment = element
+
   while (current.type === 'VElement') {
     if (
       current.startTag.attributes.some(attribute =>
@@ -18,7 +19,9 @@ export function isInVPre(element: AST.VElement): boolean {
     ) {
       return true
     }
+
     current = current.parent
   }
+
   return false
 }

@@ -112,9 +112,11 @@ export const paddingLineBetweenTags = createRule<
     const targets = options.targets ?? [{ prev: '*', next: '*', blankLine: 1 }]
     const sourceCode = context.sourceCode
     const services = sourceCode.parserServices
+
     if (!hasTemplateVisitor(services) || !targets.length) {
       return {}
     }
+
     const comments =
       options.ignoreComments && hasVueServices(services)
         ? (services
@@ -129,9 +131,11 @@ export const paddingLineBetweenTags = createRule<
             (option.next === '*' || option.next === next.rawName)
           : option.tag === previous.rawName && option.tag === next.rawName,
       )
+
       if (!entry || entry.blankLine === 'ignore') {
         return
       }
+
       // Comments are absent from children. Split around parsed comments so
       // their contents and internal line breaks never become padding.
       const ranges: AST.VElement['range'][] = []
@@ -140,27 +144,35 @@ export const paddingLineBetweenTags = createRule<
       // rescanning the document; nested sibling pairs are not visited in order.
       let lower = 0
       let upper = comments.length
+
       while (lower < upper) {
         const middle = Math.floor((lower + upper) / 2)
         const comment = comments[middle]
+
         if (comment && comment.range[0] < start) {
           lower = middle + 1
         } else {
           upper = middle
         }
       }
+
       for (let index = lower; index < comments.length; index++) {
         const comment = comments[index]
+
         if (!comment || comment.range[1] > next.range[0]) {
           break
         }
+
         ranges.push([start, comment.range[0]])
         start = comment.range[1]
       }
+
       ranges.push([start, next.range[0]])
+
       const gaps = ranges.map(range => {
         const text = sourceCode.text.slice(...range)
         const lineBreaks = text.match(/\r\n|\r|\n/gu) ?? []
+
         return {
           range,
           text,
@@ -168,17 +180,21 @@ export const paddingLineBetweenTags = createRule<
           count: Math.max(0, lineBreaks.length - 1),
         }
       })
+
       // Inspect raw text to avoid treating decoded whitespace entities as
       // formatting, even when comments are ignored.
       if (gaps.some(gap => !/^[\t \r\n]*$/u.test(gap.text))) {
         return
       }
+
       const policy = entry.blankLine ?? 1
       const count = gaps.reduce((total, gap) => total + gap.count, 0)
       const expected = policy === 'never' ? 0 : policy
+
       if (expected === 'always' ? count >= 1 : count === expected) {
         return
       }
+
       context.report({
         loc: next.startTag.loc,
         messageId:
@@ -195,19 +211,25 @@ export const paddingLineBetweenTags = createRule<
         fix(fixer) {
           let remaining = (expected === 'always' ? 1 : expected) - count
           const fixes: TSESLint.RuleFix[] = []
+
           for (const gap of gaps) {
             if (!remaining || !gap.lineBreaks.length) {
               continue
             }
+
             const firstBreak = /\r\n|\r|\n/u.exec(gap.text)
+
             if (!firstBreak) {
               continue
             }
+
             const blankLines = Math.max(0, gap.count + remaining)
             remaining -= blankLines - gap.count
+
             if (blankLines === gap.count) {
               continue
             }
+
             const lastBreak = Math.max(
               gap.text.lastIndexOf('\n'),
               gap.text.lastIndexOf('\r'),
@@ -219,9 +241,11 @@ export const paddingLineBetweenTags = createRule<
               gap.text.length -
               lastBreak -
               1
+
             if (replacementLength > MAX_PADDING_LENGTH) {
               return null
             }
+
             // Prefer the first existing line break, keeping leading comments
             // such as @vue-generic attached to the following tag.
             const replacement =
@@ -230,6 +254,7 @@ export const paddingLineBetweenTags = createRule<
               gap.text.slice(lastBreak + 1)
             fixes.push(fixer.replaceTextRange(gap.range, replacement))
           }
+
           return remaining ? null : fixes
         },
       })
@@ -240,6 +265,7 @@ export const paddingLineBetweenTags = createRule<
         // Do not inspect descendants of whitespace-sensitive or non-HTML
         // contexts, including v-pre inherited from an ancestor.
         let ancestor: AST.VElement | AST.VDocumentFragment = node
+
         while (ancestor.type === 'VElement') {
           if (
             ancestor.namespace !== 'http://www.w3.org/1999/xhtml' ||
@@ -260,14 +286,18 @@ export const paddingLineBetweenTags = createRule<
           ) {
             return
           }
+
           ancestor = ancestor.parent
         }
+
         let previous: AST.VElement | undefined
+
         for (const child of node.children) {
           if (child.type === 'VElement') {
             if (previous) {
               checkPair(previous, child)
             }
+
             previous = child
           } else if (child.type !== 'VText' || child.value.trim()) {
             previous = undefined

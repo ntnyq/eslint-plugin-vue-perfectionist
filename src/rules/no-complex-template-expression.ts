@@ -17,34 +17,44 @@ import type {
 function hasScopeReference(node: AST.VExpressionContainer): boolean {
   const attribute = node.parent.type === 'VAttribute' ? node.parent : undefined
   const owner = attribute ? attribute.parent.parent : node.parent
+
   if (owner.type !== 'VElement') {
     return false
   }
+
   const beforeLoop =
     attribute?.directive && ['if', 'else-if'].includes(attribute.key.name.name)
+
   return node.references.some(reference => {
     if (reference.isValueReference === false || !isRuntimeNode(reference.id)) {
       return false
     }
+
     let element: AST.VElement | AST.VDocumentFragment = owner
+
     while (element.type === 'VElement') {
       const variable = element.variables.find(candidate => {
         if (candidate.id.name !== reference.id.name) {
           return false
         }
+
         if (element !== owner || !attribute) {
           return true
         }
+
         return (
           candidate.kind !== 'scope' &&
           (!beforeLoop || candidate.kind !== 'v-for')
         )
       })
+
       if (variable) {
         return variable.kind === 'v-for' || variable.kind === 'scope'
       }
+
       element = element.parent
     }
+
     return false
   })
 }
@@ -119,9 +129,11 @@ export const noComplexTemplateExpression = createRule<
   defaultOptions: [{}],
   create(context, [options]) {
     const services = context.sourceCode.parserServices
+
     if (!hasTemplateVisitor(services)) {
       return {}
     }
+
     const directives = new Set<string>(
       options.directives ?? ['if', 'else-if', 'show', 'bind'],
     )
@@ -135,12 +147,15 @@ export const noComplexTemplateExpression = createRule<
           deepestConditional: number
         }
       | undefined
+
     return services.defineTemplateBodyVisitor({
       VExpressionContainer(node) {
         const expression = node.expression
+
         if (!expression) {
           return
         }
+
         if (node.parent.type === 'VAttribute') {
           if (
             !node.parent.directive ||
@@ -155,9 +170,11 @@ export const noComplexTemplateExpression = createRule<
           // Dynamic directive arguments and binding patterns are not values.
           return
         }
+
         if (options.ignoreScopeReferences && hasScopeReference(node)) {
           return
         }
+
         active = { logicalCount: 0, conditionalDepth: 0, deepestConditional: 0 }
       },
       LogicalExpression(node) {
@@ -183,9 +200,11 @@ export const noComplexTemplateExpression = createRule<
         if (!active || !node.expression) {
           return
         }
+
         const expression = node.expression
         const { logicalCount, deepestConditional } = active
         active = undefined
+
         if (logicalCount > maxLogical) {
           context.report({
             loc: expression.loc,
@@ -193,6 +212,7 @@ export const noComplexTemplateExpression = createRule<
             data: { count: logicalCount, max: maxLogical },
           })
         }
+
         if (deepestConditional > maxDepth) {
           context.report({
             loc: expression.loc,

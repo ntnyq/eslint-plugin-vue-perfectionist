@@ -105,11 +105,14 @@ export function createCallbackVisitor(
      */
     CallExpression(node: TSESTree.CallExpression) {
       const identity = getCallIdentity(node, sourceCode)
+
       if (!identity) {
         return
       }
+
       const name = identity.exportedName ?? identity.classificationName
       const indices = new Set<number>()
+
       for (const builtin of builtins) {
         if (
           (identity.source !== undefined &&
@@ -117,11 +120,13 @@ export function createCallbackVisitor(
           (identity.isUnbound && vueGlobals.has(name))
         ) {
           const index = builtin.callbacks.get(name)
+
           if (index !== undefined) {
             indices.add(index)
           }
         }
       }
+
       for (const custom of customCallbacks) {
         if (
           custom.name === name &&
@@ -133,6 +138,7 @@ export function createCallbackVisitor(
           }
         }
       }
+
       const spreadIndex = node.arguments.findIndex(
         /**
          * Find an argument that makes subsequent callback positions ambiguous.
@@ -142,8 +148,10 @@ export function createCallbackVisitor(
          */
         argument => argument.type === 'SpreadElement',
       )
+
       for (const index of indices) {
         const argument = node.arguments[index]
+
         if (argument && (spreadIndex === -1 || index < spreadIndex)) {
           checkCallback(argument, name)
         }

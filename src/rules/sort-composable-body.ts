@@ -46,13 +46,17 @@ export const sortComposableBody = createRule<
     const options = resolveOptions(context)
     const matchesPattern = createPatternMatcher(options)
     const groups = resolveGroups(options)
+
     if (!groups.length) {
       return {}
     }
+
     const ignored = new Set(options.ignoreNames)
     const bodies: FunctionNode[] = []
+
     function collect(fn: FunctionNode) {
       const name = getFunctionBindingName(fn)
+
       if (
         !fn.generator &&
         fn.body.type === 'BlockStatement' &&
@@ -63,6 +67,7 @@ export const sortComposableBody = createRule<
         bodies.push(fn)
       }
     }
+
     return {
       FunctionDeclaration: collect,
       FunctionExpression: collect,
@@ -80,10 +85,12 @@ export const sortComposableBody = createRule<
           context.sourceCode,
           options,
         )
+
         for (const fn of bodies) {
           if (fn.body.type !== 'BlockStatement') {
             continue
           }
+
           const parameterNames = new Set(fn.params.flatMap(getBindingNames))
           // A var redeclaration overwrites an existing input rather than
           // introducing a new initialization prerequisite.
@@ -94,12 +101,14 @@ export const sortComposableBody = createRule<
               statement.node.kind === 'var' &&
               statement.names.some(name => parameterNames.has(name)),
           )
+
           for (const partition of partitions) {
             const ordered = sortByDependencies(
               partition,
               analyzeDependencies(partition),
               compare,
             )
+
             reportPartition(partition, ordered, context, options, groups)
           }
         }

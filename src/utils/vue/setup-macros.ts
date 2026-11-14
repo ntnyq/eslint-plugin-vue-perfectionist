@@ -50,12 +50,15 @@ export function getSetupMacroCandidates(
    */
   function inspect(expression: TSESTree.Node, allowDefaults = true) {
     const call = unwrapExpression(expression)
+
     if (!isSetupMacroCandidate(call, sourceCode, setupRange)) {
       return
     }
+
     if (allowDefaults && call.callee.name === 'withDefaults') {
       const argument = call.arguments[0]
       const inner = argument && unwrapExpression(argument)
+
       if (
         (defaultsPolicy === 'any-arity' || call.arguments.length === 2) &&
         inner?.type === 'CallExpression' &&
@@ -64,8 +67,10 @@ export function getSetupMacroCandidates(
       ) {
         inspect(inner, false)
       }
+
       return
     }
+
     calls.push(call)
   }
 
@@ -80,6 +85,7 @@ export function getSetupMacroCandidates(
       }
     }
   }
+
   return calls
 }
 
@@ -97,9 +103,11 @@ export function getSetupMacroCalls(
   filename: string,
 ): TSESTree.CallExpression[] {
   const range = getSetupRange(sourceCode)
+
   if (!filename.endsWith('.vue') || !range) {
     return []
   }
+
   return getSetupMacroCandidates(
     program,
     sourceCode,

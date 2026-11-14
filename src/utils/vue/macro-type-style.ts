@@ -19,17 +19,22 @@ export function getMacroTypeStyle(
   if (node.type === 'TSTypeLiteral' || node.type === 'TSFunctionType') {
     return 'inline'
   }
+
   if (node.type === 'TSImportType') {
     return node.qualifier ? 'imported' : 'unsupported'
   }
+
   if (node.type !== 'TSTypeReference') {
     return 'unsupported'
   }
+
   let identifier = node.typeName
   const isQualified = identifier.type === 'TSQualifiedName'
+
   while (identifier.type === 'TSQualifiedName') {
     identifier = identifier.left
   }
+
   // Scope references resolve the type namespace, including separate value
   // bindings and vue-eslint-parser's reconstructed dual-script scopes.
   const reference = findScopeReference(identifier, sourceCode)
@@ -42,13 +47,17 @@ export function getMacroTypeStyle(
      */
     definition => definition.isTypeDefinition,
   )
+
   if (!definitions?.length) {
     return 'unknown'
   }
+
   const definition = definitions[0]
+
   if (!definition) {
     return 'unknown'
   }
+
   if (isQualified) {
     return definitions.length === 1 &&
       definition.type === 'ImportBinding' &&
@@ -56,11 +65,13 @@ export function getMacroTypeStyle(
       ? 'imported'
       : 'unsupported'
   }
+
   if (definitions.length === 1 && definition.type === 'ImportBinding') {
     return definition.node.type === 'ImportNamespaceSpecifier'
       ? 'unknown'
       : 'imported'
   }
+
   if (
     definitions.every(
       /**
@@ -72,17 +83,20 @@ export function getMacroTypeStyle(
        */
       definition => {
         const declaration = definition.node
+
         if (
           declaration.type !== 'TSInterfaceDeclaration' &&
           declaration.type !== 'TSTypeAliasDeclaration'
         ) {
           return false
         }
+
         const parent = declaration.parent
         const isTopLevel =
           parent.type === 'Program' ||
           (parent.type === 'ExportNamedDeclaration' &&
             parent.parent.type === 'Program')
+
         return isTopLevel && !declaration.declare
       },
     ) &&
@@ -99,5 +113,6 @@ export function getMacroTypeStyle(
   ) {
     return 'local'
   }
+
   return 'unknown'
 }

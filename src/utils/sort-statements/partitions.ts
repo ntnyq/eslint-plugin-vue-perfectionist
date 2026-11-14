@@ -32,16 +32,19 @@ function isPartitionComment(
   if (isBoolean(option)) {
     return option
   }
+
   if (
     typeof option === 'object' &&
     !isArray(option) &&
     !('pattern' in option)
   ) {
     const selected = comment.type === 'Line' ? option.line : option.block
+
     return selected === undefined
       ? false
       : isPartitionComment(comment, selected, matchesPattern)
   }
+
   return matchesPattern(comment.value, option)
 }
 
@@ -55,11 +58,13 @@ function collectProtectedLines(comments: TSESTree.Comment[]): ProtectedLines {
   const lines = new Set<number>()
   const disabled = new Set<string>()
   let start: number | undefined
+
   for (const comment of comments) {
     const directive =
       /^\s*eslint-(disable-next-line|disable-line|disable|enable)\b(.*)/su.exec(
         comment.value,
       )
+
     if (directive) {
       const operation = directive[1]
       const rules =
@@ -68,6 +73,7 @@ function collectProtectedLines(comments: TSESTree.Comment[]): ProtectedLines {
           ?.trim()
           .split(/[\s,]+/u)
           .filter(Boolean) ?? []
+
       if (operation === 'disable-next-line') {
         lines.add(comment.loc.end.line + 1)
       } else if (operation === 'disable-line') {
@@ -76,6 +82,7 @@ function collectProtectedLines(comments: TSESTree.Comment[]): ProtectedLines {
         if (disabled.size === 0) {
           start = comment.loc.start.line
         }
+
         for (const rule of rules.length ? rules : ['*']) {
           disabled.add(rule)
         }
@@ -87,18 +94,22 @@ function collectProtectedLines(comments: TSESTree.Comment[]): ProtectedLines {
         } else {
           disabled.clear()
         }
+
         if (!disabled.size && start !== undefined) {
           for (let line = start; line <= comment.loc.end.line; line++) {
             lines.add(line)
           }
+
           start = undefined
         }
       }
     }
+
     if (/@ts-(?:expect-error|ignore|nocheck|check)\b/u.test(comment.value)) {
       lines.add(comment.loc.end.line + 1)
     }
   }
+
   return {
     lines,
     openDisableStart: start,
@@ -133,6 +144,7 @@ export function createPartitionCollector(
   const { lines: protectedSet, openDisableStart } =
     collectProtectedLines(comments)
   const protectedLines = [...protectedSet].sort((left, right) => left - right)
+
   return function collectPartitions(nodes, isBoundary) {
     const first = nodes[0]
     const headerLine = first
@@ -157,11 +169,13 @@ export function createPartitionCollector(
         ),
     )
     const nameCounts = new Map<string, number>()
+
     for (const statement of all) {
       for (const name of statement?.names ?? []) {
         nameCounts.set(name, (nameCounts.get(name) ?? 0) + 1)
       }
     }
+
     const partitions: Statement[][] = []
     let partition: Statement[] = []
     /**
@@ -171,8 +185,10 @@ export function createPartitionCollector(
       if (partition.length) {
         partitions.push(partition)
       }
+
       partition = []
     }
+
     for (const [index, node] of nodes.entries()) {
       const statement = all[index]
       const commentsBefore = sourceCode.getCommentsBefore(node)
@@ -237,6 +253,7 @@ export function createPartitionCollector(
         flush()
         continue
       }
+
       const marker = before.findLast(
         /**
          * Identify a leading comment that starts a new partition.
@@ -263,6 +280,7 @@ export function createPartitionCollector(
             comment => comment.range[0] > marker.range[1],
           )
         : before
+
       if (
         leading.some(
           /**
@@ -277,21 +295,29 @@ export function createPartitionCollector(
       ) {
         statement.safeKind = undefined
       }
+
       if (marker) {
         flush()
       }
+
       statement.start = leading[0]?.range[0] ?? node.range[0]
       statement.end = trailing.at(-1)?.range[1] ?? node.range[1]
+
       const previous = partition.at(-1)
+
       if (previous) {
         const gap = sourceCode.text.slice(previous.end, statement.start)
+
         if (options.partitionByNewLine && /\r?\n[^\S\r\n]*\r?\n/u.test(gap)) {
           flush()
         }
       }
+
       partition.push(statement)
     }
+
     flush()
+
     return partitions
   }
 }
@@ -305,14 +331,17 @@ function lowerBound(
 ): number {
   let start = 0
   let end = length
+
   while (start < end) {
     const middle = Math.floor((start + end) / 2)
+
     if (matches(middle)) {
       end = middle
     } else {
       start = middle + 1
     }
   }
+
   return start
 }
 

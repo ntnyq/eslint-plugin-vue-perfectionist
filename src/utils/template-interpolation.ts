@@ -13,6 +13,7 @@ type TextFragmentNode = AST.VText | AST.VExpressionContainer
  */
 export function isInterpolationContext(element: AST.VElement): boolean {
   let current: AST.VElement | AST.VDocumentFragment = element
+
   while (current.type === 'VElement') {
     if (
       current.namespace !== 'http://www.w3.org/1999/xhtml' ||
@@ -48,8 +49,10 @@ export function isInterpolationContext(element: AST.VElement): boolean {
     ) {
       return false
     }
+
     current = current.parent
   }
+
   return true
 }
 
@@ -64,6 +67,7 @@ export function isInterpolationContext(element: AST.VElement): boolean {
 export function getTextFragments(element: AST.VElement): TextFragmentNode[][] {
   const fragments: TextFragmentNode[][] = []
   let fragment: TextFragmentNode[] = []
+
   /**
    * Trim the current text run, retain it when eligible, and reset the
    * accumulator.
@@ -72,13 +76,17 @@ export function getTextFragments(element: AST.VElement): TextFragmentNode[][] {
     while (fragment[0]?.type === 'VText' && !fragment[0].value.trim()) {
       fragment.shift()
     }
+
     while (fragment.at(-1)?.type === 'VText') {
       const last = fragment.at(-1)
+
       if (last?.type !== 'VText' || last.value.trim()) {
         break
       }
+
       fragment.pop()
     }
+
     if (
       fragment.some(
         /**
@@ -102,20 +110,27 @@ export function getTextFragments(element: AST.VElement): TextFragmentNode[][] {
     ) {
       fragments.push(fragment)
     }
+
     fragment = []
   }
+
   for (const child of element.children) {
     if (child.type !== 'VText' && child.type !== 'VExpressionContainer') {
       flush()
       continue
     }
+
     const previous = fragment.at(-1)
+
     if (previous && previous.range[1] !== child.range[0]) {
       flush()
     }
+
     fragment.push(child)
   }
+
   flush()
+
   return fragments
 }
 
@@ -150,9 +165,11 @@ function escapeTemplateText(value: string): string {
  */
 function hasLineComment(node: AST.VExpressionContainer): boolean {
   let parent = node.parent
+
   while (parent.type === 'VElement') {
     parent = parent.parent
   }
+
   return (
     parent.type !== 'VDocumentFragment' ||
     parent.comments.some(
@@ -185,18 +202,22 @@ export function createInterpolationReplacement(
   sourceCode: SourceCode,
 ): string | undefined {
   let content = ''
+
   for (const node of fragment) {
     if (node.type === 'VText') {
       // Avoid depending on the application's condense/preserve compiler option.
       if (/[\t\r\n\f]| {2}/u.test(node.value)) {
         return undefined
       }
+
       content += escapeTemplateText(node.value)
       continue
     }
+
     if (!node.expression || hasLineComment(node)) {
       return undefined
     }
+
     // Even `undefined` can be a template-local or component binding. Do not
     // infer identifiers without a reliable template-to-script type mapping.
     const value = inferExpressionValueShape(
@@ -210,6 +231,7 @@ export function createInterpolationReplacement(
        */
       () => false,
     )
+
     if (
       value.hasUnknownVariants ||
       !value.variants.length ||
@@ -235,10 +257,13 @@ export function createInterpolationReplacement(
     ) {
       return undefined
     }
+
     const raw = sourceCode.text.slice(...node.range)
+
     if (!raw.startsWith('{{') || !raw.endsWith('}}')) {
       return undefined
     }
+
     // Preserve block comments and parentheses. Detect line comments from the
     // parser above: their delimiters can be spelled using HTML entities.
     const expression = raw.slice(2, -2).trim()
@@ -253,6 +278,7 @@ export function createInterpolationReplacement(
     )
     content += `\${(${expression})${nullable ? " ?? ''" : ''}}`
   }
+
   // A static brace next to a substitution must never close Vue interpolation.
   return `{{ \`${content}\` }}`
 }

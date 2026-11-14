@@ -98,11 +98,14 @@ export const requireInjectionKey = createRule<
     ): string | undefined {
       const expression = unwrapExpression(node)
       const literal = getStaticStringValue(expression)
+
       if (literal !== undefined || expression.type !== 'Identifier') {
         return literal
       }
+
       const definitions = getScriptVariableDefinitions(expression, sourceCode)
       const definition = definitions[0]
+
       if (
         definitions.length !== 1 ||
         definition?.type !== 'Variable' ||
@@ -110,7 +113,9 @@ export const requireInjectionKey = createRule<
       ) {
         return undefined
       }
+
       const declaration = definition.node
+
       if (
         declaration.id.type !== 'Identifier' ||
         !declaration.init ||
@@ -118,21 +123,28 @@ export const requireInjectionKey = createRule<
       ) {
         return undefined
       }
+
       seen.add(declaration)
+
       return resolveString(declaration.init, seen)
     }
 
     return {
       CallExpression(node) {
         const key = node.arguments[0]
+
         if (!key || key.type === 'SpreadElement') {
           return
         }
+
         const identity = getCallIdentity(node, sourceCode)
+
         if (!identity) {
           return
         }
+
         const name = identity.exportedName ?? identity.classificationName
+
         if (
           !['provide', 'inject'].includes(name) ||
           !(identity.source
@@ -141,7 +153,9 @@ export const requireInjectionKey = createRule<
         ) {
           return
         }
+
         const value = resolveString(key)
+
         if (value !== undefined) {
           if (!allowed.has(value)) {
             context.report({
@@ -150,12 +164,15 @@ export const requireInjectionKey = createRule<
               data: { name, key: value },
             })
           }
+
           return
         }
+
         if (services && checker && isInjectionKey) {
           const type = checker.getTypeAtLocation(
             services.esTreeNodeToTSNodeMap.get(key),
           )
+
           if (!isInjectionKey(type)) {
             context.report({
               node: key,

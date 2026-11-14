@@ -62,6 +62,7 @@ export const preferComposableOptions = createRule<
     if (/\.d\.[cm]?ts$/iu.test(context.filename)) {
       return {}
     }
+
     const sourceCode = context.sourceCode
     const max = options.maxPositionalParams ?? 0
     const pattern = new RegExp(options.functionPattern ?? '^use[A-Z]')
@@ -71,14 +72,18 @@ export const preferComposableOptions = createRule<
       if (!pattern.test(name) || ignored.has(name)) {
         return
       }
+
       const params = parameters.filter(
         param => param.type !== 'Identifier' || param.name !== 'this',
       )
       const last = params.at(-1)
+
       if (!last) {
         return
       }
+
       const rest = params.find(param => param.type === 'RestElement')
+
       if (rest) {
         context.report({
           node: rest,
@@ -87,10 +92,13 @@ export const preferComposableOptions = createRule<
         })
         return
       }
+
       const kind = classifyComposableParameter(last, sourceCode)
+
       if (kind === 'options') {
         const count = params.length - 1
         const excess = params[max]
+
         if (count > max && excess) {
           context.report({
             node: excess,
@@ -116,6 +124,7 @@ export const preferComposableOptions = createRule<
       if (!node.id || node.declare) {
         return
       }
+
       // Only overloads with an implementation belong to this first version.
       const definitions = filterScriptDefinitions(
         sourceCode
@@ -124,6 +133,7 @@ export const preferComposableOptions = createRule<
         node,
         sourceCode,
       )
+
       if (node.type === 'TSDeclareFunction') {
         if (
           !definitions.some(
@@ -139,6 +149,7 @@ export const preferComposableOptions = createRule<
       ) {
         return
       }
+
       check(node.id.name, node.params)
     }
 
@@ -149,7 +160,9 @@ export const preferComposableOptions = createRule<
         if (node.id.type !== 'Identifier' || !node.init) {
           return
         }
+
         const initializer = unwrapExpression(node.init)
+
         if (
           initializer.type === 'ArrowFunctionExpression' ||
           initializer.type === 'FunctionExpression'

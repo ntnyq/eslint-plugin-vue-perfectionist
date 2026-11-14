@@ -37,9 +37,11 @@ export function analyzePropTypes(
           if (!constraint.booleanCasting || variant.type !== 'string') {
             return [variant.type]
           }
+
           if (variant.value === undefined) {
             return ['string', 'boolean'] as const
           }
+
           return [
             variant.value === '' || variant.value === hyphenateName(propName)
               ? ('boolean' as const)
@@ -58,6 +60,7 @@ export function analyzePropTypes(
      */
     type => !constraint.types.includes(type),
   )
+
   return {
     actual,
     invalid,

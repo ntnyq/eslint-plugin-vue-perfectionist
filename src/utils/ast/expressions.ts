@@ -58,12 +58,14 @@ export function unwrapExpression(
  */
 export function getOuterExpression(node: TSESTree.Node): TSESTree.Node {
   let current = node
+
   while (
     current.parent &&
     unwrapExpression(current.parent) === unwrapExpression(current)
   ) {
     current = current.parent
   }
+
   return current
 }
 
@@ -76,6 +78,7 @@ export function getOuterExpression(node: TSESTree.Node): TSESTree.Node {
 export function isRuntimeNode(node: AST.Node | TSESTree.Node): boolean {
   let child = node
   let parent = child.parent
+
   while (parent && parent.type !== 'VExpressionContainer') {
     switch (parent.type) {
       case 'TSAsExpression':
@@ -84,6 +87,7 @@ export function isRuntimeNode(node: AST.Node | TSESTree.Node): boolean {
         if (parent.expression !== child) {
           return false
         }
+
         break
       case 'TSTypeAnnotation':
       case 'TSTypeParameterDeclaration':
@@ -92,9 +96,11 @@ export function isRuntimeNode(node: AST.Node | TSESTree.Node): boolean {
       case 'TSInterfaceDeclaration':
         return false
     }
+
     child = parent
     parent = child.parent
   }
+
   return true
 }
 
@@ -123,12 +129,15 @@ export function isFunctionNode(node: TSESTree.Node): node is FunctionNode {
  */
 export function isPrimitiveConstant(node: TSESTree.Node): boolean {
   const expression = unwrapExpression(node)
+
   if (expression.type === 'Literal') {
     return !('regex' in expression)
   }
+
   if (expression.type === 'TemplateLiteral') {
     return expression.expressions.length === 0
   }
+
   return (
     expression.type === 'UnaryExpression' &&
     ['+', '-'].includes(expression.operator) &&
@@ -148,12 +157,15 @@ export function getStaticStringValue(
   node: AST.Node | TSESTree.Node,
 ): string | undefined {
   const expression = unwrapExpression(node)
+
   if (expression.type === 'Literal' && isString(expression.value)) {
     return expression.value
   }
+
   if (expression.type === 'TemplateLiteral' && !expression.expressions.length) {
     return expression.quasis[0]?.value.cooked ?? undefined
   }
+
   return undefined
 }
 
@@ -164,10 +176,13 @@ export function getFunctionBindingName(node: FunctionNode): string | undefined {
   if (node.type === 'FunctionDeclaration') {
     return node.id?.name
   }
+
   let parent: TSESTree.Node | undefined = node.parent
+
   while (parent && unwrapExpression(parent) === node) {
     parent = parent.parent
   }
+
   return parent?.type === 'VariableDeclarator' &&
     parent.id.type === 'Identifier'
     ? parent.id.name
@@ -181,11 +196,14 @@ export function getReturnOwner(
   node: TSESTree.ReturnStatement,
 ): FunctionNode | undefined {
   let parent: TSESTree.Node | undefined = node.parent
+
   while (parent) {
     if (isFunctionNode(parent)) {
       return parent
     }
+
     parent = parent.parent
   }
+
   return undefined
 }

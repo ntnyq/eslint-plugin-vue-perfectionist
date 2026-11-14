@@ -18,6 +18,7 @@ export function resolveVueGlobals(
   explicitGlobals?: string[],
 ): string[] {
   const autoImport = getSharedBooleanSetting(settings, 'autoImport')
+
   return explicitGlobals ?? (autoImport ? [...supportedApis] : [])
 }
 
@@ -34,6 +35,7 @@ export function resolveVueUse(
   explicitVueUse?: boolean,
 ): boolean {
   const vueuse = getSharedBooleanSetting(settings, 'vueuse')
+
   return explicitVueUse ?? vueuse ?? false
 }
 
@@ -50,12 +52,16 @@ function getSharedBooleanSetting(
   name: 'autoImport' | 'vueuse',
 ): boolean | undefined {
   const shared = settings['vue-perfectionist']
+
   if (shared === null || typeof shared !== 'object' || isArray(shared)) {
     return undefined
   }
+
   const value: unknown = Reflect.get(shared, name)
+
   if (value !== undefined && !isBoolean(value)) {
     throw new Error(`vue-perfectionist: ${name} must be a boolean.`)
   }
+
   return value
 }

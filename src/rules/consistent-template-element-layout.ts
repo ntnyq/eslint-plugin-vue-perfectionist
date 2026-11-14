@@ -84,9 +84,11 @@ export const consistentTemplateElementLayout = createRule<
   create(context, [options]) {
     const sourceCode = context.sourceCode
     const services = sourceCode.parserServices
+
     if (!hasTemplateVisitor(services)) {
       return {}
     }
+
     const strict = options.mode === 'strict'
     const skipped = new WeakSet<AST.VElement>()
     const roles = new Map(
@@ -99,9 +101,11 @@ export const consistentTemplateElementLayout = createRule<
 
     function checkContent(node: AST.VElement) {
       const endTag = node.endTag
+
       if (!endTag || getRole(node) !== 'block') {
         return
       }
+
       const content = sourceCode.text.slice(
         node.startTag.range[1],
         endTag.range[0],
@@ -110,31 +114,37 @@ export const consistentTemplateElementLayout = createRule<
       // regex backtracks quadratically over long whitespace inside the content.
       let contentStart = 0
       let contentEnd = content.length
+
       while (
         contentStart < contentEnd &&
         isLayoutWhitespace(content.charAt(contentStart))
       ) {
         contentStart++
       }
+
       if (contentStart === contentEnd) {
         return
       }
+
       while (
         contentEnd > contentStart &&
         isLayoutWhitespace(content.charAt(contentEnd - 1))
       ) {
         contentEnd--
       }
+
       const leading = content.slice(0, contentStart)
       const trailing = content.slice(contentEnd)
       const hasLeadingNewline = /[\r\n]/u.test(leading)
       const hasTrailingNewline = /[\r\n]/u.test(trailing)
+
       if (
         (hasLeadingNewline && hasTrailingNewline) ||
         !/[\r\n]/u.test(content)
       ) {
         return
       }
+
       // Formatters borrow a tag's internal whitespace at sensitive boundaries.
       // Explicit component grouping does not make a formatter know its display.
       if (
@@ -146,6 +156,7 @@ export const consistentTemplateElementLayout = createRule<
       ) {
         return
       }
+
       context.report({
         loc: endTag.loc,
         messageId: 'expectedContentLayout',
@@ -155,13 +166,16 @@ export const consistentTemplateElementLayout = createRule<
 
     function checkSiblings(node: AST.VElement) {
       let previous: AST.VElement | undefined
+
       for (const child of node.children) {
         if (child.type !== 'VElement') {
           if (child.type !== 'VText' || child.value.trim()) {
             previous = undefined
           }
+
           continue
         }
+
         if (
           previous &&
           getRole(previous) === 'block' &&
@@ -176,6 +190,7 @@ export const consistentTemplateElementLayout = createRule<
             !strict &&
             getNativeElementLayout(previous.rawName) !== 'block' &&
             /[\r\n]/u.test(sourceCode.text.slice(...previousTag.range))
+
           if (/^[\t ]*$/u.test(gap) && !hasFormatterEscape) {
             context.report({
               loc: child.startTag.loc,
@@ -184,6 +199,7 @@ export const consistentTemplateElementLayout = createRule<
             })
           }
         }
+
         previous = child
       }
     }
@@ -198,13 +214,17 @@ export const consistentTemplateElementLayout = createRule<
           skipped.add(node)
           return
         }
+
         // The SFC root and structural templates are traversal containers only.
         const isStructural = ['template', 'slot', 'component'].includes(
           node.rawName,
         )
+
         if (!isStructural) {
           checkContent(node)
+
           const endTag = node.endTag
+
           if (
             endTag &&
             /[\r\n]/u.test(sourceCode.text.slice(...endTag.range)) &&
@@ -213,6 +233,7 @@ export const consistentTemplateElementLayout = createRule<
                 getNativeElementLayout(node.rawName) === 'block'))
           ) {
             const text = sourceCode.text.slice(...endTag.range)
+
             context.report({
               loc: endTag.loc,
               messageId: 'expectedSingleLineEndTag',
@@ -226,6 +247,7 @@ export const consistentTemplateElementLayout = createRule<
                 ) {
                   return null
                 }
+
                 return fixer.replaceTextRange(
                   endTag.range,
                   text.replace(/[\t \r\n]+(?=>$)/u, ''),
@@ -234,6 +256,7 @@ export const consistentTemplateElementLayout = createRule<
             })
           }
         }
+
         checkSiblings(node)
       },
     })

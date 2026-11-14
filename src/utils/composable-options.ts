@@ -24,6 +24,7 @@ function getTypeDefinitions(
   sourceCode: SourceCode,
 ) {
   const reference = findScopeReference(identifier, sourceCode)
+
   return filterScriptDefinitions(
     reference?.resolved?.defs.filter(
       /**
@@ -61,6 +62,7 @@ function classifyMembers(members: TSESTree.TypeElement[]): ParameterKind {
   ) {
     return 'positional'
   }
+
   return members.some(
     /**
      * Recognize a property or method with a statically named key.
@@ -98,20 +100,26 @@ function classifyType(
 ): ParameterKind {
   if (state.visiting.has(node)) {
     state.cycleCount++
+
     return 'unknown'
   }
+
   const cached = state.cache.get(node)
+
   if (cached !== undefined) {
     return cached
   }
+
   const cycleCount = state.cycleCount
   state.visiting.add(node)
   const kind = resolveType(node, sourceCode, state)
   state.visiting.delete(node)
+
   // A cycle's result depends on the active path; only reuse independent shapes.
   if (state.cycleCount === cycleCount) {
     state.cache.set(node, kind)
   }
+
   return kind
 }
 
@@ -145,12 +153,15 @@ function resolveType(
           type => classifyType(type, sourceCode, state),
         ),
       )
+
       if (kinds.has('positional')) {
         return 'positional'
       }
+
       if (kinds.has('unknown')) {
         return 'unknown'
       }
+
       return kinds.has('options') ? 'options' : 'undefined'
     }
     case 'TSIntersectionType': {
@@ -163,6 +174,7 @@ function resolveType(
          */
         type => classifyType(type, sourceCode, state),
       )
+
       if (
         kinds.every(
           /**
@@ -176,17 +188,22 @@ function resolveType(
       ) {
         return 'options'
       }
+
       return kinds.includes('positional') ? 'positional' : 'unknown'
     }
     case 'TSTypeReference': {
       if (node.typeName.type !== 'Identifier' || node.typeArguments) {
         return 'unknown'
       }
+
       const definitions = getTypeDefinitions(node.typeName, sourceCode)
+
       if (!definitions?.length) {
         return 'unknown'
       }
+
       const declaration = definitions[0]?.node
+
       if (
         definitions.length === 1 &&
         declaration?.type === 'TSTypeAliasDeclaration' &&
@@ -194,9 +211,12 @@ function resolveType(
       ) {
         return classifyType(declaration.typeAnnotation, sourceCode, state)
       }
+
       const members: TSESTree.TypeElement[] = []
+
       for (const definition of definitions) {
         const node = definition.node
+
         if (
           node.type !== 'TSInterfaceDeclaration' ||
           node.typeParameters ||
@@ -204,8 +224,10 @@ function resolveType(
         ) {
           return 'unknown'
         }
+
         members.push(...node.body.body)
       }
+
       return classifyMembers(members)
     }
     case 'TSArrayType':
@@ -241,15 +263,19 @@ export function classifyComposableParameter(
   sourceCode: SourceCode,
 ): ParameterKind {
   const binding = node.type === 'AssignmentPattern' ? node.left : node
+
   if (binding.type === 'ObjectPattern') {
     return 'options'
   }
+
   if (binding.type !== 'Identifier') {
     return 'positional'
   }
+
   if (binding.typeAnnotation) {
     return classifyType(binding.typeAnnotation.typeAnnotation, sourceCode)
   }
+
   if (node.type === 'AssignmentPattern') {
     switch (node.right.type) {
       case 'ObjectExpression':
@@ -262,5 +288,6 @@ export function classifyComposableParameter(
         return 'positional'
     }
   }
+
   return 'unknown'
 }

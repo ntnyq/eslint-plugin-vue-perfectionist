@@ -54,6 +54,7 @@ export const maxLinesPerCallback = createRule<
     const sourceCode = context.sourceCode
     const max = options.max ?? 20
     const commentLines = new Set<number>()
+
     if (options.skipComments) {
       for (const comment of sourceCode.getAllComments()) {
         for (
@@ -72,13 +73,16 @@ export const maxLinesPerCallback = createRule<
       options,
       (argument, name) => {
         const callback = unwrapExpression(argument)
+
         if (
           callback.type !== 'ArrowFunctionExpression' &&
           callback.type !== 'FunctionExpression'
         ) {
           return
         }
+
         const codeLines = new Set<number>()
+
         if (options.skipComments) {
           // Token spans retain mixed code/comment lines and multiline strings.
           for (const token of sourceCode.getTokens(callback)) {
@@ -91,7 +95,9 @@ export const maxLinesPerCallback = createRule<
             }
           }
         }
+
         let lines = 0
+
         for (
           let line = callback.loc.start.line;
           line <= callback.loc.end.line;
@@ -103,6 +109,7 @@ export const maxLinesPerCallback = createRule<
           ) {
             continue
           }
+
           if (
             options.skipComments &&
             commentLines.has(line) &&
@@ -110,8 +117,10 @@ export const maxLinesPerCallback = createRule<
           ) {
             continue
           }
+
           lines++
         }
+
         if (lines > max) {
           context.report({
             node: callback,

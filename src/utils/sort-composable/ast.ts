@@ -10,19 +10,25 @@ import type { FunctionNode } from '../ast/expressions.ts'
  */
 export function hasDuplicateMembers(node: TSESTree.ObjectExpression): boolean {
   const names = new Set<string>()
+
   for (const property of node.properties) {
     if (property.type !== 'Property' || isPrototypeSetter(property)) {
       continue
     }
+
     const name = getMemberName(property)
+
     if (name === undefined) {
       continue
     }
+
     if (names.has(name)) {
       return true
     }
+
     names.add(name)
   }
+
   return false
 }
 
@@ -37,29 +43,36 @@ export function getReturnedObjects(
   if (!fn.body) {
     return []
   }
+
   const returns: (TSESTree.ObjectExpression | undefined)[] = []
+
   function add(node: TSESTree.Node | null) {
     const expression = node && unwrapExpression(node)
     returns.push(
       expression?.type === 'ObjectExpression' ? expression : undefined,
     )
   }
+
   function visit(node: TSESTree.Node) {
     if (isFunctionNode(node) || node.type === 'ClassDeclaration') {
       return
     }
+
     if (node.type === 'ReturnStatement') {
       add(node.argument)
       return
     }
+
     for (const child of getChildren(node, sourceCode)) {
       visit(child)
     }
   }
+
   if (fn.body.type === 'BlockStatement') {
     visit(fn.body)
   } else {
     add(fn.body)
   }
+
   return returns
 }

@@ -61,21 +61,26 @@ export const requireComponentProps = createRule<
   create(context, [options]) {
     const targets = compileRequiredProps(options.targets ?? [])
     const services = context.sourceCode.parserServices
+
     if (!hasTemplateVisitor(services)) {
       return {}
     }
+
     return services.defineTemplateBodyVisitor({
       VElement(node) {
         const component = resolveComponentName(node)
         const props = component && targets.get(component)
+
         if (!props) {
           return
         }
+
         const bindings = analyzeComponentBindings(
           node,
           props.keys(),
           context.sourceCode,
         )
+
         for (const [name, binding] of bindings) {
           if (
             binding.presence === 'present' ||
@@ -84,6 +89,7 @@ export const requireComponentProps = createRule<
           ) {
             continue
           }
+
           context.report({
             loc:
               binding.presence === 'absent'

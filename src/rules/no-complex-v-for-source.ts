@@ -46,6 +46,7 @@ export const noComplexVForSource = createRule<
   defaultOptions: [{}],
   create(context, [options]) {
     const services = context.sourceCode.parserServices
+
     if (!hasTemplateVisitor(services)) {
       return {}
     }
@@ -56,6 +57,7 @@ export const noComplexVForSource = createRule<
     ): boolean {
       const expression = unwrapExpression(node)
       const canUseLiteral = !isSource || options.allowLiteral !== false
+
       switch (expression.type) {
         case 'Identifier':
         case 'ThisExpression':
@@ -79,6 +81,7 @@ export const noComplexVForSource = createRule<
           return canUseLiteral && expression.expressions.length === 0
         case 'UnaryExpression': {
           const argument = unwrapExpression(expression.argument)
+
           return (
             canUseLiteral &&
             ['+', '-'].includes(expression.operator) &&

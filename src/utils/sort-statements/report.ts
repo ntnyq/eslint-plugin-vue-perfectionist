@@ -34,6 +34,7 @@ function createReplacement(
 ): { range: TSESTree.Range; text: string } | undefined {
   const first = original[0]
   const last = original.at(-1)
+
   if (
     !first ||
     !last ||
@@ -49,6 +50,7 @@ function createReplacement(
   ) {
     return undefined
   }
+
   const sourceCode = context.sourceCode
   const gaps = original.slice(0, -1).map(
     /**
@@ -61,6 +63,7 @@ function createReplacement(
     (statement, index) =>
       sourceCode.text.slice(statement.end, original[index + 1]?.start),
   )
+
   if (
     gaps.some(
       /**
@@ -78,10 +81,13 @@ function createReplacement(
   ) {
     return undefined
   }
+
   const next = sourceCode.getTokenAfter(last.node)
+
   if (next && /^[([/`+\-]/u.test(next.value)) {
     return undefined
   }
+
   const text = ordered
     .map(
       /**
@@ -97,6 +103,7 @@ function createReplacement(
         (gaps[index] ?? ''),
     )
     .join('')
+
   return {
     range: [first.start, last.end],
     text,
@@ -134,24 +141,31 @@ export function reportPartition(
     ),
   )
   const moved = new Set<Statement>()
+
   for (let start = 0; start < original.length; start++) {
     if (original[start] === ordered[start]) {
       continue
     }
+
     let end = start
+
     for (let cursor = start; cursor <= end; cursor++) {
       const desired = ordered[cursor]
+
       if (desired) {
         end = Math.max(end, positions.get(desired) ?? cursor)
       }
     }
+
     const current = original.slice(start, end + 1)
     const target = ordered.slice(start, end + 1)
     const first = current[0]
     const expected = target[0]
+
     if (!first || !expected) {
       continue
     }
+
     current.forEach(
       /**
        * Record a statement covered by an ordering diagnostic.
@@ -161,7 +175,9 @@ export function reportPartition(
        */
       statement => moved.add(statement),
     )
+
     const replacement = createReplacement(current, target, context)
+
     context.report({
       node: expected.node,
       messageId: replacement
@@ -187,30 +203,41 @@ export function reportPartition(
     })
     start = end
   }
+
   if (options.partitionByNewLine) {
     return
   }
+
   for (let index = 1; index < original.length; index++) {
     const left = original[index - 1]
     const right = original[index]
+
     if (!left || !right || moved.has(left) || moved.has(right)) {
       continue
     }
+
     const expected = getNewlines(left, right, groups, options)
+
     if (expected === 'ignore') {
       continue
     }
+
     const gap = context.sourceCode.text.slice(left.end, right.start)
+
     if (!/^\s*$/u.test(gap)) {
       continue
     }
+
     const count = Math.max(0, (gap.match(/\n/gu)?.length ?? 0) - 1)
+
     if (count === expected) {
       continue
     }
+
     const eol = context.sourceCode.text.includes('\r\n') ? '\r\n' : '\n'
     const indent = /[^\S\r\n]*$/u.exec(gap)?.[0] ?? ''
     const replacementLength = eol.length * (expected + 1) + indent.length
+
     context.report({
       node: right.node,
       messageId:

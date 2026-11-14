@@ -73,6 +73,7 @@ function hasTemplateReference(node: AST.Node, name: string): boolean {
   if (node.type === 'VExpressionContainer') {
     return node.references.some(reference => reference.id.name === name)
   }
+
   if (node.type === 'VElement') {
     return (
       node.startTag.attributes.some(
@@ -84,6 +85,7 @@ function hasTemplateReference(node: AST.Node, name: string): boolean {
       ) || node.children.some(child => hasTemplateReference(child, name))
     )
   }
+
   return false
 }
 
@@ -104,6 +106,7 @@ function getSafeFlushProperty(
         : getStaticStringValue(property.key)) === 'flush',
   )
   const property = flushProperties[0]
+
   if (
     flushProperties.length !== 1 ||
     property?.type !== 'Property' ||
@@ -112,15 +115,18 @@ function getSafeFlushProperty(
       if (item.type !== 'Property' || item.kind !== 'init' || item.method) {
         return true
       }
+
       const key =
         !item.computed && item.key.type === 'Identifier'
           ? item.key.name
           : getStaticStringValue(item.key)
+
       return !['flush', 'onTrack', 'onTrigger'].includes(key ?? '')
     })
   ) {
     return undefined
   }
+
   return property
 }
 
@@ -157,6 +163,7 @@ function planAliasBinding(
   const hasAliasExport =
     VUE_RUNTIME_SOURCES.has(identity.source ?? '') || aliasImports.length > 0
   const edits: TextEdit[] = []
+
   if (callee.type === 'MemberExpression') {
     if (!hasAliasExport) {
       return {
@@ -164,6 +171,7 @@ function planAliasBinding(
         reason: 'alias-export',
       }
     }
+
     edits.push(replace(callee.property, alias))
   } else if (callee.type === 'Identifier') {
     const imported = aliasImports.find(specifier =>
@@ -173,6 +181,7 @@ function planAliasBinding(
         specifier.local.name,
       ).some(definition => definition.node === specifier),
     )
+
     if (imported) {
       edits.push(replace(callee, imported.local.name))
     } else if (
@@ -213,6 +222,7 @@ function planAliasBinding(
               reference => reference.identifier.name === alias,
             ),
         )
+
       if (
         hasCollision ||
         !hasAliasExport ||
@@ -224,13 +234,16 @@ function planAliasBinding(
           reason: 'alias-binding',
         }
       }
+
       const last = declaration.specifiers.at(-1)
+
       if (!last) {
         return {
           safe: false,
           reason: 'alias-binding',
         }
       }
+
       // Keep the original import: other calls and template uses may
       // still need it. Import cleanup belongs to dedicated rules.
       edits.push(
@@ -244,6 +257,7 @@ function planAliasBinding(
       reason: 'alias-binding',
     }
   }
+
   return {
     safe: true,
     edits,
@@ -263,6 +277,7 @@ function planFlushRemoval(
   const properties = object.properties
 
   const before = sourceCode.getTokenBefore(object)
+
   if (
     before?.value === ',' &&
     properties.length === 1 &&
@@ -274,6 +289,7 @@ function planFlushRemoval(
     edits.push({ range: [before.range[0], object.range[1]], text: '' })
   } else {
     edits.push(replace(property, ''))
+
     const afterProperty = sourceCode.getTokenAfter(property)
     const beforeProperty = sourceCode.getTokenBefore(property)
     const comma =
@@ -282,10 +298,12 @@ function planFlushRemoval(
         : beforeProperty?.value === ','
           ? beforeProperty
           : undefined
+
     if (comma) {
       edits.push(replace(comma, ''))
     }
   }
+
   return edits
 }
 
@@ -326,14 +344,18 @@ export function createWatchEffectAliasFixPlanner(
         reason: 'options-contract',
       }
     }
+
     const property = getSafeFlushProperty(object, sourceCode)
+
     if (!property) {
       return {
         safe: false,
         reason: 'options-properties',
       }
     }
+
     const callee = unwrapExpression(node.callee)
+
     if (
       callee !== unwrapNonNullExpression(node.callee) ||
       node.typeArguments ||
@@ -346,6 +368,7 @@ export function createWatchEffectAliasFixPlanner(
         reason: 'callee-contract',
       }
     }
+
     if (
       identity.isUnbound &&
       (hasUnboundEval || hasGlobalWrite(sourceCode, 'watchEffect'))
@@ -355,7 +378,9 @@ export function createWatchEffectAliasFixPlanner(
         reason: 'global-identity',
       }
     }
+
     const binding = planAliasBinding(node, identity, alias, environment)
+
     return binding.safe
       ? {
           safe: true,

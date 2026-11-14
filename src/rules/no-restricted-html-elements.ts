@@ -61,9 +61,11 @@ export const noRestrictedHtmlElements = createRule<
   create(context, [options]) {
     const sourceCode = context.sourceCode
     const services = sourceCode.parserServices
+
     if (!hasTemplateVisitor(services) || !options.elements?.length) {
       return {}
     }
+
     const elements = new Map(
       options.elements.map(element =>
         typeof element === 'string'
@@ -77,12 +79,16 @@ export const noRestrictedHtmlElements = createRule<
         if (node.namespace !== 'http://www.w3.org/1999/xhtml') {
           return
         }
+
         // rawName retains component casing; node.name normalizes HTML names.
         const message = elements.get(node.rawName)
+
         if (message === undefined) {
           return
         }
+
         const start = node.startTag.range[0] + 1
+
         context.report({
           loc: {
             start: sourceCode.getLocFromIndex(start),

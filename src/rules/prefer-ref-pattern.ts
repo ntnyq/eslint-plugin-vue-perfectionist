@@ -89,10 +89,12 @@ export const preferRefPattern = createRule<
     function checkRenderRef(node: TSESTree.Node) {
       const expression = unwrapExpression(node)
       const name = getStaticStringValue(expression)
+
       if (name !== undefined) {
         checkName(name, expression)
       } else if (expression.type === 'Identifier') {
         const variable = findScopeReference(expression, sourceCode)?.resolved
+
         if (
           isVueRefVariable(
             variable,
@@ -108,13 +110,16 @@ export const preferRefPattern = createRule<
 
     function checkCall(node: TSESTree.CallExpression) {
       const api = getVueRuntimeApiName(node, sourceCode, vueGlobals)
+
       if (api === 'useTemplateRef' && targets.has('useTemplateRef')) {
         const argument = node.arguments[0]
         const name = argument && getStaticStringValue(argument)
+
         if (name !== undefined && argument) {
           checkName(name, unwrapExpression(argument))
         }
       }
+
       if (
         api !== 'h' ||
         !targets.has('render') ||
@@ -122,26 +127,33 @@ export const preferRefPattern = createRule<
       ) {
         return
       }
+
       const argument = node.arguments[1]
       const props = argument && unwrapExpression(argument)
+
       if (props?.type !== 'ObjectExpression') {
         return
       }
+
       // Later properties win. A spread or dynamic key may replace an earlier ref.
       for (const property of props.properties.toReversed()) {
         if (property.type === 'SpreadElement') {
           return
         }
+
         const key =
           ASTUtils.getPropertyName(property) ??
           getStaticStringValue(property.key)
+
         if (key === undefined) {
           return
         }
+
         if (key === 'ref') {
           if (!property.method && property.kind === 'init') {
             checkRenderRef(property.value)
           }
+
           return
         }
       }
@@ -149,6 +161,7 @@ export const preferRefPattern = createRule<
 
     function checkAttribute(node: AST.VAttribute | AST.VDirective) {
       const element = node.parent.parent
+
       // Slot outlet props and structural template attributes do not create refs.
       // Inside v-pre these tags are ordinary elements; Slot is a component.
       if (
@@ -165,12 +178,15 @@ export const preferRefPattern = createRule<
       ) {
         return
       }
+
       if (!node.directive) {
         if (node.key.name === 'ref' && node.value) {
           checkName(node.value.value, node.value)
         }
+
         return
       }
+
       if (
         node.key.name.name !== 'bind' ||
         node.key.argument?.type !== 'VIdentifier' ||
@@ -182,19 +198,25 @@ export const preferRefPattern = createRule<
       ) {
         return
       }
+
       const expression = unwrapExpression(node.value.expression)
       const name = getStaticStringValue(expression)
+
       if (name !== undefined) {
         checkName(name, expression)
         return
       }
+
       if (expression.type !== 'Identifier' || !setupRange) {
         return
       }
+
       const reference = node.value.references.find(ref => ref.id === expression)
+
       if (!reference || reference.variable) {
         return
       }
+
       const moduleScope = sourceCode.scopeManager?.scopes.find(
         scope => scope.type === 'module',
       )
@@ -203,6 +225,7 @@ export const preferRefPattern = createRule<
         variable?.defs.filter(definition =>
           isInScriptRange(definition.node, setupRange),
         ) ?? []
+
       if (isVueRefVariable(variable, sourceCode, definitions, vueGlobals)) {
         checkName(expression.name, expression)
       }
@@ -213,6 +236,7 @@ export const preferRefPattern = createRule<
         ? { CallExpression: checkCall }
         : {}
     const services = sourceCode.parserServices
+
     return targets.has('template') && hasTemplateVisitor(services)
       ? services.defineTemplateBodyVisitor(
           { VAttribute: checkAttribute },

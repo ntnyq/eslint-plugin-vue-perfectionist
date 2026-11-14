@@ -32,14 +32,17 @@ export function getChildren(
   sourceCode: SourceCode,
 ): TSESTree.Node[] {
   const children: TSESTree.Node[] = []
+
   for (const key of sourceCode.visitorKeys[node.type] ?? []) {
     const value: unknown = Reflect.get(node, key)
+
     if (isArray(value)) {
       children.push(...value.filter(isNode))
     } else if (isNode(value)) {
       children.push(value)
     }
   }
+
   return children
 }
 
@@ -57,12 +60,14 @@ export function containsTopLevelAwait(
   if (isFunctionNode(node)) {
     return false
   }
+
   if (
     node.type === 'AwaitExpression' ||
     (node.type === 'ForOfStatement' && node.await)
   ) {
     return true
   }
+
   return getChildren(node, sourceCode).some(
     /**
      * Search a child subtree for an await outside nested functions.

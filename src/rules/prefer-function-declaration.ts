@@ -74,6 +74,7 @@ export const preferFunctionDeclaration = createRule<
     const ignored = new Set(options.ignoreNames)
     const services = sourceCode.parserServices
     const scriptRanges: TSESTree.Range[] = []
+
     if (scopes.has('sfc') && hasVueServices(services)) {
       for (const child of services.getDocumentFragment()?.children ?? []) {
         if (
@@ -85,10 +86,12 @@ export const preferFunctionDeclaration = createRule<
         }
       }
     }
+
     const vueGlobals = resolveVueGlobals(context.settings, ['defineComponent'])
 
     function isDefineComponent(call: TSESTree.CallExpression) {
       const identity = getCallIdentity(call, sourceCode)
+
       return (
         identity &&
         (identity.exportedName ?? identity.classificationName) ===
@@ -101,6 +104,7 @@ export const preferFunctionDeclaration = createRule<
 
     function isComponentObject(node: TSESTree.ObjectExpression) {
       const parent = getOuterExpression(node).parent
+
       return (
         parent?.type === 'ExportDefaultDeclaration' ||
         (parent?.type === 'CallExpression' &&
@@ -112,6 +116,7 @@ export const preferFunctionDeclaration = createRule<
 
     function isComponentSetup(node: FunctionNode) {
       const parent = getOuterExpression(node).parent
+
       if (parent?.type === 'CallExpression') {
         return (
           parent.arguments[0] &&
@@ -119,6 +124,7 @@ export const preferFunctionDeclaration = createRule<
           isDefineComponent(parent)
         )
       }
+
       return (
         parent?.type === 'Property' &&
         parent.kind === 'init' &&
@@ -131,6 +137,7 @@ export const preferFunctionDeclaration = createRule<
 
     function isComposable(node: FunctionNode) {
       const name = getFunctionBindingName(node)
+
       return name !== undefined && pattern.test(name) && !ignored.has(name)
     }
 
@@ -143,22 +150,29 @@ export const preferFunctionDeclaration = createRule<
         ) {
           return
         }
+
         const initializer = unwrapExpression(node.init)
+
         if (
           initializer.type !== 'ArrowFunctionExpression' &&
           initializer.type !== 'FunctionExpression'
         ) {
           return
         }
+
         const declaration = node.parent
         let parent = declaration.parent
+
         if (parent.type === 'ExportNamedDeclaration') {
           parent = parent.parent
         }
+
         const isSfc = scriptRanges.some(range => isInScriptRange(node, range))
         let isTarget = isSfc && parent.type === 'Program'
+
         if (parent.type === 'BlockStatement') {
           const container = parent.parent
+
           switch (container.type) {
             case 'FunctionDeclaration':
             case 'FunctionExpression':
@@ -170,6 +184,7 @@ export const preferFunctionDeclaration = createRule<
               }
           }
         }
+
         if (isTarget) {
           context.report({
             node: node.id,

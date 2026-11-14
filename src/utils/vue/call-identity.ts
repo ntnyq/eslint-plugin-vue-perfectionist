@@ -42,8 +42,10 @@ export function getRuntimeImportBinding(
   ) {
     return undefined
   }
+
   const source = definition.parent.source.value
   const specifier = definition.node
+
   switch (specifier.type) {
     case 'ImportDefaultSpecifier':
       return {
@@ -68,6 +70,7 @@ export function getRuntimeImportBinding(
                 : String(specifier.imported.value),
           }
   }
+
   return undefined
 }
 
@@ -88,10 +91,13 @@ export function getCallIdentity(
   if (call.optional) {
     return undefined
   }
+
   const callee = unwrapExpression(call.callee)
+
   if (callee.type === 'Identifier') {
     const definitions = getScriptVariableDefinitions(callee, sourceCode)
     const binding = getRuntimeImportBinding(definitions[0])
+
     if (binding && binding.kind !== 'namespace') {
       return {
         classificationName:
@@ -102,12 +108,14 @@ export function getCallIdentity(
         isUnbound: false,
       }
     }
+
     return {
       classificationName: callee.name,
       localName: callee.name,
       isUnbound: definitions.length === 0,
     }
   }
+
   if (
     callee.type === 'MemberExpression' &&
     !callee.computed &&
@@ -115,13 +123,16 @@ export function getCallIdentity(
     callee.property.type === 'Identifier'
   ) {
     const object = unwrapExpression(callee.object)
+
     if (object.type !== 'Identifier') {
       return undefined
     }
+
     const binding = getRuntimeImportBinding(
       getScriptVariableDefinitions(object, sourceCode)[0],
     )
     const localName = `${object.name}.${callee.property.name}`
+
     if (binding?.kind === 'namespace') {
       return {
         classificationName: callee.property.name,
@@ -131,11 +142,13 @@ export function getCallIdentity(
         isUnbound: false,
       }
     }
+
     return {
       classificationName: localName,
       localName,
       isUnbound: false,
     }
   }
+
   return undefined
 }

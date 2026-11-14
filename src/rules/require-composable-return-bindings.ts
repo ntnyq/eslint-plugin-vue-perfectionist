@@ -84,8 +84,10 @@ export const requireComposableReturnBindings = createRule<
       if (!fn || !value || fn.generator) {
         return
       }
+
       const functionName = getFunctionBindingName(fn)
       const object = unwrapExpression(value)
+
       if (
         !functionName ||
         !pattern.test(functionName) ||
@@ -100,16 +102,21 @@ export const requireComposableReturnBindings = createRule<
           context.report({ node: member, messageId: 'unexpectedSpread' })
           continue
         }
+
         const key = getMemberName(member)
+
         if (key === undefined) {
           context.report({ node: member.key, messageId: 'dynamicKey' })
           continue
         }
+
         if (isPrototypeSetter(member)) {
           context.report({ node: member, messageId: 'prototypeSetter' })
           continue
         }
+
         const binding = unwrapExpression(member.value)
+
         if (
           member.method ||
           member.kind !== 'init' ||
@@ -140,17 +147,22 @@ export const requireComposableReturnBindings = createRule<
           ) {
             return false
           }
+
           // Start outside the declaration: a local function's own node is not
           // the function that owns its binding.
           let parent: TSESTree.Node | undefined = def.node.parent
+
           while (parent) {
             if (isFunctionNode(parent)) {
               return parent === fn
             }
+
             parent = parent.parent
           }
+
           return false
         })
+
         if (parameter && !options.allowParameters) {
           context.report({
             node: binding,

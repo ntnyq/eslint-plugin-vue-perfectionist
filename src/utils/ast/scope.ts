@@ -24,6 +24,7 @@ export function findScopeReference(
      */
     item => item.identifier === identifier,
   )
+
   while (!reference && scope.upper) {
     scope = scope.upper
     reference = scope.references.find(
@@ -36,5 +37,6 @@ export function findScopeReference(
       item => item.identifier === identifier,
     )
   }
+
   return reference
 }

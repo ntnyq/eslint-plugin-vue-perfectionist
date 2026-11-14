@@ -29,11 +29,14 @@ export function getTemplateExpressionScope(
   sourceCode: SourceCode,
 ): TemplateExpressionScope | undefined {
   const expression = container.expression
+
   if (!expression) {
     return undefined
   }
+
   const copies = new Map<object, Record<string, unknown>>()
   const originals = new Map<object, AST.Node>()
+
   AST.traverseNodes(container, {
     visitorKeys: sourceCode.visitorKeys,
     enterNode(node) {
@@ -50,14 +53,18 @@ export function getTemplateExpressionScope(
     },
     leaveNode() {},
   })
+
   for (const original of originals.values()) {
     const copy = copies.get(original)
+
     if (!copy) {
       continue
     }
+
     for (const key of sourceCode.visitorKeys[original.type] ??
       AST.getFallbackKeys(original)) {
       const value: unknown = Reflect.get(original, key)
+
       if (Array.isArray(value)) {
         copy[key] = value.map(child => copies.get(child) ?? child)
       } else if (value && typeof value === 'object') {
@@ -67,6 +74,7 @@ export function getTemplateExpressionScope(
   }
 
   const location = { loc: container.loc, range: container.range }
+
   function statement(value: unknown) {
     return {
       ...location,
@@ -74,12 +82,14 @@ export function getTemplateExpressionScope(
       expression: value,
     }
   }
+
   function parameters(params: AST.ESLintPattern[]) {
     return statement({
       ...location,
       type: 'ArrowFunctionExpression',
       params: params.flatMap(param => {
         const copy = copies.get(param)
+
         return copy ? [copy] : []
       }),
       body: { ...location, type: 'BlockStatement', body: [] },
@@ -88,7 +98,9 @@ export function getTemplateExpressionScope(
       generator: false,
     })
   }
+
   let body: unknown[]
+
   switch (expression.type) {
     case 'VForExpression':
       // The source is evaluated outside the loop aliases. Parameter defaults
@@ -110,6 +122,7 @@ export function getTemplateExpressionScope(
     default:
       body = [statement(copies.get(expression))]
   }
+
   // Vue's ESTree types omit TypeScript extensions and use different parent
   // types. The adapter above supplies a complete Program for the analyzer.
   const program: TSESTree.Program = {
@@ -123,36 +136,47 @@ export function getTemplateExpressionScope(
   const manager = analyze(program, { sourceType: 'module', lib: [] })
   const references = new Map<AST.ESLintIdentifier, Reference>()
   const freeReferences: TemplateScopeReference[] = []
+
   for (const scope of manager.scopes) {
     for (const reference of scope.references) {
       const original = originals.get(reference.identifier)
+
       if (original?.type !== 'Identifier' || !reference.isValueReference) {
         continue
       }
+
       references.set(original, reference)
+
       if (!reference.resolved) {
         freeReferences.push({ id: original, reference })
       }
     }
   }
+
   return {
     freeReferences,
     hasLocalBinding(identifier, name) {
       const reference = references.get(identifier)
+
       if (!reference) {
         return true
       }
+
       if (identifier.name === name) {
         return reference.resolved?.isValueVariable ?? false
       }
+
       let scope = reference.from
+
       while (true) {
         if (scope.set.get(name)?.isValueVariable) {
           return true
         }
+
         if (!scope.upper) {
           return false
         }
+
         scope = scope.upper
       }
     },

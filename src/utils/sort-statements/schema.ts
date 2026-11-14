@@ -184,6 +184,7 @@ export const COMMON_PROPERTIES: Record<string, JSONSchema.JSONSchema4> = {
  */
 export function createOptionsSchema(selectors: readonly string[]) {
   const condition = createCondition(selectors)
+
   return {
     additionalProperties: false,
     type: 'object',

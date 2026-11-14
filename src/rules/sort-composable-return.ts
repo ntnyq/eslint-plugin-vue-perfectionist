@@ -51,8 +51,10 @@ export const sortComposableReturn = createRule<
       if (!fn || !value || fn.generator) {
         return
       }
+
       const name = getFunctionBindingName(fn)
       const object = unwrapExpression(value)
+
       if (
         name &&
         pattern.test(name) &&

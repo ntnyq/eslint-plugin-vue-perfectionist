@@ -71,8 +71,10 @@ export const sortScriptSetup = createRule<
         matchesPattern,
         createMacroClassifier(context.sourceCode),
       )
+
       for (const partition of collectPartitions(nodes)) {
         const dependencies = analyzeDependencies(partition)
+
         reportPartition(
           partition,
           sortByDependencies(partition, dependencies, compare),
@@ -82,6 +84,7 @@ export const sortScriptSetup = createRule<
         )
       }
     }
+
     return {
       'Program:exit': onProgramExit,
     }

@@ -28,11 +28,14 @@ function isMacroBinding(
   sourceCode: SourceCode,
 ): boolean {
   const identifier = unwrapExpression(argument)
+
   if (identifier.type !== 'Identifier') {
     return false
   }
+
   const definitions = getScriptVariableDefinitions(identifier, sourceCode)
   const definition = definitions[0]
+
   if (
     definitions.length !== 1 ||
     definition?.type !== 'Variable' ||
@@ -42,7 +45,9 @@ function isMacroBinding(
   ) {
     return false
   }
+
   const variable = sourceCode.getDeclaredVariables(definition.node)[0]
+
   if (
     !variable ||
     variable.references.some(
@@ -57,7 +62,9 @@ function isMacroBinding(
   ) {
     return false
   }
+
   let initializer = unwrapExpression(definition.node.init)
+
   if (
     initializer.type === 'CallExpression' &&
     initializer.callee.type === 'Identifier' &&
@@ -68,6 +75,7 @@ function isMacroBinding(
   ) {
     initializer = unwrapExpression(initializer.arguments[0])
   }
+
   return initializer === macro
 }
 
@@ -81,20 +89,25 @@ function isMacroBinding(
  */
 function hasPassiveOptions(options: TSESTree.Node, name: string): boolean {
   const object = unwrapExpression(options)
+
   if (object.type !== 'ObjectExpression') {
     return false
   }
+
   let passive = false
   let eventName: string | undefined = `update:${name}`
+
   for (const property of object.properties) {
     const key =
       property.type === 'Property'
         ? ASTUtils.getPropertyName(property)
         : undefined
+
     if (property.type === 'Property' && property.kind !== 'init') {
       // VueUse reads clone before passive; an accessor can mutate other options.
       return false
     }
+
     if (
       property.type === 'Property' &&
       key === '__proto__' &&
@@ -103,20 +116,25 @@ function hasPassiveOptions(options: TSESTree.Node, name: string): boolean {
       !property.shorthand
     ) {
       const prototype = unwrapExpression(property.value)
+
       if (prototype.type !== 'Literal' || prototype.value !== null) {
         // Inherited accessors can mutate even explicitly declared own options.
         return false
       }
     }
+
     if (typeof key !== 'string') {
       passive = false
       eventName = undefined
       continue
     }
+
     if (property.type !== 'Property') {
       continue
     }
+
     const value = unwrapExpression(property.value)
+
     if (key === 'passive') {
       passive =
         property.kind === 'init' &&
@@ -130,6 +148,7 @@ function hasPassiveOptions(options: TSESTree.Node, name: string): boolean {
           : undefined
     }
   }
+
   return passive && eventName === `update:${name}`
 }
 
@@ -145,6 +164,7 @@ function hasUncertainVModelGlobal(sourceCode: SourceCode): boolean {
     (sourceCode.scopeManager?.scopes.some(scope =>
       scope.references.some(reference => {
         const identifier = reference.identifier
+
         if (
           identifier.type !== 'Identifier' ||
           identifier.name !== 'eval' ||
@@ -154,8 +174,10 @@ function hasUncertainVModelGlobal(sourceCode: SourceCode): boolean {
         ) {
           return false
         }
+
         const expression = getOuterExpression(identifier)
         const parent = expression.parent
+
         return (
           parent?.type === 'CallExpression' &&
           parent.callee === expression &&
@@ -187,9 +209,11 @@ export function getPassiveModelNames(
 ): Set<string> {
   const names = new Set<string>()
   const range = getSetupRange(sourceCode)
+
   if (!range) {
     return names
   }
+
   const setupRange = range
   const hasUncertainGlobal = autoImport && hasUncertainVModelGlobal(sourceCode)
 
@@ -200,6 +224,7 @@ export function getPassiveModelNames(
    */
   function inspect(expression: TSESTree.Node) {
     const call = unwrapExpression(expression)
+
     if (
       call.type !== 'CallExpression' ||
       !isInScriptRange(call, setupRange) ||
@@ -207,7 +232,9 @@ export function getPassiveModelNames(
     ) {
       return
     }
+
     const identity = getCallIdentity(call, sourceCode)
+
     if (
       !identity ||
       (identity.exportedName ?? identity.classificationName) !== 'useVModel' ||
@@ -216,8 +243,10 @@ export function getPassiveModelNames(
     ) {
       return
     }
+
     const [props, key, emit, options] = call.arguments
     const name = key && getStaticStringValue(key)
+
     if (
       props &&
       emit &&
@@ -242,5 +271,6 @@ export function getPassiveModelNames(
       }
     }
   }
+
   return names
 }

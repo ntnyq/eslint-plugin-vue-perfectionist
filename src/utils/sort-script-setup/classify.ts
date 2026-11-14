@@ -13,10 +13,13 @@ export function createMacroClassifier(
     if (!identity.isUnbound) {
       return undefined
     }
+
     if (identity.classificationName === 'withDefaults') {
       const first = call.arguments[0]
+
       if (first?.type === 'CallExpression') {
         const inner = getCallIdentity(first, sourceCode)
+
         if (inner?.isUnbound && inner.classificationName === 'defineProps') {
           return {
             selector: 'define-props',
@@ -25,7 +28,9 @@ export function createMacroClassifier(
         }
       }
     }
+
     const selector = MACROS.get(identity.classificationName)
+
     return selector ? { selector } : undefined
   }
 }

@@ -28,6 +28,7 @@ function getSlotAttribute(
   ) {
     return undefined
   }
+
   return element.startTag.attributes.find(attribute =>
     attribute.directive
       ? attribute.key.name.name === 'slot'
@@ -53,24 +54,31 @@ function getSlotName(
     const name = key.startsWith('#')
       ? key.slice(1)
       : key.slice('v-slot:'.length)
+
     // A leading dot introduces modifiers without a slot argument in Vue.
     if (!name || name.startsWith('.')) {
       return 'default'
     }
+
     return name.startsWith('[') ? undefined : name
   }
+
   const argument = attribute.key.argument
+
   if (!argument) {
     return 'default'
   }
+
   if (argument.type === 'VIdentifier') {
     // Rejoining parsed modifiers would discard consecutive or trailing dots.
     return sourceText.slice(argument.range[0], attribute.key.range[1])
   }
+
   // A suffix after the bracket changes the expression Vue evaluates.
   if (argument.range[1] !== attribute.key.range[1]) {
     return undefined
   }
+
   return argument.expression
     ? getStaticStringValue(argument.expression)
     : undefined
@@ -127,36 +135,46 @@ export const requireComponentSlots = createRule<
   defaultOptions: [{}],
   create(context, [options]) {
     const targets = new Map<string, Set<string>>()
+
     for (const target of options.targets ?? []) {
       for (const component of target.components) {
         const key = hyphenateName(component)
         const slots = targets.get(key) ?? new Set<string>()
+
         for (const slot of target.slots) {
           slots.add(slot)
         }
+
         targets.set(key, slots)
       }
     }
+
     const services = context.sourceCode.parserServices
+
     if (!targets.size || !hasTemplateVisitor(services)) {
       return {}
     }
+
     return services.defineTemplateBodyVisitor({
       VElement(node) {
         // Dynamic component identities are outside this rule's template contract.
         if (['component', 'Component', 'slot'].includes(node.rawName)) {
           return
         }
+
         const component = resolveComponentName(node)
         const requiredSlots = component && targets.get(component)
+
         if (!requiredSlots) {
           return
         }
+
         const slots = new Set<string>()
         let hasUnknownSlot = false
 
         function collectSlot(attribute: AST.VAttribute | AST.VDirective) {
           const name = getSlotName(attribute, context.sourceCode.text)
+
           if (name === undefined) {
             hasUnknownSlot = true
           } else {
@@ -165,6 +183,7 @@ export const requireComponentSlots = createRule<
         }
 
         const componentSlot = getSlotAttribute(node)
+
         if (componentSlot) {
           // With component-level v-slot, all children belong to that slot.
           collectSlot(componentSlot)
@@ -174,6 +193,7 @@ export const requireComponentSlots = createRule<
               child.type === 'VElement' && child.rawName === 'template'
                 ? getSlotAttribute(child)
                 : undefined
+
             if (directive) {
               collectSlot(directive)
             } else if (
@@ -186,6 +206,7 @@ export const requireComponentSlots = createRule<
             }
           }
         }
+
         for (const slot of requiredSlots) {
           if (
             slots.has(slot) ||
@@ -193,6 +214,7 @@ export const requireComponentSlots = createRule<
           ) {
             continue
           }
+
           context.report({
             loc: {
               start: {

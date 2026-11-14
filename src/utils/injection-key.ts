@@ -14,29 +14,37 @@ function getInjectionKeyMarkers(
   checker: ts.TypeChecker,
 ): Set<ts.Symbol> {
   const markers = new Set<ts.Symbol>()
+
   for (const source of program.getSourceFiles()) {
     const filename = source.fileName.replaceAll('\\', '/')
+
     if (
       !/\/node_modules\/@vue\/runtime-core\//u.test(filename) ||
       !source.isDeclarationFile
     ) {
       continue
     }
+
     const module = checker.getSymbolAtLocation(source)
     const exported =
       module &&
       checker
         .getExportsOfModule(module)
         .find(symbol => symbol.name === 'InjectionKey')
+
     if (!exported) {
       continue
     }
+
     const type = checker.getDeclaredTypeOfSymbol(exported)
+
     if (!type.isIntersection()) {
       continue
     }
+
     for (const part of type.types) {
       const symbol = part.getSymbol()
+
       if (
         symbol?.declarations?.some(
           declaration => declaration.getSourceFile() === source,
@@ -47,6 +55,7 @@ function getInjectionKeyMarkers(
       }
     }
   }
+
   return markers
 }
 
@@ -82,18 +91,24 @@ export function createInjectionKeyTypeChecker(
     if (visiting.has(type)) {
       return false
     }
+
     visiting.add(type)
+
     try {
       if (type.isUnion()) {
         return type.types.every(part => isKey(part, visiting))
       }
+
       if (type.isIntersection()) {
         return type.types.some(part => isKey(part, visiting, candidate))
       }
+
       if (type.isStringLiteral()) {
         return allowedStrings.has(type.value)
       }
+
       const symbol = type.getSymbol()
+
       // The empty Vue marker can be extracted with conditional inference. It
       // establishes provenance only when the complete candidate is a symbol.
       if (
@@ -103,11 +118,14 @@ export function createInjectionKeyTypeChecker(
       ) {
         return true
       }
+
       if (type.getBaseTypes()?.some(base => isKey(base, visiting, candidate))) {
         return true
       }
+
       // Indexed access and deferred conditional types have constraints too.
       const constraint = checker.getBaseConstraintOfType(type)
+
       return (
         constraint !== undefined &&
         constraint !== type &&
@@ -117,5 +135,6 @@ export function createInjectionKeyTypeChecker(
       visiting.delete(type)
     }
   }
+
   return isKey
 }

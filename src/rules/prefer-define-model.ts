@@ -44,6 +44,7 @@ export const preferDefineModel = createRule<
     const autoImport = supportsVueUse
       ? resolveVueGlobals(context.settings, ['useVModel']).includes('useVModel')
       : false
+
     return {
       Program(program) {
         const calls = getSetupMacroCalls(
@@ -63,6 +64,7 @@ export const preferDefineModel = createRule<
         )
         const propCall = props[0]
         const emitCall = emits[0]
+
         if (
           props.length !== 1 ||
           emits.length !== 1 ||
@@ -71,6 +73,7 @@ export const preferDefineModel = createRule<
         ) {
           return
         }
+
         const events = new Set(
           getModelContractMembers(emitCall, context.sourceCode, 'emits').map(
             member => member.name,
@@ -86,6 +89,7 @@ export const preferDefineModel = createRule<
             )
           : new Set<string>()
         const reported = new Set<string>()
+
         for (const member of getModelContractMembers(
           propCall,
           context.sourceCode,
@@ -99,7 +103,9 @@ export const preferDefineModel = createRule<
           ) {
             continue
           }
+
           reported.add(member.name)
+
           context.report({
             node: member.node,
             messageId: 'preferDefineModel',

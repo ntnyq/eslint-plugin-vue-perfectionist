@@ -22,6 +22,7 @@ export const noTemplateTypeAssertion = createRule<
   defaultOptions: [],
   create(context) {
     const services = context.sourceCode.parserServices
+
     if (!hasTemplateVisitor(services)) {
       return {}
     }

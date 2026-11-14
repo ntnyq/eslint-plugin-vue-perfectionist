@@ -12,6 +12,7 @@ import type { Group, ResolvedOptions, Statement } from './types.ts'
  */
 function normalizeSortName(name: string, options: ResolvedOptions): string {
   let formatted = options.ignoreCase ? name.toLowerCase() : name
+
   if (options.specialCharacters === 'trim') {
     formatted = formatted.replace(
       /^[^a-z\u{C0}-\u{24F}\u{1E00}-\u{1EFF}]+/giu,
@@ -23,6 +24,7 @@ function normalizeSortName(name: string, options: ResolvedOptions): string {
       '',
     )
   }
+
   return formatted.replace(/\s/gu, '')
 }
 
@@ -52,21 +54,27 @@ function createComparator(
   const alphabet = new Map(
     [...options.alphabet].map((character, index) => [character, index]),
   )
+
   return (left, right) => {
     if (type === 'unsorted') {
       return 0
     }
+
     if (type === 'subgroup-order') {
       return (left.subgroup - right.subgroup) * direction
     }
+
     if (type === 'line-length') {
       return (left.size - right.size) * direction
     }
+
     const a = normalizeSortName(left.name, options)
     const b = normalizeSortName(right.name, options)
+
     if (type === 'alphabetical') {
       return a.localeCompare(b, options.locales) * direction
     }
+
     if (natural) {
       // natural-orderby folds case internally. Resolve case-only ties after
       // its numeric comparison, before applying the configured fallback.
@@ -75,21 +83,28 @@ function createComparator(
         !result && !options.ignoreCase && a.toLowerCase() === b.toLowerCase()
           ? a.localeCompare(b, options.locales)
           : 0
+
       return (result || caseOrder) * direction
     }
+
     const leftCharacters = [...a]
     const rightCharacters = [...b]
+
     for (const [index, character] of leftCharacters.entries()) {
       const other = rightCharacters[index]
+
       if (other === undefined) {
         break
       }
+
       const first = alphabet.get(character) ?? Infinity
       const second = alphabet.get(other) ?? Infinity
+
       if (first !== second) {
         return (first > second ? 1 : -1) * direction
       }
     }
+
     return (leftCharacters.length - rightCharacters.length) * direction
   }
 }
@@ -109,15 +124,18 @@ export function createStatementComparator(
     if (options.type === 'unsorted') {
       return () => 0
     }
+
     const primary = createComparator(options.type, options.order, options)
     const fallback = createComparator(
       options.fallbackSort.type,
       options.fallbackSort.order ?? options.order,
       options,
     )
+
     return (left: Statement, right: Statement) =>
       primary(left, right) || fallback(left, right)
   })
+
   return (left, right) =>
     left.group - right.group ||
     comparators[left.group]?.(left, right) ||
@@ -142,23 +160,28 @@ export function getNewlines(
 ): Newlines {
   if (left.group === right.group) {
     const inside = groups[left.group]?.options.newlinesInside ?? 'ignore'
+
     return inside === 'newlinesBetween'
       ? options.newlinesBetween === 'ignore'
         ? 'ignore'
         : 0
       : inside
   }
+
   if (left.group > right.group) {
     return options.newlinesBetween
   }
+
   const values = groups
     .slice(left.group + 1, right.group + 1)
     .map(group => group.before)
   const positive = values.filter(
     (value): value is number => isNumber(value) && value > 0,
   )
+
   if (positive.length) {
     return Math.max(...positive)
   }
+
   return values.includes('ignore') ? 'ignore' : 0
 }

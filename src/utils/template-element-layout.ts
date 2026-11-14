@@ -126,9 +126,11 @@ export function getNativeElementLayout(
   if (PRESERVED_TAGS.has(name)) {
     return 'preserve'
   }
+
   if (BLOCK_TAGS.has(name)) {
     return 'block'
   }
+
   return INLINE_TAGS.has(name) ? 'inline' : 'unknown'
 }
 

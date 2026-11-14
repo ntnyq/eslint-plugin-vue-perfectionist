@@ -27,12 +27,15 @@ export const consistentTemplateRefName = createRule<
   defaultOptions: [],
   create(context) {
     const vueGlobals = resolveVueGlobals(context.settings, ['useTemplateRef'])
+
     return {
       VariableDeclarator(node) {
         if (node.id.type !== 'Identifier' || !node.init) {
           return
         }
+
         const initializer = unwrapExpression(node.init)
+
         if (
           initializer.type !== 'CallExpression' ||
           getVueRuntimeApiName(initializer, context.sourceCode, vueGlobals) !==
@@ -40,8 +43,10 @@ export const consistentTemplateRefName = createRule<
         ) {
           return
         }
+
         const argument = initializer.arguments[0]
         const key = argument && getStaticStringValue(argument)
+
         if (key !== undefined && key !== node.id.name) {
           context.report({
             node: node.id,

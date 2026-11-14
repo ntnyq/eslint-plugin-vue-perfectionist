@@ -54,8 +54,10 @@ const TEMPLATE_GLOBALS = new Set([
  */
 function isUnsafeReference(identifier: AST.ESLintIdentifier) {
   let node: AST.Node | TSESTree.Node = identifier
+
   while (node.parent && node.parent.type !== 'VExpressionContainer') {
     const parent: AST.Node | TSESTree.Node = node.parent
+
     if (
       (parent.type === 'AssignmentExpression' && parent.left === node) ||
       parent.type === 'UpdateExpression' ||
@@ -69,6 +71,7 @@ function isUnsafeReference(identifier: AST.ESLintIdentifier) {
     ) {
       return true
     }
+
     if (
       (parent.type === 'MemberExpression' && parent.object === node) ||
       unwrapExpression(parent) === node ||
@@ -84,8 +87,10 @@ function isUnsafeReference(identifier: AST.ESLintIdentifier) {
       node = parent
       continue
     }
+
     break
   }
+
   return false
 }
 
@@ -125,6 +130,7 @@ export const requirePropsPrefix = createRule<
     const sourceCode = context.sourceCode
     const services = sourceCode.parserServices
     const setupRange = getSetupRange(sourceCode)
+
     if (
       !context.filename.endsWith('.vue') ||
       !setupRange ||
@@ -132,6 +138,7 @@ export const requirePropsPrefix = createRule<
     ) {
       return {}
     }
+
     const propNames = new Set<string>()
     const scriptBindings = new Set<string>()
     let prefix: string | undefined
@@ -145,9 +152,11 @@ export const requirePropsPrefix = createRule<
       container: AST.VExpressionContainer,
     ): AST.Reference[] {
       const scope = scopes.get(container)
+
       if (container.expression?.type !== 'VForExpression' || !scope) {
         return [...container.references]
       }
+
       const expression = container.expression
       const references = container.references.filter(
         reference =>
@@ -158,6 +167,7 @@ export const requirePropsPrefix = createRule<
         container.parent.type === 'VAttribute'
           ? container.parent.parent.parent
           : undefined
+
       // Resolve genuine free references without Vue's synthetic loop aliases.
       for (const { id, reference } of scope.freeReferences) {
         if (
@@ -166,19 +176,24 @@ export const requirePropsPrefix = createRule<
         ) {
           continue
         }
+
         let ancestor: AST.Node | null | undefined = element?.parent
         let variable: AST.Variable | null = null
+
         while (ancestor) {
           if (ancestor.type === 'VElement') {
             variable =
               ancestor.variables.find(binding => binding.id.name === id.name) ??
               null
+
             if (variable) {
               break
             }
           }
+
           ancestor = ancestor.parent
         }
+
         references.push({
           id,
           mode: reference.isReadOnly()
@@ -190,13 +205,16 @@ export const requirePropsPrefix = createRule<
           isValueReference: true,
         })
       }
+
       return references
     }
 
     function checkContainer(container: AST.VExpressionContainer) {
       const scope = scopes.get(container)
+
       for (const reference of getReferences(container)) {
         const { id, variable } = reference
+
         if (
           variable ||
           reference.isValueReference === false ||
@@ -207,8 +225,10 @@ export const requirePropsPrefix = createRule<
         ) {
           continue
         }
+
         let shadowed = !prefix || !scope || scope.hasLocalBinding(id, prefix)
         let ancestor: AST.Node | null | undefined = container.parent
+
         while (ancestor) {
           if (
             ancestor.type === 'VElement' &&
@@ -216,8 +236,10 @@ export const requirePropsPrefix = createRule<
           ) {
             shadowed = true
           }
+
           ancestor = ancestor.parent
         }
+
         const attribute =
           container.parent.type === 'VAttribute' ? container.parent : undefined
         const shorthand =
@@ -238,6 +260,7 @@ export const requirePropsPrefix = createRule<
           !isUnsafeReference(id) &&
           (!attribute?.directive || attribute.key.name.name !== 'model') &&
           (!objectShorthand || id.name !== '__proto__')
+
         context.report({
           loc: id.loc,
           messageId: 'requirePropsPrefix',
@@ -246,13 +269,16 @@ export const requirePropsPrefix = createRule<
             if (!canFix) {
               return null
             }
+
             const access = `${prefix}.${id.name}`
+
             if (shorthand && attribute) {
               return fixer.insertTextAfterRange(
                 attribute.key.range,
                 `="${access}"`,
               )
             }
+
             return fixer.replaceTextRange(
               id.range,
               objectShorthand
@@ -270,7 +296,9 @@ export const requirePropsPrefix = createRule<
           if (!propNames.size) {
             return
           }
+
           containers.push(node)
+
           if (options.autofix || node.expression?.type === 'VForExpression') {
             scopes.set(node, getTemplateExpressionScope(node, sourceCode))
           }
@@ -279,6 +307,7 @@ export const requirePropsPrefix = createRule<
           if (node.parent.type !== 'VDocumentFragment') {
             return
           }
+
           // A template can write a binding independently of the reference being
           // fixed. Such a binding no longer has a proven stable identity.
           if (
@@ -293,6 +322,7 @@ export const requirePropsPrefix = createRule<
           ) {
             prefix = undefined
           }
+
           for (const container of containers) {
             checkContainer(container)
           }
@@ -304,6 +334,7 @@ export const requirePropsPrefix = createRule<
             if (scope.type !== 'module' && scope.type !== 'global') {
               continue
             }
+
             for (const variable of scope.variables) {
               if (
                 variable.defs.some(
@@ -318,6 +349,7 @@ export const requirePropsPrefix = createRule<
               }
             }
           }
+
           const calls = getSetupMacroCalls(
             program,
             sourceCode,
@@ -327,10 +359,13 @@ export const requirePropsPrefix = createRule<
               call.callee.type === 'Identifier' &&
               call.callee.name === 'defineProps',
           )
+
           if (calls.length !== 1 || !calls[0]) {
             return
           }
+
           const call = calls[0]
+
           for (const member of getModelContractMembers(
             call,
             sourceCode,
@@ -338,7 +373,9 @@ export const requirePropsPrefix = createRule<
           )) {
             propNames.add(normalizePropName(member.name))
           }
+
           let outer: TSESTree.Node = call
+
           while (
             outer.parent &&
             outer.parent.type !== 'VariableDeclarator' &&
@@ -346,7 +383,9 @@ export const requirePropsPrefix = createRule<
           ) {
             outer = outer.parent
           }
+
           const declaration = outer.parent
+
           if (
             declaration?.type !== 'VariableDeclarator' ||
             declaration.id.type !== 'Identifier' ||
@@ -354,10 +393,12 @@ export const requirePropsPrefix = createRule<
           ) {
             return
           }
+
           const identifier = declaration.id
           const binding = sourceCode.scopeManager?.scopes
             .flatMap(scope => scope.variables)
             .find(variable => variable.identifiers.includes(identifier))
+
           if (
             binding &&
             !binding.references.some(

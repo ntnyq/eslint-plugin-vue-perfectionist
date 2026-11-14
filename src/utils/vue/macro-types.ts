@@ -21,6 +21,7 @@ export function createMacroTypeVisitor(
   check: (macro: DefineMacrosTypeStyleMacro, type: TSESTree.TypeNode) => void,
 ) {
   const setupRange = getSetupRange(sourceCode)
+
   if (!filename.endsWith('.vue') || !setupRange) {
     return {}
   }
@@ -34,6 +35,7 @@ export function createMacroTypeVisitor(
         'any-arity',
       )) {
         const macro = call.callee.name
+
         switch (macro) {
           case 'defineProps':
           case 'defineEmits':
@@ -42,7 +44,9 @@ export function createMacroTypeVisitor(
           default:
             continue
         }
+
         const types = call.typeArguments?.params
+
         if (call.arguments.length === 0 && types?.length === 1 && types[0]) {
           check(macro, types[0])
         }

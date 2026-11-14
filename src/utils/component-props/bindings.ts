@@ -41,6 +41,7 @@ export function analyzeComponentBindings(
   const bindings = new Map<string, ComponentPropBinding>()
   const explicitNames = new Set<string>()
   const uncertainAliases = new Set<string>()
+
   for (const name of propNames) {
     bindings.set(name, {
       presence: 'absent',
@@ -66,6 +67,7 @@ export function analyzeComponentBindings(
       if (name !== undefined && normalizePropName(name) !== key) {
         continue
       }
+
       // Camelization can remove hyphens before uppercase letters, digits, and
       // underscores. Unknown keys can leave an alias after a later raw-key write.
       if (
@@ -75,9 +77,11 @@ export function analyzeComponentBindings(
       ) {
         uncertainAliases.add(key)
       }
+
       if (binding.presence !== 'present') {
         binding.presence = 'unknown'
       }
+
       binding.value = createUnknownValueAnalysis(node)
     }
   }
@@ -91,9 +95,11 @@ export function analyzeComponentBindings(
   function write(rawName: string, value: ExpressionValueAnalysis) {
     const name = normalizePropName(rawName)
     const binding = bindings.get(name)
+
     if (!binding) {
       return
     }
+
     binding.presence = 'present'
     binding.rawNames.add(rawName)
     // Vue normalizes aliases after raw-key merging. Do not invent precedence.
@@ -120,8 +126,10 @@ export function analyzeComponentBindings(
       if (explicitNames.has(rawName)) {
         return
       }
+
       explicitNames.add(rawName)
     }
+
     write(rawName, value)
   }
 
@@ -155,9 +163,11 @@ export function analyzeComponentBindings(
            */
           item => item.id === identifier,
         )
+
         if (!reference || reference.variable) {
           return false
         }
+
         return !sourceCode.scopeManager?.scopes.some(
           /**
            * Detect a script-level binding that shadows global undefined.
@@ -187,9 +197,11 @@ export function analyzeComponentBindings(
     container: AST.VExpressionContainer,
   ) {
     const node = unwrapExpression(input)
+
     if (node.type !== 'ObjectExpression') {
       // Nullish and primitive non-string spreads cannot contribute named props.
       const value = infer(node, container)
+
       if (
         !value.hasUnknownVariants &&
         value.variants.every(
@@ -207,14 +219,17 @@ export function analyzeComponentBindings(
       ) {
         return
       }
+
       uncertain(node, undefined, true)
       return
     }
+
     for (const property of node.properties) {
       if (property.type !== 'Property') {
         spread(property.argument, container)
         continue
       }
+
       const name =
         !property.computed && property.key.type === 'Identifier'
           ? property.key.name
@@ -223,6 +238,7 @@ export function analyzeComponentBindings(
                 typeof property.key.value === 'bigint')
             ? String(property.key.value)
             : getStaticStringValue(property.key)
+
       if (
         name === undefined ||
         (name === '__proto__' &&
@@ -253,8 +269,10 @@ export function analyzeComponentBindings(
       )
       continue
     }
+
     const directive = attribute.key.name.name
     const argument = attribute.key.argument
+
     // Object bindings and dynamic event names flush Vue's explicit prop object.
     if (
       directive === 'on' &&
@@ -263,14 +281,17 @@ export function analyzeComponentBindings(
       explicitNames.clear()
       continue
     }
+
     if (directive !== 'bind' && directive !== 'model') {
       continue
     }
+
     let name = argument
       ? getStaticDirectiveArgument(argument)
       : directive === 'model'
         ? 'modelValue'
         : undefined
+
     if (
       directive === 'bind' &&
       attribute.key.modifiers.some(
@@ -287,19 +308,24 @@ export function analyzeComponentBindings(
       uncertain(attribute, name)
       continue
     }
+
     if (!argument && directive === 'bind') {
       explicitNames.clear()
+
       if (attribute.value?.expression) {
         spread(attribute.value.expression, attribute.value)
       } else {
         uncertain(attribute, undefined, true)
       }
+
       continue
     }
+
     if (name === undefined) {
       uncertain(attribute)
       continue
     }
+
     if (
       directive === 'bind' &&
       attribute.key.modifiers.some(
@@ -314,6 +340,7 @@ export function analyzeComponentBindings(
     ) {
       name = normalizePropName(name)
     }
+
     writeExplicit(
       name,
       attribute.value?.expression
@@ -321,6 +348,7 @@ export function analyzeComponentBindings(
         : createUnknownValueAnalysis(attribute),
       !argument || argument.type === 'VIdentifier',
     )
+
     if (directive === 'model' && attribute.key.modifiers.length) {
       // Vue emits this object beside the model value in the same prop group.
       writeExplicit(
@@ -334,5 +362,6 @@ export function analyzeComponentBindings(
       )
     }
   }
+
   return bindings
 }

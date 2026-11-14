@@ -31,11 +31,14 @@ export function parsePredefinedGroup(
      */
     candidate => name === candidate || name.endsWith(`-${candidate}`),
   )
+
   if (!selector) {
     return undefined
   }
+
   const prefix = name.slice(0, -(selector.length + 1))
   const modifiers: Modifier[] = []
+
   if (name !== selector) {
     for (const part of prefix.split('-')) {
       const modifier = MODIFIERS.find(
@@ -47,15 +50,19 @@ export function parsePredefinedGroup(
          */
         candidate => candidate === part,
       )
+
       if (!modifier || modifiers.includes(modifier)) {
         return undefined
       }
+
       modifiers.push(modifier)
     }
   }
+
   if (!areModifiersValid(selector, modifiers)) {
     return undefined
   }
+
   return {
     selector,
     modifiers,
@@ -80,12 +87,15 @@ function areModifiersValid(selector: Selector, modifiers: Modifier[]): boolean {
      */
     modifier => ['const', 'let', 'var'].includes(modifier),
   )
+
   if (declarationKinds.length > 1) {
     return false
   }
+
   if (modifiers.includes('async') && selector !== 'function') {
     return false
   }
+
   if (
     modifiers.includes('declare') &&
     ![
@@ -100,6 +110,7 @@ function areModifiersValid(selector: Selector, modifiers: Modifier[]): boolean {
   ) {
     return false
   }
+
   if (
     modifiers.some(
       /**
@@ -122,12 +133,14 @@ function areModifiersValid(selector: Selector, modifiers: Modifier[]): boolean {
   ) {
     return false
   }
+
   if (
     modifiers.includes('destructured') &&
     ['constant', 'function'].includes(selector)
   ) {
     return false
   }
+
   if (
     selector === 'constant' &&
     declarationKinds.some(
@@ -142,6 +155,7 @@ function areModifiersValid(selector: Selector, modifiers: Modifier[]): boolean {
   ) {
     return false
   }
+
   return true
 }
 
@@ -153,6 +167,7 @@ function areModifiersValid(selector: Selector, modifiers: Modifier[]): boolean {
  */
 function normalizeGroupName(name: string): string {
   const parsed = parsePredefinedGroup(name)
+
   return parsed
     ? [
         ...MODIFIERS.filter(
@@ -179,12 +194,15 @@ export function getGroupNames(entry: GroupEntry): string[] {
   if (isString(entry)) {
     return [entry]
   }
+
   if (isArray(entry)) {
     return entry
   }
+
   if ('group' in entry) {
     return isString(entry.group) ? [entry.group] : entry.group
   }
+
   return []
 }
 
@@ -199,12 +217,14 @@ function validateCondition(condition: MatchCondition) {
   if (Object.keys(condition).length === 0) {
     invalid('Custom group conditions must not be empty.')
   }
+
   if (
     condition.selector &&
     !areModifiersValid(condition.selector, condition.modifiers ?? [])
   ) {
     invalid('Invalid selector/modifier combination.')
   }
+
   const kinds =
     condition.modifiers?.filter(
       /**
@@ -215,6 +235,7 @@ function validateCondition(condition: MatchCondition) {
        */
       modifier => ['const', 'let', 'var'].includes(modifier),
     ) ?? []
+
   if (kinds.length > 1) {
     invalid('Declaration modifiers are mutually exclusive.')
   }
@@ -231,8 +252,10 @@ function validateCondition(condition: MatchCondition) {
 export function resolveGroups(options: ResolvedOptions): Group[] {
   const groups: Group[] = []
   let before = options.newlinesBetween
+
   for (const entry of options.groups) {
     const names = getGroupNames(entry)
+
     if (!names.length) {
       if (
         typeof entry === 'object' &&
@@ -241,8 +264,10 @@ export function resolveGroups(options: ResolvedOptions): Group[] {
       ) {
         before = entry.newlinesBetween
       }
+
       continue
     }
+
     const overrides: GroupOverrides =
       typeof entry === 'object' && !isArray(entry) && 'group' in entry
         ? entry
@@ -270,6 +295,7 @@ export function resolveGroups(options: ResolvedOptions): Group[] {
         ...custom?.fallbackSort,
       },
     }
+
     if (
       (resolved.type === 'custom' ||
         (resolved.type !== 'unsorted' &&
@@ -278,9 +304,11 @@ export function resolveGroups(options: ResolvedOptions): Group[] {
     ) {
       invalid('custom sorting requires a non-empty alphabet.')
     }
+
     groups.push({ names, options: resolved, before })
     before = options.newlinesBetween
   }
+
   return groups
 }
 
@@ -299,6 +327,7 @@ function matchesCondition(
   matchesPattern: PatternMatcher,
 ): boolean {
   const namePattern = condition.elementNamePattern
+
   return (
     (!condition.selector || condition.selector === statement.selector) &&
     (!condition.modifiers ||
@@ -363,6 +392,7 @@ export function createGroupMatcher(
           : name === 'unknown'
             ? -1
             : 10000
+
         return {
           name,
           group: groupIndex,
@@ -373,6 +403,7 @@ export function createGroupMatcher(
       }),
     )
     .sort((left, right) => right.score - left.score)
+
   return statement => {
     const custom = options.customGroups.find(group =>
       'anyOf' in group && group.anyOf
@@ -390,11 +421,14 @@ export function createGroupMatcher(
             statement.modifiers.includes(modifier),
           )),
     )
+
     if (!best) {
       return false
     }
+
     statement.group = best.group
     statement.subgroup = best.subgroup
+
     return true
   }
 }
@@ -413,18 +447,23 @@ export function validateGroups(
 ) {
   const acceptsGroup = (name: string) => {
     const parsed = parsePredefinedGroup(name)
+
     return parsed && selectors.includes(parsed.selector)
   }
+
   for (const custom of options.customGroups) {
     const conditions =
       'anyOf' in custom && custom.anyOf ? custom.anyOf : [custom]
+
     for (const condition of conditions) {
       if (condition.selector && !selectors.includes(condition.selector)) {
         invalid(`Unknown selector: ${condition.selector}`)
       }
     }
   }
+
   const customNames = new Set<string>()
+
   for (const custom of options.customGroups) {
     if (
       customNames.has(custom.groupName) ||
@@ -433,7 +472,9 @@ export function validateGroups(
     ) {
       invalid(`Invalid or duplicate custom group: ${custom.groupName}`)
     }
+
     customNames.add(custom.groupName)
+
     if ('anyOf' in custom && custom.anyOf) {
       custom.anyOf.forEach(validateCondition)
     } else {
@@ -445,35 +486,47 @@ export function validateGroups(
         newlinesInside,
         ...condition
       } = custom
+
       validateCondition(condition)
     }
   }
+
   const seen = new Set<string>()
   let previousWasSeparator = true
+
   for (const entry of options.groups) {
     const names = getGroupNames(entry)
+
     if (!names.length) {
       if (previousWasSeparator) {
         invalid('Newline separators must be between groups.')
       }
+
       previousWasSeparator = true
       continue
     }
+
     previousWasSeparator = false
+
     for (const name of names) {
       if (name !== 'unknown' && !customNames.has(name) && !acceptsGroup(name)) {
         invalid(`Unknown group: ${name}`)
       }
+
       const normalized = normalizeGroupName(name)
+
       if (seen.has(normalized)) {
         invalid(`Duplicate group: ${name}`)
       }
+
       seen.add(normalized)
     }
   }
+
   if (previousWasSeparator && options.groups.length) {
     invalid('Newline separators must be between groups.')
   }
+
   for (const name of customNames) {
     if (!seen.has(name)) {
       invalid(`Custom group is not referenced in groups: ${name}`)

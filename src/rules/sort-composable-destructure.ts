@@ -54,29 +54,36 @@ export const sortComposableDestructure = createRule<
         ? undefined
         : new RegExp(options.importSourcePattern)
     const ignored = new Set(options.ignoreNames)
+
     return {
       VariableDeclarator(node) {
         if (node.id.type !== 'ObjectPattern' || !node.init) {
           return
         }
+
         const initializer = unwrapExpression(node.init)
         const awaited = initializer.type === 'AwaitExpression'
         const call = awaited
           ? unwrapExpression(initializer.argument)
           : initializer
+
         if (call.type !== 'CallExpression') {
           return
         }
+
         const callee = unwrapExpression(call.callee)
         const identity = getCallIdentity(call, context.sourceCode)
+
         if (!identity || (callee.type !== 'Identifier' && !identity.source)) {
           return
         }
+
         if (callee.type === 'Identifier') {
           const definitions = getScriptVariableDefinitions(
             callee,
             context.sourceCode,
           )
+
           if (
             definitions.some(
               definition => definition.type === 'ImportBinding',
@@ -86,10 +93,12 @@ export const sortComposableDestructure = createRule<
             return
           }
         }
+
         const name =
           callee.type === 'Identifier' && identity.exportedName === 'default'
             ? identity.localName
             : identity.classificationName
+
         if (
           !pattern.test(name) ||
           ignored.has(name) ||
@@ -98,6 +107,7 @@ export const sortComposableDestructure = createRule<
         ) {
           return
         }
+
         report(node.id, name, (_, memberName) =>
           classifier.consumedPropertyKind(call, memberName, awaited),
         )

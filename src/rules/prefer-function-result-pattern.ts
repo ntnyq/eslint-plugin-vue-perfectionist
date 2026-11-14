@@ -40,16 +40,20 @@ function isBooleanType(node: TSESTree.TypeNode): boolean {
 
 function hasBooleanValue(call: TSESTree.CallExpression): boolean {
   const typeArgument = call.typeArguments?.params[0]
+
   if (typeArgument) {
     return isBooleanType(typeArgument)
   }
+
   const argument = call.arguments[0]
   const value = argument && unwrapExpression(argument)
+
   return value?.type === 'Literal' && typeof value.value === 'boolean'
 }
 
 function isBooleanExpression(node: TSESTree.Node): boolean {
   const expression = unwrapExpression(node)
+
   switch (expression.type) {
     case 'Literal':
       return typeof expression.value === 'boolean'
@@ -85,6 +89,7 @@ function isBooleanExpression(node: TSESTree.Node): boolean {
 
 function isBooleanGetter(node: TSESTree.Node): boolean {
   const getter = unwrapExpression(node)
+
   if (
     (getter.type !== 'ArrowFunctionExpression' &&
       getter.type !== 'FunctionExpression') ||
@@ -93,14 +98,18 @@ function isBooleanGetter(node: TSESTree.Node): boolean {
   ) {
     return false
   }
+
   if (getter.returnType) {
     return isBooleanType(getter.returnType.typeAnnotation)
   }
+
   if (getter.body.type !== 'BlockStatement') {
     return isBooleanExpression(getter.body)
   }
+
   // A single return cannot fall through or hide a return in a nested function.
   const statement = getter.body.body[0]
+
   return (
     getter.body.body.length === 1 &&
     statement?.type === 'ReturnStatement' &&
@@ -111,17 +120,23 @@ function isBooleanGetter(node: TSESTree.Node): boolean {
 
 function isBooleanComputed(call: TSESTree.CallExpression): boolean {
   const typeArgument = call.typeArguments?.params[0]
+
   if (typeArgument) {
     return isBooleanType(typeArgument)
   }
+
   const argument = call.arguments[0]
+
   if (!argument) {
     return false
   }
+
   const value = unwrapExpression(argument)
+
   if (value.type !== 'ObjectExpression') {
     return isBooleanGetter(value)
   }
+
   // Spreads or dynamic keys can replace the getter, so do not infer their value.
   if (
     value.properties.some(
@@ -130,6 +145,7 @@ function isBooleanComputed(call: TSESTree.CallExpression): boolean {
   ) {
     return false
   }
+
   const getters = value.properties.filter(
     property =>
       property.type === 'Property' &&
@@ -137,6 +153,7 @@ function isBooleanComputed(call: TSESTree.CallExpression): boolean {
         (property.key.type === 'Literal' && property.key.value === 'get')),
   )
   const getter = getters[0]
+
   return (
     getters.length === 1 &&
     getter?.type === 'Property' &&
@@ -153,6 +170,7 @@ function isBooleanCall(
   if (source === 'vue' && name === 'computed') {
     return isBooleanComputed(call)
   }
+
   // useToggle(ref) returns a function; custom values/options are not boolean state.
   if (source === '@vueuse/core' && name === 'useToggle') {
     return (
@@ -161,6 +179,7 @@ function isBooleanCall(
         (call.arguments.length === 1 && hasBooleanValue(call)))
     )
   }
+
   return hasBooleanValue(call)
 }
 
@@ -262,16 +281,22 @@ export const preferFunctionResultPattern = createRule<
         if (!node.init) {
           return
         }
+
         const call = unwrapExpression(node.init)
+
         if (call.type !== 'CallExpression') {
           return
         }
+
         const identity = getCallIdentity(call, sourceCode)
+
         if (!identity) {
           return
         }
+
         const name = identity.exportedName ?? identity.classificationName
         const selected = new Map<number | undefined, (typeof targets)[number]>()
+
         for (const target of targets) {
           if (
             target.names.includes(name) &&
@@ -280,6 +305,7 @@ export const preferFunctionResultPattern = createRule<
             selected.set(target.returnIndex, target)
           }
         }
+
         for (const target of selected.values()) {
           // Select before filtering so an override cannot fall back to an earlier target.
           if (
@@ -288,6 +314,7 @@ export const preferFunctionResultPattern = createRule<
           ) {
             continue
           }
+
           const result =
             target.returnIndex === undefined
               ? node.id
@@ -296,6 +323,7 @@ export const preferFunctionResultPattern = createRule<
                 : undefined
           const binding =
             result?.type === 'AssignmentPattern' ? result.left : result
+
           if (
             binding?.type === 'Identifier' &&
             !target.matcher.test(binding.name)

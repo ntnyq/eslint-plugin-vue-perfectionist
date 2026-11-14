@@ -58,6 +58,7 @@ export const preferSimpleEventHandler = createRule<
   defaultOptions: [{}],
   create(context, [options]) {
     const services = context.sourceCode.parserServices
+
     if (!hasTemplateVisitor(services)) {
       return {}
     }
@@ -81,6 +82,7 @@ export const preferSimpleEventHandler = createRule<
           ) {
             return 'unexpectedStatement'
           }
+
           return node.body.length === 1 ? undefined : 'expectedSingleOperation'
         case 'ExpressionStatement':
           return undefined
@@ -88,6 +90,7 @@ export const preferSimpleEventHandler = createRule<
           if (parent?.type !== 'BlockStatement') {
             return 'unexpectedStatement'
           }
+
           return node.argument ? undefined : 'expectedSingleOperation'
         case 'SequenceExpression':
           return 'unexpectedSequence'
@@ -142,7 +145,9 @@ export const preferSimpleEventHandler = createRule<
         ) {
           return
         }
+
         const messageId = getMessageId(node, node.parent)
+
         if (messageId) {
           context.report({
             loc: node.loc,
