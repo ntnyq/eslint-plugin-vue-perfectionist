@@ -413,6 +413,22 @@ export const RULE_DOCS: RuleDocumentation[] = [
     typeInformation: false,
   },
   {
+    name: 'consistent-template-element-layout',
+    group: 'template-conventions',
+    description: {
+      en: 'Enforce consistent template element layouts.',
+      zh: '强制模板元素使用一致的布局。',
+    },
+    scope: 'Template',
+    fix: 'Opt-in',
+    defaults: {
+      en: 'Formatter-compatible layout checks; reports only.',
+      zh: '兼容格式化工具的布局检查；默认仅报告。',
+    },
+    requiresOptions: false,
+    typeInformation: false,
+  },
+  {
     name: 'no-complex-template-expression',
     group: 'template-conventions',
     description: {

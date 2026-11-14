@@ -19,6 +19,9 @@ import type {
   ComposableMemberKindOverride,
   ComposableNewlines,
   ComposableSortType,
+  ConsistentTemplateElementLayoutOptions,
+  TemplateElementLayout,
+  TemplateElementLayoutGroup,
   CustomCallback,
   CustomGroup,
   DefineMacrosNewlineMacro,
@@ -97,6 +100,9 @@ export interface PublicTypes {
   ComposableMemberKindOverride: ComposableMemberKindOverride
   ComposableNewlines: ComposableNewlines
   ComposableSortType: ComposableSortType
+  ConsistentTemplateElementLayoutOptions: ConsistentTemplateElementLayoutOptions
+  TemplateElementLayout: TemplateElementLayout
+  TemplateElementLayoutGroup: TemplateElementLayoutGroup
   CustomCallback: CustomCallback
   CustomGroup: CustomGroup
   DefineMacrosNewlineMacro: DefineMacrosNewlineMacro
@@ -194,3 +200,12 @@ export const invalidBodySelector: SortComposableBodySelector = 'define-props'
 
 // @ts-expect-error Body sorting does not use name-length member comparison.
 export const invalidBodyComparison: SortComposableBodyOptions = { type: 'name-length' }
+
+export const elementLayout = {
+  mode: 'compatible',
+  fix: 'safe',
+  groups: [{ tags: ['AppCard'], layout: 'block' }],
+} satisfies ConsistentTemplateElementLayoutOptions
+
+// @ts-expect-error Unsafe layout fixes are not supported.
+export const invalidElementLayout: ConsistentTemplateElementLayoutOptions = { fix: 'unsafe' }

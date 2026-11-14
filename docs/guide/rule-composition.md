@@ -126,6 +126,12 @@ for named event handlers, and
 for mixed text and interpolation. Each rule has its own syntax and safety
 limits; enabling one does not enable the others.
 
+[`consistent-template-element-layout`](/rules/consistent-template-element-layout)
+checks complete inline or expanded block content and separated block siblings.
+It defaults to formatter-compatible reporting. Configure component layout groups
+explicitly; safe closing-tag fixes require `fix: 'safe'`. Coordinate overlapping
+content-newline and closing-tag rules with this layout policy.
+
 [`padding-line-between-tags`](/rules/padding-line-between-tags) enforces exact
 blank-line counts between consecutive template tags. If you also use
 `vue/padding-line-between-tags`, disable that rule for pairs controlled here.
@@ -186,6 +192,7 @@ their documented boundaries:
 | Rule                                                                                                                         | Automatic changes                                                                                                 |
 | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | [`callback-style`](/rules/callback-style#diagnostics-and-fixes)                                                              | Convert arrow expression bodies to blocks while preserving return values.                                         |
+| [`consistent-template-element-layout`](/rules/consistent-template-element-layout#automatic-fixes-and-formatting)             | Join split closing tags only with `fix: 'safe'`; content and sibling spacing stay report-only.                    |
 | [`define-macros-newline`](/rules/define-macros-newline#automatic-fixes-and-formatting)                                       | Insert line breaks without changing member order; a formatter finishes indentation.                               |
 | [`define-model-name-casing`](/rules/define-model-name-casing#automatic-fixes-and-formatting)                                 | Rename model contracts only with `fix: true` (default `false`); consumers require review.                         |
 | [`padding-line-between-tags`](/rules/padding-line-between-tags#automatic-fixes-and-formatting)                               | Adjust blank lines between eligible tags already on separate lines.                                               |

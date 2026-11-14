@@ -163,6 +163,7 @@ and automatic fix support, and individual rule pages for options and defaults.
 
 | Rule                                                                                                                           | Description                                                        |
 | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| [consistent-template-element-layout](https://vue-perfectionist.ntnyq.dev/rules/consistent-template-element-layout)             | Enforce consistent template element layouts.                       |
 | [no-complex-template-expression](https://vue-perfectionist.ntnyq.dev/rules/no-complex-template-expression)                     | Limit logical operators and conditional nesting in Vue templates.  |
 | [no-complex-v-for-source](https://vue-perfectionist.ntnyq.dev/rules/no-complex-v-for-source)                                   | Disallow complex expressions in Vue v-for sources.                 |
 | [no-restricted-html-elements](https://vue-perfectionist.ntnyq.dev/rules/no-restricted-html-elements)                           | Disallow specified native HTML elements in Vue templates.          |

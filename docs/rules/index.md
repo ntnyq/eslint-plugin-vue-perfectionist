@@ -90,6 +90,7 @@ also report problems that require manual changes. See
 
 | Rule                                                                                      | Description                                                        | Scope    | Automatic fix   |
 | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | -------- | --------------- |
+| [consistent-template-element-layout](./consistent-template-element-layout.md)             | Enforce consistent template element layouts.                       | Template | Opt-in          |
 | [no-complex-template-expression](./no-complex-template-expression.md)                     | Limit logical operators and conditional nesting in Vue templates.  | Template | —               |
 | [no-complex-v-for-source](./no-complex-v-for-source.md)                                   | Disallow complex expressions in Vue v-for sources.                 | Template | —               |
 | [no-restricted-html-elements](./no-restricted-html-elements.md)                           | Disallow specified native HTML elements in Vue templates.          | Template | —               |

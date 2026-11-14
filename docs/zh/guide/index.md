@@ -106,6 +106,10 @@ pnpm exec eslint . --fix
 使用 [sort-composable-body](/zh/rules/sort-composable-body) 检查具名组合式函数体的
 直接语句。它沿用 setup 排序偏好，独立于成员排序应用保守的移动修复。
 
+使用 [consistent-template-element-layout](/zh/rules/consistent-template-element-layout)
+检查块级元素的完整单行或展开布局，以及块级兄弟分行。
+默认采用兼容格式化工具的仅报告模式，可显式开启结束标签安全修复和组件布局分组。
+
 ## 后续步骤 {#next-steps}
 
 - [选择规则](/zh/rules/)：按用途浏览规则，查看适用文件范围、默认行为和自动修复支持情况。

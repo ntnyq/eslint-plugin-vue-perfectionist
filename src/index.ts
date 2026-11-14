@@ -21,6 +21,7 @@ export type {
   ComposableMemberKindOverride,
   ComposableNewlines,
   ComposableSortType,
+  ConsistentTemplateElementLayoutOptions,
   CustomCallback,
   CustomGroup,
   DefineMacrosNewlineMacro,
@@ -74,6 +75,8 @@ export type {
   SortComposableOptions,
   SortComposableReturnOptions,
   SortScriptSetupOptions,
+  TemplateElementLayout,
+  TemplateElementLayoutGroup,
   VuePerfectionistPlugin,
   VuePerfectionistSettings,
 } from './types/index.ts'

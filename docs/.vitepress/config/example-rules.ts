@@ -31,6 +31,7 @@ export const EXAMPLE_RULES: Record<string, Linter.RuleEntry> = {
       ],
     },
   ],
+  'vue-perfectionist/consistent-template-element-layout': 'error',
   'vue-perfectionist/consistent-template-ref-name': 'error',
   'vue-perfectionist/define-macros-newline': 'error',
   'vue-perfectionist/define-macros-type-style': 'error',

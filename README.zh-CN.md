@@ -155,6 +155,7 @@ pnpm exec eslint . --fix
 
 | 规则                                                                                                                              | 描述                                                    |
 | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| [consistent-template-element-layout](https://vue-perfectionist.ntnyq.dev/zh/rules/consistent-template-element-layout)             | 强制模板元素使用一致的布局。                            |
 | [no-complex-template-expression](https://vue-perfectionist.ntnyq.dev/zh/rules/no-complex-template-expression)                     | 限制 Vue 模板中逻辑运算符的数量和条件表达式的嵌套层数。 |
 | [no-complex-v-for-source](https://vue-perfectionist.ntnyq.dev/zh/rules/no-complex-v-for-source)                                   | 禁止在 Vue v-for 数据源中使用复杂表达式。               |
 | [no-restricted-html-elements](https://vue-perfectionist.ntnyq.dev/zh/rules/no-restricted-html-elements)                           | 禁止在 Vue 模板中使用指定的原生 HTML 元素。             |

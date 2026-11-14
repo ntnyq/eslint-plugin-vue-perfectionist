@@ -18,6 +18,20 @@ interface ExampleProfile {
 }
 
 const EXAMPLE_PROFILES: Record<string, ExampleProfile> = {
+  'element-layout-strict': {
+    rule: 'consistent-template-element-layout',
+    options: { mode: 'strict' },
+  },
+  'element-layout-components': {
+    rule: 'consistent-template-element-layout',
+    options: {
+      groups: [
+        { tags: ['AppCard'], layout: 'block' },
+        { tags: ['RouterLink'], layout: 'inline' },
+        { tags: ['CodeEditor'], layout: 'preserve' },
+      ],
+    },
+  },
   'return-bindings-no-aliases': {
     rule: 'require-composable-return-bindings',
     options: { allowAliases: false },

@@ -80,6 +80,11 @@ const rules = {
 
 使用 [`no-complex-v-for-source`](/zh/rules/no-complex-v-for-source) 检查迭代数据源，使用 [`prefer-simple-event-handler`](/zh/rules/prefer-simple-event-handler) 检查具名事件处理器，使用 [`prefer-template-literal-in-interpolation`](/zh/rules/prefer-template-literal-in-interpolation) 检查混合文本与插值。各规则有独立的语法及安全边界，启用其中一条不会启用其他规则。
 
+[`consistent-template-element-layout`](/zh/rules/consistent-template-element-layout)
+检查块级内容的完整单行或展开布局，以及块级兄弟分行。默认采用兼容格式化工具的
+仅报告模式。组件布局需显式分组；安全结束标签修复需设置 `fix: 'safe'`。
+与内容换行和结束标签规则组合时，应协调重叠的布局策略。
+
 [`padding-line-between-tags`](/zh/rules/padding-line-between-tags) 强制相邻模板标签之间使用精确数量的空行。如果还使用 `vue/padding-line-between-tags`，请对由本规则控制的标签对禁用该规则。空行偏好应与格式化工具保持一致。
 
 ## 语句排序 {#statement-ordering}
@@ -125,6 +130,7 @@ export default defineConfig([
 | 规则                                                                                                                            | 自动修改内容                                                                 |
 | ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
 | [`callback-style`](/zh/rules/callback-style#diagnostics-and-fixes)                                                              | 将箭头表达式函数体转为块级函数体，同时保留返回值。                           |
+| [`consistent-template-element-layout`](/zh/rules/consistent-template-element-layout#automatic-fixes-and-formatting)             | 仅在 `fix: 'safe'` 时合并拆行结束标签；内容与兄弟间距始终仅报告。            |
 | [`define-macros-newline`](/zh/rules/define-macros-newline#automatic-fixes-and-formatting)                                       | 插入换行而不改变成员顺序，缩进由格式化工具处理。                             |
 | [`define-model-name-casing`](/zh/rules/define-model-name-casing#automatic-fixes-and-formatting)                                 | 仅在 `fix: true` 时重命名模型约定（默认 `false`），需检查调用方。            |
 | [`padding-line-between-tags`](/zh/rules/padding-line-between-tags#automatic-fixes-and-formatting)                               | 调整已分行的、符合条件的标签之间的空行。                                     |

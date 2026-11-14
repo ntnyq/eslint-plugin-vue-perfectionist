@@ -119,6 +119,11 @@ For direct statements inside named composables, enable
 [sort-composable-body](/rules/sort-composable-body). It shares setup sorting
 preferences and applies conservative movement fixes independently of member sorting.
 
+Use [consistent-template-element-layout](/rules/consistent-template-element-layout)
+for complete inline or expanded block layouts and separated block siblings.
+It defaults to formatter-compatible reporting; safe closing-tag fixes and
+component layout groups are opt-in.
+
 ## Next Steps
 
 - [Choose rules](/rules/): browse by purpose and check file scopes, defaults, and automatic fix support.

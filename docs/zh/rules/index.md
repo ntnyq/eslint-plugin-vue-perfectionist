@@ -79,6 +79,7 @@ description: 按用途、文件范围及自动修复支持情况浏览所有 Vue
 
 | 规则                                                                                      | 描述                                                    | 范围 | 自动修复     |
 | ----------------------------------------------------------------------------------------- | ------------------------------------------------------- | ---- | ------------ |
+| [consistent-template-element-layout](./consistent-template-element-layout.md)             | 强制模板元素使用一致的布局。                            | 模板 | 需显式启用   |
 | [no-complex-template-expression](./no-complex-template-expression.md)                     | 限制 Vue 模板中逻辑运算符的数量和条件表达式的嵌套层数。 | 模板 | —            |
 | [no-complex-v-for-source](./no-complex-v-for-source.md)                                   | 禁止在 Vue v-for 数据源中使用复杂表达式。               | 模板 | —            |
 | [no-restricted-html-elements](./no-restricted-html-elements.md)                           | 禁止在 Vue 模板中使用指定的原生 HTML 元素。             | 模板 | —            |

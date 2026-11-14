@@ -14,6 +14,7 @@ describe('plugin contract', () => {
       'callback-style',
       'component-prop-types',
       'component-prop-values',
+      'consistent-template-element-layout',
       'consistent-template-ref-name',
       'define-macros-newline',
       'define-macros-type-style',
